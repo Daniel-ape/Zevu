@@ -1,4 +1,4 @@
-# Collects Tokmanni prices once a day and publishes them with the web app.
+# Collects Tokmanni prices and current leaflet links once a day and publishes them with the web app.
 name: Collect prices
 on:
   schedule:
@@ -9,7 +9,24 @@ permissions:
 concurrency:
   group: collect
 jobs:
+  leaflets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node collector/leaflets.mjs
+      - name: Commit leaflet links
+        run: |
+          git config user.name "hintaopas-bot"
+          git config user.email "hintaopas-bot@users.noreply.github.com"
+          git add public/prices/leaflets.json
+          git diff --cached --quiet || (git commit -m "Update leaflet links" && git push)
   tokmanni:
+    needs: leaflets
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -23,4 +40,4 @@ jobs:
           git config user.name "hintaopas-bot"
           git config user.email "hintaopas-bot@users.noreply.github.com"
           git add public/prices
-          git diff --cached --quiet || (git commit -m "Update Tokmanni prices" && git push)
+          git diff --cached --quiet || (git commit -m "Update Tokmanni prices" && git pull --rebase && git push)
