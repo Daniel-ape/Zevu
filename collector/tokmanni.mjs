@@ -21,22 +21,28 @@ const disallow = robots
   .filter((l) => /^disallow:/i.test(l))
   .map((l) => l.slice(l.indexOf(':') + 1).trim())
   .filter(Boolean)
-const allowed = (path) =>
-  !disallow.some((rule) => {
-    const re = new RegExp('^' + rule.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\\\$$/, '$'))
-    return re.test(path)
-  })
+const blockedBy = (rule, path) =>
+  new RegExp('^' + rule.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\\\$$/, '$')).test(path)
+const allowed = (path) => !disallow.some((rule) => blockedBy(rule, path))
 
 const known = new Set(JSON.parse(readFileSync('public/products/fi.json', 'utf8')).rows.map((r) => r[0]))
 const urls = new Map()
+const stats = { withEan: 0, known: 0, blockedExample: '' }
 const index = await get('https://www.tokmanni.fi/sitemap/sitemap.xml')
 for (const sm of [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])) {
   await sleep(DELAY)
   for (const [, u] of (await get(sm)).matchAll(/<loc>([^<]+)<\/loc>/g)) {
     const m = u.match(/-(\d{8}|\d{13})$/)
-    if (m && known.has(m[1]) && allowed(new URL(u).pathname)) urls.set(m[1], u)
+    if (!m) continue
+    stats.withEan++
+    if (!known.has(m[1])) continue
+    stats.known++
+    const path = new URL(u).pathname
+    if (allowed(path)) urls.set(m[1], u)
+    else if (!stats.blockedExample) stats.blockedExample = `${path} by ${disallow.find((r) => !allowed.call(null, path) && blockedBy(r, path))}`
   }
 }
+console.log('sitemap stats', JSON.stringify(stats), 'known in app', known.size, 'rules', disallow.length)
 console.log(`${urls.size} Tokmanni products match the app's catalogue`)
 
 function priceFrom(html) {
