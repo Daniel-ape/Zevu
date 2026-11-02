@@ -23,7 +23,7 @@ const disallow = robots
   .filter(Boolean)
 const allowed = (path) =>
   !disallow.some((rule) => {
-    const re = new RegExp('^' + rule.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\\\$$/, '$'))
+    const re = new RegExp('^' + rule.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\\\$$/, '$'))
     return re.test(path)
   })
 
