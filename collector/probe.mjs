@@ -1,19 +1,23 @@
+import { readFileSync } from 'node:fs'
 const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)'
 const get = async (u) => { const r = await fetch(u, { headers: { 'User-Agent': UA } }); return [r.status, await r.text()] }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const eans = new Set(JSON.parse(readFileSync('collector/fi-snapshot.json', 'utf8')).rows.map((r) => r[0]))
 let all = []
 for (const n of [1, 2, 3]) {
-  const [st, xml] = await get(`https://www.tokmanni.fi/sitemap/sitemap-1-${n}.xml`)
-  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
-  console.log('sitemap', n, st, locs.length, locs.filter((u, i) => i % Math.max(1, Math.floor(locs.length / 12)) === 0).slice(0, 12))
-  all = all.concat(locs)
+  const [, xml] = await get(`https://www.tokmanni.fi/sitemap/sitemap-1-${n}.xml`)
+  all = all.concat([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]))
   await sleep(10000)
 }
-const food = all.filter((u) => /maito|kahvi|leipa|juusto|jogurtti|mehu|suklaa|keksi|pasta|riisi/.test(u))
-console.log('total', all.length, 'food-ish', food.length, food.slice(0, 10))
-const sample = food[0] || all.find((u) => !/\/(c|category)\//.test(u))
-const [st, html] = await get(sample)
-console.log('\nPRODUCT', sample, st)
-console.log('ld+json:', [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1].slice(0, 900)))
-console.log('gtin/ean hits:', [...html.matchAll(/(gtin13|"ean"|EAN)[^<]{0,80}/gi)].map((m) => m[0]).slice(0, 5))
-console.log('price hits:', [...html.matchAll(/("price"|price-amount|data-price-amount)[^<]{0,80}/gi)].map((m) => m[0]).slice(0, 5))
+const byEan = new Map()
+for (const u of all) { const m = u.match(/-(\d{8}|\d{13})$/); if (m) byEan.set(m[1], u) }
+const hits = [...byEan.keys()].filter((e) => eans.has(e))
+console.log('products with EAN in url', byEan.size, 'matching our snapshot', hits.length)
+const sample = hits.slice(0, 2).map((e) => byEan.get(e))
+for (const u of sample) {
+  await sleep(10000)
+  const [st, html] = await get(u)
+  console.log('\nPRODUCT', u, st)
+  console.log('ld+json:', [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1].slice(0, 700)))
+  console.log('price attrs:', [...html.matchAll(/data-price-amount="([^"]+)"|"finalPrice":\{"amount":([\d.]+)|itemprop="price" content="([^"]+)"/g)].map((m) => m[0]).slice(0, 6))
+}
