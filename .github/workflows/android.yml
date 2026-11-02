@@ -4,6 +4,7 @@ name: Android app (APK)
 on:
   push:
     branches: [main]
+    paths-ignore: ['public/prices/**']
   workflow_dispatch:
 permissions:
   contents: write

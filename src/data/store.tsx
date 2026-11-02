@@ -5,11 +5,13 @@ import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
 import { lookupBarcode, searchProducts } from './openFoodFacts'
 import { loadSnapshot, snapshotProducts } from './snapshot'
+import { collectedProvider } from './collectedPrices'
 
-// Registered price providers. Prices currently come only from receipts users
-// import; store connectors are added here when a permitted source exists.
+// Registered price providers: prices collected from stores that allow it
+// (Tokmanni, see collector/). Receipts and the user's own prices are added
+// on top. The UI only ever sees PriceObservations.
 // The UI only ever sees PriceObservations.
-const PROVIDERS: PriceProvider[] = []
+const PROVIDERS: PriceProvider[] = [collectedProvider('tokmanni.json', 'tokmanni')]
 
 function load<T>(key: string, fallback: T): T {
   try {
