@@ -20,7 +20,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3
+      # The runner image already includes the Android SDK (ANDROID_HOME).
       - run: npm ci
       - run: npx vite build && npx cap sync android
       - run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
