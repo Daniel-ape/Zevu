@@ -10,6 +10,16 @@ export const LANGS: { id: Lang; label: string }[] = [
 ]
 
 const en = {
+  'spend.title': 'Spending', 'spend.none': 'Import receipts to see what you spend on food.',
+  'spend.byStore': 'By store', 'spend.byCat': 'By category', 'spend.other': 'Other',
+  'spend.receipts': '{n} receipts', 'spend.receipt1': '1 receipt', 'spend.prev': 'Previous month', 'spend.next': 'Next month',
+  'stores.title': 'My stores',
+  'stores.note': 'Comparisons and “cheapest” use only the stores you pick. Pick none to compare all stores.',
+  'list.new': 'New list', 'list.newName': 'List name', 'list.create': 'Create', 'list.rename': 'Rename',
+  'list.delete': 'Delete list', 'list.share': 'Share list', 'list.copied': 'List copied',
+  'list.clearChecked': 'Remove ticked items', 'list.save': 'Save', 'list.tick': 'Tick off',
+  'watch.on': 'Watching price', 'watch.off': 'Watch price', 'watch.title': 'Watched prices',
+  'watch.cheaper': '{amount} cheaper', 'watch.dearer': '{amount} more', 'watch.same': 'No change', 'watch.noPrice': 'No price yet',
   'price.yours': 'Your price',
   'ap.title': 'Add a price', 'ap.shelf': 'Photograph the shelf label', 'ap.or': 'or find the product',
   'ap.search': 'Product name', 'ap.store': 'Store', 'ap.price': 'Price (€)', 'ap.save': 'Save price',
@@ -91,7 +101,7 @@ const en = {
   'price.updated': 'Updated {when}', 'price.outdated': 'Outdated · {when}', 'price.offer': 'Offer', 'price.member': 'Member price',
   // list
   'list.empty': 'Your list is empty.', 'list.find': 'Find products', 'list.add': 'Add products', 'list.from': 'from {price}',
-  'list.where': "Where it's cheapest", 'list.items': '{n} items', 'list.cheapest': 'Cheapest',
+  'list.where': "Where it's cheapest", 'list.items': '{n} items', 'list.items1': '1 item', 'list.cheapest': 'Cheapest',
   'list.notRanked': 'Not ranked, missing a price for something on your list: {stores}.', 'list.less': 'Less', 'list.more': 'More',
   'list.defaultName': 'Weekly shop',
   // scan
@@ -111,6 +121,16 @@ type Dict = typeof en
 export type Key = keyof Dict
 
 const fi: Dict = {
+  'spend.title': 'Kulutus', 'spend.none': 'Tuo kuitteja, niin näet paljonko ruokaan kuluu.',
+  'spend.byStore': 'Kaupoittain', 'spend.byCat': 'Tuoteryhmittäin', 'spend.other': 'Muut',
+  'spend.receipts': '{n} kuittia', 'spend.receipt1': '1 kuitti', 'spend.prev': 'Edellinen kuukausi', 'spend.next': 'Seuraava kuukausi',
+  'stores.title': 'Omat kaupat',
+  'stores.note': 'Vertailut ja ”halvin” koskevat vain valitsemiasi kauppoja. Jos et valitse yhtään, vertaillaan kaikkia.',
+  'list.new': 'Uusi lista', 'list.newName': 'Listan nimi', 'list.create': 'Luo', 'list.rename': 'Nimeä uudelleen',
+  'list.delete': 'Poista lista', 'list.share': 'Jaa lista', 'list.copied': 'Lista kopioitu',
+  'list.clearChecked': 'Poista rastitetut', 'list.save': 'Tallenna', 'list.tick': 'Rastita',
+  'watch.on': 'Hintaa seurataan', 'watch.off': 'Seuraa hintaa', 'watch.title': 'Seuratut hinnat',
+  'watch.cheaper': '{amount} halvempi', 'watch.dearer': '{amount} kalliimpi', 'watch.same': 'Ei muutosta', 'watch.noPrice': 'Ei vielä hintaa',
   'price.yours': 'Oma hinta',
   'ap.title': 'Lisää hinta', 'ap.shelf': 'Kuvaa hyllynreunan hintalappu', 'ap.or': 'tai etsi tuote',
   'ap.search': 'Tuotteen nimi', 'ap.store': 'Kauppa', 'ap.price': 'Hinta (€)', 'ap.save': 'Tallenna hinta',
@@ -185,7 +205,7 @@ const fi: Dict = {
   'time.justNow': 'juuri nyt', 'time.hours': '{n} h sitten', 'time.yesterday': 'eilen', 'time.days': '{n} päivää sitten',
   'price.updated': 'Päivitetty {when}', 'price.outdated': 'Vanhentunut · {when}', 'price.offer': 'Tarjous', 'price.member': 'Jäsenhinta',
   'list.empty': 'Listasi on tyhjä.', 'list.find': 'Etsi tuotteita', 'list.add': 'Lisää tuotteita', 'list.from': 'alkaen {price}',
-  'list.where': 'Missä halvinta', 'list.items': '{n} tuotetta', 'list.cheapest': 'Halvin',
+  'list.where': 'Missä halvinta', 'list.items': '{n} tuotetta', 'list.items1': '1 tuote', 'list.cheapest': 'Halvin',
   'list.notRanked': 'Ei vertailussa, jonkin tuotteen hinta puuttuu: {stores}.', 'list.less': 'Vähemmän', 'list.more': 'Lisää',
   'list.defaultName': 'Viikon ostokset',
   'scan.title': 'Skannaa',
@@ -200,6 +220,16 @@ const fi: Dict = {
 }
 
 const sv: Dict = {
+  'spend.title': 'Utgifter', 'spend.none': 'Importera kvitton så ser du vad du lägger på mat.',
+  'spend.byStore': 'Per butik', 'spend.byCat': 'Per kategori', 'spend.other': 'Övrigt',
+  'spend.receipts': '{n} kvitton', 'spend.receipt1': '1 kvitto', 'spend.prev': 'Föregående månad', 'spend.next': 'Nästa månad',
+  'stores.title': 'Mina butiker',
+  'stores.note': 'Jämförelser och ”billigast” gäller bara butikerna du väljer. Välj ingen för att jämföra alla.',
+  'list.new': 'Ny lista', 'list.newName': 'Listans namn', 'list.create': 'Skapa', 'list.rename': 'Byt namn',
+  'list.delete': 'Radera listan', 'list.share': 'Dela listan', 'list.copied': 'Listan kopierad',
+  'list.clearChecked': 'Ta bort avbockade', 'list.save': 'Spara', 'list.tick': 'Bocka av',
+  'watch.on': 'Bevakar priset', 'watch.off': 'Bevaka priset', 'watch.title': 'Bevakade priser',
+  'watch.cheaper': '{amount} billigare', 'watch.dearer': '{amount} dyrare', 'watch.same': 'Ingen ändring', 'watch.noPrice': 'Inget pris ännu',
   'price.yours': 'Ditt pris',
   'ap.title': 'Lägg till pris', 'ap.shelf': 'Fota hyllkantsetiketten', 'ap.or': 'eller sök produkten',
   'ap.search': 'Produktnamn', 'ap.store': 'Butik', 'ap.price': 'Pris (€)', 'ap.save': 'Spara pris',
@@ -274,7 +304,7 @@ const sv: Dict = {
   'time.justNow': 'just nu', 'time.hours': 'för {n} h sedan', 'time.yesterday': 'i går', 'time.days': 'för {n} dagar sedan',
   'price.updated': 'Uppdaterat {when}', 'price.outdated': 'Föråldrat · {when}', 'price.offer': 'Erbjudande', 'price.member': 'Medlemspris',
   'list.empty': 'Din lista är tom.', 'list.find': 'Hitta produkter', 'list.add': 'Lägg till produkter', 'list.from': 'från {price}',
-  'list.where': 'Var det är billigast', 'list.items': '{n} varor', 'list.cheapest': 'Billigast',
+  'list.where': 'Var det är billigast', 'list.items': '{n} varor', 'list.items1': '1 vara', 'list.cheapest': 'Billigast',
   'list.notRanked': 'Inte rankade, saknar pris för något på listan: {stores}.', 'list.less': 'Färre', 'list.more': 'Fler',
   'list.defaultName': 'Veckohandling',
   'scan.title': 'Skanna',

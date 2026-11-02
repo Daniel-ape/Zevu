@@ -7,7 +7,7 @@ import { Offers } from '../ui/Offers'
 import { ReceiptSheet } from './ReceiptSheet'
 
 export function Home() {
-  const { products, observations, retailers, list, recent, loading, t } = useStore()
+  const { products, observations, retailers, list, recent, loading, watched, t } = useStore()
   const nav = useNav()
   const [receipt, setReceipt] = useState(false)
   const listName = list.name === 'Weekly shop' ? t('list.defaultName') : list.name
@@ -90,6 +90,38 @@ export function Home() {
 
       <Offers />
       {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
+
+      {watched.length > 0 && (
+        <div className="section">
+          <div className="section-head"><h2>{t('watch.title')}</h2></div>
+          <div className="rows">
+            {watched.map((w) => {
+              const p = products.find((x) => x.id === w.productId)
+              if (!p) return null
+              const c = cheapest(compare(p, observations, retailers))
+              const now = c?.current.priceCents ?? null
+              const diff = now !== null && w.baselineCents !== null ? now - w.baselineCents : null
+              return (
+                <button key={w.productId} className="row" onClick={() => nav.openProduct(p.id)}>
+                  <Tile product={p} />
+                  <div className="grow">
+                    <div className="title">{p.name}</div>
+                    <div className="sub">{c ? c.retailer.name : t('watch.noPrice')}</div>
+                  </div>
+                  <div className="end">
+                    {now !== null && <div className="price">{euro(now)}</div>}
+                    {diff !== null && (
+                      <div className="tiny" style={{ fontWeight: 600, color: diff < 0 ? 'var(--good)' : diff > 0 ? 'var(--warn)' : 'var(--text-2)' }}>
+                        {diff < 0 ? t('watch.cheaper', { amount: euro(-diff) }) : diff > 0 ? t('watch.dearer', { amount: euro(diff) }) : t('watch.same')}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {recent.length > 0 && (
         <div className="section">

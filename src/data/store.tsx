@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { ChainId, PriceObservation, PriceProvider, Product, Retailer, ShoppingList } from '../domain/types'
+import type { ChainId, PriceObservation, PriceProvider, Product, Retailer, ShoppingList, Watch } from '../domain/types'
 import { LOYALTY_PROGRAMS, RETAILERS } from './retailers'
 import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
@@ -10,7 +10,6 @@ import { collectedProvider } from './collectedPrices'
 // Registered price providers: prices collected from stores that allow it
 // (Tokmanni, see collector/). Receipts and the user's own prices are added
 // on top. The UI only ever sees PriceObservations.
-// The UI only ever sees PriceObservations.
 const PROVIDERS: PriceProvider[] = [collectedProvider('tokmanni.json', 'tokmanni')]
 
 function load<T>(key: string, fallback: T): T {
@@ -38,8 +37,22 @@ interface Store {
   retailers: Retailer[]
   observations: PriceObservation[]
   loading: boolean
+  /** All stores the app knows; `retailers` is narrowed to the user's own stores. */
+  allRetailers: Retailer[]
+  myStores: string[]
+  toggleMyStore: (id: string) => void
+  /** The active shopping list, and all lists. */
   list: ShoppingList
+  lists: ShoppingList[]
+  setActiveList: (id: string) => void
+  createList: (name: string) => void
+  renameList: (id: string, name: string) => void
+  deleteList: (id: string) => void
   setQuantity: (productId: string, qty: number) => void
+  toggleChecked: (productId: string) => void
+  clearChecked: () => void
+  watched: Watch[]
+  toggleWatch: (productId: string, currentCents: number | null) => void
   /** Barcode lookup: local catalogue first, then Open Food Facts. 'unavailable' = service unreachable. */
   findByBarcode: (ean: string) => Promise<Product | null | 'unavailable'>
   /** Product search in Open Food Facts; 'unavailable' when unreachable. */
@@ -67,11 +80,17 @@ const Ctx = createContext<Store | null>(null)
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [observations, setObservations] = useState<PriceObservation[]>([])
   const [loading, setLoading] = useState(true)
-  const [list, setList] = useState<ShoppingList>(() => {
-    const saved = load('list', DEFAULT_LIST)
+  const [lists, setLists] = useState<ShoppingList[]>(() => {
+    const saved = load<ShoppingList[] | null>('lists', null) ?? [load('list', DEFAULT_LIST)] // older versions had one list
     // Lists saved by earlier versions may hold demo products (ids p1…p18).
-    return { ...saved, items: saved.items.filter((i) => !/^p\d+$/.test(i.productId)) }
+    return saved.map((l) => ({ ...l, items: l.items.filter((i) => !/^p\d+$/.test(i.productId)) }))
   })
+  const [activeId, setActiveId] = useState<string>(() => load('activeList', lists[0]?.id ?? 'weekly'))
+  const list = lists.find((l) => l.id === activeId) ?? lists[0]
+  const updateActive = (fn: (l: ShoppingList) => ShoppingList) =>
+    setLists((all) => all.map((l) => (l.id === list.id ? fn(l) : l)))
+  const [myStores, setMyStores] = useState<string[]>(() => load('myStores', []))
+  const [watched, setWatched] = useState<Watch[]>(() => load('watched', []))
   const [receipts, setReceipts] = useState<Receipt[]>(() => load('receipts', []))
   const [userPrices, setUserPrices] = useState<PriceObservation[]>(() => load('userPrices', []))
   const [lastStore, setLastStore] = useState<string | null>(() => load('lastStore', null))
@@ -102,7 +121,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false))
   }, [])
 
-  useEffect(() => save('list', list), [list])
+  useEffect(() => save('lists', lists), [lists])
+  useEffect(() => save('activeList', activeId), [activeId])
+  useEffect(() => save('myStores', myStores), [myStores])
+  useEffect(() => save('watched', watched), [watched])
   useEffect(() => save('receipts', receipts), [receipts])
   useEffect(() => save('userPrices', userPrices), [userPrices])
   useEffect(() => save('lastStore', lastStore), [lastStore])
@@ -158,18 +180,46 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return 'unavailable'
         }
       },
-      retailers: RETAILERS,
+      allRetailers: RETAILERS,
+      retailers: myStores.length ? RETAILERS.filter((r) => myStores.includes(r.id)) : RETAILERS,
+      myStores,
+      toggleMyStore: (id) => setMyStores((m) => (m.includes(id) ? m.filter((x) => x !== id) : [...m, id])),
       observations: effective,
       loading,
       list,
+      lists,
+      setActiveList: setActiveId,
+      createList: (name) => {
+        const id = (crypto.randomUUID?.() ?? String(Date.now())).slice(0, 8)
+        setLists((all) => [...all, { id, name, items: [] }])
+        setActiveId(id)
+      },
+      renameList: (id, name) => setLists((all) => all.map((l) => (l.id === id ? { ...l, name } : l))),
+      deleteList: (id) =>
+        setLists((all) => {
+          const rest = all.filter((l) => l.id !== id)
+          const next = rest.length ? rest : [{ ...DEFAULT_LIST, id: 'weekly' }]
+          if (id === activeId) setActiveId(next[0].id)
+          return next
+        }),
+      toggleChecked: (productId) =>
+        updateActive((l) => ({ ...l, items: l.items.map((i) => (i.productId === productId ? { ...i, checked: !i.checked } : i)) })),
+      clearChecked: () => updateActive((l) => ({ ...l, items: l.items.filter((i) => !i.checked) })),
+      watched,
+      toggleWatch: (productId, currentCents) =>
+        setWatched((w) =>
+          w.some((x) => x.productId === productId)
+            ? w.filter((x) => x.productId !== productId)
+            : [...w, { productId, baselineCents: currentCents, since: new Date().toISOString() }],
+        ),
       setQuantity: (productId, qty) =>
-        setList((l) => {
+        updateActive((l) => {
           const items = l.items.filter((i) => i.productId !== productId)
           if (qty > 0) {
             const idx = l.items.findIndex((i) => i.productId === productId)
             const next = { productId, quantity: qty }
             if (idx === -1) items.push(next)
-            else items.splice(idx, 0, next)
+            else items.splice(idx, 0, { ...l.items[idx], ...next })
           }
           return { ...l, items }
         }),
@@ -192,7 +242,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       t: (key, vars) => translate(lang, key, vars),
       programs: LOYALTY_PROGRAMS,
     }),
-    [effective, products, loading, list, receipts, recent, theme, memberships, lang, lastStore],
+    [effective, products, loading, lists, list, activeId, myStores, watched, receipts, recent, theme, memberships, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

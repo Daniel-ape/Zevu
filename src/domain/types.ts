@@ -76,6 +76,15 @@ export interface PriceProvider {
 export interface ShoppingListItem {
   productId: string
   quantity: number
+  /** Ticked off while shopping. */
+  checked?: boolean
+}
+
+/** A product the user follows, with the lowest price when they started. */
+export interface Watch {
+  productId: string
+  baselineCents: number | null
+  since: string
 }
 
 export interface ShoppingList {

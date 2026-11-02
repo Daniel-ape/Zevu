@@ -5,6 +5,7 @@ import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
 import { Chevron, Plus } from '../ui/icons'
 import { ReceiptSheet } from './ReceiptSheet'
+import { Spending } from '../ui/Spending'
 
 function Group({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
@@ -17,12 +18,25 @@ function Group({ title, note, children }: { title: string; note?: string; childr
 }
 
 export function Profile() {
-  const { theme, setTheme, programs, memberships, toggleMembership, lang, setLang, receipts, retailers, t } = useStore()
+  const { theme, setTheme, programs, memberships, toggleMembership, lang, setLang, receipts, allRetailers, myStores, toggleMyStore, t } = useStore()
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
 
   return (
     <div className="screen">
       <div className="topbar"><h1>{t('you.title')}</h1></div>
+
+      <Group title={t('spend.title')}>
+        <Spending />
+      </Group>
+
+      <Group title={t('stores.title')} note={t('stores.note')}>
+        {allRetailers.map((r) => (
+          <label key={r.id} className="row" style={{ cursor: 'pointer', padding: '11px 0' }}>
+            <div className="grow title" style={{ fontWeight: 500 }}>{r.name}</div>
+            <input type="checkbox" className="switch" checked={myStores.includes(r.id)} onChange={() => toggleMyStore(r.id)} aria-label={r.name} />
+          </label>
+        ))}
+      </Group>
 
       <Group title={t('you.groupCards')} note={t('you.cardsNote')}>
         {programs.map((p) => {
@@ -48,7 +62,7 @@ export function Profile() {
         {receipts.map((r) => (
           <button key={r.id} className="row" onClick={() => setSheet({ receipt: r })}>
             <div className="grow">
-              <div className="title">{retailerName(r, retailers)}</div>
+              <div className="title">{retailerName(r, allRetailers)}</div>
               <div className="sub">
                 {new Date(r.date).toLocaleDateString(LOCALE[lang])} · {t('rc.items', { n: r.items.length })}
               </div>
@@ -84,7 +98,7 @@ export function Profile() {
         <div className="row">
           <div className="grow">
             <div className="title">{t('you.data')}</div>
-            <div className="sub" style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{t('you.dataNote')} {t('you.cardsLimit')} {t('about.off')}</div>
+            <div className="sub" style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{t('you.dataNote')} {t('you.cardsLimit')}</div>
           </div>
         </div>
       </Group>

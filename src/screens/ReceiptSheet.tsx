@@ -8,7 +8,7 @@ type Draft = Omit<Receipt, 'id' | 'importedAt'>
 
 /** Bottom sheet: import a new receipt, or show a saved one. */
 export function ReceiptSheet({ receipt, onClose }: { receipt?: Receipt; onClose: () => void }) {
-  const { products, retailers, addReceipt, removeReceipt, t, lang } = useStore()
+  const { products, allRetailers, addReceipt, removeReceipt, t, lang } = useStore()
   const [text, setText] = useState('')
   const [draft, setDraft] = useState<Draft | null>(receipt ?? null)
   const [busy, setBusy] = useState('')
@@ -68,7 +68,7 @@ export function ReceiptSheet({ receipt, onClose }: { receipt?: Receipt; onClose:
       <div className="sheet" role="dialog" aria-modal="true" aria-label={t('rc.title')} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-grab" />
         <div className="section-head" style={{ marginBottom: 16 }}>
-          <h2>{viewing && draft ? retailerName(receipt!, retailers) : t('rc.title')}</h2>
+          <h2>{viewing && draft ? retailerName(receipt!, allRetailers) : t('rc.title')}</h2>
           <button className="link" onClick={onClose}>{t(viewing ? 'rc.close' : 'rc.cancel')}</button>
         </div>
 
@@ -99,7 +99,7 @@ export function ReceiptSheet({ receipt, onClose }: { receipt?: Receipt; onClose:
                   <span className="grow title">{t('rc.store')}</span>
                   <select className="select" value={draft.retailerId ?? ''} onChange={(e) => setDraft({ ...draft, retailerId: e.target.value || null })}>
                     <option value="">{t('rc.chooseStore')}</option>
-                    {retailers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                    {allRetailers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
                   </select>
                 </label>
                 <label className="row">

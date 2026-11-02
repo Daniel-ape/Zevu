@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useStore } from '../data/store'
 import { cheapest, compare, euro, lowestHistory, sizeLabel, trend, unitLabel } from '../domain/pricing'
 import { useNav } from '../nav'
-import { Back, Check, Plus } from '../ui/icons'
+import { Back, Bell, Check, Plus } from '../ui/icons'
 import { PriceMeta, RankBadge, RetailerMark, Tile, TrendTag } from '../ui/bits'
 import { PriceChart } from '../ui/PriceChart'
 import { inAppLink } from '../data/openLink'
@@ -10,7 +10,7 @@ import { PriceSheet } from './PriceSheet'
 import { useState } from 'react'
 
 export function ProductScreen({ id }: { id: string }) {
-  const { products, observations, retailers, list, setQuantity, markViewed, t } = useStore()
+  const { products, observations, retailers, list, setQuantity, markViewed, watched, toggleWatch, t } = useStore()
   const nav = useNav()
   const [adding, setAdding] = useState(false)
   const product = products.find((p) => p.id === id)
@@ -25,13 +25,22 @@ export function ProductScreen({ id }: { id: string }) {
   const fresh = rows.filter((r) => r.freshness === 'fresh')
   const spread = best && fresh.length > 1 ? fresh[fresh.length - 1].current.priceCents - best.current.priceCents : 0
   const inList = list.items.find((i) => i.productId === product.id)
+  const isWatched = watched.some((w) => w.productId === product.id)
 
   return (
     <div className="screen push">
       <div className="topbar center sticky">
         <button className="icon-btn" onClick={nav.back} aria-label={t('product.back')}><Back /></button>
         <span style={{ flex: 1 }} />
-        <span style={{ width: 42 }} aria-hidden />
+        <button
+          className={'icon-btn' + (isWatched ? ' on' : '')}
+          onClick={() => toggleWatch(product.id, best?.current.priceCents ?? null)}
+          aria-label={t(isWatched ? 'watch.on' : 'watch.off')}
+          aria-pressed={isWatched}
+          title={t(isWatched ? 'watch.on' : 'watch.off')}
+        >
+          <Bell />
+        </button>
       </div>
 
       <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>

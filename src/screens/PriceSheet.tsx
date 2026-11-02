@@ -19,7 +19,7 @@ export function PriceSheet({ product: initial, startWithPhoto, onClose }: {
   startWithPhoto?: boolean
   onClose: () => void
 }) {
-  const { products, retailers, findByBarcode, addPrice, lastStore, t } = useStore()
+  const { products, allRetailers, findByBarcode, addPrice, lastStore, t } = useStore()
   const [product, setProduct] = useState<Product | undefined>(initial)
   const [query, setQuery] = useState('')
   const [store, setStore] = useState(lastStore ?? '')
@@ -131,7 +131,7 @@ export function PriceSheet({ product: initial, startWithPhoto, onClose }: {
                     <span className="grow title">{t('ap.store')}</span>
                     <select className="select" value={store} onChange={(e) => setStore(e.target.value)}>
                       <option value="">{t('rc.chooseStore')}</option>
-                      {retailers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                      {allRetailers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
                     </select>
                   </label>
                   <label className="row">
