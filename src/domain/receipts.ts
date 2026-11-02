@@ -148,6 +148,7 @@ export function receiptObservations(receipts: Receipt[]): PriceObservation[] {
         priceCents: Math.round(it.priceCents / it.quantity),
         observedAt: r.date,
         source: 'user-report',
+        origin: 'receipt',
       })
     }
   }

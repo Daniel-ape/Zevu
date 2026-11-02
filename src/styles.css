@@ -412,3 +412,4 @@ button.row:active { opacity: 0.6; }
 
 .leaflet { padding-top: env(safe-area-inset-top); }
 .sheet { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+.price-input { width: 110px; text-align: right; font-size: 18px; font-weight: 700; }

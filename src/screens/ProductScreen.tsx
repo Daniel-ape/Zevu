@@ -6,10 +6,13 @@ import { Back, Check, Plus } from '../ui/icons'
 import { PriceMeta, RankBadge, RetailerMark, Tile, TrendTag } from '../ui/bits'
 import { PriceChart } from '../ui/PriceChart'
 import { inAppLink } from '../data/openLink'
+import { PriceSheet } from './PriceSheet'
+import { useState } from 'react'
 
 export function ProductScreen({ id }: { id: string }) {
   const { products, observations, retailers, list, setQuantity, markViewed, t } = useStore()
   const nav = useNav()
+  const [adding, setAdding] = useState(false)
   const product = products.find((p) => p.id === id)
 
   useEffect(() => markViewed(id), [id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -104,7 +107,8 @@ export function ProductScreen({ id }: { id: string }) {
         </p>
       )}
 
-      <div className="section">
+      <div className="section" style={{ display: 'grid', gap: 10 }}>
+        <button className="btn ghost" onClick={() => setAdding(true)}>{t('product.addPrice')}</button>
         {inList ? (
           <button className="btn ghost" onClick={() => nav.go('lists')}>
             <Check /> {t('product.inList', { n: inList.quantity })}
@@ -115,6 +119,7 @@ export function ProductScreen({ id }: { id: string }) {
           </button>
         )}
       </div>
+      {adding && <PriceSheet product={product} onClose={() => setAdding(false)} />}
     </div>
   )
 }

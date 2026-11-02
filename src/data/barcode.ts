@@ -71,8 +71,9 @@ export async function decodeCanvas(canvas: HTMLCanvasElement): Promise<string | 
 /** Decode a still photo, trying a few sizes since phone photos are large. */
 export async function decodeImage(file: Blob): Promise<string | null> {
   const img = await createImageBitmap(file)
-  for (const max of [1400, 900, 2000]) {
-    const scale = Math.min(1, max / Math.max(img.width, img.height))
+  // Several sizes: big photos are scaled down, small or blurry ones up (thin bars need pixels).
+  for (const max of [1400, 900, 2000, 2800]) {
+    const scale = Math.min(2.5, max / Math.max(img.width, img.height))
     const c = document.createElement('canvas')
     c.width = Math.round(img.width * scale)
     c.height = Math.round(img.height * scale)

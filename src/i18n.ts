@@ -10,6 +10,15 @@ export const LANGS: { id: Lang; label: string }[] = [
 ]
 
 const en = {
+  'price.yours': 'Your price',
+  'ap.title': 'Add a price', 'ap.shelf': 'Photograph the shelf label', 'ap.or': 'or find the product',
+  'ap.search': 'Product name', 'ap.store': 'Store', 'ap.price': 'Price (€)', 'ap.save': 'Save price',
+  'ap.reading': 'Reading the label…', 'ap.check': 'Check the price and store before saving.',
+  'ap.noBarcode': 'No barcode found on the label. Find the product by name instead.',
+  'ap.noPrice': 'Couldn’t read the price. Type it in.', 'ap.change': 'Change',
+  'ap.saved': 'Price saved', 'ap.another': 'Add another', 'ap.unknown': 'Product {code} isn’t known yet.',
+  'ap.tip': 'Fit the whole label in the picture: the barcode and the big price.',
+  'product.addPrice': 'Add a price', 'scan.shelf': 'Photograph a shelf label',
   'home.startTitle': 'Prices come from receipts',
   'home.startText': 'After shopping, scan your receipt. The prices you paid are saved and the app starts comparing stores for you.',
   'home.startBtn': 'Scan a receipt',
@@ -102,6 +111,15 @@ type Dict = typeof en
 export type Key = keyof Dict
 
 const fi: Dict = {
+  'price.yours': 'Oma hinta',
+  'ap.title': 'Lisää hinta', 'ap.shelf': 'Kuvaa hyllynreunan hintalappu', 'ap.or': 'tai etsi tuote',
+  'ap.search': 'Tuotteen nimi', 'ap.store': 'Kauppa', 'ap.price': 'Hinta (€)', 'ap.save': 'Tallenna hinta',
+  'ap.reading': 'Luetaan hintalappua…', 'ap.check': 'Tarkista hinta ja kauppa ennen tallennusta.',
+  'ap.noBarcode': 'Hintalapusta ei löytynyt viivakoodia. Etsi tuote nimellä.',
+  'ap.noPrice': 'Hintaa ei saatu luettua. Kirjoita se.', 'ap.change': 'Vaihda',
+  'ap.saved': 'Hinta tallennettu', 'ap.another': 'Lisää toinen', 'ap.unknown': 'Tuotetta {code} ei vielä tunneta.',
+  'ap.tip': 'Ota koko hintalappu kuvaan: viivakoodi ja iso hinta.',
+  'product.addPrice': 'Lisää hinta', 'scan.shelf': 'Kuvaa hyllyn hintalappu',
   'home.startTitle': 'Hinnat tulevat kuiteista',
   'home.startText': 'Skannaa kuitti ostosten jälkeen. Maksamasi hinnat tallentuvat, ja sovellus alkaa vertailla kauppoja puolestasi.',
   'home.startBtn': 'Skannaa kuitti',
@@ -182,6 +200,15 @@ const fi: Dict = {
 }
 
 const sv: Dict = {
+  'price.yours': 'Ditt pris',
+  'ap.title': 'Lägg till pris', 'ap.shelf': 'Fota hyllkantsetiketten', 'ap.or': 'eller sök produkten',
+  'ap.search': 'Produktnamn', 'ap.store': 'Butik', 'ap.price': 'Pris (€)', 'ap.save': 'Spara pris',
+  'ap.reading': 'Läser etiketten…', 'ap.check': 'Kontrollera pris och butik innan du sparar.',
+  'ap.noBarcode': 'Hittade ingen streckkod på etiketten. Sök produkten på namn i stället.',
+  'ap.noPrice': 'Kunde inte läsa priset. Skriv in det.', 'ap.change': 'Byt',
+  'ap.saved': 'Priset sparat', 'ap.another': 'Lägg till ett till', 'ap.unknown': 'Produkten {code} är inte känd ännu.',
+  'ap.tip': 'Få med hela etiketten på bilden: streckkoden och det stora priset.',
+  'product.addPrice': 'Lägg till pris', 'scan.shelf': 'Fota en hyllkantsetikett',
   'home.startTitle': 'Priserna kommer från kvitton',
   'home.startText': 'Skanna kvittot efter att du handlat. Priserna du betalade sparas och appen börjar jämföra butikerna åt dig.',
   'home.startBtn': 'Skanna ett kvitto',

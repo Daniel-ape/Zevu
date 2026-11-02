@@ -53,6 +53,8 @@ export interface PriceObservation {
   isPromotion?: boolean
   /** Price for loyalty-card members, when the source reports one. */
   memberPriceCents?: number
+  /** For user reports: from a receipt, typed in, or read from a shelf label. */
+  origin?: 'receipt' | 'manual' | 'shelf'
   /** Set by the app when memberPriceCents was applied for this user. */
   isMemberPrice?: boolean
 }

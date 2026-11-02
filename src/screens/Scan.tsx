@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { ReceiptSheet } from './ReceiptSheet'
 import { CameraScanner } from './CameraScanner'
+import { PriceSheet } from './PriceSheet'
 import { useStore } from '../data/store'
 import { decodeImage } from '../data/barcode'
 import { useNav } from '../nav'
@@ -14,6 +15,7 @@ export function Scan() {
   const [busy, setBusy] = useState(false)
   const [camera, setCamera] = useState(false)
   const [receipt, setReceipt] = useState(false)
+  const [shelf, setShelf] = useState(false)
   const photo = useRef<HTMLInputElement>(null)
 
   const lookup = async (raw: string) => {
@@ -48,7 +50,10 @@ export function Scan() {
       </button>
       {status && <p className="small" style={{ textAlign: 'center', color: 'var(--text-2)', lineHeight: 1.5 }}>{status}</p>}
 
-      <button className="btn ghost" style={{ marginTop: 12 }} onClick={() => setReceipt(true)}>{t('scan.receipt')}</button>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 12 }}>
+        <button className="btn ghost" style={{ fontSize: 14 }} onClick={() => setShelf(true)}>{t('scan.shelf')}</button>
+        <button className="btn ghost" style={{ fontSize: 14 }} onClick={() => setReceipt(true)}>{t('scan.receipt')}</button>
+      </div>
 
       <form className="section" onSubmit={(e) => { e.preventDefault(); lookup(code) }}>
         <div className="small muted" style={{ marginBottom: 8 }}>{t('scan.type')}</div>
@@ -74,6 +79,7 @@ export function Scan() {
         />
       )}
       {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
+      {shelf && <PriceSheet startWithPhoto onClose={() => setShelf(false)} />}
     </div>
   )
 }

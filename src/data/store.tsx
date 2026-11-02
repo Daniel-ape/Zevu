@@ -42,6 +42,9 @@ interface Store {
   findByBarcode: (ean: string) => Promise<Product | null | 'unavailable'>
   /** Product search in Open Food Facts; 'unavailable' when unreachable. */
   searchOnline: (q: string) => Promise<Product[] | 'unavailable'>
+  /** Prices the user added by hand or from a shelf label. */
+  addPrice: (o: { productId: string; retailerId: string; priceCents: number; origin: 'manual' | 'shelf' }) => void
+  lastStore: string | null
   receipts: Receipt[]
   addReceipt: (r: Receipt) => void
   removeReceipt: (id: string) => void
@@ -68,6 +71,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return { ...saved, items: saved.items.filter((i) => !/^p\d+$/.test(i.productId)) }
   })
   const [receipts, setReceipts] = useState<Receipt[]>(() => load('receipts', []))
+  const [userPrices, setUserPrices] = useState<PriceObservation[]>(() => load('userPrices', []))
+  const [lastStore, setLastStore] = useState<string | null>(() => load('lastStore', null))
   // Products fetched from Open Food Facts, kept so they work offline later.
   const [remote, setRemote] = useState<Product[]>(() => load('remoteProducts', []))
   const remember = (list: Product[]) =>
@@ -97,6 +102,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => save('list', list), [list])
   useEffect(() => save('receipts', receipts), [receipts])
+  useEffect(() => save('userPrices', userPrices), [userPrices])
+  useEffect(() => save('lastStore', lastStore), [lastStore])
   useEffect(() => save('remoteProducts', remote), [remote])
   useEffect(() => save('recent', recent), [recent])
   useEffect(() => save('memberships', memberships), [memberships])
@@ -117,8 +124,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         )
       : observations
     // Prices the user actually paid, from imported receipts.
-    return [...provider, ...receiptObservations(receipts)]
-  }, [observations, memberships, receipts])
+    return [...provider, ...receiptObservations(receipts), ...userPrices]
+  }, [observations, memberships, receipts, userPrices])
   useEffect(() => {
     save('theme', theme)
     const root = document.documentElement
@@ -164,6 +171,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
           return { ...l, items }
         }),
+      addPrice: ({ productId, retailerId, priceCents, origin }) => {
+        setUserPrices((all) => [...all, { productId, retailerId, priceCents, origin, source: 'user-report', observedAt: new Date().toISOString() }])
+        setLastStore(retailerId)
+      },
+      lastStore,
       receipts,
       addReceipt: (r) => setReceipts((all) => [r, ...all]),
       removeReceipt: (id) => setReceipts((all) => all.filter((r) => r.id !== id)),
@@ -178,7 +190,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       t: (key, vars) => translate(lang, key, vars),
       programs: LOYALTY_PROGRAMS,
     }),
-    [effective, products, loading, list, receipts, recent, theme, memberships, lang],
+    [effective, products, loading, list, receipts, recent, theme, memberships, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

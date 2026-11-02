@@ -72,7 +72,9 @@ export function PriceMeta({ row }: { row: RetailerPrice }) {
   return (
     <>
       {fresh ? t('price.updated', { when }) : <span className="tag stale">{t('price.outdated', { when })}</span>}
-      {row.current.source === 'user-report' && <span className="tag receipt" style={{ marginLeft: 6 }}>{t('price.receipt')}</span>}
+      {row.current.source === 'user-report' && (
+        <span className="tag receipt" style={{ marginLeft: 6 }}>{t(row.current.origin === 'receipt' || !row.current.origin ? 'price.receipt' : 'price.yours')}</span>
+      )}
       {fresh && row.current.isMemberPrice && <span className="tag member" style={{ marginLeft: 6 }}>{t('price.member')}</span>}
       {fresh && !row.current.isMemberPrice && row.current.isPromotion && <span className="tag promo" style={{ marginLeft: 6 }}>{t('price.offer')}</span>}
     </>

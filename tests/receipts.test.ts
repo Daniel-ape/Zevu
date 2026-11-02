@@ -1,6 +1,7 @@
 // Run: npm run test:receipts
 import assert from 'node:assert/strict'
 import { cleanOcrLine, parseReceipt } from '../src/domain/receipts'
+import { pickShelfPrice } from '../src/domain/shelfLabel'
 
 const NOW = new Date('2026-11-02T20:00:00')
 const items = (text: string) => parseReceipt(text, NOW).items.map((i) => [i.name, i.quantity, i.priceCents])
@@ -63,6 +64,15 @@ test('Payment and tax lines after the total are ignored', () => {
 
 test('Discount printed without a minus sign', () => {
   assert.deepEqual(items(`K-MARKET\nJOGURTTI 1KG 2,49\nALENNUS 0,50\nYHTEENSÄ 1,99`), [['JOGURTTI 1KG', 1, 199]])
+})
+
+test('Shelf label: the biggest price wins, unit prices ignored', () => {
+  const W = (text: string, height: number, line: string) => ({ text, height, line })
+  assert.equal(pickShelfPrice([W('Valio', 20, 'Valio maito 1 l'), W('1,29', 90, '1,29'), W('1,29', 18, '1,29 €/l')]), 129)
+  assert.equal(pickShelfPrice([W('3,98', 22, '7,96 €/kg 3,98'), W('2', 120, '2 49'), W('49', 60, '2 49')]), 249)
+  assert.equal(pickShelfPrice([W('Juusto', 30, 'Juusto')]), null)
+  // Only small print (the unit price) was read: leave the field empty rather than guess.
+  assert.equal(pickShelfPrice([W('Kookosmaito', 64, 'K'), W('Freshona', 60, 'F'), W('1,29', 24, '1,29 €N'), W('4056489367611', 21, '4056489367611')]), null)
 })
 
 console.log(`${passed} tests passed`)
