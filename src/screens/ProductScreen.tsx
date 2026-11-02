@@ -69,8 +69,8 @@ export function ProductScreen({ id }: { id: string }) {
           <div className="value">{best?.unitPriceCents != null ? euro(best.unitPriceCents) : '—'}</div>
         </div>
         <div className="stat">
-          <div className="label">{t('product.save')}</div>
-          <div className="value" style={{ color: spread > 0 ? 'var(--good)' : undefined }}>{spread > 0 ? euro(spread) : '—'}</div>
+          <div className="label">{t(spread > 0 ? 'product.save' : 'product.stores')}</div>
+          <div className="value" style={{ color: spread > 0 ? 'var(--good)' : undefined }}>{spread > 0 ? euro(spread) : fresh.length}</div>
         </div>
       </div>
 
@@ -99,25 +99,18 @@ export function ProductScreen({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="section">
+      {history.length > 1 && <div className="section">
         <div className="section-head">
           <h2>{t('product.history')}</h2>
           <TrendTag pct={trend(product, observations)} />
         </div>
         <PriceChart points={history} />
-      </div>
+      </div>}
 
         </>
       )}
 
-      {product.infoSource === 'open-food-facts' && (
-        <p className="tiny muted" style={{ marginTop: 18 }}>
-          <a href={`https://world.openfoodfacts.org/product/${product.ean}`} target="_blank" rel="noreferrer" onClick={inAppLink(`https://world.openfoodfacts.org/product/${product.ean}`)} style={{ color: 'inherit' }}>{t('product.info')}</a>
-        </p>
-      )}
-
-      <div className="section" style={{ display: 'grid', gap: 10 }}>
-        <button className="btn ghost" onClick={() => setAdding(true)}>{t('product.addPrice')}</button>
+      <div className="section actions-row">
         {inList ? (
           <button className="btn ghost" onClick={() => nav.go('lists')}>
             <Check /> {t('product.inList', { n: inList.quantity })}
@@ -127,7 +120,14 @@ export function ProductScreen({ id }: { id: string }) {
             <Plus /> {t('product.add')}
           </button>
         )}
+        <button className="btn ghost" onClick={() => setAdding(true)}>{t('product.addPrice')}</button>
       </div>
+
+      {product.infoSource === 'open-food-facts' && (
+        <p className="tiny" style={{ marginTop: 20, textAlign: 'center' }}>
+          <a href={`https://world.openfoodfacts.org/product/${product.ean}`} target="_blank" rel="noreferrer" onClick={inAppLink(`https://world.openfoodfacts.org/product/${product.ean}`)} style={{ color: 'var(--text-3)' }}>{t('product.info')}</a>
+        </p>
+      )}
       {adding && <PriceSheet product={product} onClose={() => setAdding(false)} />}
     </div>
   )

@@ -10,6 +10,8 @@ export const LANGS: { id: Lang; label: string }[] = [
 ]
 
 const en = {
+  'scan.barcodeSub': 'Compare a product’s prices', 'scan.shelfShort': 'Shelf label', 'scan.shelfSub': 'Save the price you see',
+  'scan.receiptShort': 'Receipt', 'scan.receiptSub': 'Save everything you bought',
   'spend.title': 'Spending', 'spend.none': 'Import receipts to see what you spend on food.',
   'spend.byStore': 'By store', 'spend.byCat': 'By category', 'spend.other': 'Other',
   'spend.receipts': '{n} receipts', 'spend.receipt1': '1 receipt', 'spend.prev': 'Previous month', 'spend.next': 'Next month',
@@ -49,7 +51,7 @@ const en = {
   'offers.lidl': 'This week’s Lidl offers and leaflet',
   'offers.tok': 'Tokmanni’s current leaflet and offers',
   'scan.barcode': 'Scan a barcode', 'scan.camera': 'Barcode camera', 'scan.aim': 'Point at the barcode',
-  'scan.starting': 'Starting camera…', 'scan.type': 'Or type the number under the barcode',
+  'scan.starting': 'Starting camera…', 'scan.type': 'Type a barcode number',
   'scan.looking': 'Looking up…', 'scan.reading': 'Reading the barcode…',
   'scan.noBarcode': "Couldn't find a barcode in the photo. Hold the phone closer and keep it steady.",
   'scan.noCamera': "The live camera isn't available here, so take a photo of the barcode instead.",
@@ -93,7 +95,7 @@ const en = {
   'cat.meat': 'Meat', 'cat.pantry': 'Pantry', 'cat.drinks': 'Drinks', 'cat.snacks': 'Snacks', 'cat.household': 'Household',
   // product
   'product.back': 'Back', 'product.lowest': 'Lowest', 'product.per': 'Per {unit}',
-  'product.save': 'You save', 'product.byStore': 'Prices by store', 'product.history': 'Lowest price history',
+  'product.save': 'You save', 'product.stores': 'Stores', 'product.byStore': 'Prices by store', 'product.history': 'Lowest price history',
   'product.noPrices': 'No store has a price for this product yet.', 'product.notFound': 'Product not found.',
   'product.add': 'Add to list', 'product.inList': 'In your list ({n})', 'chart.notEnough': 'Not enough price history yet.',
   // freshness
@@ -114,13 +116,15 @@ const en = {
   'you.cardsLimit': 'Stores do not let other apps sign in to your account. To bring in what you actually paid, import receipts.',
   'you.cardOn': 'Member prices on', 'you.cardOff': 'Not added', 'you.language': 'Language', 'you.appearance': 'Appearance',
   'theme.system': 'Auto', 'theme.light': 'Light', 'theme.dark': 'Dark',
-  'you.data': 'Price data', 'you.dataNote': 'Prices come from receipts imported in this app. Product names and pictures: Open Food Facts.',
+  'you.data': 'Price data', 'you.dataNote': 'Prices: your receipts and shelf labels, and Tokmanni’s website. Products: Open Food Facts (ODbL).',
 }
 
 type Dict = typeof en
 export type Key = keyof Dict
 
 const fi: Dict = {
+  'scan.barcodeSub': 'Vertaa tuotteen hintoja', 'scan.shelfShort': 'Hintalappu', 'scan.shelfSub': 'Tallenna näkemäsi hinta',
+  'scan.receiptShort': 'Kuitti', 'scan.receiptSub': 'Tallenna kaikki ostoksesi',
   'spend.title': 'Kulutus', 'spend.none': 'Tuo kuitteja, niin näet paljonko ruokaan kuluu.',
   'spend.byStore': 'Kaupoittain', 'spend.byCat': 'Tuoteryhmittäin', 'spend.other': 'Muut',
   'spend.receipts': '{n} kuittia', 'spend.receipt1': '1 kuitti', 'spend.prev': 'Edellinen kuukausi', 'spend.next': 'Seuraava kuukausi',
@@ -160,7 +164,7 @@ const fi: Dict = {
   'offers.lidl': 'Lidlin tämän viikon tarjoukset ja lehti',
   'offers.tok': 'Tokmannin ajankohtainen lehti ja tarjoukset',
   'scan.barcode': 'Skannaa viivakoodi', 'scan.camera': 'Viivakoodikamera', 'scan.aim': 'Osoita viivakoodia',
-  'scan.starting': 'Käynnistetään kameraa…', 'scan.type': 'Tai kirjoita viivakoodin alla oleva numero',
+  'scan.starting': 'Käynnistetään kameraa…', 'scan.type': 'Kirjoita viivakoodin numero',
   'scan.looking': 'Haetaan…', 'scan.reading': 'Luetaan viivakoodia…',
   'scan.noBarcode': 'Kuvasta ei löytynyt viivakoodia. Vie puhelin lähemmäs ja pidä se paikallaan.',
   'scan.noCamera': 'Kamera ei ole tässä käytettävissä, joten ota viivakoodista kuva.',
@@ -199,7 +203,7 @@ const fi: Dict = {
   'cat.all': 'Kaikki', 'cat.dairy': 'Maito & munat', 'cat.produce': 'Hedelmät & vihannekset', 'cat.bread': 'Leipä',
   'cat.meat': 'Liha', 'cat.pantry': 'Kuivatuotteet', 'cat.drinks': 'Juomat', 'cat.snacks': 'Herkut', 'cat.household': 'Koti',
   'product.back': 'Takaisin', 'product.lowest': 'Halvin', 'product.per': 'Per {unit}',
-  'product.save': 'Säästät', 'product.byStore': 'Hinnat kaupoittain', 'product.history': 'Halvimman hinnan historia',
+  'product.save': 'Säästät', 'product.stores': 'Kauppoja', 'product.byStore': 'Hinnat kaupoittain', 'product.history': 'Halvimman hinnan historia',
   'product.noPrices': 'Tälle tuotteelle ei vielä ole hintaa.', 'product.notFound': 'Tuotetta ei löytynyt.',
   'product.add': 'Lisää listaan', 'product.inList': 'Listalla ({n})', 'chart.notEnough': 'Hintahistoriaa ei ole vielä tarpeeksi.',
   'time.justNow': 'juuri nyt', 'time.hours': '{n} h sitten', 'time.yesterday': 'eilen', 'time.days': '{n} päivää sitten',
@@ -216,10 +220,12 @@ const fi: Dict = {
   'you.cardsLimit': 'Kaupat eivät salli muiden sovellusten kirjautua tiliisi. Tuo kuitteja, niin maksamasi hinnat näkyvät.',
   'you.cardOn': 'Jäsenhinnat käytössä', 'you.cardOff': 'Ei lisätty', 'you.language': 'Kieli', 'you.appearance': 'Ulkoasu',
   'theme.system': 'Auto', 'theme.light': 'Vaalea', 'theme.dark': 'Tumma',
-  'you.data': 'Hintatiedot', 'you.dataNote': 'Hinnat tulevat sovellukseen tuoduista kuiteista. Tuotenimet ja kuvat: Open Food Facts.',
+  'you.data': 'Hintatiedot', 'you.dataNote': 'Hinnat: omat kuittisi ja hintalappusi sekä Tokmannin verkkosivut. Tuotteet: Open Food Facts (ODbL).',
 }
 
 const sv: Dict = {
+  'scan.barcodeSub': 'Jämför en produkts priser', 'scan.shelfShort': 'Hyllkant', 'scan.shelfSub': 'Spara priset du ser',
+  'scan.receiptShort': 'Kvitto', 'scan.receiptSub': 'Spara allt du köpt',
   'spend.title': 'Utgifter', 'spend.none': 'Importera kvitton så ser du vad du lägger på mat.',
   'spend.byStore': 'Per butik', 'spend.byCat': 'Per kategori', 'spend.other': 'Övrigt',
   'spend.receipts': '{n} kvitton', 'spend.receipt1': '1 kvitto', 'spend.prev': 'Föregående månad', 'spend.next': 'Nästa månad',
@@ -259,7 +265,7 @@ const sv: Dict = {
   'offers.lidl': 'Lidls erbjudanden och reklamblad denna vecka',
   'offers.tok': 'Tokmannis aktuella reklamblad och erbjudanden',
   'scan.barcode': 'Skanna streckkod', 'scan.camera': 'Streckkodskamera', 'scan.aim': 'Rikta mot streckkoden',
-  'scan.starting': 'Startar kameran…', 'scan.type': 'Eller skriv numret under streckkoden',
+  'scan.starting': 'Startar kameran…', 'scan.type': 'Skriv streckkodens nummer',
   'scan.looking': 'Söker…', 'scan.reading': 'Läser streckkoden…',
   'scan.noBarcode': 'Hittade ingen streckkod på fotot. Håll telefonen närmare och stilla.',
   'scan.noCamera': 'Kameran är inte tillgänglig här, så ta ett foto av streckkoden i stället.',
@@ -298,7 +304,7 @@ const sv: Dict = {
   'cat.all': 'Alla', 'cat.dairy': 'Mejeri & ägg', 'cat.produce': 'Frukt & grönt', 'cat.bread': 'Bröd',
   'cat.meat': 'Kött', 'cat.pantry': 'Skafferi', 'cat.drinks': 'Drycker', 'cat.snacks': 'Godis & snacks', 'cat.household': 'Hushåll',
   'product.back': 'Tillbaka', 'product.lowest': 'Lägst', 'product.per': 'Per {unit}',
-  'product.save': 'Du sparar', 'product.byStore': 'Priser per butik', 'product.history': 'Lägsta prisets historik',
+  'product.save': 'Du sparar', 'product.stores': 'Butiker', 'product.byStore': 'Priser per butik', 'product.history': 'Lägsta prisets historik',
   'product.noPrices': 'Ingen butik har ett pris för produkten ännu.', 'product.notFound': 'Produkten hittades inte.',
   'product.add': 'Lägg till i listan', 'product.inList': 'I din lista ({n})', 'chart.notEnough': 'Inte tillräckligt med prishistorik ännu.',
   'time.justNow': 'just nu', 'time.hours': 'för {n} h sedan', 'time.yesterday': 'i går', 'time.days': 'för {n} dagar sedan',
@@ -315,7 +321,7 @@ const sv: Dict = {
   'you.cardsLimit': 'Butikerna låter inte andra appar logga in på ditt konto. Importera kvitton för att få med vad du betalade.',
   'you.cardOn': 'Medlemspriser på', 'you.cardOff': 'Inte tillagt', 'you.language': 'Språk', 'you.appearance': 'Utseende',
   'theme.system': 'Auto', 'theme.light': 'Ljust', 'theme.dark': 'Mörkt',
-  'you.data': 'Prisdata', 'you.dataNote': 'Priserna kommer från kvitton som importerats i appen. Produktnamn och bilder: Open Food Facts.',
+  'you.data': 'Prisdata', 'you.dataNote': 'Priser: dina kvitton och hyllkantsetiketter samt Tokmannis webbplats. Produkter: Open Food Facts (ODbL).',
 }
 
 const DICTS: Record<Lang, Dict> = { en, fi, sv }

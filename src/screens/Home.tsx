@@ -88,7 +88,6 @@ export function Home() {
         </div>
       )}
 
-      <Offers />
       {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
 
       {watched.length > 0 && (
@@ -122,6 +121,8 @@ export function Home() {
           </div>
         </div>
       )}
+
+      <Offers />
 
       {recent.length > 0 && (
         <div className="section">

@@ -14,7 +14,6 @@ export function SearchScreen() {
   const nav = useNav()
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<CategoryId | 'all'>(nav.searchCategory)
-  const [store, setStore] = useState<string>('all')
   const [sort, setSort] = useState<Sort>('price')
   const input = useRef<HTMLInputElement>(null)
 
@@ -38,7 +37,7 @@ export function SearchScreen() {
 
   const results = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    const scope = store === 'all' ? retailers : retailers.filter((r) => r.id === store)
+    const scope = retailers
     return products
       .filter((p) => cat === 'all' || p.category === cat)
       .filter((p) => !needle || `${p.name} ${p.brand} ${p.ean}`.toLowerCase().includes(needle) || (Array.isArray(online) && online.includes(p.id)))
@@ -47,7 +46,7 @@ export function SearchScreen() {
         return { p, best: cheapest(rows), count: rows.filter((r) => r.freshness === 'fresh').length }
       })
       // Browsing without a query lists only products that have prices.
-      .filter((r) => (store === 'all' && needle ? true : r.best || r.count > 0))
+      .filter((r) => (needle ? true : r.best || r.count > 0))
       .sort((a, b) => {
         if (sort === 'name') return a.p.name.localeCompare(b.p.name)
         const av = sort === 'unit' ? a.best?.unitPriceCents : a.best?.current.priceCents
@@ -55,7 +54,7 @@ export function SearchScreen() {
         return (av ?? Infinity) - (bv ?? Infinity)
       })
       .slice(0, 80)
-  }, [q, cat, store, sort, products, observations, retailers, online])
+  }, [q, cat, sort, products, observations, retailers, online])
 
   return (
     <div className="screen">
@@ -69,11 +68,6 @@ export function SearchScreen() {
       <div className="chips" style={{ marginTop: 16 }}>
         {CATEGORIES.map((c) => (
           <button key={c.id} className={'chip' + (cat === c.id ? ' on' : '')} onClick={() => setCat(c.id)}>{t(c.key)}</button>
-        ))}
-      </div>
-      <div className="chips" style={{ marginTop: 8 }}>
-        {[{ id: 'all', name: t('search.allStores') }, ...retailers].map((r) => (
-          <button key={r.id} className={'chip' + (store === r.id ? ' on' : '')} style={{ height: 34, fontSize: 14 }} onClick={() => setStore(r.id)}>{r.name}</button>
         ))}
       </div>
 

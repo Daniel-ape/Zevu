@@ -5,7 +5,7 @@ import { PriceSheet } from './PriceSheet'
 import { useStore } from '../data/store'
 import { decodeImage } from '../data/barcode'
 import { useNav } from '../nav'
-import { Scan as ScanIcon } from '../ui/icons'
+import { ArrowRight, Receipt, Scan as ScanIcon, Tag } from '../ui/icons'
 
 export function Scan() {
   const { findByBarcode, t } = useStore()
@@ -47,28 +47,34 @@ export function Scan() {
       <button className="scan-hero" disabled={busy} onClick={() => { setStatus(''); setCamera(true) }}>
         <ScanIcon size={34} />
         <span>{t('scan.barcode')}</span>
+        <small>{t('scan.barcodeSub')}</small>
       </button>
       {status && <p className="small" style={{ textAlign: 'center', color: 'var(--text-2)', lineHeight: 1.5 }}>{status}</p>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 12 }}>
-        <button className="btn ghost" style={{ fontSize: 14 }} onClick={() => setShelf(true)}>{t('scan.shelf')}</button>
-        <button className="btn ghost" style={{ fontSize: 14 }} onClick={() => setReceipt(true)}>{t('scan.receipt')}</button>
+      <div className="scan-options">
+        <button className="scan-option" onClick={() => setShelf(true)}>
+          <Tag size={24} />
+          <span>{t('scan.shelfShort')}</span>
+          <small>{t('scan.shelfSub')}</small>
+        </button>
+        <button className="scan-option" onClick={() => setReceipt(true)}>
+          <Receipt size={24} />
+          <span>{t('scan.receiptShort')}</span>
+          <small>{t('scan.receiptSub')}</small>
+        </button>
       </div>
 
       <form className="section" onSubmit={(e) => { e.preventDefault(); lookup(code) }}>
-        <div className="small muted" style={{ marginBottom: 8 }}>{t('scan.type')}</div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <label className="search" style={{ flex: 1 }}>
-            <input
-              value={code}
-              onChange={(e) => { setCode(e.target.value); setStatus('') }}
-              inputMode="numeric"
-              placeholder="6410000000000"
-              aria-label={t('scan.label')}
-            />
-          </label>
-          <button className="btn primary" style={{ width: 'auto', padding: '0 20px', height: 48 }} disabled={busy} type="submit">{t('scan.lookup')}</button>
-        </div>
+        <label className="search" style={{ paddingRight: 6 }}>
+          <input
+            value={code}
+            onChange={(e) => { setCode(e.target.value); setStatus('') }}
+            inputMode="numeric"
+            placeholder={t('scan.type')}
+            aria-label={t('scan.label')}
+          />
+          <button className="search-go" disabled={busy || code.replace(/\D/g, '').length < 8} type="submit" aria-label={t('scan.lookup')}><ArrowRight size={18} /></button>
+        </label>
       </form>
 
       {camera && (

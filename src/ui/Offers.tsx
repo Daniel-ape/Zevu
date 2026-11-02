@@ -1,7 +1,6 @@
 import { useStore } from '../data/store'
-import { inAppLink, isNativeApp } from '../data/openLink'
+import { inAppLink } from '../data/openLink'
 import type { Key } from '../i18n'
-import { Chevron } from './icons'
 
 // Official offer pages of each chain. They always show the current week, so
 // nothing here goes out of date and no offer is ever invented by the app.
@@ -27,21 +26,14 @@ export function Offers() {
         <h2>{t('offers.title')}</h2>
         <span className="muted tiny">{t('offers.week', { n: isoWeek() })}</span>
       </div>
-
-      <div className="rows">
+      <div className="store-grid">
         {CHAINS.map((c) => (
-          <a key={c.name} className="row" href={c.url} target="_blank" rel="noreferrer" onClick={inAppLink(c.url)} style={{ color: 'inherit', textDecoration: 'none' }}>
-            <div className="mark" aria-hidden>{c.name[0]}</div>
-            <div className="grow">
-              <div className="title">{c.name}</div>
-              <div className="sub" style={{ whiteSpace: 'normal' }}>{t(c.text)}</div>
-            </div>
-            <span className="muted"><Chevron /></span>
+          <a key={c.name} className="store-card" href={c.url} target="_blank" rel="noreferrer" onClick={inAppLink(c.url)} aria-label={t(c.text)}>
+            <span className="mark" aria-hidden>{c.name[0]}</span>
+            <span>{c.name}</span>
           </a>
         ))}
       </div>
-      <p className="tiny muted" style={{ marginTop: 4, lineHeight: 1.5 }}>{t(isNativeApp ? 'offers.inAppNote' : 'offers.webNote')}</p>
-
     </div>
   )
 }

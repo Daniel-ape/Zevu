@@ -7,18 +7,18 @@ import { Chevron, Plus } from '../ui/icons'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 
-function Group({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
+function Group({ title, note, plain, children }: { title: string; note?: string; plain?: boolean; children: ReactNode }) {
   return (
     <section className="group">
       <div className="group-title">{title}</div>
-      <div className="group-body">{children}</div>
+      <div className={plain ? undefined : 'group-body'}>{children}</div>
       {note && <p className="group-note">{note}</p>}
     </section>
   )
 }
 
 export function Profile() {
-  const { theme, setTheme, programs, memberships, toggleMembership, lang, setLang, receipts, allRetailers, myStores, toggleMyStore, t } = useStore()
+  const { theme, setTheme, lang, setLang, receipts, allRetailers, myStores, toggleMyStore, t } = useStore()
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
 
   return (
@@ -29,28 +29,14 @@ export function Profile() {
         <Spending />
       </Group>
 
-      <Group title={t('stores.title')} note={t('stores.note')}>
-        {allRetailers.map((r) => (
-          <label key={r.id} className="row" style={{ cursor: 'pointer', padding: '11px 0' }}>
-            <div className="grow title" style={{ fontWeight: 500 }}>{r.name}</div>
-            <input type="checkbox" className="switch" checked={myStores.includes(r.id)} onChange={() => toggleMyStore(r.id)} aria-label={r.name} />
-          </label>
-        ))}
-      </Group>
-
-      <Group title={t('you.groupCards')} note={t('you.cardsNote')}>
-        {programs.map((p) => {
-          const on = memberships.includes(p.chain)
-          return (
-            <label key={p.chain} className="row" style={{ cursor: 'pointer' }}>
-              <div className="grow">
-                <div className="title">{p.name}</div>
-                <div className="sub">{on ? t('you.cardOn') : p.stores}</div>
-              </div>
-              <input type="checkbox" className="switch" checked={on} onChange={() => toggleMembership(p.chain)} aria-label={p.name} />
-            </label>
-          )
-        })}
+      <Group title={t('stores.title')} note={t('stores.note')} plain>
+        <div className="chip-wrap">
+          {allRetailers.map((r) => (
+            <button key={r.id} className={'chip' + (myStores.includes(r.id) ? ' on' : '')} onClick={() => toggleMyStore(r.id)} aria-pressed={myStores.includes(r.id)}>
+              {r.name}
+            </button>
+          ))}
+        </div>
       </Group>
 
       <Group title={t('you.groupReceipts')} note={t('rc.importNote')}>
@@ -98,7 +84,7 @@ export function Profile() {
         <div className="row">
           <div className="grow">
             <div className="title">{t('you.data')}</div>
-            <div className="sub" style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{t('you.dataNote')} {t('you.cardsLimit')}</div>
+            <div className="sub" style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{t('you.dataNote')}</div>
           </div>
         </div>
       </Group>

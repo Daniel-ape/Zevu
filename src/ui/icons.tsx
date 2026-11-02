@@ -46,3 +46,12 @@ export const Arrow = ({ size = 12, down }: P & { down?: boolean }) => (
 export const Check = ({ size }: P) => (
   <svg {...base(size)}><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
 )
+export const Tag = ({ size }: P) => (
+  <svg {...base(size)}><path d="M3.5 12.2V5a1.5 1.5 0 0 1 1.5-1.5h7.2l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-6.4 6.4a1.5 1.5 0 0 1-2.1 0z" /><circle cx="8.5" cy="8.5" r="1.4" /></svg>
+)
+export const Receipt = ({ size }: P) => (
+  <svg {...base(size)}><path d="M6 3.5h12v17l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3z" /><path d="M9 8h6M9 11.5h6M9 15h3.5" /></svg>
+)
+export const ArrowRight = ({ size }: P) => (
+  <svg {...base(size)}><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+)
