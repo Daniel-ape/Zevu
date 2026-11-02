@@ -80,7 +80,7 @@ export function Home() {
         </div>
       )}
 
-      {!loading && observations.length === 0 && (
+      {!loading && !observations.some((o) => o.source === 'user-report') && (
         <div className="notice-plain section">
           <div className="title" style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>{t('home.startTitle')}</div>
           <div className="small muted" style={{ lineHeight: 1.5 }}>{t('home.startText')}</div>
