@@ -3,7 +3,7 @@ import { useStore } from '../data/store'
 import { cheapest, compare, euro, lowestHistory, sizeLabel, trend, unitLabel } from '../domain/pricing'
 import { useNav } from '../nav'
 import { Back, Check, Plus } from '../ui/icons'
-import { PriceMeta, RankBadge, RetailerMark, SampleNotice, Tile, TrendTag } from '../ui/bits'
+import { PriceMeta, RankBadge, RetailerMark, Tile, TrendTag } from '../ui/bits'
 import { PriceChart } from '../ui/PriceChart'
 import { inAppLink } from '../data/openLink'
 
@@ -65,8 +65,7 @@ export function ProductScreen({ id }: { id: string }) {
       <div className="section">
         <div className="section-head">
           <h2>{t('product.byStore')}</h2>
-          <SampleNotice compact />
-        </div>
+          </div>
         <div className="rows">
           {rows.map((r) => {
             const rank = r.freshness === 'fresh' ? fresh.indexOf(r) + 1 : 0

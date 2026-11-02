@@ -10,6 +10,11 @@ export const LANGS: { id: Lang; label: string }[] = [
 ]
 
 const en = {
+  'home.startTitle': 'Prices come from receipts',
+  'home.startText': 'After shopping, scan your receipt. The prices you paid are saved and the app starts comparing stores for you.',
+  'home.startBtn': 'Scan a receipt',
+  'search.hint': 'Search {n} products by name, brand or barcode.',
+  'list.noPrices': 'No prices for these products yet. Scan receipts and the cheapest store shows up here.',
   'offers.inAppNote': 'Opens the store’s own leaflet page inside the app.',
   'offers.webNote': 'In the phone app these open inside the app. In this preview they open in a new tab.',
   'leaflet.sampleTitle': 'Sample leaflet', 'leaflet.open': 'Open the leaflet',
@@ -90,13 +95,18 @@ const en = {
   'you.cardsLimit': 'Stores do not let other apps sign in to your account. To bring in what you actually paid, import receipts.',
   'you.cardOn': 'Member prices on', 'you.cardOff': 'Not added', 'you.language': 'Language', 'you.appearance': 'Appearance',
   'theme.system': 'Auto', 'theme.light': 'Light', 'theme.dark': 'Dark',
-  'you.data': 'Price data', 'you.dataNote': 'Sample prices only. Real store prices are not connected yet.',
+  'you.data': 'Price data', 'you.dataNote': 'Prices come from receipts imported in this app. Product names and pictures: Open Food Facts.',
 }
 
 type Dict = typeof en
 export type Key = keyof Dict
 
 const fi: Dict = {
+  'home.startTitle': 'Hinnat tulevat kuiteista',
+  'home.startText': 'Skannaa kuitti ostosten jälkeen. Maksamasi hinnat tallentuvat, ja sovellus alkaa vertailla kauppoja puolestasi.',
+  'home.startBtn': 'Skannaa kuitti',
+  'search.hint': 'Hae {n} tuotteesta nimellä, merkillä tai viivakoodilla.',
+  'list.noPrices': 'Näille tuotteille ei ole vielä hintoja. Skannaa kuitteja, niin halvin kauppa näkyy tässä.',
   'offers.inAppNote': 'Avaa kaupan oman tarjouslehtisivun sovelluksen sisällä.',
   'offers.webNote': 'Puhelinsovelluksessa nämä avautuvat sovelluksen sisällä. Tässä esikatselussa ne avautuvat uudelle välilehdelle.',
   'leaflet.sampleTitle': 'Esimerkkilehti', 'leaflet.open': 'Avaa lehti',
@@ -168,10 +178,15 @@ const fi: Dict = {
   'you.cardsLimit': 'Kaupat eivät salli muiden sovellusten kirjautua tiliisi. Tuo kuitteja, niin maksamasi hinnat näkyvät.',
   'you.cardOn': 'Jäsenhinnat käytössä', 'you.cardOff': 'Ei lisätty', 'you.language': 'Kieli', 'you.appearance': 'Ulkoasu',
   'theme.system': 'Auto', 'theme.light': 'Vaalea', 'theme.dark': 'Tumma',
-  'you.data': 'Hintatiedot', 'you.dataNote': 'Vain esimerkkihintoja. Kauppojen oikeita hintoja ei ole vielä yhdistetty.',
+  'you.data': 'Hintatiedot', 'you.dataNote': 'Hinnat tulevat sovellukseen tuoduista kuiteista. Tuotenimet ja kuvat: Open Food Facts.',
 }
 
 const sv: Dict = {
+  'home.startTitle': 'Priserna kommer från kvitton',
+  'home.startText': 'Skanna kvittot efter att du handlat. Priserna du betalade sparas och appen börjar jämföra butikerna åt dig.',
+  'home.startBtn': 'Skanna ett kvitto',
+  'search.hint': 'Sök bland {n} produkter på namn, märke eller streckkod.',
+  'list.noPrices': 'Det finns inga priser för de här produkterna ännu. Skanna kvitton så syns den billigaste butiken här.',
   'offers.inAppNote': 'Öppnar butikens egen bladsida inne i appen.',
   'offers.webNote': 'I mobilappen öppnas de inne i appen. I den här förhandsvisningen öppnas de i en ny flik.',
   'leaflet.sampleTitle': 'Exempelblad', 'leaflet.open': 'Öppna bladet',
@@ -243,7 +258,7 @@ const sv: Dict = {
   'you.cardsLimit': 'Butikerna låter inte andra appar logga in på ditt konto. Importera kvitton för att få med vad du betalade.',
   'you.cardOn': 'Medlemspriser på', 'you.cardOff': 'Inte tillagt', 'you.language': 'Språk', 'you.appearance': 'Utseende',
   'theme.system': 'Auto', 'theme.light': 'Ljust', 'theme.dark': 'Mörkt',
-  'you.data': 'Prisdata', 'you.dataNote': 'Endast exempelpriser. Butikernas riktiga priser är inte anslutna ännu.',
+  'you.data': 'Prisdata', 'you.dataNote': 'Priserna kommer från kvitton som importerats i appen. Produktnamn och bilder: Open Food Facts.',
 }
 
 const DICTS: Record<Lang, Dict> = { en, fi, sv }

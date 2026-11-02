@@ -3,7 +3,7 @@ import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel } from '../domain/pricing'
 import { useNav } from '../nav'
 import { Minus, Plus } from '../ui/icons'
-import { RankBadge, RetailerMark, SampleNotice, Tile } from '../ui/bits'
+import { RankBadge, RetailerMark, Tile } from '../ui/bits'
 
 export function Lists() {
   const { list, products, observations, retailers, setQuantity, t } = useStore()
@@ -65,7 +65,7 @@ export function Lists() {
               <h2>{t('list.where')}</h2>
               <span className="muted tiny">{t('list.items', { n: itemCount })}</span>
             </div>
-            <SampleNotice compact />
+            {complete.length === 0 && <p className="small muted" style={{ lineHeight: 1.5 }}>{t('list.noPrices')}</p>}
             <div className="rows">
               {complete.map((bt) => {
                 const rank = complete.indexOf(bt) + 1
@@ -89,7 +89,7 @@ export function Lists() {
                 )
               })}
             </div>
-            {incomplete.length > 0 && (
+            {complete.length > 0 && incomplete.length > 0 && (
               <p className="tiny muted" style={{ marginTop: 6 }}>
                 {t('list.notRanked', { stores: incomplete.map((x) => x.retailer.name).join(', ') })}
               </p>

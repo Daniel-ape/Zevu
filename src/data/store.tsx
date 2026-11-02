@@ -1,16 +1,15 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { ChainId, PriceObservation, PriceProvider, Product, Retailer, ShoppingList } from '../domain/types'
-import { LOYALTY_PROGRAMS, PRODUCTS, RETAILERS, sampleProvider } from './sampleProvider'
+import { LOYALTY_PROGRAMS, RETAILERS } from './retailers'
 import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
 import { lookupBarcode, searchProducts } from './openFoodFacts'
 import { loadSnapshot, snapshotProducts } from './snapshot'
 
-// Registered price providers. Real connectors (k-ruoka, s-kaupat, ...) are
-// added here later; the UI only ever sees PriceObservations.
-const PROVIDERS: PriceProvider[] = [sampleProvider]
-
-export const usingSampleData = PROVIDERS.some((p) => p.isSample)
+// Registered price providers. Prices currently come only from receipts users
+// import; store connectors are added here when a permitted source exists.
+// The UI only ever sees PriceObservations.
+const PROVIDERS: PriceProvider[] = []
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -28,18 +27,7 @@ function save(key: string, value: unknown) {
   }
 }
 
-const DEFAULT_LIST: ShoppingList = {
-  id: 'weekly',
-  name: 'Weekly shop',
-  items: [
-    { productId: 'p1', quantity: 2 },
-    { productId: 'p5', quantity: 1 },
-    { productId: 'p7', quantity: 1 },
-    { productId: 'p10', quantity: 1 },
-    { productId: 'p12', quantity: 1 },
-    { productId: 'p17', quantity: 1 },
-  ],
-}
+const DEFAULT_LIST: ShoppingList = { id: 'weekly', name: 'Weekly shop', items: [] }
 
 export type Theme = 'system' | 'light' | 'dark'
 
@@ -74,7 +62,11 @@ const Ctx = createContext<Store | null>(null)
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [observations, setObservations] = useState<PriceObservation[]>([])
   const [loading, setLoading] = useState(true)
-  const [list, setList] = useState<ShoppingList>(() => load('list', DEFAULT_LIST))
+  const [list, setList] = useState<ShoppingList>(() => {
+    const saved = load('list', DEFAULT_LIST)
+    // Lists saved by earlier versions may hold demo products (ids p1…p18).
+    return { ...saved, items: saved.items.filter((i) => !/^p\d+$/.test(i.productId)) }
+  })
   const [receipts, setReceipts] = useState<Receipt[]>(() => load('receipts', []))
   // Products fetched from Open Food Facts, kept so they work offline later.
   const [remote, setRemote] = useState<Product[]>(() => load('remoteProducts', []))
@@ -84,7 +76,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       list.forEach((p) => byId.set(p.id, p))
       return [...byId.values()].slice(-300)
     })
-  const [recent, setRecent] = useState<string[]>(() => load('recent', []))
+  const [recent, setRecent] = useState<string[]>(() => load<string[]>('recent', []).filter((id) => !/^p\d+$/.test(id)))
   const [theme, setTheme] = useState<Theme>(() => load('theme', 'system'))
   const [memberships, setMemberships] = useState<ChainId[]>(() => load('memberships', []))
   const [lang, setLang] = useState<Lang>(() => load('lang', detectLang()))
@@ -93,13 +85,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => { loadSnapshot().then(setSnapshotRows) }, [])
   const products = useMemo(() => {
     const seen = new Set<string>()
-    const all = [...PRODUCTS, ...snapshotProducts(snapshotRows, lang), ...remote]
+    const all = [...snapshotProducts(snapshotRows, lang), ...remote]
     return all.filter((p) => (seen.has(p.ean) ? false : (seen.add(p.ean), true)))
   }, [remote, snapshotRows, lang])
 
   useEffect(() => {
-    const ids = PRODUCTS.map((p) => p.id)
-    Promise.all(PROVIDERS.map((p) => p.getObservations(ids).catch(() => [])))
+    Promise.all(PROVIDERS.map((p) => p.getObservations([]).catch(() => [])))
       .then((all) => setObservations(all.flat()))
       .finally(() => setLoading(false))
   }, [])

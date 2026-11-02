@@ -4,7 +4,7 @@ import type { CategoryId, Product, Retailer } from '../domain/types'
 import type { RetailerPrice } from '../domain/pricing'
 import { ageDays } from '../domain/pricing'
 import { Arrow } from './icons'
-import { usingSampleData, useStore } from '../data/store'
+import { useStore } from '../data/store'
 import type { Key } from '../i18n'
 
 export const CATEGORIES: { id: CategoryId | 'all'; key: Key }[] = (
@@ -77,10 +77,4 @@ export function PriceMeta({ row }: { row: RetailerPrice }) {
       {fresh && !row.current.isMemberPrice && row.current.isPromotion && <span className="tag promo" style={{ marginLeft: 6 }}>{t('price.offer')}</span>}
     </>
   )
-}
-
-export function SampleNotice(_: { compact?: boolean }) {
-  const { t } = useStore()
-  if (!usingSampleData) return null
-  return <span className="tag sample">{t('sample')}</span>
 }

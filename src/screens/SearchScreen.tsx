@@ -4,7 +4,7 @@ import { cheapest, compare, euro, sizeLabel, unitLabel } from '../domain/pricing
 import type { CategoryId } from '../domain/types'
 import { useNav } from '../nav'
 import { Search } from '../ui/icons'
-import { CATEGORIES, SampleNotice, Tile } from '../ui/bits'
+import { CATEGORIES, Tile } from '../ui/bits'
 
 type Sort = 'price' | 'unit' | 'name'
 
@@ -88,9 +88,10 @@ export function SearchScreen() {
         </div>
       </div>
 
-      <div style={{ marginBottom: 12 }}><SampleNotice compact /></div>
 
-      {results.length === 0 && online !== 'loading' ? (
+      {results.length === 0 && !q.trim() ? (
+        <div className="empty">{t('search.hint', { n: products.length })}</div>
+      ) : results.length === 0 && online !== 'loading' ? (
         <div className="empty">{t('search.none', { q })}</div>
       ) : (
         <div>

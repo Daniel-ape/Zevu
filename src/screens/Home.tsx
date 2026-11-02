@@ -1,13 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { SampleNotice, Tile, TrendTag } from '../ui/bits'
+import { Tile, TrendTag } from '../ui/bits'
 import { Offers } from '../ui/Offers'
+import { ReceiptSheet } from './ReceiptSheet'
 
 export function Home() {
   const { products, observations, retailers, list, recent, loading, t } = useStore()
   const nav = useNav()
+  const [receipt, setReceipt] = useState(false)
   const listName = list.name === 'Weekly shop' ? t('list.defaultName') : list.name
 
   const totals = useMemo(
@@ -32,7 +34,6 @@ export function Home() {
     <div className="screen">
       <div className="topbar">
         <h1>Hintaopas</h1>
-        <SampleNotice compact />
       </div>
 
       <div>
@@ -79,7 +80,16 @@ export function Home() {
         </div>
       )}
 
+      {!loading && observations.length === 0 && (
+        <div className="notice-plain section">
+          <div className="title" style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>{t('home.startTitle')}</div>
+          <div className="small muted" style={{ lineHeight: 1.5 }}>{t('home.startText')}</div>
+          <button className="btn primary" style={{ marginTop: 14, height: 48 }} onClick={() => setReceipt(true)}>{t('home.startBtn')}</button>
+        </div>
+      )}
+
       <Offers />
+      {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
 
       {recent.length > 0 && (
         <div className="section">

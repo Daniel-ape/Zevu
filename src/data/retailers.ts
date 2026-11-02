@@ -1,0 +1,22 @@
+// Finnish grocery chains and their stores the app knows about.
+import type { LoyaltyProgram, Retailer } from '../domain/types'
+
+export const RETAILERS: Retailer[] = [
+  { id: 'prisma', name: 'Prisma', chain: 's-group' },
+  { id: 's-market', name: 'S-market', chain: 's-group' },
+  { id: 'k-citymarket', name: 'K-Citymarket', chain: 'k-group' },
+  { id: 'k-market', name: 'K-Market', chain: 'k-group' },
+  { id: 'k-supermarket', name: 'K-Supermarket', chain: 'k-group' },
+  { id: 'sale', name: 'Sale', chain: 's-group' },
+  { id: 'alepa', name: 'Alepa', chain: 's-group' },
+  { id: 'lidl', name: 'Lidl', chain: 'lidl' },
+  { id: 'tokmanni', name: 'Tokmanni', chain: 'tokmanni' },
+]
+
+export const LOYALTY_PROGRAMS: LoyaltyProgram[] = [
+  { chain: 's-group', name: 'S-Etukortti', stores: 'Prisma, S-market, Sale, Alepa' },
+  { chain: 'k-group', name: 'K-Plussa', stores: 'K-Citymarket, K-Supermarket, K-Market' },
+  { chain: 'lidl', name: 'Lidl Plus', stores: 'Lidl' },
+  { chain: 'tokmanni', name: 'Tokmanni Club', stores: 'Tokmanni' },
+]
+
