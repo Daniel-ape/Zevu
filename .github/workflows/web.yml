@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Republish after the daily price collection (its own commit does not trigger a push build).
+  workflow_run:
+    workflows: ['Collect prices']
+    types: [completed]
 permissions:
   contents: read
   pages: write
