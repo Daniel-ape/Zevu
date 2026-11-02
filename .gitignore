@@ -1,0 +1,6 @@
+dist
+node_modules
+public/ocr
+scripts/.image-index.json
+android/app/src/main/assets/public
+ios/App/App/public
