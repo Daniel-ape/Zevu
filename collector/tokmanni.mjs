@@ -16,11 +16,23 @@ const get = async (url) => {
 
 // Respect robots.txt: skip anything it disallows.
 const robots = await get('https://www.tokmanni.fi/robots.txt')
-const disallow = robots
-  .split('\n')
-  .filter((l) => /^disallow:/i.test(l))
-  .map((l) => l.slice(l.indexOf(':') + 1).trim())
-  .filter(Boolean)
+// Only rules in groups that apply to us: "User-agent: *" or our own name.
+function rulesFor(text, agent) {
+  const groups = []
+  let current = null
+  for (const raw of text.split('\n')) {
+    const line = raw.replace(/#.*/, '').trim()
+    const [key, ...rest] = line.split(':')
+    const value = rest.join(':').trim()
+    if (/^user-agent$/i.test(key)) {
+      if (!current || current.rules.length) groups.push((current = { agents: [], rules: [] }))
+      current.agents.push(value.toLowerCase())
+    } else if (/^disallow$/i.test(key) && current && value) current.rules.push(value)
+  }
+  const mine = groups.filter((g) => g.agents.includes(agent))
+  return (mine.length ? mine : groups.filter((g) => g.agents.includes('*'))).flatMap((g) => g.rules)
+}
+const disallow = rulesFor(robots, 'hintaopasbot')
 const blockedBy = (rule, path) =>
   new RegExp('^' + rule.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\\\$$/, '$')).test(path)
 const allowed = (path) => !disallow.some((rule) => blockedBy(rule, path))
