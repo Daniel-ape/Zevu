@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { ChainId, PriceObservation, PriceProvider, Product, Retailer, ShoppingList, Watch } from '../domain/types'
-import { LOYALTY_PROGRAMS, RETAILERS } from './retailers'
+import type { PriceObservation, PriceProvider, Product, Retailer, ShoppingList, Watch } from '../domain/types'
+import { RETAILERS } from './retailers'
 import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
 import { lookupBarcode, searchProducts } from './openFoodFacts'
@@ -48,6 +48,7 @@ interface Store {
   createList: (name: string) => void
   renameList: (id: string, name: string) => void
   deleteList: (id: string) => void
+  restoreList: (l: ShoppingList) => void
   setQuantity: (productId: string, qty: number) => void
   toggleChecked: (productId: string) => void
   clearChecked: () => void
@@ -67,12 +68,9 @@ interface Store {
   markViewed: (productId: string) => void
   theme: Theme
   setTheme: (t: Theme) => void
-  memberships: ChainId[]
-  toggleMembership: (c: ChainId) => void
   lang: Lang
   setLang: (l: Lang) => void
   t: (key: Key, vars?: Record<string, string | number>) => string
-  programs: typeof LOYALTY_PROGRAMS
 }
 
 const Ctx = createContext<Store | null>(null)
@@ -104,7 +102,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })
   const [recent, setRecent] = useState<string[]>(() => load<string[]>('recent', []).filter((id) => !/^p\d+$/.test(id)))
   const [theme, setTheme] = useState<Theme>(() => load('theme', 'system'))
-  const [memberships, setMemberships] = useState<ChainId[]>(() => load('memberships', []))
   const [lang, setLang] = useState<Lang>(() => load('lang', detectLang()))
   // Real products sold in Finland, bundled with the app (Open Food Facts).
   const [snapshotRows, setSnapshotRows] = useState<Awaited<ReturnType<typeof loadSnapshot>>>([])
@@ -130,26 +127,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => save('lastStore', lastStore), [lastStore])
   useEffect(() => save('remoteProducts', remote), [remote])
   useEffect(() => save('recent', recent), [recent])
-  useEffect(() => save('memberships', memberships), [memberships])
   useEffect(() => {
     save('lang', lang)
     document.documentElement.lang = lang
   }, [lang])
 
-  // Apply member prices for the cards the user has. Everything downstream
-  // (comparisons, baskets, history) just sees the price this user would pay.
-  const effective = useMemo(() => {
-    const chainOf = new Map(RETAILERS.map((r) => [r.id, r.chain]))
-    const provider = memberships.length
-      ? observations.map((o) =>
-          o.memberPriceCents && memberships.includes(chainOf.get(o.retailerId)!)
-            ? { ...o, priceCents: o.memberPriceCents, isMemberPrice: true }
-            : o,
-        )
-      : observations
-    // Prices the user actually paid, from imported receipts.
-    return [...provider, ...receiptObservations(receipts), ...userPrices]
-  }, [observations, memberships, receipts, userPrices])
+  // Everything the user has seen themselves comes on top of collected prices.
+  const effective = useMemo(
+    () => [...observations, ...receiptObservations(receipts), ...userPrices],
+    [observations, receipts, userPrices],
+  )
   useEffect(() => {
     save('theme', theme)
     const root = document.documentElement
@@ -202,6 +189,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (id === activeId) setActiveId(next[0].id)
           return next
         }),
+      restoreList: (l) => {
+        setLists((all) => [...all.filter((x) => x.id !== l.id), l])
+        setActiveId(l.id)
+      },
       toggleChecked: (productId) =>
         updateActive((l) => ({ ...l, items: l.items.map((i) => (i.productId === productId ? { ...i, checked: !i.checked } : i)) })),
       clearChecked: () => updateActive((l) => ({ ...l, items: l.items.filter((i) => !i.checked) })),
@@ -235,14 +226,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       markViewed: (id) => setRecent((r) => [id, ...r.filter((x) => x !== id)].slice(0, 8)),
       theme,
       setTheme,
-      memberships,
-      toggleMembership: (c) => setMemberships((m) => (m.includes(c) ? m.filter((x) => x !== c) : [...m, c])),
       lang,
       setLang,
       t: (key, vars) => translate(lang, key, vars),
-      programs: LOYALTY_PROGRAMS,
     }),
-    [effective, products, loading, lists, list, activeId, myStores, watched, receipts, recent, theme, memberships, lang, lastStore],
+    [effective, products, loading, lists, list, activeId, myStores, watched, receipts, recent, theme, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

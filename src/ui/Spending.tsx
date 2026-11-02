@@ -55,6 +55,8 @@ export function Spending() {
     )
   }
 
+  if (receipts.length === 0) return <p className="small muted" style={{ padding: '16px 0', margin: 0, lineHeight: 1.5 }}>{t('spend.none')}</p>
+
   return (
     <div style={{ padding: '14px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

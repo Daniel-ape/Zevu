@@ -95,7 +95,7 @@ export function SearchScreen() {
                 <Tile product={p} />
                 <div className="grow">
                   <div className="title">{p.name}</div>
-                  <div className="sub">{p.brand} · {sizeLabel(p)}</div>
+                  <div className="sub">{[p.brand, sizeLabel(p)].filter(Boolean).join(' · ')}</div>
                 </div>
                 <div className="end">
                   {best ? (

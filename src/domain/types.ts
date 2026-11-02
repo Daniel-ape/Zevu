@@ -59,11 +59,6 @@ export interface PriceObservation {
   isMemberPrice?: boolean
 }
 
-export interface LoyaltyProgram {
-  chain: ChainId
-  name: string
-  stores: string
-}
 
 /** A data provider returns observations; the app never invents prices. */
 export interface PriceProvider {

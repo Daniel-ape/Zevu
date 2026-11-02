@@ -3,7 +3,7 @@
 // follow that, identify ourselves, and only fetch products the app knows
 // (matched by the barcode at the end of Tokmanni's product URLs).
 // Output: public/prices/tokmanni.json, served with the web app.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 
 const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
 const DELAY = 10_000 // Crawl-delay: 10
@@ -87,3 +87,17 @@ writeFileSync(
   JSON.stringify({ source: 'tokmanni.fi product pages', retailerId: 'tokmanni', fetchedAt: new Date().toISOString(), prices }),
 )
 console.log(`saved ${prices.length} prices`)
+
+// Price history: one point per day when the price changes, last 180 days.
+const HISTORY = 'public/prices/tokmanni-history.json'
+const history = existsSync(HISTORY) ? JSON.parse(readFileSync(HISTORY, 'utf8')) : {}
+const today = new Date().toISOString().slice(0, 10)
+const cutoff = new Date(Date.now() - 180 * 86_400_000).toISOString().slice(0, 10)
+for (const { ean, priceCents } of prices) {
+  const points = (history[ean] ?? []).filter(([d]) => d >= cutoff && d !== today)
+  const last = points[points.length - 1]
+  if (!last || last[1] !== priceCents) points.push([today, priceCents])
+  history[ean] = points
+}
+writeFileSync(HISTORY, JSON.stringify(history))
+console.log(`history for ${Object.keys(history).length} products`)

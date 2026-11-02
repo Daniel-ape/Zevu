@@ -18,8 +18,9 @@ function Group({ title, note, plain, children }: { title: string; note?: string;
 }
 
 export function Profile() {
-  const { theme, setTheme, lang, setLang, receipts, allRetailers, myStores, toggleMyStore, t } = useStore()
+  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, t } = useStore()
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
+  const [undo, setUndo] = useState<Receipt | null>(null)
 
   return (
     <div className="screen">
@@ -89,7 +90,19 @@ export function Profile() {
         </div>
       </Group>
 
-      {sheet && <ReceiptSheet receipt={sheet.receipt} onClose={() => setSheet(null)} />}
+      {sheet && (
+        <ReceiptSheet
+          receipt={sheet.receipt}
+          onClose={() => setSheet(null)}
+          onDeleted={(r) => { setUndo(r); setTimeout(() => setUndo((u) => (u === r ? null : u)), 6000) }}
+        />
+      )}
+      {undo && (
+        <div className="toast">
+          {t('undo.receiptDeleted')}
+          <button onClick={() => { addReceipt(undo); setUndo(null) }}>{t('undo.undo')}</button>
+        </div>
+      )}
     </div>
   )
 }

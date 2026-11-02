@@ -112,7 +112,7 @@ export function PriceSheet({ product: initial, startWithPhoto, onClose }: {
                   {matches.map((p) => (
                     <button key={p.id} className="row" onClick={() => setProduct(p)}>
                       <Tile product={p} />
-                      <div className="grow"><div className="title">{p.name}</div><div className="sub">{p.brand} · {sizeLabel(p)}</div></div>
+                      <div className="grow"><div className="title">{p.name}</div><div className="sub">{[p.brand, sizeLabel(p)].filter(Boolean).join(' · ')}</div></div>
                     </button>
                   ))}
                 </div>
@@ -123,7 +123,7 @@ export function PriceSheet({ product: initial, startWithPhoto, onClose }: {
               <>
                 <div className="row" style={{ borderBottom: 0, paddingTop: 0 }}>
                   <Tile product={product} />
-                  <div className="grow"><div className="title">{product.name}</div><div className="sub">{product.brand} · {sizeLabel(product)}</div></div>
+                  <div className="grow"><div className="title">{product.name}</div><div className="sub">{[product.brand, sizeLabel(product)].filter(Boolean).join(' · ')}</div></div>
                   {!initial && <button className="link" onClick={() => setProduct(undefined)}>{t('ap.change')}</button>}
                 </div>
                 <div className="rows">

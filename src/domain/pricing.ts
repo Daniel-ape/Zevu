@@ -35,6 +35,7 @@ export function unitLabel(p: Product): string {
 
 export function sizeLabel(p: Product): string {
   const { amount, unit } = p.size
+  if (!amount) return ''
   if (unit === 'pcs') return amount === 1 ? '1 pc' : `${amount} pcs`
   if (amount >= 1000) return `${(amount / 1000).toLocaleString('fi-FI')} ${unit === 'g' ? 'kg' : 'l'}`
   return `${amount} ${unit}`

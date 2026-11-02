@@ -66,7 +66,7 @@ export function Home() {
                     <Tile product={p} />
                     <div className="grow">
                       <div className="title">{p.name}</div>
-                      <div className="sub">{sizeLabel(p)}{c ? ` · ${c.retailer.name}` : ''}</div>
+                      <div className="sub">{[sizeLabel(p), c?.retailer.name].filter(Boolean).join(' · ')}</div>
                     </div>
                     <div className="end">
                       {c && <div className="price">{euro(c.current.priceCents)}</div>}

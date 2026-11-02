@@ -7,13 +7,14 @@ import { RankBadge, RetailerMark, Tile } from '../ui/bits'
 
 export function Lists() {
   const {
-    list, lists, setActiveList, createList, renameList, deleteList,
+    list, lists, setActiveList, createList, renameList, deleteList, restoreList,
     products, observations, retailers, setQuantity, toggleChecked, clearChecked, t,
   } = useStore()
   const nav = useNav()
   const [mode, setMode] = useState<'none' | 'new' | 'rename'>('none')
   const [name, setName] = useState('')
   const [toast, setToast] = useState('')
+  const [undo, setUndo] = useState<typeof list | null>(null)
   const display = (n: string) => (n === 'Weekly shop' ? t('list.defaultName') : n)
 
   const totals = useMemo(
@@ -82,7 +83,7 @@ export function Lists() {
       ) : (
         <div className="tiny" style={{ display: 'flex', gap: 16, margin: '10px 4px 0' }}>
           <button className="link" style={{ fontSize: 13 }} onClick={() => { setMode('rename'); setName(display(list.name)) }}>{t('list.rename')}</button>
-          {lists.length > 1 && <button className="link" style={{ fontSize: 13 }} onClick={() => deleteList(list.id)}>{t('list.delete')}</button>}
+          {lists.length > 1 && <button className="link" style={{ fontSize: 13 }} onClick={() => { const gone = list; deleteList(list.id); setUndo(gone); setTimeout(() => setUndo((u) => (u === gone ? null : u)), 6000) }}>{t('list.delete')}</button>}
         </div>
       )}
 
@@ -109,7 +110,7 @@ export function Lists() {
                     <Tile product={p} />
                     <div style={{ minWidth: 0 }}>
                       <div className="title" style={{ textDecoration: item.checked ? 'line-through' : undefined }}>{p.name}</div>
-                      <div className="sub">{sizeLabel(p)}{c ? ` · ${t('list.from', { price: euro(c.current.priceCents) })}` : ''}</div>
+                      <div className="sub">{[sizeLabel(p), c && t('list.from', { price: euro(c.current.priceCents) })].filter(Boolean).join(' · ')}</div>
                     </div>
                   </button>
                   <div className="stepper">
@@ -153,13 +154,19 @@ export function Lists() {
             </div>
             {complete.length > 0 && incomplete.length > 0 && (
               <p className="tiny muted" style={{ marginTop: 6 }}>
-                {t('list.notRanked', { stores: incomplete.map((x) => x.retailer.name).join(', ') })}
+                {t('list.notRankedN', { n: incomplete.length })}
               </p>
             )}
           </div>
         </>
       )}
       {toast && <div className="toast">{toast}</div>}
+      {undo && (
+        <div className="toast">
+          {t('undo.listDeleted')}
+          <button onClick={() => { restoreList(undo); setUndo(null) }}>{t('undo.undo')}</button>
+        </div>
+      )}
     </div>
   )
 }

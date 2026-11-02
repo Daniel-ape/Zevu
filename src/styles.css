@@ -454,3 +454,8 @@ button.row:active { opacity: 0.6; }
 .search-go:disabled { opacity: 0.25; }
 
 .chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.search > svg { flex-shrink: 0; }
+
+.toast { display: flex; align-items: center; gap: 14px; }
+.toast button { color: var(--accent); font-weight: 700; }

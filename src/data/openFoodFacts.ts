@@ -63,7 +63,7 @@ export function parseQuantity(q?: string): { amount: number; unit: SizeUnit } {
     const b = toBase(parseFloat(one[1]), one[2])
     return { amount: Math.round(b.amount), unit: b.unit }
   }
-  return { amount: 1, unit: 'pcs' }
+  return { amount: 0, unit: 'pcs' } // size unknown
 }
 
 // Checked in order; the first match wins. Broad umbrella tags are removed first

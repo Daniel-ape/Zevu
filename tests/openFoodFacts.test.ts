@@ -19,7 +19,7 @@ await test('quantities', () => {
   assert.deepEqual(parseQuantity('6 x 0,33 l'), { amount: 1980, unit: 'ml' })
   assert.deepEqual(parseQuantity('10 kpl'), { amount: 10, unit: 'pcs' })
   assert.deepEqual(parseQuantity('150 gram'), { amount: 150, unit: 'g' })
-  assert.deepEqual(parseQuantity(undefined), { amount: 1, unit: 'pcs' })
+  assert.deepEqual(parseQuantity(undefined), { amount: 0, unit: 'pcs' })
 })
 
 await test('barcode lookup maps a product (Finnish name preferred)', async () => {

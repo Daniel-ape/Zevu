@@ -7,7 +7,7 @@ import { LOCALE } from '../i18n'
 type Draft = Omit<Receipt, 'id' | 'importedAt'>
 
 /** Bottom sheet: import a new receipt, or show a saved one. */
-export function ReceiptSheet({ receipt, onClose }: { receipt?: Receipt; onClose: () => void }) {
+export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receipt; onClose: () => void; onDeleted?: (r: Receipt) => void }) {
   const { products, allRetailers, addReceipt, removeReceipt, t, lang } = useStore()
   const [text, setText] = useState('')
   const [draft, setDraft] = useState<Draft | null>(receipt ?? null)
@@ -154,7 +154,7 @@ export function ReceiptSheet({ receipt, onClose }: { receipt?: Receipt; onClose:
             </div>
 
             {viewing ? (
-              <button className="btn ghost" style={{ marginTop: 16, color: 'var(--accent)' }} onClick={() => { removeReceipt(receipt!.id); onClose() }}>
+              <button className="btn ghost" style={{ marginTop: 16, color: 'var(--accent)' }} onClick={() => { removeReceipt(receipt!.id); onDeleted?.(receipt!); onClose() }}>
                 {t('rc.delete')}
               </button>
             ) : (
