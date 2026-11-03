@@ -71,16 +71,34 @@ function priceFrom(html) {
   return m ? Math.round(parseFloat(m[1]) * 100) : null
 }
 
-const prices = []
-for (const [ean, url] of urls) {
+// Each run has a time budget (GitHub stops jobs after 6 h). Products never
+// fetched go first, then the ones checked longest ago; prices not re-checked
+// this run are kept for up to 10 days.
+const START = Date.now()
+const BUDGET = 270 * 60_000
+const FILE = 'public/prices/tokmanni.json'
+const previous = existsSync(FILE) ? JSON.parse(readFileSync(FILE, 'utf8')) : { prices: [] }
+const prev = new Map(previous.prices.map((p) => [p.ean, { ...p, checkedAt: p.checkedAt ?? previous.fetchedAt }]))
+const order = [...urls.entries()].sort(([a], [b]) => {
+  const ta = prev.get(a)?.checkedAt ?? ''
+  const tb = prev.get(b)?.checkedAt ?? ''
+  return ta < tb ? -1 : ta > tb ? 1 : 0
+})
+const fresh = new Map()
+for (const [ean, url] of order) {
+  if (Date.now() - START > BUDGET) { console.log('time budget reached'); break }
   await sleep(DELAY)
   try {
     const cents = priceFrom(await get(url))
-    if (cents && cents > 0 && cents < 100000) prices.push({ ean, priceCents: cents, url })
+    if (cents && cents > 0 && cents < 100000) fresh.set(ean, { ean, priceCents: cents, url, checkedAt: new Date().toISOString() })
   } catch (e) {
     console.log('skip', ean, String(e).slice(0, 80))
   }
 }
+const keepAfter = new Date(Date.now() - 10 * 86_400_000).toISOString()
+const prices = [...fresh.values()]
+for (const [ean, p] of prev) if (!fresh.has(ean) && urls.has(ean) && p.checkedAt >= keepAfter) prices.push(p)
+console.log(`checked ${fresh.size} of ${urls.size}, kept ${prices.length - fresh.size} earlier prices`)
 mkdirSync('public/prices', { recursive: true })
 writeFileSync(
   'public/prices/tokmanni.json',
@@ -93,7 +111,7 @@ const HISTORY = 'public/prices/tokmanni-history.json'
 const history = existsSync(HISTORY) ? JSON.parse(readFileSync(HISTORY, 'utf8')) : {}
 const today = new Date().toISOString().slice(0, 10)
 const cutoff = new Date(Date.now() - 180 * 86_400_000).toISOString().slice(0, 10)
-for (const { ean, priceCents } of prices) {
+for (const { ean, priceCents } of fresh.values()) {
   const points = (history[ean] ?? []).filter(([d]) => d >= cutoff && d !== today)
   const last = points[points.length - 1]
   if (!last || last[1] !== priceCents) points.push([today, priceCents])

@@ -7,7 +7,7 @@ import { fetchData } from './dataFile'
 interface File {
   retailerId: string
   fetchedAt: string
-  prices: { ean: string; priceCents: number }[]
+  prices: { ean: string; priceCents: number; checkedAt?: string }[]
 }
 
 export function collectedProvider(file: string, id: 'tokmanni'): PriceProvider {
@@ -35,7 +35,8 @@ export function collectedProvider(file: string, id: 'tokmanni'): PriceProvider {
         productId: `off:${p.ean}`,
         retailerId: d.retailerId,
         priceCents: p.priceCents,
-        observedAt: d.fetchedAt,
+        // When this price was last checked on the store's site.
+        observedAt: p.checkedAt ?? d.fetchedAt,
         source: id,
       }))]
     },
