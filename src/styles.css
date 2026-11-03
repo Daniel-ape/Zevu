@@ -717,3 +717,10 @@ h1 { font-size: 30px; }
 .menu-icon { width: 32px; height: 32px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
 .menu-value { color: var(--text-2); font-size: 15px; margin-right: 2px; }
 .group-note { font-size: 13px; color: var(--text-2); margin: 8px 6px 0; line-height: 1.45; }
+
+/* Product: where it's cheapest */
+.best-card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: var(--card-shadow); }
+.best-label { font-size: 13px; font-weight: 600; color: var(--text-2); }
+.best-store { font-size: 22px; font-weight: 700; margin-top: 2px; letter-spacing: -0.01em; }
+.best-price { font-size: 34px; font-weight: 800; color: var(--accent); margin-top: 4px; letter-spacing: -0.02em; }
+.best-meta { font-size: 13px; color: var(--text-2); margin-top: 6px; line-height: 1.45; }

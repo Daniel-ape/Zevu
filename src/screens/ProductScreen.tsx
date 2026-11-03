@@ -10,13 +10,14 @@ import { PriceSheet } from './PriceSheet'
 import { useState } from 'react'
 
 export function ProductScreen({ id }: { id: string }) {
-  const { products, observations, retailers, list, setQuantity, markViewed, watched, toggleWatch, t } = useStore()
+  const { products, pricesOf, retailers, list, setQuantity, markViewed, watched, toggleWatch, t } = useStore()
   const nav = useNav()
   const [adding, setAdding] = useState(false)
   const product = products.find((p) => p.id === id)
 
   useEffect(() => markViewed(id), [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const observations = pricesOf(id)
   const rows = useMemo(() => (product ? compare(product, observations, retailers) : []), [product, observations, retailers])
   const history = useMemo(() => (product ? lowestHistory(product, observations) : []), [product, observations])
   if (!product) return <div className="screen empty">{t('product.notFound')}</div>
@@ -59,20 +60,20 @@ export function ProductScreen({ id }: { id: string }) {
         </div>
       ) : (
         <>
-      <div className="stats section" style={{ marginTop: 20 }}>
-        <div className="stat">
-          <div className="label">{t('product.lowest')}</div>
-          <div className="value">{best ? euro(best.current.priceCents) : '—'}</div>
+      {best && (
+        <div className="best-card section" style={{ marginTop: 20 }}>
+          <div className="best-label">{t('product.cheapestAt')}</div>
+          <div className="best-store">{best.retailer.name}</div>
+          <div className="best-price">{euro(best.current.priceCents)}</div>
+          <div className="best-meta">
+            {[
+              best.unitPriceCents != null ? `${euro(best.unitPriceCents)}${unitLabel(product)}` : '',
+              fresh.length > 1 ? t('product.comparedN', { n: fresh.length }) : t('product.onlyOne'),
+              spread > 0 ? t('product.saveVs', { amount: euro(spread) }) : '',
+            ].filter(Boolean).join(' · ')}
+          </div>
         </div>
-        <div className="stat">
-          <div className="label">{t('product.per', { unit: unitLabel(product).slice(1) })}</div>
-          <div className="value">{best?.unitPriceCents != null ? euro(best.unitPriceCents) : '—'}</div>
-        </div>
-        <div className="stat">
-          <div className="label">{t(spread > 0 ? 'product.save' : 'product.stores')}</div>
-          <div className="value" style={{ color: spread > 0 ? 'var(--good)' : undefined }}>{spread > 0 ? euro(spread) : fresh.length}</div>
-        </div>
-      </div>
+      )}
 
       <div className="section">
         <div className="section-head">
@@ -81,8 +82,10 @@ export function ProductScreen({ id }: { id: string }) {
         <div className="rows">
           {rows.map((r) => {
             const rank = r.freshness === 'fresh' ? fresh.indexOf(r) + 1 : 0
-            return (
-              <div key={r.retailer.id} className="row" style={{ opacity: r.freshness === 'outdated' ? 0.6 : 1 }}>
+            const diff = best && rank > 1 ? r.current.priceCents - best.current.priceCents : 0
+            const url = r.current.url
+            const body = (
+              <>
                 {rank ? <RankBadge rank={rank} /> : <div className="rank">–</div>}
                 <RetailerMark retailer={r.retailer} />
                 <div className="grow">
@@ -91,9 +94,16 @@ export function ProductScreen({ id }: { id: string }) {
                 </div>
                 <div className="end">
                   <div className="price" style={{ color: rank === 1 ? 'var(--accent)' : undefined }}>{euro(r.current.priceCents)}</div>
-                  <div className="sub">{r.unitPriceCents != null ? `${euro(r.unitPriceCents)}${unitLabel(product)}` : ''}</div>
+                  <div className="sub">{rank === 1 && fresh.length > 1 ? t('product.cheapest') : diff > 0 ? `+${euro(diff)}` : r.unitPriceCents != null ? `${euro(r.unitPriceCents)}${unitLabel(product)}` : ''}</div>
                 </div>
-              </div>
+              </>
+            )
+            return url ? (
+              <a key={r.retailer.id} className="row" href={url} target="_blank" rel="noreferrer" onClick={inAppLink(url)} style={{ opacity: r.freshness === 'outdated' ? 0.6 : 1, color: 'inherit', textDecoration: 'none' }}>
+                {body}
+              </a>
+            ) : (
+              <div key={r.retailer.id} className="row" style={{ opacity: r.freshness === 'outdated' ? 0.6 : 1 }}>{body}</div>
             )
           })}
         </div>

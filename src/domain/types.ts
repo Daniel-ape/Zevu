@@ -59,6 +59,8 @@ export interface PriceObservation {
   origin?: 'receipt' | 'manual' | 'shelf'
   /** Set by the app when memberPriceCents was applied for this user. */
   isMemberPrice?: boolean
+  /** The product's page in the shop, when the price was read from it. */
+  url?: string
 }
 
 

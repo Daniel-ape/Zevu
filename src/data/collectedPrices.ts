@@ -7,7 +7,7 @@ import { fetchData } from './dataFile'
 interface File {
   retailerId: string
   fetchedAt: string
-  prices: { ean: string; priceCents: number; checkedAt?: string; name?: string; brand?: string; image?: string }[]
+  prices: { ean: string; priceCents: number; checkedAt?: string; name?: string; brand?: string; image?: string; url?: string }[]
 }
 
 const files = new Map<string, Promise<File | null>>()
@@ -78,6 +78,7 @@ export function collectedProvider(file: string, id: string): PriceProvider {
         // When this price was last checked on the store's site.
         observedAt: p.checkedAt ?? d.fetchedAt,
         source,
+        url: p.url && /^https:\/\//.test(p.url) ? p.url : undefined,
       }))]
     },
   }
