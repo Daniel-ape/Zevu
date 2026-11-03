@@ -110,14 +110,14 @@ async function pageLinks(url) {
 const SHOPS = {
   minimani: { group: 'https://view.publitas.com/minimani-yhtiot-oy/', pages: ['https://www.minimani.fi/lehti-ilmoitukset-mainoslehti'] },
   rusta: { group: 'https://view.publitas.com/rusta-kuvasto', pages: [] },
-  halpahalli: { group: null, pages: ['https://www.halpahalli.fi/mainokset', 'https://www.halpahalli.fi/lelulehti'] },
+  halpahalli: { groups: ['https://view.publitas.com/halpahalli/', 'https://view.publitas.com/halpa-halli/', 'https://view.publitas.com/halpahalli-oy/', 'https://view.publitas.com/kokkolan-halpa-halli/'], pages: ['https://www.halpahalli.fi/mainokset', 'https://www.halpahalli.fi/lelulehti'] },
 }
 const pubRobots = rulesFor(await get('https://view.publitas.com/robots.txt').catch(() => ''), 'hintaopasbot')
 for (const [shop, cfg] of Object.entries(SHOPS)) {
   out[shop] = []
   try {
     const seen = new Set()
-    const candidates = [cfg.group, ...(await Promise.all(cfg.pages.map(pageLinks))).flat()].filter(Boolean)
+    const candidates = [cfg.group, ...(cfg.groups ?? []), ...(await Promise.all(cfg.pages.map(pageLinks))).flat()].filter(Boolean)
     console.log(shop, 'candidates', JSON.stringify(candidates))
     for (const c of candidates.slice(0, 8)) {
       if (pubRobots.some((r) => blockedBy(r, new URL(c).pathname))) continue

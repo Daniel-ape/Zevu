@@ -8,6 +8,9 @@ export type LeafletFeed = {
   updated?: string
   lidl?: { name: string; period: string; url: string; image?: string }[] | null
   tokmanni?: { name: string; url: string; image?: string }[] | { image?: string } | null
+  minimani?: { name: string; url: string; image?: string }[]
+  rusta?: { name: string; url: string; image?: string }[]
+  halpahalli?: { name: string; url: string; image?: string }[]
 }
 
 let feed: Promise<LeafletFeed | null> | null = null
@@ -18,6 +21,7 @@ const EVENT = 'hintaopas:leaflets-seen'
 const urlsOf = (d: LeafletFeed | null) => [
   ...(d?.lidl ?? []).map((l) => l.url),
   ...(Array.isArray(d?.tokmanni) ? d.tokmanni.map((l) => l.url) : []),
+  ...[d?.minimani, d?.rusta, d?.halpahalli].flatMap((x) => (x ?? []).map((l) => l.url)),
 ].filter((u): u is string => typeof u === 'string')
 
 function readSeen(): string[] | null {

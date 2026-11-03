@@ -18,7 +18,7 @@ type Chain = { chain: string; about: Key; aboutText?: string; leaflets: Leaflet[
 
 const LIDL_PAGE = 'https://www.lidl.fi/c/tarjouslehdet/s10019134'
 const TOK_PAGE = 'https://tarjoussanomat.tokmanni.fi/Tarjoussanomat/'
-const IMG_HOSTS = ['https://imgproxy.leaflets.schwarz/', 'https://cdn.ipaper.io/', 'https://tarjoussanomat.tokmanni.fi/']
+const IMG_HOSTS = ['https://imgproxy.leaflets.schwarz/', 'https://cdn.ipaper.io/', 'https://tarjoussanomat.tokmanni.fi/', 'https://view.publitas.com/']
 const safeImg = (u?: unknown) => (typeof u === 'string' && IMG_HOSTS.some((h) => u.startsWith(h)) ? u : undefined)
 
 type Collected = LeafletFeed
@@ -53,7 +53,11 @@ function periodStatus(period: string | undefined, now = new Date()): Status | 'p
 function weekStatus(name: string): Status | 'past' | undefined {
   // Tokmanni's Tarjoussanomat link always opens the newest issue.
   if (/^tarjoussanomat$/i.test(name.trim())) return 'now'
-  const m = name.match(/\bvk\.?\s*(\d{1,2})\b/i)
+  // A catalogue for an earlier year has ended.
+  const year = name.match(/\b(20\d{2})\b/)?.[1]
+  if (year && +year < new Date().getFullYear()) return 'past'
+  // "vk 45", "vko45", or Rusta's "DM 2645" (year 26, week 45)
+  const m = name.match(/\bvko?\.?\s*(\d{1,2})\b/i) ?? name.match(/\bDM\s*\d{2}(\d{2})\b/i)
   if (!m) return undefined
   const w = +m[1]
   const cur = isoWeek()
@@ -91,6 +95,19 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
     .filter((l) => l.status !== 'past')
     .map((l) => ({ ...l, status: l.status as Status | undefined }))
     .sort((a, b) => order(a) - order(b))
+  // Shops publishing on Publitas: titles tidied, old issues hidden.
+  const tidy = (n: string) => n.replace(/\bvko\s*(\d+)\s*(20\d{2})?/i, 'Vko $1').replace(/\bDM\s*\d{2}(\d{2})\s*FI\b/i, 'Kuvasto vko $1').replace(/\s+/g, ' ').replace(/^./, (c) => c.toUpperCase())
+  const pub = (list?: { name: string; url: string; image?: string }[]) => (list ?? [])
+    .filter((l) => typeof l.url === 'string' && l.url.startsWith('https://view.publitas.com/'))
+    .map((l) => ({ name: tidy(l.name), url: l.url, image: safeImg(l.image), status: weekStatus(l.name) }))
+    .filter((l) => l.status !== 'past')
+    .map((l) => ({ ...l, status: l.status as Status | undefined }))
+    .sort((a, b) => order(a) - order(b))
+  const more: Chain[] = ([
+    ['Halpa-Halli', 'offers.hh', pub(data?.halpahalli), 'halpahalli'],
+    ['Minimani', 'offers.mini', pub(data?.minimani), null],
+    ['Rusta', 'offers.rusta', pub(data?.rusta), null],
+  ] as const).filter(([, , l]) => l.length).map(([chain, about, leaflets]) => ({ chain, about, leaflets }))
   const shelf: Chain[] = [
     {
       chain: 'Lidl', about: 'offers.lidl', aboutText: nearText('lidl'), km: near?.get('lidl')?.km,
@@ -117,6 +134,7 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
       km: Math.min(...(['k-citymarket', 'k-supermarket', 'k-market'] as const).map((c) => near?.get(c)?.km ?? Infinity)),
     },
   ]
+  shelf.push(...more)
   // Closest chains first once the position is known.
   if (near) shelf.sort((a, b) => (a.km ?? Infinity) - (b.km ?? Infinity))
   return { shelf, updated: typeof data?.updated === 'string' ? data.updated : undefined }
