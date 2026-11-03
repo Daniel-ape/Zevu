@@ -18,7 +18,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 200
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,7 +31,7 @@ jobs:
         run: |
           node scripts/reuse-images.mjs
           if [ "${{ inputs.images || '3000' }}" != "0" ]; then
-            python3 scripts/snapshot-images.py raw.json ${{ inputs.images || '3000' }} 80
+            python3 scripts/snapshot-images.py raw.json ${{ inputs.images || '6000' }} 150
           fi
       - run: npx tsx scripts/build-snapshot.ts raw.json
       - name: Commit catalogue
@@ -39,4 +39,7 @@ jobs:
           git config user.name "hintaopas-bot"
           git config user.email "hintaopas-bot@users.noreply.github.com"
           git add public/products
-          git diff --cached --quiet || (git commit -m "Rebuild product catalogue" && git pull --rebase && git push)
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Rebuild product catalogue"
+          for i in 1 2 3 4 5 6 7 8; do git pull --rebase -q -X theirs && git push -q && exit 0; sleep $((RANDOM % 30 + 10)); done
+          exit 1
