@@ -67,18 +67,23 @@ for (const sm of [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])) {
 console.log('sitemap stats', JSON.stringify(stats), 'known in app', known.size, 'rules', disallow.length)
 console.log(`${urls.size} Tokmanni products match the app's catalogue`)
 
-function priceFrom(html) {
+// Price, plus the product picture Tokmanni shows (used when the catalogue has none).
+function productFrom(html) {
   for (const [, json] of html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
     try {
       const d = JSON.parse(json)
       const offer = Array.isArray(d.offers) ? d.offers[0] : d.offers
-      if (d['@type'] === 'Product' && offer?.price) return Math.round(parseFloat(offer.price) * 100)
+      if (d['@type'] === 'Product' && offer?.price) {
+        const img = [].concat(d.image ?? [])[0]
+        const image = typeof img === 'string' ? img : img?.url
+        return { cents: Math.round(parseFloat(offer.price) * 100), image: image?.startsWith('https://') ? image : undefined }
+      }
     } catch {
       /* not JSON we understand */
     }
   }
   const m = html.match(/data-price-amount="([\d.]+)"/)
-  return m ? Math.round(parseFloat(m[1]) * 100) : null
+  return m ? { cents: Math.round(parseFloat(m[1]) * 100) } : null
 }
 
 // Each run has a time budget (GitHub stops jobs after 6 h). Products never
@@ -99,8 +104,9 @@ for (const [ean, url] of order) {
   if (Date.now() - START > BUDGET) { console.log('time budget reached'); break }
   await sleep(DELAY)
   try {
-    const cents = priceFrom(await get(url))
-    if (cents && cents > 0 && cents < 100000) fresh.set(ean, { ean, priceCents: cents, url, checkedAt: new Date().toISOString() })
+    const got = productFrom(await get(url))
+    const cents = got?.cents
+    if (cents && cents > 0 && cents < 100000) fresh.set(ean, { ean, priceCents: cents, url, image: got.image, checkedAt: new Date().toISOString() })
   } catch (e) {
     console.log('skip', ean, String(e).slice(0, 80))
   }

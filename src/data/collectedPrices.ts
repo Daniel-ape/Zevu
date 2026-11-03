@@ -28,6 +28,13 @@ const GUESS: [RegExp, CategoryId][] = [
 ]
 const EMOJI: Record<CategoryId, string> = { dairy: '🥛', produce: '🥕', bread: '🍞', meat: '🥩', pantry: '🥫', drinks: '🧃', snacks: '🍫', household: '🛍️' }
 
+/** Product pictures the shops show, by barcode (fallback for catalogue products without one). */
+export async function shopImages(file: string): Promise<[string, string][]> {
+  const d = await load(file)
+  if (!d) return []
+  return d.prices.filter((p) => p.image && /^https:\/\//.test(p.image)).map((p) => [p.ean, p.image!])
+}
+
 /** Products a shop sells that aren't in the catalogue, built from the shop's own data. */
 export async function collectedProducts(file: string): Promise<Product[]> {
   const d = await load(file)

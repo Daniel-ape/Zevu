@@ -5,7 +5,7 @@ import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
 import { lookupBarcode, searchProducts } from './openFoodFacts'
 import { loadSnapshot, snapshotProducts } from './snapshot'
-import { collectedProducts, collectedProvider } from './collectedPrices'
+import { collectedProducts, collectedProvider, shopImages } from './collectedPrices'
 
 // Registered price providers: prices collected from stores that allow it
 // (Tokmanni, see collector/). Receipts and the user's own prices are added
@@ -119,14 +119,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => { loadSnapshot().then(setSnapshotRows) }, [])
   // Products shops sell that the catalogue doesn't have (named by the shop).
   const [shopProducts, setShopProducts] = useState<Product[]>([])
+  const [shopPics, setShopPics] = useState<Map<string, string>>(new Map())
   useEffect(() => {
     Promise.all(SHOP_FILES.map(([f]) => collectedProducts(f).catch(() => []))).then((all) => setShopProducts(all.flat()))
+    Promise.all(SHOP_FILES.map(([f]) => shopImages(f).catch(() => []))).then((all) => setShopPics(new Map(all.flat())))
   }, [])
   const products = useMemo(() => {
     const seen = new Set<string>()
     const all = [...snapshotProducts(snapshotRows, lang), ...remote, ...shopProducts]
-    return all.filter((p) => (seen.has(p.ean) ? false : (seen.add(p.ean), true)))
-  }, [remote, snapshotRows, lang, shopProducts])
+    return all
+      .filter((p) => (seen.has(p.ean) ? false : (seen.add(p.ean), true)))
+      // No picture in the catalogue: use the one a shop shows for the same barcode.
+      .map((p) => (p.imageChunk === undefined && !p.imageUrl && shopPics.has(p.ean) ? { ...p, imageUrl: shopPics.get(p.ean) } : p))
+  }, [remote, snapshotRows, lang, shopProducts, shopPics])
 
   useEffect(() => {
     Promise.all(PROVIDERS.map((p) => p.getObservations([]).catch(() => [])))

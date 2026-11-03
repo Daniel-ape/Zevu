@@ -23,7 +23,7 @@ export function Tile({ product, large }: { product: Product; large?: boolean }) 
   const src = packed ?? product.imageUrl
   return (
     <div className={'tile' + (large ? ' lg' : '')} aria-hidden>
-      {src && !broken ? <img src={src} alt="" loading="lazy" onError={() => setBroken(true)} /> : product.emoji}
+      {src && !broken ? <img src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setBroken(true)} /> : product.emoji}
     </div>
   )
 }
