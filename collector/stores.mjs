@@ -89,7 +89,9 @@ function productFrom(html) {
     try { d = JSON.parse(j) } catch { continue }
     for (const x of [].concat(d['@graph'] ?? d)) {
       if (!x || !/Product/.test([].concat(x['@type']).join(' '))) continue
+      // Some shops leave the barcode out of JSON-LD but print it elsewhere on the page.
       const gtin = [].concat(x.gtin13 ?? x.gtin ?? x.gtin8 ?? x.gtin12 ?? x.ean ?? []).map(String).find((g) => /^\d{8,14}$/.test(g))
+        ?? html.match(/["'](?:ean|ean13|gtin|gtin13|barcode)["']\s*[:=]\s*["']?(\d{8,14})/i)?.[1]
       const offer = [].concat(x.offers ?? [])[0]
       const price = parseFloat(offer?.price ?? offer?.lowPrice)
       if (!gtin || !(price > 0)) continue
