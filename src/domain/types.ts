@@ -4,7 +4,7 @@
 // PriceObservation records *what one retailer charged, when, according to
 // which source*. Prices are never stored on the product itself.
 
-export type ChainId = 's-group' | 'k-group' | 'lidl' | 'tokmanni'
+export type ChainId = 's-group' | 'k-group' | 'lidl' | 'tokmanni' | 'halpahalli' | 'verkkokauppa' | 'stockmann'
 
 export interface Retailer {
   id: string // e.g. "prisma", "k-citymarket"
@@ -43,7 +43,7 @@ export type CategoryId =
   | 'household'
 
 /** Where a price came from. 'sample' must always be shown as such in the UI. */
-export type PriceSource = 'sample' | 'k-ruoka' | 's-kaupat' | 'tokmanni' | 'lidl-offers' | 'user-report'
+export type PriceSource = 'sample' | 'k-ruoka' | 's-kaupat' | 'tokmanni' | 'lidl-offers' | 'user-report' | 'shop'
 
 export interface PriceObservation {
   productId: string

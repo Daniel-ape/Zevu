@@ -5,12 +5,17 @@ import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
 import { lookupBarcode, searchProducts } from './openFoodFacts'
 import { loadSnapshot, snapshotProducts } from './snapshot'
-import { collectedProvider } from './collectedPrices'
+import { collectedProducts, collectedProvider } from './collectedPrices'
 
 // Registered price providers: prices collected from stores that allow it
 // (Tokmanni, see collector/). Receipts and the user's own prices are added
 // on top. The UI only ever sees PriceObservations.
-const PROVIDERS: PriceProvider[] = [collectedProvider('tokmanni.json', 'tokmanni')]
+// Prices collected daily from the shops' own sites (collector/*.mjs).
+const SHOP_FILES: [string, string][] = [
+  ['tokmanni.json', 'tokmanni'], ['halpahalli.json', 'halpahalli'], ['verkkokauppa.json', 'verkkokauppa'],
+  ['prisma.json', 'prisma'], ['stockmann.json', 'stockmann'],
+]
+const PROVIDERS: PriceProvider[] = SHOP_FILES.map(([file, id]) => collectedProvider(file, id))
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -112,11 +117,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Real products sold in Finland, bundled with the app (Open Food Facts).
   const [snapshotRows, setSnapshotRows] = useState<Awaited<ReturnType<typeof loadSnapshot>>>([])
   useEffect(() => { loadSnapshot().then(setSnapshotRows) }, [])
+  // Products shops sell that the catalogue doesn't have (named by the shop).
+  const [shopProducts, setShopProducts] = useState<Product[]>([])
+  useEffect(() => {
+    Promise.all(SHOP_FILES.map(([f]) => collectedProducts(f).catch(() => []))).then((all) => setShopProducts(all.flat()))
+  }, [])
   const products = useMemo(() => {
     const seen = new Set<string>()
-    const all = [...snapshotProducts(snapshotRows, lang), ...remote]
+    const all = [...snapshotProducts(snapshotRows, lang), ...remote, ...shopProducts]
     return all.filter((p) => (seen.has(p.ean) ? false : (seen.add(p.ean), true)))
-  }, [remote, snapshotRows, lang])
+  }, [remote, snapshotRows, lang, shopProducts])
 
   useEffect(() => {
     Promise.all(PROVIDERS.map((p) => p.getObservations([]).catch(() => [])))

@@ -1,0 +1,47 @@
+# Collects prices from web shops that publish barcodes and prices on their
+# product pages (see collector/stores.mjs). Each shop is its own job; what was
+# read is kept in the Actions cache, so the full range is covered over days.
+name: Collect shop prices
+on:
+  schedule:
+    - cron: '43 1 * * *'   # 03:43 Finnish time
+  workflow_dispatch:
+    inputs:
+      budget:
+        description: 'Minutes per shop'
+        default: '250'
+permissions:
+  contents: write
+concurrency:
+  group: stores
+jobs:
+  shop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        store: [halpahalli, verkkokauppa, prisma, stockmann]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: collector/state
+          key: state-${{ matrix.store }}-${{ github.run_id }}
+          restore-keys: state-${{ matrix.store }}-
+      - run: node collector/stores.mjs ${{ matrix.store }}
+        env:
+          BUDGET_MIN: ${{ inputs.budget || '250' }}
+      - name: Commit prices
+        run: |
+          git config user.name "hintaopas-bot"
+          git config user.email "hintaopas-bot@users.noreply.github.com"
+          git add public/prices/${{ matrix.store }}.json public/prices/${{ matrix.store }}-history.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update ${{ matrix.store }} prices"
+          for i in 1 2 3 4 5; do git pull --rebase -q && git push -q && exit 0; sleep $((RANDOM % 20 + 5)); done
+          exit 1

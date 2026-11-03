@@ -1,4 +1,5 @@
-// Finnish grocery chains and their stores the app knows about.
+// Finnish grocery chains and shops the app knows about. Prices for Prisma also
+// come from the Prisma.fi web shop (collector/stores.mjs).
 import type { Retailer } from '../domain/types'
 
 export const RETAILERS: Retailer[] = [
@@ -11,4 +12,7 @@ export const RETAILERS: Retailer[] = [
   { id: 'alepa', name: 'Alepa', chain: 's-group' },
   { id: 'lidl', name: 'Lidl', chain: 'lidl' },
   { id: 'tokmanni', name: 'Tokmanni', chain: 'tokmanni' },
+  { id: 'halpahalli', name: 'Halpa-Halli', chain: 'halpahalli' },
+  { id: 'verkkokauppa', name: 'Verkkokauppa.com', chain: 'verkkokauppa' },
+  { id: 'stockmann', name: 'Stockmann', chain: 'stockmann' },
 ]
