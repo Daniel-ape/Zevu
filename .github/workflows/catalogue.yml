@@ -8,8 +8,8 @@ on:
         description: 'How many products to fetch'
         default: '8000'
       images:
-        description: 'How many products get a picture'
-        default: '2500'
+        description: 'How many products get a picture (0 = keep the current pictures)'
+        default: '0'
 permissions:
   contents: write
 jobs:
@@ -24,8 +24,14 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: pip install pillow
       - run: node scripts/fetch-off.mjs ${{ inputs.max }}
-      - run: rm -f public/products/img-*.json scripts/.image-index.json
-      - run: python3 scripts/snapshot-images.py raw.json ${{ inputs.images }}
+      - name: Pictures
+        run: |
+          if [ "${{ inputs.images }}" = "0" ]; then
+            node scripts/reuse-images.mjs
+          else
+            rm -f public/products/img-*.json scripts/.image-index.json
+            python3 scripts/snapshot-images.py raw.json ${{ inputs.images }}
+          fi
       - run: npx tsx scripts/build-snapshot.ts raw.json
       - name: Commit catalogue
         run: |
