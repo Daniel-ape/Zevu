@@ -127,3 +127,77 @@ export function basketTotals(
   // Complete baskets first, then by price.
   return totals.sort((a, b) => a.missing - b.missing || a.totalCents - b.totalCents)
 }
+
+export interface SplitPlan {
+  /** One or two stores, in the order they cover most of the list. */
+  stores: Retailer[]
+  totalCents: number
+  /** Which store each priced item is bought at. */
+  picks: { productId: string; quantity: number; retailer: Retailer; priceCents: number }[]
+  /** Items no store has a fresh price for (left out of the totals). */
+  unpriced: number
+  /** The best one-store basket for the same items, if one store has them all. */
+  single?: { retailer: Retailer; totalCents: number }
+  savingCents: number
+}
+
+/**
+ * Cheapest way to buy the list in at most two stores. Items without a price
+ * anywhere are left out (never guessed). Returns null unless splitting beats
+ * buying everything in one store.
+ */
+export function splitPlan(
+  list: ShoppingList,
+  products: Product[],
+  pricesOf: (id: string) => PriceObservation[],
+  retailers: Retailer[],
+  now = Date.now(),
+): SplitPlan | null {
+  const items = list.items
+    .map((item) => {
+      const product = products.find((p) => p.id === item.productId)
+      if (!product) return null
+      const prices = new Map<string, number>()
+      for (const r of compare(product, pricesOf(product.id), retailers, now)) if (r.freshness === 'fresh') prices.set(r.retailer.id, r.current.priceCents)
+      return { item, prices }
+    })
+    .filter((x): x is { item: ShoppingList['items'][number]; prices: Map<string, number> } => !!x)
+  const priced = items.filter((x) => x.prices.size > 0)
+  if (priced.length < 2) return null
+  const unpriced = items.length - priced.length
+
+  const cost = (ids: string[]) => {
+    let total = 0
+    let covered = 0
+    for (const { item, prices } of priced) {
+      const best = Math.min(...ids.map((id) => prices.get(id) ?? Infinity))
+      if (best !== Infinity) { total += best * item.quantity; covered++ }
+    }
+    return { total, covered }
+  }
+  const stores = retailers.filter((r) => priced.some((x) => x.prices.has(r.id)))
+  let single: { retailer: Retailer; totalCents: number } | undefined
+  for (const r of stores) {
+    const c = cost([r.id])
+    if (c.covered === priced.length && (!single || c.total < single.totalCents)) single = { retailer: r, totalCents: c.total }
+  }
+  let best: { ids: [string, string]; total: number; covered: number } | undefined
+  for (let i = 0; i < stores.length; i++) {
+    for (let j = i + 1; j < stores.length; j++) {
+      const ids: [string, string] = [stores[i].id, stores[j].id]
+      const c = cost(ids)
+      if (!best || c.covered > best.covered || (c.covered === best.covered && c.total < best.total)) best = { ids, ...c }
+    }
+  }
+  if (!best || best.covered < priced.length) return null
+  if (single && best.total >= single.totalCents) return null
+
+  const picks = priced.map(({ item, prices }) => {
+    const id = best!.ids.reduce((a, b) => ((prices.get(a) ?? Infinity) <= (prices.get(b) ?? Infinity) ? a : b))
+    return { productId: item.productId, quantity: item.quantity, retailer: retailers.find((r) => r.id === id)!, priceCents: prices.get(id)! }
+  })
+  const used = best.ids.map((id) => retailers.find((r) => r.id === id)!).filter((r) => picks.some((p) => p.retailer.id === r.id))
+  if (used.length < 2) return null
+  used.sort((a, b) => picks.filter((p) => p.retailer.id === b.id).length - picks.filter((p) => p.retailer.id === a.id).length)
+  return { stores: used, totalCents: best.total, picks, unpriced, single, savingCents: single ? single.totalCents - best.total : 0 }
+}

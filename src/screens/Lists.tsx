@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
-import { basketTotals, cheapest, compare, euro, sizeLabel } from '../domain/pricing'
+import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan } from '../domain/pricing'
 import { useNav } from '../nav'
 import { Check, Minus, Plus } from '../ui/icons'
 import { RankBadge, RetailerMark, Tile } from '../ui/bits'
@@ -24,6 +24,7 @@ export function Lists() {
     () => basketTotals(list, products, observations, retailers),
     [list, products, observations, retailers],
   )
+  const plan = useMemo(() => splitPlan(list, products, pricesOf, retailers), [list, products, pricesOf, retailers])
   const complete = totals.filter((x) => x.missing === 0)
   const incomplete = totals.filter((x) => x.missing > 0)
   const best = complete[0]
@@ -162,6 +163,41 @@ export function Lists() {
               </p>
             )}
           </div>
+
+          {plan && (
+            <div className="section">
+              <div className="section-head"><h2>{t('split.title')}</h2></div>
+              <div className="best-card">
+                <div className="best-label">{plan.stores.map((r) => r.name).join(' + ')}</div>
+                <div className="best-price">{euro(plan.totalCents)}</div>
+                <div className="best-meta">
+                  {plan.single ? t('split.saves', { amount: euro(plan.savingCents), store: plan.single.retailer.name }) : t('split.noSingle')}
+                  {plan.unpriced > 0 && <> · {t('split.unpriced', { n: plan.unpriced })}</>}
+                </div>
+              </div>
+              {plan.stores.map((r) => (
+                <div key={r.id} style={{ marginTop: 12 }}>
+                  <div className="group-title" style={{ margin: '0 4px 6px' }}>{r.name}</div>
+                  <div className="rows">
+                    {plan.picks.filter((p) => p.retailer.id === r.id).map((pk) => {
+                      const p = products.find((x) => x.id === pk.productId)
+                      if (!p) return null
+                      return (
+                        <button key={pk.productId} className="row" onClick={() => nav.openProduct(p.id)}>
+                          <Tile product={p} />
+                          <div className="grow">
+                            <div className="title">{pk.quantity > 1 ? `${pk.quantity} × ` : ''}{p.name}</div>
+                            <div className="sub">{sizeLabel(p)}</div>
+                          </div>
+                          <div className="price">{euro(pk.priceCents * pk.quantity)}</div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </>
       )}
       {shopping && <StoreMode onClose={() => setShopping(false)} />}
