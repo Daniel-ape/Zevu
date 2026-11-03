@@ -14,6 +14,7 @@ import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
 import { useLiquidGlass } from './ui/LiquidGlass'
+import { DOCK_ICONS, NativeDock, wantsNativeDock } from './native/nativeDock'
 
 const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile']
 const fromHash = (): Tab => {
@@ -45,6 +46,8 @@ function Shell() {
   const scanRef = useRef<HTMLButtonElement>(null)
   const barGlass = useLiquidGlass('lg-bar', barRef)
   const scanGlass = useLiquidGlass('lg-scan', scanRef, { bezel: 14, scale: 22 })
+  // iPhone app: Apple's own Liquid Glass tab bar (native). Falls back to the web dock if it fails.
+  const [nativeDock, setNativeDock] = useState(wantsNativeDock)
   const [stack, setStack] = useState<string[]>([]) // product ids opened on top of the tab
   const [searchCategory, setSearchCategory] = useState<CategoryId | 'all'>('all')
   const [searchFocus, setSearchFocus] = useState(false)
@@ -74,6 +77,24 @@ function Shell() {
   )
 
   const top = stack[stack.length - 1]
+  const goRef = useRef(nav.go)
+  goRef.current = nav.go
+  useEffect(() => {
+    if (!nativeDock) return
+    const h = NativeDock.addListener('tap', (e) => goRef.current(e.id as Tab))
+    return () => { h.then((x) => x.remove()).catch(() => {}) }
+  }, [nativeDock])
+  useEffect(() => {
+    if (!nativeDock) return
+    const ids: Tab[] = ['home', 'search', 'lists', 'leaflets', 'profile']
+    const label = { home: 'tab.home', search: 'tab.search', lists: 'tab.list', leaflets: 'tab.leaflets', profile: 'tab.you' } as const
+    NativeDock.show({
+      tabs: ids.map((id) => ({ id, label: t(label[id as keyof typeof label]), icon: DOCK_ICONS[id] })),
+      selected: top ? '' : tab,
+      badges: newLeaflets && tab !== 'leaflets' ? ['leaflets'] : [],
+      scanLabel: t('tab.scan'),
+    }).catch(() => setNativeDock(false))
+  }, [nativeDock, tab, top, newLeaflets, t])
   useEffect(() => {
     window.scrollTo(0, 0)
     document.querySelector('.screen')?.scrollTo(0, 0)
@@ -91,7 +112,7 @@ function Shell() {
     <NavCtx.Provider value={nav}>
       <div className="shell">
         {screen}
-        <nav className="dock" aria-label="Main">
+        {!nativeDock && <nav className="dock" aria-label="Main">
           {barGlass.svg}{scanGlass.svg}
           <div ref={barRef} className={'dock-bar glass' + (barGlass.active ? ' refract' : '')} style={barGlass.style}>
             {tabBtn('home', t('tab.home'), <HomeIcon />)}
@@ -103,7 +124,7 @@ function Shell() {
           <button ref={scanRef} style={tab === 'scan' && !top ? undefined : scanGlass.style} className={'dock-scan glass' + (scanGlass.active ? ' refract' : '') + (tab === 'scan' && !top ? ' on' : '')} onClick={() => nav.go('scan')} aria-label={t('tab.scan')}>
             <ScanIcon size={26} />
           </button>
-        </nav>
+        </nav>}
       </div>
     </NavCtx.Provider>
   )
