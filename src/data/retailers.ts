@@ -15,4 +15,7 @@ export const RETAILERS: Retailer[] = [
   { id: 'halpahalli', name: 'Halpa-Halli', chain: 'halpahalli' },
   { id: 'verkkokauppa', name: 'Verkkokauppa.com', chain: 'verkkokauppa' },
   { id: 'stockmann', name: 'Stockmann', chain: 'stockmann' },
+  { id: 'karkkainen', name: 'Kärkkäinen', chain: 'karkkainen' },
+  { id: 'ruohonjuuri', name: 'Ruohonjuuri', chain: 'ruohonjuuri' },
+  { id: 'yliopistonapteekki', name: 'Yliopiston Apteekki', chain: 'yliopistonapteekki' },
 ]

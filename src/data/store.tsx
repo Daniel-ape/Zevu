@@ -13,7 +13,8 @@ import { collectedProducts, collectedProvider, shopImages } from './collectedPri
 // Prices collected daily from the shops' own sites (collector/*.mjs).
 const SHOP_FILES: [string, string][] = [
   ['tokmanni.json', 'tokmanni'], ['halpahalli.json', 'halpahalli'], ['verkkokauppa.json', 'verkkokauppa'],
-  ['prisma.json', 'prisma'], ['stockmann.json', 'stockmann'],
+  ['prisma.json', 'prisma'], ['stockmann.json', 'stockmann'], ['karkkainen.json', 'karkkainen'],
+  ['ruohonjuuri.json', 'ruohonjuuri'], ['yliopistonapteekki.json', 'yliopistonapteekki'],
 ]
 const PROVIDERS: PriceProvider[] = SHOP_FILES.map(([file, id]) => collectedProvider(file, id))
 

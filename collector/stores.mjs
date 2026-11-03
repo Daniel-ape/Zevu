@@ -16,6 +16,9 @@ const STORES = {
   halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all' },
   verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'all' },
   prisma: { retailerId: 'prisma', base: 'https://www.prisma.fi', sitemaps: ['https://www.prisma.fi/sitemap.xml'], product: /\/tuotteet\/\d+\//, keep: 'all' },
+  karkkainen: { retailerId: 'karkkainen', base: 'https://www.karkkainen.com', sitemaps: ['https://www.karkkainen.com/files/sitemap/sitemap.xml'], maps: /products_fi/, product: /^https:\/\/www\.karkkainen\.com\/(?!en\/)/, keep: 'all' },
+  ruohonjuuri: { retailerId: 'ruohonjuuri', base: 'https://www.ruohonjuuri.fi', sitemaps: ['https://www.ruohonjuuri.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
+  yliopistonapteekki: { retailerId: 'yliopistonapteekki', base: 'https://www.yliopistonapteekki.fi', sitemaps: ['https://www.yliopistonapteekki.fi/pub/media/sitemap.xml'], product: /-\d{3,}$/, keep: 'all' },
   stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'all' },
 }
 const name = process.argv[2]
@@ -66,7 +69,7 @@ while (queue.length && !over()) {
     const xml = await get(map)
     for (const [, loc] of xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)) {
       const u = loc.replace(/&amp;/g, '&')
-      if (/\.xml(\.gz)?$/i.test(u)) queue.push(u)
+      if (/\.xml(\.gz)?([?#].*)?$/i.test(u)) { if (!cfg.maps || cfg.maps.test(u)) queue.push(u) }
       else if (cfg.product.test(u) && u.startsWith(cfg.base) && !blocked(new URL(u).pathname)) urls.add(u)
     }
   } catch (e) {

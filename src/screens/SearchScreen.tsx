@@ -56,6 +56,9 @@ export function SearchScreen() {
       // Browsing without a query lists only products that have prices.
       .filter((r) => (needle ? true : r.best || r.count > 0))
       .sort((a, b) => {
+        // Typo matches last; otherwise products with a price come first.
+        if (needle && (tier(a.score) === 3) !== (tier(b.score) === 3)) return tier(a.score) === 3 ? 1 : -1
+        if (!!a.best !== !!b.best) return a.best ? -1 : 1
         if (needle && tier(a.score) !== tier(b.score)) return tier(a.score) - tier(b.score)
         if (sort === 'name') return a.p.name.localeCompare(b.p.name)
         const av = sort === 'unit' ? a.best?.unitPriceCents : a.best?.current.priceCents
