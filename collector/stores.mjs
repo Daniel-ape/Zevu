@@ -14,9 +14,9 @@ import { gunzipSync } from 'node:zlib'
 
 const STORES = {
   halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all' },
-  verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'match' },
-  prisma: { retailerId: 'prisma', base: 'https://www.prisma.fi', sitemaps: ['https://www.prisma.fi/sitemap.xml'], product: /\/tuotteet\/\d+\//, keep: 'match' },
-  stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'match' },
+  verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'all' },
+  prisma: { retailerId: 'prisma', base: 'https://www.prisma.fi', sitemaps: ['https://www.prisma.fi/sitemap.xml'], product: /\/tuotteet\/\d+\//, keep: 'all' },
+  stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'all' },
 }
 const name = process.argv[2]
 const cfg = STORES[name]
