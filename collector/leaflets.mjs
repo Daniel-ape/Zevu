@@ -87,6 +87,48 @@ try {
 } catch (e) {
   console.log('tokmanni:', e.message)
 }
+// Shops that publish their leaflets with Publitas: the publication page offers a
+// cover (og:image) and a title. A Publitas group address always opens the
+// newest leaflet. Links on the shop's own leaflet page add the other ones.
+const meta2 = (html, prop) =>
+  html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]+content=["']([^"']+)`, 'i'))?.[1] ??
+  html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${prop}["']`, 'i'))?.[1]
+const unescape = (s) => (s ?? '').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim()
+async function publitas(url) {
+  const r = await fetch(url, { headers: { 'User-Agent': UA } })
+  if (!r.ok) return null
+  const html = await r.text()
+  const image = unescape(meta2(html, 'og:image'))
+  const final = r.url.replace(/\/page\/\d+\/?$/, '/')
+  let title = unescape(meta2(html, 'og:title') ?? html.match(/<title>([^<]*)<\/title>/i)?.[1])
+  title = title.replace(/^.*? - /, '').replace(/ - Sivu \d+$/i, '').replace(/ - Page \d+$/i, '').replace(/_/g, ' ')
+  return image.startsWith('https://') ? { name: title, url: final, image } : null
+}
+async function pageLinks(url) {
+  try { return [...new Set([...(await get(url)).matchAll(/https:\/\/view\.publitas\.com\/[a-z0-9-]+\/[a-z0-9_-]+\/?/gi)].map((m) => m[0].replace(/\/?$/, '/')))] } catch { return [] }
+}
+const SHOPS = {
+  minimani: { group: 'https://view.publitas.com/minimani-yhtiot-oy/', pages: ['https://www.minimani.fi/lehti-ilmoitukset-mainoslehti'] },
+  rusta: { group: 'https://view.publitas.com/rusta-kuvasto', pages: [] },
+  halpahalli: { group: null, pages: ['https://www.halpahalli.fi/mainokset', 'https://www.halpahalli.fi/lelulehti'] },
+}
+const pubRobots = rulesFor(await get('https://view.publitas.com/robots.txt').catch(() => ''), 'hintaopasbot')
+for (const [shop, cfg] of Object.entries(SHOPS)) {
+  out[shop] = []
+  try {
+    const seen = new Set()
+    const candidates = [cfg.group, ...(await Promise.all(cfg.pages.map(pageLinks))).flat()].filter(Boolean)
+    console.log(shop, 'candidates', JSON.stringify(candidates))
+    for (const c of candidates.slice(0, 8)) {
+      if (pubRobots.some((r) => blockedBy(r, new URL(c).pathname))) continue
+      await sleep(1500)
+      const l = await publitas(c).catch(() => null)
+      if (l && !seen.has(l.url)) { seen.add(l.url); out[shop].push(l) }
+    }
+  } catch (e) {
+    console.log(shop, e.message)
+  }
+}
 console.log('leaflets', JSON.stringify(out))
 mkdirSync('public/prices', { recursive: true })
 writeFileSync('public/prices/leaflets.json', JSON.stringify(out) + '\n')
