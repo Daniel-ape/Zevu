@@ -279,7 +279,7 @@ button.row:active { opacity: 0.6; }
 @media (max-width: 599px) { .dock { position: fixed; bottom: max(18px, env(safe-area-inset-bottom)); } }
 .dock-bar { display: flex; gap: 2px; padding: 5px; border-radius: 999px; pointer-events: auto; }
 .tab {
-  position: relative; z-index: 1; width: 66px; height: 54px; border-radius: 999px;
+  position: relative; z-index: 1; width: 58px; height: 54px; border-radius: 999px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   color: var(--text-2); font-size: 10.5px; font-weight: 600; transition: color 0.25s, background 0.25s, transform 0.2s;
 }
@@ -429,9 +429,6 @@ button.row:active { opacity: 0.6; }
 .topbar.sticky .icon-btn.on { background: var(--accent-soft); }
 
 /* Weekly offers: four compact store tiles */
-.leaflets .row { color: inherit; text-decoration: none; }
-.leaflets .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.leaflets .mark { background: var(--bg); width: 40px; height: 40px; font-size: 15px; color: var(--text); flex-shrink: 0; }
 
 .actions-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .actions-row .btn { height: 52px; font-size: 15px; }
@@ -454,3 +451,16 @@ button.row:active { opacity: 0.6; }
 
 .toast { display: flex; align-items: center; gap: 14px; }
 .toast button { color: var(--accent); font-weight: 700; }
+
+/* Leaflet shelf */
+.shelf { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 12px; }
+.cover { color: inherit; text-decoration: none; min-width: 0; }
+.cover:active .cover-img { transform: scale(0.97); }
+.cover-img {
+  aspect-ratio: 3 / 4.6; border-radius: 12px; overflow: hidden; background: var(--surface-2);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); transition: transform 0.15s; display: grid; place-items: center;
+}
+.cover-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.cover-blank { font-size: 34px; font-weight: 700; color: var(--text-2); }
+.cover-name { font-size: 13px; font-weight: 600; margin-top: 8px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cover-period { font-size: 11.5px; color: var(--text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

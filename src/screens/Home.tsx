@@ -3,7 +3,6 @@ import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
 import { useNav } from '../nav'
 import { Tile, TrendTag } from '../ui/bits'
-import { Offers } from '../ui/Offers'
 import { ReceiptSheet } from './ReceiptSheet'
 
 export function Home() {
@@ -121,8 +120,6 @@ export function Home() {
           </div>
         </div>
       )}
-
-      <Offers />
 
       {recent.length > 0 && (
         <div className="section">

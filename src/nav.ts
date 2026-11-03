@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { CategoryId } from './domain/types'
 
-export type Tab = 'home' | 'search' | 'scan' | 'lists' | 'profile'
+export type Tab = 'home' | 'search' | 'scan' | 'lists' | 'leaflets' | 'profile'
 
 export interface Nav {
   tab: Tab

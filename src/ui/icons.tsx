@@ -20,6 +20,9 @@ export const List = ({ size }: P) => (
 export const User = ({ size }: P) => (
   <svg {...base(size)}><circle cx="12" cy="8.5" r="3.8" /><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" /></svg>
 )
+export const Paper = ({ size }: P) => (
+  <svg {...base(size)}><path d="M6 4h9.5L19 7.5V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" /><path d="M8.5 9h4M8.5 12.5h7M8.5 16h7" /></svg>
+)
 export const Back = ({ size }: P) => (
   <svg {...base(size)}><path d="m14.5 5-7 7 7 7" /></svg>
 )

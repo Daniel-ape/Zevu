@@ -2,15 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { StoreProvider, useStore } from './data/store'
 import type { CategoryId } from './domain/types'
 import { NavCtx, type Nav, type Tab } from './nav'
-import { Home as HomeIcon, List, Scan as ScanIcon, Search, User } from './ui/icons'
+import { Home as HomeIcon, List, Paper, Scan as ScanIcon, Search, User } from './ui/icons'
 import { Home } from './screens/Home'
 import { SearchScreen } from './screens/SearchScreen'
 import { ProductScreen } from './screens/ProductScreen'
 import { Lists } from './screens/Lists'
 import { Scan } from './screens/Scan'
 import { Profile } from './screens/Profile'
+import { Leaflets } from './screens/Leaflets'
 
-const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'profile']
+const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile']
 const fromHash = (): Tab => {
   const h = location.hash.slice(1) as Tab
   return TABS.includes(h) ? h : 'home'
@@ -66,6 +67,7 @@ function Shell() {
     : tab === 'search' ? <SearchScreen key="search" />
     : tab === 'scan' ? <Scan key="scan" />
     : tab === 'lists' ? <Lists key="lists" />
+    : tab === 'leaflets' ? <Leaflets key="leaflets" />
     : <Profile key="profile" />
 
   return (
@@ -77,6 +79,7 @@ function Shell() {
             {tabBtn('home', t('tab.home'), <HomeIcon />)}
             {tabBtn('search', t('tab.search'), <Search />)}
             {tabBtn('lists', t('tab.list'), <List />)}
+            {tabBtn('leaflets', t('tab.leaflets'), <Paper />)}
             {tabBtn('profile', t('tab.you'), <User />)}
           </div>
           <button className={'dock-scan glass' + (tab === 'scan' && !top ? ' on' : '')} onClick={() => nav.go('scan')} aria-label={t('tab.scan')}>

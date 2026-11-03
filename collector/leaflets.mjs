@@ -45,10 +45,29 @@ try {
     seen.add(url)
     const name = text(m[0].match(/class="flyer__name">([\s\S]*?)<\/div>/)?.[1] ?? '')
     const period = text(m[0].match(/class="flyer__title">([\s\S]*?)<\/span>/)?.[1] ?? '')
-    if (name) out.lidl.push({ name, period, url })
+    // The small cover picture Lidl itself shows for the leaflet (first page).
+    const img = m[0].match(/class="flyer__image"[^>]*src="([^"]+)"/)?.[1] ?? m[0].match(/src="(https:\/\/imgproxy\.leaflets\.schwarz\/[^"]+)"/)?.[1]
+    const image = img?.startsWith('https://imgproxy.leaflets.schwarz/') ? img : undefined
+    if (name) out.lidl.push({ name, period, url, image })
   }
 } catch (e) {
   console.log('lidl:', e.message)
+}
+// Tokmanni: its leaflet viewer always shows the newest issue; take the cover
+// picture the page itself offers for link previews (og:image), if any.
+try {
+  const base = 'https://tarjoussanomat.tokmanni.fi'
+  const page = '/Tarjoussanomat/'
+  const robots = await get(base + '/robots.txt').catch(() => '')
+  const disallow = rulesFor(robots, 'hintaopasbot')
+  if (disallow.some((r) => blockedBy(r, page))) throw new Error('robots.txt disallows the leaflet page')
+  const html = await get(base + page)
+  const og = html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i)?.[1] ?? html.match(/<meta[^>]+content="([^"]+)"[^>]+property="og:image"/i)?.[1]
+  const title = html.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim()
+  console.log('tokmanni og:image', og, 'title', title)
+  if (og?.startsWith('https://')) out.tokmanni = { image: og.replace(/&amp;/g, '&') }
+} catch (e) {
+  console.log('tokmanni:', e.message)
 }
 console.log('leaflets', JSON.stringify(out))
 mkdirSync('public/prices', { recursive: true })
