@@ -1,0 +1,27 @@
+# Finds the stores' current leaflets (links, names, cover pictures) twice a day.
+name: Collect leaflets
+on:
+  schedule:
+    - cron: '41 4 * * *'    # morning: Lidl's and Tokmanni's new leaflets
+    - cron: '23 14 * * *'   # afternoon: leaflets published for the next days
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: leaflets
+jobs:
+  leaflets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node collector/leaflets.mjs
+      - name: Commit leaflet links
+        run: |
+          git config user.name "hintaopas-bot"
+          git config user.email "hintaopas-bot@users.noreply.github.com"
+          git add public/prices/leaflets.json
+          git diff --cached --quiet || (git commit -m "Update leaflet links" && git pull --rebase && git push)
