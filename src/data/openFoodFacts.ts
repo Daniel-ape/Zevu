@@ -96,7 +96,7 @@ export function toProduct(p: OffProduct, lang: Lang): Product | null {
     id: `off:${p.code}`,
     ean: p.code,
     name: name.trim(),
-    brand: (p.brands ?? '').split(',')[0].trim(),
+    brand: String(p.brands ?? '').split(',')[0].trim(),
     category: cat,
     size: parseQuantity(p.quantity),
     emoji,

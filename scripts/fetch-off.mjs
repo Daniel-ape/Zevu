@@ -19,7 +19,17 @@ const get = async (url) => {
 }
 
 const byCode = new Map()
-const add = (ps) => { for (const p of ps ?? []) if (p.code && !byCode.has(p.code)) byCode.set(p.code, p) }
+// Search-a-licious returns some text fields as lists; the app expects text.
+const text = (v) => (Array.isArray(v) ? v.join(', ') : typeof v === 'string' ? v : undefined)
+const clean = (p) => ({
+  ...p,
+  code: String(p.code ?? ''),
+  product_name: text(p.product_name), product_name_fi: text(p.product_name_fi), product_name_sv: text(p.product_name_sv),
+  product_name_en: text(p.product_name_en), brands: text(p.brands), quantity: text(p.quantity),
+  categories_tags: Array.isArray(p.categories_tags) ? p.categories_tags : [],
+  image_front_small_url: text(p.image_front_small_url),
+})
+const add = (ps) => { for (const p of ps ?? []) if (p.code && !byCode.has(String(p.code))) byCode.set(String(p.code), clean(p)) }
 
 // 1. Search-a-licious
 for (let page = 1; byCode.size < MAX; page++) {
