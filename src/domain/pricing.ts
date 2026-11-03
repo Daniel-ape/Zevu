@@ -257,3 +257,16 @@ export function priceFacts(points: { date: Date; cents: number }[]) {
     changedAt: i > 0 ? points[i].date : null,
   }
 }
+
+/**
+ * Brand for display: the catalogue often has the supplier's registered name
+ * ("LANTMANNEN CEREALIA AS", "Viennetta - Unilever"). Keep the first brand,
+ * drop company forms and write all-caps names in normal case.
+ */
+export function brandLabel(brand: string): string {
+  let b = (brand ?? '').split(/,| - /)[0].trim()
+  b = b.replace(/\s*\((?:nordic|finland|suomi)\)\s*$/i, '').replace(/\s+(?:oy|oyj|ab|as|a\/s|asa|ltd|gmbh|inc|s\.?a\.?|aps|oy ab|ab oy|norge as|sverige ab|finland oy|nordic)\.?$/i, '').trim()
+  b = b.replace(/\s+(?:oy|ab|as|norge|norway|sverige|sweden|danmark|denmark|nordic|finland|suomi)$/i, '').trim()
+  if (b.length > 3 && b === b.toUpperCase() && /[A-ZÅÄÖ]/.test(b)) b = b.toLowerCase().replace(/(^|[\s\-&/])([a-zåäöü])/g, (_, s, c) => s + c.toUpperCase())
+  return b
+}

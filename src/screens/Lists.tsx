@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan } from '../domain/pricing'
 import { useNav } from '../nav'
-import { Check, Minus, Plus } from '../ui/icons'
+import { Check, List as ListIcon, Minus, Plus } from '../ui/icons'
 import { RankBadge, RetailerMark, Tile } from '../ui/bits'
 import { StoreMode } from './StoreMode'
 
@@ -93,11 +93,11 @@ export function Lists() {
       )}
 
       {list.items.length === 0 ? (
-        <div className="empty">
-          {t('list.empty')}
-          <div style={{ marginTop: 16 }}>
-            <button className="btn primary" style={{ maxWidth: 220 }} onClick={() => nav.go('search', { focus: true })}>{t('list.find')}</button>
-          </div>
+        <div className="empty-state">
+          <div className="empty-icon"><ListIcon size={30} /></div>
+          <div className="empty-title">{t('list.empty')}</div>
+          <div className="empty-text">{t('list.emptyHint')}</div>
+          <button className="btn primary" onClick={() => nav.go('search', { focus: true })}>{t('list.find')}</button>
         </div>
       ) : (
         <>

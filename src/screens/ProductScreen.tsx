@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useStore } from '../data/store'
-import { cheapest, compare, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel } from '../domain/pricing'
+import { cheapest, compare, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel, brandLabel } from '../domain/pricing'
 import { LOCALE } from '../i18n'
 import { useNav } from '../nav'
 import { Back, Bell, Check, Plus } from '../ui/icons'
@@ -49,7 +49,7 @@ export function ProductScreen({ id }: { id: string }) {
       <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
         <Tile product={product} large />
         <div style={{ minWidth: 0 }}>
-          <div className="muted small">{product.brand}</div>
+          <div className="muted small">{brandLabel(product.brand)}</div>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginTop: 2 }}>{product.name}</div>
           <div className="muted small" style={{ marginTop: 4 }}>{sizeLabel(product)}</div>
         </div>

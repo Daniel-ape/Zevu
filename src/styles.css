@@ -818,3 +818,159 @@ h1 { font-size: 30px; }
 .wa-sub b { color: var(--text); }
 .wa-close { width: 34px; height: 34px; border-radius: 50%; color: var(--text-2); flex-shrink: 0; }
 @keyframes wa-in { from { transform: translateY(-120%); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ============================================================
+   Design system v3 — Apple-like, one system for every screen
+   (iOS grouped style): system font (SF Pro on iPhone), large
+   titles, inset grouped cards with hairline separators, one
+   green accent, capsule controls, glass bars.
+   ============================================================ */
+:root {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f2f2f7;
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-2: rgba(120, 120, 128, 0.08);
+  --text: #000000;
+  --text-2: rgba(60, 60, 67, 0.64);
+  --text-3: rgba(60, 60, 67, 0.32);
+  --line: rgba(60, 60, 67, 0.16);
+  --card-shadow: none;
+  --radius: 20px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #000000; --card: #1c1c1e; --surface: #1c1c1e; --surface-2: #2c2c2e;
+    --fill: rgba(120, 120, 128, 0.32); --fill-2: rgba(120, 120, 128, 0.2);
+    --text: #ffffff; --text-2: rgba(235, 235, 245, 0.62); --text-3: rgba(235, 235, 245, 0.3);
+    --line: rgba(84, 84, 88, 0.6);
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #000000; --card: #1c1c1e; --surface: #1c1c1e; --surface-2: #2c2c2e;
+  --fill: rgba(120, 120, 128, 0.32); --fill-2: rgba(120, 120, 128, 0.2);
+  --text: #ffffff; --text-2: rgba(235, 235, 245, 0.62); --text-3: rgba(235, 235, 245, 0.3);
+  --line: rgba(84, 84, 88, 0.6);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 17px; letter-spacing: -0.01em;
+}
+.screen { padding-left: 16px; padding-right: 16px; }
+
+/* Typography: iOS text styles */
+h1, .screen h1 { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: 0.01em; margin: 4px 0 0; }
+.home-head h1 { margin-top: 2px; }
+.eyebrow, .home-head .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: uppercase; color: var(--text-2); }
+.section { margin-top: 30px; }
+.section-head { margin: 0 4px 8px; align-items: baseline; }
+.section-head h2 { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: 0.01em; }
+.section-head .link, .link { color: var(--accent); font-size: 15px; font-weight: 500; }
+.muted { color: var(--text-2); }
+.topbar { margin-bottom: 14px; min-height: 44px; }
+
+/* Inset grouped lists */
+.rows, .group-body { background: var(--card); border-radius: var(--radius); padding: 0; box-shadow: none; overflow: hidden; }
+.rows .row, .group-body .row {
+  position: relative; padding: 11px 16px; min-height: 52px; gap: 12px; border-bottom: 0;
+}
+.rows .row:not(:last-child)::after, .group-body .row:not(:last-child)::after {
+  content: ''; position: absolute; left: 16px; right: 0; bottom: 0; height: 0.5px; background: var(--line);
+}
+.rows .row:has(.tile):not(:last-child)::after { left: 76px; }
+.group-body .row.menu-row:not(:last-child)::after { left: 60px; }
+.rows .row.search-row { padding-right: 12px; }
+.rows .row.search-row:not(:last-child)::after { left: 76px; }
+:root .group-body .row { border-bottom: 0; }
+button.row:active, a.row:active, .search-open:active { background: var(--fill-2); opacity: 1; }
+.row .title {
+  font-size: 16px; font-weight: 600; line-height: 1.25; white-space: normal;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.row .sub { font-size: 13.5px; color: var(--text-2); margin-top: 2px; }
+.row .price { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.row .end .sub { white-space: nowrap; }
+.group-title { font-size: 13px; font-weight: 400; text-transform: uppercase; letter-spacing: 0; color: var(--text-2); margin: 0 16px 7px; }
+.group-note { margin: 7px 16px 0; font-size: 13px; }
+
+/* Product pictures: white, softly framed */
+.tile { width: 48px; height: 48px; border-radius: 11px; background: #fff; box-shadow: inset 0 0 0 0.5px var(--line); }
+.tile.lg { width: 88px; height: 88px; border-radius: 20px; }
+:root[data-theme='dark'] .tile:not(:has(img)) { background: var(--surface-2); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .tile:not(:has(img)) { background: var(--surface-2); } }
+.tile img { padding: 3px; }
+
+/* Controls */
+.search { height: 40px; border-radius: 12px; background: var(--fill); box-shadow: none; padding: 0 10px; gap: 6px; color: var(--text-2); }
+.search input { font-size: 17px; }
+.search input::placeholder { color: var(--text-2); }
+.search svg { width: 18px; height: 18px; }
+.chips { padding: 2px 16px; margin: 0 -16px; gap: 8px; }
+.chip { height: 34px; padding: 0 14px; font-size: 15px; font-weight: 500; background: var(--card); color: var(--text); box-shadow: none; }
+.chip.on { background: var(--accent); color: #fff; }
+.seg { background: var(--fill); padding: 2px; border-radius: 9px; }
+.seg button { height: 30px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--text); padding: 0 10px; }
+.seg button.on { background: var(--card); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04); font-weight: 600; }
+.btn { height: 50px; font-size: 17px; font-weight: 600; border-radius: 999px; }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.ghost { background: var(--fill); color: var(--accent); box-shadow: none; }
+.actions-row .btn { height: 50px; font-size: 16px; }
+.quick-add { width: 32px; height: 32px; background: var(--fill); color: var(--accent); }
+.quick-add.in { background: var(--accent); color: #fff; }
+.icon-plain { background: var(--fill); box-shadow: none; color: var(--accent); width: 36px; height: 36px; }
+.menu-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; }
+.menu-icon svg { width: 18px; height: 18px; }
+.menu-value { font-size: 17px; }
+
+/* Cards */
+.list-card, .best-card, .card-plain, .notice-plain, .tip, .scan-hero, .scan-option, .price-card, .near-chip, .hero {
+  background: var(--card); border-radius: var(--radius); box-shadow: none;
+}
+.list-card .quick-icon, .tip .quick-icon { background: var(--accent); color: #fff; border-radius: 12px; }
+.best-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-2); letter-spacing: 0; }
+.best-store { font-size: 22px; font-weight: 700; }
+.best-price { font-size: 40px; font-weight: 700; letter-spacing: -0.01em; }
+.flag { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+
+/* Scan page */
+.scan-hero { padding: 30px 16px; gap: 10px; color: var(--accent); }
+.scan-hero svg { width: 44px; height: 44px; }
+.scan-option { padding: 16px; }
+
+/* Leaflet covers: a bit more like book covers */
+.cover-img { border-radius: 10px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 6px 16px rgba(0, 0, 0, 0.08); }
+.cover-name { font-size: 13px; }
+
+/* Empty states */
+.empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 56px 28px 24px; }
+.empty-icon { width: 64px; height: 64px; border-radius: 18px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); display: grid; place-items: center; margin-bottom: 16px; }
+.empty-title { font-size: 22px; font-weight: 700; }
+.empty-text { font-size: 15px; color: var(--text-2); margin: 6px 0 22px; line-height: 1.4; max-width: 300px; }
+.empty-state .btn { max-width: 240px; }
+.empty { color: var(--text-2); font-size: 15px; }
+
+/* Sheets */
+.sheet { background: var(--bg); border-radius: 22px 22px 0 0; }
+.sheet .rows { background: var(--card); border-radius: var(--radius); }
+.sheet-grab { background: var(--text-3); width: 36px; }
+
+/* Sticky top bars on pushed screens: glass, like iOS nav bars */
+.topbar.sticky { background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+.topbar.sticky .icon-btn { background: var(--fill); box-shadow: none; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none; color: var(--accent); width: 36px; height: 36px; }
+
+/* Compact title when the large title scrolls away */
+.scroll-title {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 25; max-width: 430px; margin: 0 auto;
+  padding: max(10px, env(safe-area-inset-top)) 16px 10px; text-align: center; font-size: 17px; font-weight: 600;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 0.5px 0 var(--line); opacity: 0; transform: translateY(-6px); pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.scroll-title.on { opacity: 1; transform: none; }
+
+/* Shopping mode and toasts */
+.shop { background: var(--bg); }
+.toast { background: color-mix(in srgb, var(--text) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); bottom: calc(100px + env(safe-area-inset-bottom)); }

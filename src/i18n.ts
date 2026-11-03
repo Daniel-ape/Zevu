@@ -73,7 +73,7 @@ const en = {
   'home.drops': 'Price drops', 'home.last4w': 'last 4 weeks', 'home.recent': 'Recently viewed',
   // search
   'search.title': 'Search', 'search.placeholder': 'Product, brand or barcode', 'search.clear': 'Clear', 'search.count': '{n} products', 'search.countOne': '1 product', 'search.sort': 'Sort',
-  'sort.price': 'Price', 'sort.unit': '€/kg', 'sort.name': 'A–Z',
+  'sort.top': 'Popular', 'sort.price': 'Price', 'sort.unit': '€/kg', 'sort.name': 'A–Z',
   'search.none': 'No products match “{q}”.', 'search.noPrice': 'No prices yet',
   // categories
   'cat.all': 'All', 'cat.dairy': 'Dairy & eggs', 'cat.produce': 'Fruit & veg', 'cat.bread': 'Bread',
@@ -86,7 +86,7 @@ const en = {
   'time.justNow': 'just now', 'time.hours': '{n} h ago', 'time.yesterday': 'yesterday', 'time.days': '{n} days ago',
   'price.updated': 'Updated {when}', 'price.outdated': 'Outdated · {when}', 'price.offer': 'Offer', 'price.member': 'Member price',
   // list
-  'list.empty': 'Your list is empty.', 'list.find': 'Find products', 'list.add': 'Add products', 'list.from': 'from {price}',
+  'list.empty': 'Your list is empty', 'list.emptyHint': 'Add products and the app works out where your shopping is cheapest.', 'list.find': 'Find products', 'list.add': 'Add products', 'list.from': 'from {price}',
   'list.where': "Where it's cheapest", 'list.items': '{n} items', 'list.items1': '1 item', 'list.notRankedN': '{n} other stores are missing a price for something on the list.', 'list.cheapest': 'Cheapest', 'list.less': 'Less', 'list.more': 'More',
   'list.defaultName': 'Weekly shop',
   // scan
@@ -163,7 +163,7 @@ const fi: Dict = {
   'home.cheapestAt': '{list} on halvin kaupassa', 'home.saveUpTo': 'Säästä jopa {amount}',
   'home.drops': 'Hinnanlaskut', 'home.last4w': '4 viikkoa', 'home.recent': 'Viimeksi katsotut',
   'search.title': 'Haku', 'search.placeholder': 'Tuote, merkki tai viivakoodi', 'search.clear': 'Tyhjennä', 'search.count': '{n} tuotetta', 'search.countOne': '1 tuote', 'search.sort': 'Järjestys',
-  'sort.price': 'Hinta', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
+  'sort.top': 'Suosittu', 'sort.price': 'Hinta', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
   'search.none': 'Ei tuloksia haulle ”{q}”.', 'search.noPrice': 'Ei vielä hintoja',
   'cat.all': 'Kaikki', 'cat.dairy': 'Maito & munat', 'cat.produce': 'Hedelmät & vihannekset', 'cat.bread': 'Leipä',
   'cat.meat': 'Liha', 'cat.pantry': 'Kuivatuotteet', 'cat.drinks': 'Juomat', 'cat.snacks': 'Herkut', 'cat.household': 'Siivous & pesu', 'cat.health': 'Terveys & kauneus', 'cat.pets': 'Lemmikit', 'cat.home': 'Koti & puutarha', 'cat.electronics': 'Elektroniikka', 'cat.toys': 'Lelut & pelit', 'cat.clothing': 'Vaatteet',
@@ -172,7 +172,7 @@ const fi: Dict = {
   'product.add': 'Lisää listaan', 'product.inList': 'Listalla ({n})', 'chart.notEnough': 'Hintahistoriaa ei ole vielä tarpeeksi.', 'price.lowestDays': 'Halvin hinta {n} päivään', 'price.droppedFrom': 'Laskenut hinnasta {amount}', 'price.low': 'Halvin', 'price.high': 'Kallein', 'price.since': 'Alkaen', 'price.stable': 'Hinta ennallaan {date} lähtien', 'price.history': 'Hintahistoria',
   'time.justNow': 'juuri nyt', 'time.hours': '{n} h sitten', 'time.yesterday': 'eilen', 'time.days': '{n} päivää sitten',
   'price.updated': 'Päivitetty {when}', 'price.outdated': 'Vanhentunut · {when}', 'price.offer': 'Tarjous', 'price.member': 'Jäsenhinta',
-  'list.empty': 'Listasi on tyhjä.', 'list.find': 'Etsi tuotteita', 'list.add': 'Lisää tuotteita', 'list.from': 'alkaen {price}',
+  'list.empty': 'Listasi on tyhjä', 'list.emptyHint': 'Lisää tuotteita, niin sovellus laskee, mistä ostokset saa halvimmalla.', 'list.find': 'Etsi tuotteita', 'list.add': 'Lisää tuotteita', 'list.from': 'alkaen {price}',
   'list.where': 'Missä halvinta', 'list.items': '{n} tuotetta', 'list.items1': '1 tuote', 'list.notRankedN': '{n} muulta kaupalta puuttuu jonkin listan tuotteen hinta.', 'list.cheapest': 'Halvin', 'list.less': 'Vähemmän', 'list.more': 'Lisää',
   'list.defaultName': 'Viikon ostokset',
   'scan.title': 'Skannaa',
@@ -244,7 +244,7 @@ const sv: Dict = {
   'home.cheapestAt': '{list} är billigast hos', 'home.saveUpTo': 'Spara upp till {amount}',
   'home.drops': 'Prissänkningar', 'home.last4w': 'senaste 4 veckorna', 'home.recent': 'Senast visade',
   'search.title': 'Sök', 'search.placeholder': 'Produkt, märke eller streckkod', 'search.clear': 'Rensa', 'search.count': '{n} produkter', 'search.countOne': '1 produkt', 'search.sort': 'Sortera',
-  'sort.price': 'Pris', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
+  'sort.top': 'Populärt', 'sort.price': 'Pris', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
   'search.none': 'Inga produkter matchar ”{q}”.', 'search.noPrice': 'Inga priser ännu',
   'cat.all': 'Alla', 'cat.dairy': 'Mejeri & ägg', 'cat.produce': 'Frukt & grönt', 'cat.bread': 'Bröd',
   'cat.meat': 'Kött', 'cat.pantry': 'Skafferi', 'cat.drinks': 'Drycker', 'cat.snacks': 'Godis & snacks', 'cat.household': 'Tvätt & städ', 'cat.health': 'Hälsa & skönhet', 'cat.pets': 'Djur', 'cat.home': 'Hem & trädgård', 'cat.electronics': 'Elektronik', 'cat.toys': 'Leksaker & spel', 'cat.clothing': 'Kläder',
@@ -253,7 +253,7 @@ const sv: Dict = {
   'product.add': 'Lägg till i listan', 'product.inList': 'I din lista ({n})', 'chart.notEnough': 'Inte tillräckligt med prishistorik ännu.', 'price.lowestDays': 'Lägsta priset på {n} dagar', 'price.droppedFrom': 'Sänkt från {amount}', 'price.low': 'Lägst', 'price.high': 'Högst', 'price.since': 'Sedan', 'price.stable': 'Oförändrat pris sedan {date}', 'price.history': 'Prishistorik',
   'time.justNow': 'just nu', 'time.hours': 'för {n} h sedan', 'time.yesterday': 'i går', 'time.days': 'för {n} dagar sedan',
   'price.updated': 'Uppdaterat {when}', 'price.outdated': 'Föråldrat · {when}', 'price.offer': 'Erbjudande', 'price.member': 'Medlemspris',
-  'list.empty': 'Din lista är tom.', 'list.find': 'Hitta produkter', 'list.add': 'Lägg till produkter', 'list.from': 'från {price}',
+  'list.empty': 'Din lista är tom', 'list.emptyHint': 'Lägg till varor så räknar appen ut var du handlar billigast.', 'list.find': 'Hitta produkter', 'list.add': 'Lägg till produkter', 'list.from': 'från {price}',
   'list.where': 'Var det är billigast', 'list.items': '{n} varor', 'list.items1': '1 vara', 'list.notRankedN': '{n} andra butiker saknar pris för något på listan.', 'list.cheapest': 'Billigast', 'list.less': 'Färre', 'list.more': 'Fler',
   'list.defaultName': 'Veckohandling',
   'scan.title': 'Skanna',

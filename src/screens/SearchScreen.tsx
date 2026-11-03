@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../data/store'
-import { cheapest, compare, euro, sizeLabel, unitLabel } from '../domain/pricing'
+import { cheapest, compare, euro, sizeLabel, unitLabel, brandLabel } from '../domain/pricing'
 import type { CategoryId } from '../domain/types'
 import { useNav } from '../nav'
 import { Check, Plus, Search } from '../ui/icons'
 import { haystack, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
 
-type Sort = 'price' | 'unit' | 'name'
+type Sort = 'top' | 'price' | 'unit' | 'name'
 
 export function SearchScreen() {
   const { products, retailers, searchOnline, list, setQuantity, pricesOf, t } = useStore()
@@ -16,7 +16,7 @@ export function SearchScreen() {
   const nav = useNav()
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<CategoryId | 'all'>(nav.searchCategory)
-  const [sort, setSort] = useState<Sort>('price')
+  const [sort, setSort] = useState<Sort>('top')
   const input = useRef<HTMLInputElement>(null)
 
   useEffect(() => setCat(nav.searchCategory), [nav.searchCategory])
@@ -38,6 +38,8 @@ export function SearchScreen() {
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const hay = useMemo(() => new Map(products.map((p) => [p.id, haystack(p)])), [products])
+  // Catalogue order is popularity order; shop-only products come after it.
+  const rank = useMemo(() => new Map(products.map((p, i) => [p.id, i])), [products])
   const results = useMemo(() => {
     const needle = q.trim()
     const scope = retailers
@@ -60,13 +62,14 @@ export function SearchScreen() {
         if (needle && (tier(a.score) === 3) !== (tier(b.score) === 3)) return tier(a.score) === 3 ? 1 : -1
         if (!!a.best !== !!b.best) return a.best ? -1 : 1
         if (needle && tier(a.score) !== tier(b.score)) return tier(a.score) - tier(b.score)
+        if (sort === 'top') return rank.get(a.p.id)! - rank.get(b.p.id)!
         if (sort === 'name') return a.p.name.localeCompare(b.p.name)
         const av = sort === 'unit' ? a.best?.unitPriceCents : a.best?.current.priceCents
         const bv = sort === 'unit' ? b.best?.unitPriceCents : b.best?.current.priceCents
         return (av ?? Infinity) - (bv ?? Infinity)
       })
       .slice(0, 80)
-  }, [q, cat, sort, products, pricesOf, retailers, online, hay])
+  }, [q, cat, sort, products, pricesOf, retailers, online, hay, rank])
 
   const inList = (id: string) => list.items.find((i) => i.productId === id)
   const quickAdd = (id: string) => {
@@ -94,7 +97,7 @@ export function SearchScreen() {
       <div className="section-head" style={{ marginTop: 20 }}>
         <span className="muted small">{results.length === 1 ? t('search.countOne') : t('search.count', { n: results.length })}</span>
         <div className="seg" role="group" aria-label={t('search.sort')}>
-          {(['price', 'unit', 'name'] as Sort[]).map((s) => (
+          {(['top', 'price', 'unit', 'name'] as Sort[]).map((s) => (
             <button key={s} className={sort === s ? 'on' : ''} onClick={() => setSort(s)}>
               {t(`sort.${s}`)}
             </button>
@@ -116,7 +119,7 @@ export function SearchScreen() {
                 <Tile product={p} />
                 <div className="grow">
                   <div className="title">{p.name}</div>
-                  <div className="sub">{[p.brand, sizeLabel(p)].filter(Boolean).join(' · ')}</div>
+                  <div className="sub">{[brandLabel(p.brand), sizeLabel(p)].filter(Boolean).join(' · ')}</div>
                 </div>
                 <div className="end">
                   {best ? (

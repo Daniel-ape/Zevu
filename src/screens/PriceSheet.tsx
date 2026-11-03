@@ -6,7 +6,7 @@ import { pickShelfPrice, type LabelWord } from '../domain/shelfLabel'
 const eanFromWords = (words: LabelWord[]) =>
   words.map((w) => w.text.replace(/\D/g, '')).find((d) => (d.length === 13 || d.length === 8) && isValidEan(d)) ?? null
 import type { Product } from '../domain/types'
-import { euro, sizeLabel } from '../domain/pricing'
+import { euro, sizeLabel, brandLabel } from '../domain/pricing'
 import { Tile } from '../ui/bits'
 import { Check } from '../ui/icons'
 
@@ -112,7 +112,7 @@ export function PriceSheet({ product: initial, startWithPhoto, onClose }: {
                   {matches.map((p) => (
                     <button key={p.id} className="row" onClick={() => setProduct(p)}>
                       <Tile product={p} />
-                      <div className="grow"><div className="title">{p.name}</div><div className="sub">{[p.brand, sizeLabel(p)].filter(Boolean).join(' · ')}</div></div>
+                      <div className="grow"><div className="title">{p.name}</div><div className="sub">{[brandLabel(p.brand), sizeLabel(p)].filter(Boolean).join(' · ')}</div></div>
                     </button>
                   ))}
                 </div>
@@ -123,7 +123,7 @@ export function PriceSheet({ product: initial, startWithPhoto, onClose }: {
               <>
                 <div className="row" style={{ borderBottom: 0, paddingTop: 0 }}>
                   <Tile product={product} />
-                  <div className="grow"><div className="title">{product.name}</div><div className="sub">{[product.brand, sizeLabel(product)].filter(Boolean).join(' · ')}</div></div>
+                  <div className="grow"><div className="title">{product.name}</div><div className="sub">{[brandLabel(product.brand), sizeLabel(product)].filter(Boolean).join(' · ')}</div></div>
                   {!initial && <button className="link" onClick={() => setProduct(undefined)}>{t('ap.change')}</button>}
                 </div>
                 <div className="rows">

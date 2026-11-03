@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { haystack, matchScore } from '../domain/search'
-import { sizeLabel } from '../domain/pricing'
+import { sizeLabel, brandLabel } from '../domain/pricing'
 import { Tile } from './bits'
 import { Search } from './icons'
 
@@ -46,7 +46,7 @@ export function ProductPicker({ initial, onPick, onClose }: { initial: string; o
               <Tile product={p} />
               <div className="grow">
                 <div className="title">{p.name}</div>
-                <div className="sub">{[p.brand, sizeLabel(p)].filter(Boolean).join(' · ')}</div>
+                <div className="sub">{[brandLabel(p.brand), sizeLabel(p)].filter(Boolean).join(' · ')}</div>
               </div>
             </button>
           ))}
