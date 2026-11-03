@@ -17,7 +17,7 @@ const safeImg = (u?: unknown) => (typeof u === 'string' && IMG_HOSTS.some((h) =>
 
 type Collected = {
   lidl?: { name: string; period: string; url: string; image?: string }[] | null
-  tokmanni?: { image?: string } | null
+  tokmanni?: { name: string; url: string; image?: string }[] | { image?: string } | null
 }
 
 function isoWeek(d = new Date()) {
@@ -41,6 +41,10 @@ function useShelf(): Chain[] {
     .filter((l) => typeof l.url === 'string' && l.url.startsWith('https://www.lidl.fi/'))
     .slice(0, 9)
     .map((l) => ({ name: l.name, period: l.period, url: l.url, image: safeImg(l.image) }))
+  const tok = (Array.isArray(data?.tokmanni) ? data.tokmanni : [])
+    .filter((l) => typeof l.url === 'string' && l.url.startsWith('https://tarjoussanomat.tokmanni.fi/'))
+    .slice(0, 9)
+    .map((l) => ({ name: l.name, url: l.url, image: safeImg(l.image) }))
   return [
     {
       chain: 'Lidl', about: 'offers.lidl',
@@ -48,7 +52,7 @@ function useShelf(): Chain[] {
     },
     {
       chain: 'Tokmanni', about: 'offers.tok',
-      leaflets: [{ name: 'Tarjoussanomat', period: week, url: TOK_PAGE, image: safeImg(data?.tokmanni?.image) }],
+      leaflets: tok.length ? tok : [{ name: 'Tarjoussanomat', period: week, url: TOK_PAGE }],
     },
     {
       chain: 'K-Ruoka', about: 'offers.kAbout',
