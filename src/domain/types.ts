@@ -41,6 +41,12 @@ export type CategoryId =
   | 'drinks'
   | 'snacks'
   | 'household'
+  | 'health'
+  | 'pets'
+  | 'home'
+  | 'electronics'
+  | 'toys'
+  | 'clothing'
 
 /** Where a price came from. 'sample' must always be shown as such in the UI. */
 export type PriceSource = 'sample' | 'k-ruoka' | 's-kaupat' | 'tokmanni' | 'lidl-offers' | 'user-report' | 'shop'

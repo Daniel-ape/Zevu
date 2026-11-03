@@ -8,7 +8,7 @@ import type { Key } from '../i18n'
 // Shopping mode: the active list in store-walk order, big text, the whole row
 // ticks an item, ticked items drop into "In the basket". Keeps the screen on
 // where the browser allows it.
-const AISLES: CategoryId[] = ['produce', 'bread', 'meat', 'dairy', 'pantry', 'snacks', 'drinks', 'household']
+const AISLES: CategoryId[] = ['produce', 'bread', 'meat', 'dairy', 'pantry', 'snacks', 'drinks', 'household', 'health', 'pets', 'home', 'electronics', 'toys', 'clothing']
 
 export function StoreMode({ onClose }: { onClose: () => void }) {
   const { list, products, toggleChecked, t } = useStore()

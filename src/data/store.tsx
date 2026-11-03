@@ -5,7 +5,7 @@ import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
 import { lookupBarcode, searchProducts } from './openFoodFacts'
 import { loadSnapshot, snapshotProducts } from './snapshot'
-import { collectedProducts, collectedProvider, shopImages } from './collectedPrices'
+import { EMOJI, collectedProducts, collectedProvider, shopImages } from './collectedPrices'
 
 // Registered price providers: prices collected from stores that allow it
 // (Tokmanni, see collector/). Receipts and the user's own prices are added
@@ -191,7 +191,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
       },
       addOwnProduct: ({ ean, name, category }) => {
-        const emoji: Record<CategoryId, string> = { dairy: '🥛', produce: '🥕', bread: '🍞', meat: '🥩', pantry: '🥫', drinks: '🧃', snacks: '🍫', household: '🧴' }
+        const emoji = EMOJI
         const id = ean ? `off:${ean}` : `own:${name.trim().toLowerCase().replace(/[^a-z0-9åäö]+/g, '-')}`
         const p: Product = { id, ean, name: name.trim(), brand: '', category, size: { amount: 0, unit: 'pcs' }, emoji: emoji[category], infoSource: 'user' }
         remember([p])

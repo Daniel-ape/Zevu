@@ -77,7 +77,7 @@ const en = {
   'search.none': 'No products match “{q}”.', 'search.noPrice': 'No prices yet',
   // categories
   'cat.all': 'All', 'cat.dairy': 'Dairy & eggs', 'cat.produce': 'Fruit & veg', 'cat.bread': 'Bread',
-  'cat.meat': 'Meat', 'cat.pantry': 'Pantry', 'cat.drinks': 'Drinks', 'cat.snacks': 'Snacks', 'cat.household': 'Household',
+  'cat.meat': 'Meat', 'cat.pantry': 'Pantry', 'cat.drinks': 'Drinks', 'cat.snacks': 'Snacks', 'cat.household': 'Cleaning', 'cat.health': 'Health & beauty', 'cat.pets': 'Pets', 'cat.home': 'Home & garden', 'cat.electronics': 'Electronics', 'cat.toys': 'Toys & games', 'cat.clothing': 'Clothing',
   // product
   'product.back': 'Back', 'product.lowest': 'Lowest', 'product.per': 'Per {unit}',
   'product.save': 'You save', 'product.stores': 'Stores', 'product.byStore': 'Prices by store', 'product.history': 'Lowest price history', 'product.notFound': 'Product not found.',
@@ -166,7 +166,7 @@ const fi: Dict = {
   'sort.price': 'Hinta', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
   'search.none': 'Ei tuloksia haulle ”{q}”.', 'search.noPrice': 'Ei vielä hintoja',
   'cat.all': 'Kaikki', 'cat.dairy': 'Maito & munat', 'cat.produce': 'Hedelmät & vihannekset', 'cat.bread': 'Leipä',
-  'cat.meat': 'Liha', 'cat.pantry': 'Kuivatuotteet', 'cat.drinks': 'Juomat', 'cat.snacks': 'Herkut', 'cat.household': 'Koti',
+  'cat.meat': 'Liha', 'cat.pantry': 'Kuivatuotteet', 'cat.drinks': 'Juomat', 'cat.snacks': 'Herkut', 'cat.household': 'Siivous & pesu', 'cat.health': 'Terveys & kauneus', 'cat.pets': 'Lemmikit', 'cat.home': 'Koti & puutarha', 'cat.electronics': 'Elektroniikka', 'cat.toys': 'Lelut & pelit', 'cat.clothing': 'Vaatteet',
   'product.back': 'Takaisin', 'product.lowest': 'Halvin', 'product.per': 'Per {unit}',
   'product.save': 'Säästät', 'product.stores': 'Kauppoja', 'product.byStore': 'Hinnat kaupoittain', 'product.history': 'Halvimman hinnan historia', 'product.notFound': 'Tuotetta ei löytynyt.',
   'product.add': 'Lisää listaan', 'product.inList': 'Listalla ({n})', 'chart.notEnough': 'Hintahistoriaa ei ole vielä tarpeeksi.', 'price.lowestDays': 'Halvin hinta {n} päivään', 'price.droppedFrom': 'Laskenut hinnasta {amount}', 'price.low': 'Halvin', 'price.high': 'Kallein', 'price.since': 'Alkaen', 'price.stable': 'Hinta ennallaan {date} lähtien', 'price.history': 'Hintahistoria',
@@ -247,7 +247,7 @@ const sv: Dict = {
   'sort.price': 'Pris', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
   'search.none': 'Inga produkter matchar ”{q}”.', 'search.noPrice': 'Inga priser ännu',
   'cat.all': 'Alla', 'cat.dairy': 'Mejeri & ägg', 'cat.produce': 'Frukt & grönt', 'cat.bread': 'Bröd',
-  'cat.meat': 'Kött', 'cat.pantry': 'Skafferi', 'cat.drinks': 'Drycker', 'cat.snacks': 'Godis & snacks', 'cat.household': 'Hushåll',
+  'cat.meat': 'Kött', 'cat.pantry': 'Skafferi', 'cat.drinks': 'Drycker', 'cat.snacks': 'Godis & snacks', 'cat.household': 'Tvätt & städ', 'cat.health': 'Hälsa & skönhet', 'cat.pets': 'Djur', 'cat.home': 'Hem & trädgård', 'cat.electronics': 'Elektronik', 'cat.toys': 'Leksaker & spel', 'cat.clothing': 'Kläder',
   'product.back': 'Tillbaka', 'product.lowest': 'Lägst', 'product.per': 'Per {unit}',
   'product.save': 'Du sparar', 'product.stores': 'Butiker', 'product.byStore': 'Priser per butik', 'product.history': 'Lägsta prisets historik', 'product.notFound': 'Produkten hittades inte.',
   'product.add': 'Lägg till i listan', 'product.inList': 'I din lista ({n})', 'chart.notEnough': 'Inte tillräckligt med prishistorik ännu.', 'price.lowestDays': 'Lägsta priset på {n} dagar', 'price.droppedFrom': 'Sänkt från {amount}', 'price.low': 'Lägst', 'price.high': 'Högst', 'price.since': 'Sedan', 'price.stable': 'Oförändrat pris sedan {date}', 'price.history': 'Prishistorik',

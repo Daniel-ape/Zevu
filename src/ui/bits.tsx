@@ -8,7 +8,7 @@ import { useStore } from '../data/store'
 import type { Key } from '../i18n'
 
 export const CATEGORIES: { id: CategoryId | 'all'; key: Key }[] = (
-  ['all', 'dairy', 'produce', 'bread', 'meat', 'pantry', 'drinks', 'snacks', 'household'] as const
+  ['all', 'dairy', 'produce', 'bread', 'meat', 'pantry', 'drinks', 'snacks', 'household', 'health', 'pets', 'home', 'electronics', 'toys', 'clothing'] as const
 ).map((id) => ({ id, key: `cat.${id}` as Key }))
 
 export function Tile({ product, large }: { product: Product; large?: boolean }) {

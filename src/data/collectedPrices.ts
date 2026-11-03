@@ -3,6 +3,7 @@
 
 import type { CategoryId, PriceObservation, PriceProvider, PriceSource, Product } from '../domain/types'
 import { fetchData } from './dataFile'
+import { parseQuantity } from './openFoodFacts'
 
 interface File {
   retailerId: string
@@ -16,17 +17,39 @@ const load = (file: string) => {
   return files.get(file)!
 }
 
-// Simple category guess from a Finnish/Swedish product name.
-const GUESS: [RegExp, CategoryId][] = [
-  [/maito|juusto|jogurtti|kerma|voi\b|rahka|viili|muna|mjölk|ost\b/i, 'dairy'],
-  [/leipä|sämpylä|näkki|korppu|bröd/i, 'bread'],
-  [/liha|makkara|nakki|kinkku|kana|broiler|kala|lohi|kött|korv/i, 'meat'],
-  [/omena|banaani|peruna|tomaatti|kurkku|porkkana|hedelmä|vihannes|marja|frukt/i, 'produce'],
-  [/juoma|mehu|kahvi|tee\b|vesi|limsa|olut|kaffe|dryck/i, 'drinks'],
-  [/suklaa|karkki|makeinen|sipsi|keksi|choklad|godis|chips/i, 'snacks'],
-  [/pasta|makaroni|riisi|jauho|kastike|säilyke|mauste|öljy|hiutale|mysli|muro/i, 'pantry'],
+// Category guess from a Finnish/Swedish product name; the first match wins.
+// Non-food words come first so "kissanruoka" is pet food and "puhdistusmaito"
+// is skin care. Shops that sell no food never get a food category.
+const NONFOOD: [RegExp, CategoryId][] = [
+  [/koira|kissa|lemmik|jyrsijä|akvaario|kaneille|hevose|\bhund|\bkatt\b|kattmat|kattleksak/i, 'pets'],
+  [/puhelin|kuuloke|kaiutin|televisio|\btv\b|kannettava|tietokone|näyttö|laturi|kaapeli|\busb|hdmi|bluetooth|kamera|konsoli|playstation|xbox|nintendo|ipad|iphone|galaxy|hiiri\b|näppäimistö|reititin|muistikortti|\bssd\b|älykello|powerbank|virtapankki|tulostin|projektori|mikrofoni/i, 'electronics'],
+  [/lelu|lego|nukke|palapeli|lautapeli|seurapeli|pehmo|leikki|playmobil|barbie|hot wheels|figuuri|leksak|funko/i, 'toys'],
+  [/shampoo|hoitoaine|voide|vitamiini|tabletit|kapseli|hammastahna|hammasharja|deodorantti|antiperspirant|meikki|meikin|ripsiväri|huuli|kynsilakka|lakka\b|parfyymi|hajuvesi|eau de|tuoksu|ihon|aurinkosuoja|laastari|kosteus|seerumi|serum|suihkusaippua|saippua|partak|kasvo|hius|kynsi|lääke|särky|nenäsumute|silmätipat|probiootti|omega|magnesium|kalsium|puhdistusmaito|puhdistusöljy|cleans|cream|lotion|balsami|kosmetiikka|ripsi|kulmakynä/i, 'health'],
+  [/pesuaine|puhdistusaine|siivous|tiskiaine|pyykin|roskapussi|talouspaperi|wc-paperi|huuhteluaine|tahranpoist|astianpesu/i, 'household'],
+  [/paita\b|paita,|t-paita|housut|takki\b|takki,|mekko|hame\b|sukat|sukkahousut|kengät|saappaat|pipo|hanskat|lapaset|farkut|alushousut|rintaliivit|huppari|neule|villapaita|pyjama|uimapuku|bokserit|huivi|koru\b|korvakoru|kaulakoru|rannekoru|sormus/i, 'clothing'],
+  [/lamppu|valaisin|matto|tyyny|peitto|lakana|pyyhe|verho|kattila|paistinpannu|pannu\b|astia|muki|lasi\b|lasit\b|juomalasi|veitsi|kynttilä|työkalu|ruuvi|porakone|puutarha|ruukku|tuoli|pöytä|hylly|säilytys|laatikko|kori\b|sisustus|teline|sakset|vasara|maali\b|liima|grilli|savustus|jatkojohto|paristo|keitin|kone\b|blender|tehosekoitin|airfryer|kahvimylly|termos|pullo\b|juomapullo|henkari/i, 'home'],
 ]
-const EMOJI: Record<CategoryId, string> = { dairy: '🥛', produce: '🥕', bread: '🍞', meat: '🥩', pantry: '🥫', drinks: '🧃', snacks: '🍫', household: '🛍️' }
+const FOOD: [RegExp, CategoryId][] = [
+  [/maito\b|maitoa|maitojuoma|juusto|jogurtti|kuohukerma|ruokakerma|vispikerma|\bvoi\b|rahka|viili|kananmun|munat\b|mjölk|\bost\b/i, 'dairy'],
+  [/leipä\b|leipää|sämpylä|näkki|korppu|\bbröd/i, 'bread'],
+  [/makkara|nakki|kinkku|broiler|kanafile|kananpoika|jauheliha|naudan|porsaan|lohifile|kalapuikko|tonnikala|\bkött|\bkorv\b|korvar\b/i, 'meat'],
+  [/omena\b|banaani|peruna|tomaatti|kurkku\b|porkkana|hedelmä|vihannes|marja|frukt/i, 'produce'],
+  [/juoma\b|juomat\b|mehu|kahvi\b|kahvia|papukahvi|suodatinkahvi|\btee\b|kivennäisvesi|limsa|olut|kaffe|dryck|energiajuoma/i, 'drinks'],
+  [/suklaa|karkki|makeinen|sipsi|keksi|choklad|godis|chips|pastilli|purukumi|konvehti/i, 'snacks'],
+  [/pasta\b|makaroni|riisi\b|jauho|kastike|säilyke|mauste|ruokaöljy|rypsiöljy|oliiviöljy|hiutale|mysli|muro|puuro|keitto\b|proteiini/i, 'pantry'],
+]
+const NO_FOOD = new Set(['verkkokauppa', 'stockmann', 'yliopistonapteekki', 'apteekki360'])
+const guess = (name: string, shop: string): CategoryId | undefined =>
+  NONFOOD.find(([re]) => re.test(name))?.[1] ?? (NO_FOOD.has(shop) ? undefined : FOOD.find(([re]) => re.test(name))?.[1])
+// When the name gives no clue, the kind of shop does.
+const SHOP_DEFAULT: Record<string, CategoryId> = {
+  verkkokauppa: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
+  stockmann: 'health', karkkainen: 'home', halpahalli: 'home', prisma: 'home', lidl: 'home', tokmanni: 'household',
+}
+export const EMOJI: Record<CategoryId, string> = {
+  dairy: '🥛', produce: '🥕', bread: '🍞', meat: '🥩', pantry: '🥫', drinks: '🧃', snacks: '🍫', household: '🧽',
+  health: '🧴', pets: '🐾', home: '🏠', electronics: '🔌', toys: '🧸', clothing: '👕',
+}
 
 /** Product pictures the shops show, by barcode (fallback for catalogue products without one). */
 export async function shopImages(file: string): Promise<[string, string][]> {
@@ -40,10 +63,11 @@ export async function collectedProducts(file: string): Promise<Product[]> {
   const d = await load(file)
   if (!d) return []
   return d.prices.filter((p) => p.name).map((p) => {
-    const category = GUESS.find(([re]) => re.test(p.name!))?.[1] ?? 'household'
+    const category = guess(p.name!, d.retailerId) ?? SHOP_DEFAULT[d.retailerId] ?? 'household'
     return {
       id: `off:${p.ean}`, ean: p.ean, name: p.name!, brand: p.brand ?? '', category,
-      size: { amount: 0, unit: 'pcs' as const }, emoji: EMOJI[category],
+      // Shops rarely give the size separately, but it is usually in the name ("400 g", "6 x 0,33 l").
+      size: parseQuantity(p.name), emoji: EMOJI[category],
       imageUrl: p.image && /^https:\/\//.test(p.image) ? p.image : undefined,
     }
   })
