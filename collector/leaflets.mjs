@@ -53,19 +53,37 @@ try {
 } catch (e) {
   console.log('lidl:', e.message)
 }
-// Tokmanni: its leaflet viewer always shows the newest issue; take the cover
-// picture the page itself offers for link previews (og:image), if any.
+// Tokmanni: its leaflet page links to every current leaflet (Tarjoussanomat,
+// Ruokasanomat, seasonal catalogues...). Each leaflet's own page offers a
+// cover picture for link previews (og:image) and a title.
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const meta = (html, prop) =>
+  html.match(new RegExp(`<meta[^>]+property="${prop}"[^>]+content="([^"]+)"`, 'i'))?.[1] ??
+  html.match(new RegExp(`<meta[^>]+content="([^"]+)"[^>]+property="${prop}"`, 'i'))?.[1]
+out.tokmanni = []
 try {
-  const base = 'https://tarjoussanomat.tokmanni.fi'
-  const page = '/Tarjoussanomat/'
-  const robots = await get(base + '/robots.txt').catch(() => '')
-  const disallow = rulesFor(robots, 'hintaopasbot')
-  if (disallow.some((r) => blockedBy(r, page))) throw new Error('robots.txt disallows the leaflet page')
-  const html = await get(base + page)
-  const og = html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i)?.[1] ?? html.match(/<meta[^>]+content="([^"]+)"[^>]+property="og:image"/i)?.[1]
-  const title = html.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim()
-  console.log('tokmanni og:image', og, 'title', title)
-  if (og?.startsWith('https://')) out.tokmanni = { image: og.replace(/&amp;/g, '&') }
+  const main = rulesFor(await get('https://www.tokmanni.fi/robots.txt'), 'hintaopasbot')
+  if (main.some((r) => blockedBy(r, '/tarjouslehti'))) throw new Error('robots.txt disallows the leaflet page')
+  const list = await get('https://www.tokmanni.fi/tarjouslehti')
+  const viewer = 'https://tarjoussanomat.tokmanni.fi'
+  const vrules = rulesFor(await get(viewer + '/robots.txt').catch(() => ''), 'hintaopasbot')
+  const links = [...new Set([...list.matchAll(/href="(https:\/\/tarjoussanomat\.tokmanni\.fi\/[^"#?]+)"/g)].map((m) => m[1]))]
+  for (const url of links.slice(0, 12)) {
+    if (vrules.some((r) => blockedBy(r, new URL(url).pathname))) continue
+    await sleep(3000)
+    try {
+      const html = await get(url)
+      const title = text(meta(html, 'og:title') ?? html.match(/<title>([^<]*)<\/title>/i)?.[1] ?? '')
+        .replace(/^Lue uusin\s+/i, '')
+      const image = meta(html, 'og:image')?.replace(/&amp;/g, '&')
+      // A readable name from the address when the page has no useful title.
+      const slug = new URL(url).pathname.split('/').filter(Boolean).pop() ?? ''
+      const fromSlug = slug.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase())
+      out.tokmanni.push({ name: title && !/^tokmanni$/i.test(title) ? title : fromSlug, url, image: image?.startsWith('https://') ? image : undefined })
+    } catch (e) {
+      console.log('tokmanni leaflet', url, e.message)
+    }
+  }
 } catch (e) {
   console.log('tokmanni:', e.message)
 }
