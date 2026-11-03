@@ -6,6 +6,7 @@ import { useNav } from '../nav'
 import { Check, Plus, Search } from '../ui/icons'
 import { haystack, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
+import { EMOJI } from '../data/collectedPrices'
 
 type Sort = 'top' | 'price' | 'unit' | 'name'
 
@@ -17,6 +18,7 @@ export function SearchScreen() {
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<CategoryId | 'all'>(nav.searchCategory)
   const [sort, setSort] = useState<Sort>('top')
+  const [picking, setPicking] = useState(false)
   const input = useRef<HTMLInputElement>(null)
 
   useEffect(() => setCat(nav.searchCategory), [nav.searchCategory])
@@ -71,6 +73,15 @@ export function SearchScreen() {
       .slice(0, 80)
   }, [q, cat, sort, products, pricesOf, retailers, online, hay, rank])
 
+  // How many products with a price each category has (shown in the picker).
+  const counts = useMemo(() => {
+    const c = new Map<string, number>()
+    for (const p of products) if (pricesOf(p.id).length) { c.set(p.category, (c.get(p.category) ?? 0) + 1); c.set('all', (c.get('all') ?? 0) + 1) }
+    return c
+  }, [products, pricesOf])
+  const catLabel = (id: CategoryId | 'all') => t(CATEGORIES.find((c) => c.id === id)!.key)
+  const catEmoji = (id: CategoryId | 'all') => (id === 'all' ? '🛒' : EMOJI[id])
+
   const inList = (id: string) => list.items.find((i) => i.productId === id)
   const quickAdd = (id: string) => {
     const item = inList(id)
@@ -88,11 +99,32 @@ export function SearchScreen() {
         {q && <button className="tiny muted" onClick={() => setQ('')}>{t('search.clear')}</button>}
       </label>
 
-      <div className="chips" style={{ marginTop: 16 }}>
-        {CATEGORIES.map((c) => (
-          <button key={c.id} className={'chip' + (cat === c.id ? ' on' : '')} onClick={() => setCat(c.id)}>{t(c.key)}</button>
-        ))}
+      <div className="cat-bar">
+        <button className={'cat-btn' + (cat !== 'all' ? ' on' : '')} onClick={() => setPicking(true)} aria-haspopup="dialog">
+          <span className="cat-emoji">{catEmoji(cat)}</span>
+          <span>{cat === 'all' ? t('search.category') : catLabel(cat)}</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </button>
+        {cat !== 'all' && <button className="cat-clear" onClick={() => setCat('all')} aria-label={t('search.clear')}>✕</button>}
       </div>
+
+      {picking && (
+        <div className="sheet-backdrop" onClick={() => setPicking(false)}>
+          <div className="sheet" role="dialog" aria-modal="true" aria-label={t('search.category')} onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-grab" />
+            <h2 style={{ fontSize: 20, margin: '0 4px 14px' }}>{t('search.category')}</h2>
+            <div className="cat-grid">
+              {CATEGORIES.map((c) => (
+                <button key={c.id} className={'cat-tile' + (cat === c.id ? ' on' : '')} onClick={() => { setCat(c.id); setPicking(false) }}>
+                  <span className="cat-tile-emoji">{catEmoji(c.id)}</span>
+                  <span className="cat-tile-name">{t(c.key)}</span>
+                  <span className="cat-tile-n">{counts.get(c.id) ?? 0}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="section-head" style={{ marginTop: 20 }}>
         <span className="muted small">{results.length === 1 ? t('search.countOne') : t('search.count', { n: results.length })}</span>

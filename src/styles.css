@@ -974,3 +974,24 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 /* Shopping mode and toasts */
 .shop { background: var(--bg); }
 .toast { background: color-mix(in srgb, var(--text) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); bottom: calc(100px + env(safe-area-inset-bottom)); }
+
+/* Search: one category button + a picker sheet (easy with a thumb) */
+.cat-bar { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.cat-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 10px; border-radius: 999px;
+  background: var(--card); font-size: 16px; font-weight: 600; color: var(--text);
+}
+.cat-btn.on { background: var(--accent); color: #fff; }
+.cat-btn:active, .cat-tile:active { transform: scale(0.97); }
+.cat-emoji { font-size: 20px; line-height: 1; }
+.cat-clear { width: 40px; height: 40px; border-radius: 50%; background: var(--fill); color: var(--text-2); font-size: 14px; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cat-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+  min-height: 104px; padding: 12px 6px; border-radius: 18px; background: var(--card); color: var(--text); transition: transform 0.12s;
+}
+.cat-tile.on { background: var(--accent); color: #fff; }
+.cat-tile-emoji { font-size: 30px; line-height: 1; }
+.cat-tile-name { font-size: 13.5px; font-weight: 600; line-height: 1.2; }
+.cat-tile-n { font-size: 12px; color: var(--text-2); }
+.cat-tile.on .cat-tile-n { color: rgba(255, 255, 255, 0.85); }
