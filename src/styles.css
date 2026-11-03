@@ -1001,7 +1001,7 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 /* Store name above a leaflet's title (home page strip) */
 .cover-store { display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--c, var(--text-2)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cover-store::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-.cover-store + .cover-name { margin-top: 2px; font-weight: 500; color: var(--text-2); }
+.cover-store + .cover-name { margin-top: 2px; }
 .cover-store.c-lidl { --c: #0b56b8; }
 .cover-store.c-tokmanni { --c: #c8202f; }
 .cover-store.c-kruoka { --c: #e3600b; }

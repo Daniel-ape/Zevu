@@ -137,7 +137,8 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
   return { shelf, updated: typeof data?.updated === 'string' ? data.updated : undefined }
 }
 
-export function Cover({ chain, l, showStore }: { chain: string; l: Leaflet; showStore?: boolean }) {
+/** showStore: the store's name under the cover; storeOnly: nothing else (home page). */
+export function Cover({ chain, l, showStore = true, storeOnly }: { chain: string; l: Leaflet; showStore?: boolean; storeOnly?: boolean }) {
   const { t } = useStore()
   const [broken, setBroken] = useState(false)
   const [wide, setWide] = useState(false)
@@ -163,8 +164,8 @@ export function Cover({ chain, l, showStore }: { chain: string; l: Leaflet; show
           {l.name.startsWith('K-') ? l.name.split(' ')[0] : chain}
         </div>
       )}
-      {!showStore && <div className="cover-name">{l.name}</div>}
-      {!showStore && l.period && <div className="cover-period">{l.period}</div>}
+      {!storeOnly && <div className="cover-name">{l.name}</div>}
+      {!storeOnly && l.period && <div className="cover-period">{l.period}</div>}
     </a>
   )
 }
