@@ -1,9 +1,0 @@
-name: Probe
-on: workflow_dispatch
-jobs:
-  probe:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm i --no-save sharp
-      - run: node collector/probe.mjs
