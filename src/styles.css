@@ -711,3 +711,9 @@ h1 { font-size: 30px; }
 .icon-plain { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--card); box-shadow: var(--card-shadow); color: var(--text); font-size: 20px; line-height: 1; }
 .menu-sheet .row { width: 100%; font-weight: 600; }
 .menu-sheet .row.danger { color: var(--accent); }
+
+/* You page menu */
+.menu-row { gap: 12px; }
+.menu-icon { width: 32px; height: 32px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+.menu-value { color: var(--text-2); font-size: 15px; margin-right: 2px; }
+.group-note { font-size: 13px; color: var(--text-2); margin: 8px 6px 0; line-height: 1.45; }

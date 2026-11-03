@@ -3,93 +3,45 @@ import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
-import { Chevron, Plus } from '../ui/icons'
+import { Back, Bell, Check, Chevron, Home, Info, Plus, Receipt as ReceiptIcon, Tag } from '../ui/icons'
+import { cheapest, compare } from '../domain/pricing'
+import { Tile } from '../ui/bits'
+import { useNav } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 
-function Group({ title, note, plain, children }: { title: string; note?: string; plain?: boolean; children: ReactNode }) {
+type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about'
+
+// One row of the menu: icon, title, current value, chevron.
+function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: string; value?: string; onClick: () => void }) {
   return (
-    <section className="group">
-      <div className="group-title">{title}</div>
-      <div className={plain ? undefined : 'group-body'}>{children}</div>
-      {note && <p className="group-note">{note}</p>}
-    </section>
+    <button className="row menu-row" onClick={onClick}>
+      <span className="menu-icon">{icon}</span>
+      <span className="grow title">{title}</span>
+      {value && <span className="menu-value">{value}</span>}
+      <span className="muted"><Chevron /></span>
+    </button>
   )
 }
 
 export function Profile() {
-  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, t } = useStore()
+  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, products, observations, retailers, t } = useStore()
+  const nav = useNav()
+  const [page, setPage] = useState<Page | null>(null)
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
   const [undo, setUndo] = useState<Receipt | null>(null)
 
-  return (
-    <div className="screen">
-      <div className="topbar"><h1>{t('you.title')}</h1></div>
+  const now = new Date()
+  const monthTotal = receipts
+    .filter((r) => { const d = new Date(r.date); return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() })
+    .reduce((sum, r) => sum + (r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0)), 0)
+  const titles: Record<Page, string> = {
+    spending: t('spend.title'), receipts: t('you.groupReceipts'), stores: t('stores.title'), watched: t('watch.title'),
+    language: t('you.language'), appearance: t('you.appearance'), about: t('you.groupAbout'),
+  }
 
-      <Group title={t('spend.title')}>
-        <Spending />
-      </Group>
-
-      <Group title={t('stores.title')} note={t('stores.note')} plain>
-        <div className="chip-wrap">
-          {allRetailers.map((r) => (
-            <button key={r.id} className={'chip' + (myStores.includes(r.id) ? ' on' : '')} onClick={() => toggleMyStore(r.id)} aria-pressed={myStores.includes(r.id)}>
-              {r.name}
-            </button>
-          ))}
-        </div>
-      </Group>
-
-      <Group title={t('you.groupReceipts')} note={t('rc.importNote')}>
-        <button className="row" onClick={() => setSheet({})}>
-          <div className="grow title" style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Plus size={18} /> {t('rc.import')}
-          </div>
-        </button>
-        {receipts.map((r) => (
-          <button key={r.id} className="row" onClick={() => setSheet({ receipt: r })}>
-            <div className="grow">
-              <div className="title">{retailerName(r, allRetailers)}</div>
-              <div className="sub">
-                {new Date(r.date).toLocaleDateString(LOCALE[lang])} · {t('rc.items', { n: r.items.length })}
-              </div>
-            </div>
-            <div className="price" style={{ fontSize: 15 }}>
-              {euro(r.totalCents ?? r.items.reduce((s, i) => s + i.priceCents, 0))}
-            </div>
-            <span className="muted"><Chevron /></span>
-          </button>
-        ))}
-      </Group>
-
-      <Group title={t('you.groupSettings')}>
-        <div className="row">
-          <div className="grow title">{t('you.language')}</div>
-          <div className="seg">
-            {LANGS.map((l) => (
-              <button key={l.id} className={lang === l.id ? 'on' : ''} onClick={() => setLang(l.id)}>{l.label}</button>
-            ))}
-          </div>
-        </div>
-        <div className="row">
-          <div className="grow title">{t('you.appearance')}</div>
-          <div className="seg">
-            {(['system', 'light', 'dark'] as Theme[]).map((th) => (
-              <button key={th} className={theme === th ? 'on' : ''} onClick={() => setTheme(th)}>{t(`theme.${th}`)}</button>
-            ))}
-          </div>
-        </div>
-      </Group>
-
-      <Group title={t('you.groupAbout')}>
-        <div className="row">
-          <div className="grow">
-            <div className="title">{t('you.data')}</div>
-            <div className="sub" style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{t('you.dataNote')}</div>
-          </div>
-        </div>
-      </Group>
-
+  const sheets = (
+    <>
       {sheet && (
         <ReceiptSheet
           receipt={sheet.receipt}
@@ -103,6 +55,147 @@ export function Profile() {
           <button onClick={() => { addReceipt(undo); setUndo(null) }}>{t('undo.undo')}</button>
         </div>
       )}
+    </>
+  )
+
+  if (page) {
+    return (
+      <div className="screen push">
+        <div className="topbar sticky">
+          <button className="icon-btn" onClick={() => setPage(null)} aria-label={t('product.back')}><Back /></button>
+          <h2 style={{ flex: 1, textAlign: 'center', marginRight: 44 }}>{titles[page]}</h2>
+        </div>
+
+        {page === 'spending' && <div className="group-body" style={{ padding: 16 }}><Spending /></div>}
+
+        {page === 'receipts' && (
+          <>
+            <div className="rows">
+              <button className="row" onClick={() => setSheet({})}>
+                <div className="grow title" style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Plus size={18} /> {t('rc.import')}
+                </div>
+              </button>
+              {receipts.map((r) => (
+                <button key={r.id} className="row" onClick={() => setSheet({ receipt: r })}>
+                  <div className="grow">
+                    <div className="title">{retailerName(r, allRetailers)}</div>
+                    <div className="sub">{new Date(r.date).toLocaleDateString(LOCALE[lang])} · {t('rc.items', { n: r.items.length })}</div>
+                  </div>
+                  <div className="price" style={{ fontSize: 15 }}>{euro(r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0))}</div>
+                  <span className="muted"><Chevron /></span>
+                </button>
+              ))}
+            </div>
+            <p className="group-note">{t('rc.importNote')}</p>
+          </>
+        )}
+
+        {page === 'stores' && (
+          <>
+            <div className="rows">
+              {allRetailers.map((r) => (
+                <button key={r.id} className="row" onClick={() => toggleMyStore(r.id)} aria-pressed={myStores.includes(r.id)}>
+                  <span className="grow title">{r.name}</span>
+                  <span className={'tick' + (myStores.includes(r.id) ? ' on' : '')}>{myStores.includes(r.id) && <Check size={16} />}</span>
+                </button>
+              ))}
+            </div>
+            <p className="group-note">{t('stores.note')}</p>
+          </>
+        )}
+
+        {page === 'watched' && (
+          watched.length === 0 ? <div className="empty">{t('you.noWatched')}</div> : (
+            <div className="rows">
+              {watched.map((w) => {
+                const p = products.find((x) => x.id === w.productId)
+                if (!p) return null
+                const c = cheapest(compare(p, observations, retailers))
+                return (
+                  <button key={w.productId} className="row" onClick={() => nav.openProduct(p.id)}>
+                    <Tile product={p} />
+                    <div className="grow">
+                      <div className="title">{p.name}</div>
+                      <div className="sub">{c ? c.retailer.name : t('watch.noPrice')}</div>
+                    </div>
+                    {c && <div className="price">{euro(c.current.priceCents)}</div>}
+                  </button>
+                )
+              })}
+            </div>
+          )
+        )}
+
+        {page === 'language' && (
+          <div className="rows">
+            {LANGS.map((l) => (
+              <button key={l.id} className="row" onClick={() => setLang(l.id)}>
+                <span className="grow title">{l.label}</span>
+                {lang === l.id && <span style={{ color: 'var(--accent)' }}><Check size={18} /></span>}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {page === 'appearance' && (
+          <div className="rows">
+            {(['system', 'light', 'dark'] as Theme[]).map((th) => (
+              <button key={th} className="row" onClick={() => setTheme(th)}>
+                <span className="grow title">{t(`theme.${th}`)}</span>
+                {theme === th && <span style={{ color: 'var(--accent)' }}><Check size={18} /></span>}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {page === 'about' && (
+          <div className="rows">
+            <div className="row">
+              <div className="grow">
+                <div className="title">{t('you.data')}</div>
+                <div className="sub" style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{t('you.dataNote')}</div>
+              </div>
+            </div>
+          </div>
+        )}
+        {sheets}
+      </div>
+    )
+  }
+
+  return (
+    <div className="screen">
+      <div className="topbar"><h1>{t('you.title')}</h1></div>
+
+      <button className="list-card" onClick={() => setPage('spending')}>
+        <span className="quick-icon"><ReceiptIcon size={22} /></span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <b>{t('you.thisMonth')}</b>
+          <span className="sub">{t('you.receiptsCount', { n: receipts.length })}</span>
+        </span>
+        <span className="price">{euro(monthTotal)}</span>
+      </button>
+
+      <div className="section rows">
+        <MenuRow icon={<ReceiptIcon size={18} />} title={t('you.groupReceipts')} value={String(receipts.length)} onClick={() => setPage('receipts')} />
+        <MenuRow icon={<Tag size={18} />} title={t('spend.title')} onClick={() => setPage('spending')} />
+      </div>
+
+      <div className="section rows">
+        <MenuRow icon={<Home size={18} />} title={t('stores.title')} value={myStores.length ? String(myStores.length) : t('you.allStores')} onClick={() => setPage('stores')} />
+        <MenuRow icon={<Bell size={18} />} title={t('watch.title')} value={String(watched.length)} onClick={() => setPage('watched')} />
+      </div>
+
+      <div className="section rows">
+        <MenuRow icon={<b style={{ fontSize: 14 }}>Aa</b>} title={t('you.language')} value={LANGS.find((l) => l.id === lang)?.label} onClick={() => setPage('language')} />
+        <MenuRow icon={<span style={{ fontSize: 17 }}>◐</span>} title={t('you.appearance')} value={t(`theme.${theme}`)} onClick={() => setPage('appearance')} />
+      </div>
+
+      <div className="section rows">
+        <MenuRow icon={<Info size={18} />} title={t('you.groupAbout')} onClick={() => setPage('about')} />
+      </div>
+      {sheets}
     </div>
   )
 }
