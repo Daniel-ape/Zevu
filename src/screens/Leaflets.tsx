@@ -11,7 +11,7 @@ import type { Key } from '../i18n'
 // and Osuuskauppa KPO does not publish its weekly ads online), so S stores are
 // not listed.
 type Status = 'now' | 'soon'
-type Leaflet = { name: string; period?: string; url: string; image?: string; status?: Status }
+export type Leaflet = { name: string; period?: string; url: string; image?: string; status?: Status }
 type Chain = { chain: string; about: Key; leaflets: Leaflet[] }
 
 const LIDL_PAGE = 'https://www.lidl.fi/c/tarjouslehdet/s10019134'
@@ -62,7 +62,7 @@ function weekStatus(name: string): Status | 'past' | undefined {
 }
 const order = (l: Leaflet) => (l.status === 'now' ? 0 : l.status === 'soon' ? 2 : 1)
 
-function useShelf(): { shelf: Chain[]; updated?: string } {
+export function useShelf(): { shelf: Chain[]; updated?: string } {
   const { t } = useStore()
   const [data, setData] = useState<Collected | null>(null)
   useEffect(() => {
@@ -104,7 +104,7 @@ function useShelf(): { shelf: Chain[]; updated?: string } {
   return { shelf, updated: typeof data?.updated === 'string' ? data.updated : undefined }
 }
 
-function Cover({ chain, l }: { chain: string; l: Leaflet }) {
+export function Cover({ chain, l }: { chain: string; l: Leaflet }) {
   const { t } = useStore()
   const [broken, setBroken] = useState(false)
   const [wide, setWide] = useState(false)
