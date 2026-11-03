@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../data/store'
 import { inAppLink } from '../data/openLink'
 import { loadLeaflets, markLeafletsSeen, type LeafletFeed } from '../data/leafletFeed'
+import { CHAIN_LABEL, distance, forgetLocation, locate, nearestByChain, useNearby, type Chain as StoreChain, type NearStore } from '../data/nearby'
+import { Chevron } from '../ui/icons'
 import type { Key } from '../i18n'
 
 // A shelf of the chains' own weekly leaflets. Covers and links come from the
@@ -12,7 +14,7 @@ import type { Key } from '../i18n'
 // not listed.
 type Status = 'now' | 'soon'
 export type Leaflet = { name: string; period?: string; url: string; image?: string; status?: Status }
-type Chain = { chain: string; about: Key; leaflets: Leaflet[] }
+type Chain = { chain: string; about: Key; aboutText?: string; leaflets: Leaflet[]; km?: number }
 
 const LIDL_PAGE = 'https://www.lidl.fi/c/tarjouslehdet/s10019134'
 const TOK_PAGE = 'https://tarjoussanomat.tokmanni.fi/Tarjoussanomat/'
@@ -64,6 +66,12 @@ const order = (l: Leaflet) => (l.status === 'now' ? 0 : l.status === 'soon' ? 2 
 
 export function useShelf(): { shelf: Chain[]; updated?: string } {
   const { t } = useStore()
+  const { stores } = useNearby()
+  const near = stores ? nearestByChain(stores) : null
+  const nearText = (c: StoreChain) => {
+    const st = near?.get(c)
+    return st ? t('near.nearest', { store: st.name, dist: distance(st.km) }) : undefined
+  }
   const [data, setData] = useState<Collected | null>(null)
   useEffect(() => {
     loadLeaflets().then(setData)
@@ -85,22 +93,32 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
     .sort((a, b) => order(a) - order(b))
   const shelf: Chain[] = [
     {
-      chain: 'Lidl', about: 'offers.lidl',
+      chain: 'Lidl', about: 'offers.lidl', aboutText: nearText('lidl'), km: near?.get('lidl')?.km,
       leaflets: lidl.length ? lidl : [{ name: t('offers.all'), url: LIDL_PAGE }],
     },
     {
-      chain: 'Tokmanni', about: 'offers.tok',
+      chain: 'Tokmanni', about: 'offers.tok', aboutText: nearText('tokmanni'), km: near?.get('tokmanni')?.km,
       leaflets: tok.length ? tok : [{ name: 'Tarjoussanomat', period: week, url: TOK_PAGE }],
     },
     {
       chain: 'K-Ruoka', about: 'offers.kAbout',
-      leaflets: [
-        { name: 'K-Citymarket', period: week, url: 'https://www.k-ruoka.fi/k-citymarket/tarjouslehti' },
-        { name: 'K-Supermarket', period: week, url: 'https://www.k-ruoka.fi/k-supermarket/tarjouslehti' },
-        { name: 'K-Market', period: week, url: 'https://www.k-ruoka.fi/k-market/tarjouslehti' },
-      ],
+      // With the user's position, each K chain opens the leaflet of the nearest
+      // store of that chain (stores have their own leaflets); otherwise the
+      // chain's general digital leaflet.
+      leaflets: (['k-citymarket', 'k-supermarket', 'k-market'] as const)
+        .map((c) => {
+          const st = near?.get(c)
+          return st?.kSlug
+            ? { name: st.name, period: distance(st.km), url: `https://www.k-ruoka.fi/tarjouslehdet/kauppa/${st.kSlug}`, km: st.km }
+            : { name: CHAIN_LABEL[c], period: week, url: `https://www.k-ruoka.fi/${c}/tarjouslehti`, km: st?.km ?? Infinity }
+        })
+        .sort((x, y) => x.km - y.km)
+        .map(({ km: _km, ...l }) => l),
+      km: Math.min(...(['k-citymarket', 'k-supermarket', 'k-market'] as const).map((c) => near?.get(c)?.km ?? Infinity)),
     },
   ]
+  // Closest chains first once the position is known.
+  if (near) shelf.sort((a, b) => (a.km ?? Infinity) - (b.km ?? Infinity))
   return { shelf, updated: typeof data?.updated === 'string' ? data.updated : undefined }
 }
 
@@ -120,7 +138,7 @@ export function Cover({ chain, l }: { chain: string; l: Leaflet }) {
           />
         ) : (
           <span className={'cover-blank c-' + chain.toLowerCase().replace(/[^a-z]/g, '')} aria-hidden>
-            <b>{l.name.startsWith('K-') ? l.name : chain}</b>
+            <b>{(l.name.startsWith('K-') ? l.name.split(' ')[0] : chain).replace('-', '\u2011')}</b>
             <small>{t('offers.leaflet')}</small>
           </span>
         )}
@@ -153,11 +171,12 @@ export function Leaflets() {
           </button>
         ))}
       </div>
+      <NearbyCard />
       {shown.map((c) => (
         <div key={c.chain} className="section">
           <div className="section-head">
             <h2>{c.chain}</h2>
-            <span className="muted tiny">{t(c.about)}</span>
+            <span className="muted tiny" style={{ textAlign: 'right' }}>{c.aboutText ?? t(c.about)}</span>
           </div>
           <div className="shelf">
             {c.leaflets.map((l) => <Cover key={l.url} chain={c.chain} l={l} />)}
@@ -168,6 +187,53 @@ export function Leaflets() {
         {t('offers.note')}
         {when && <><br />{t('offers.updated', { time: when })}</>}
       </p>
+    </div>
+  )
+}
+
+// Nearest store of each chain, or a button to share the position.
+function NearbyCard() {
+  const { t } = useStore()
+  const { stores, status } = useNearby()
+  const [error, setError] = useState<string | null>(null)
+  const [asking, setAsking] = useState(false)
+  const ask = async () => {
+    setError(null)
+    setAsking(true)
+    try { await locate() } catch { setError(t('near.denied')) } finally { setAsking(false) }
+  }
+  if (status === 'off') {
+    return (
+      <button className="tip section" onClick={ask} disabled={asking}>
+        <span className="quick-icon" aria-hidden>📍</span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <b>{asking ? t('near.loading') : t('near.use')}</b>
+          <span>{error ?? t('near.why')}</span>
+        </span>
+        <Chevron />
+      </button>
+    )
+  }
+  const list = stores ? [...nearestByChain(stores).values()].slice(0, 6) : []
+  const href = (s: NearStore) => s.url ?? `https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}`
+  return (
+    <div className="section">
+      <div className="section-head">
+        <h2>{t('near.title')}</h2>
+        <button className="link tiny" onClick={forgetLocation}>{t('near.forget')}</button>
+      </div>
+      {status === 'loading' && <p className="small muted">{t('near.loading')}</p>}
+      {status === 'error' && <p className="small muted">{t('near.error')}</p>}
+      {list.length > 0 && (
+        <div className="strip">
+          {list.map((s) => (
+            <a key={s.chain} className="near-chip" href={href(s)} target="_blank" rel="noreferrer" onClick={inAppLink(href(s))}>
+              <b>{s.name}</b>
+              <span>{distance(s.km)}</span>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
