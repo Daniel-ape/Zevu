@@ -20,9 +20,9 @@ jobs:
     timeout-minutes: 300
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 9
       matrix:
-        store: [halpahalli, verkkokauppa, prisma, stockmann, karkkainen, ruohonjuuri, yliopistonapteekki]
+        store: [halpahalli, verkkokauppa, prisma, stockmann, karkkainen, ruohonjuuri, yliopistonapteekki, lidl, apteekki360]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

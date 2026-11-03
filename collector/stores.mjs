@@ -16,7 +16,9 @@ const STORES = {
   halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all' },
   verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'all' },
   prisma: { retailerId: 'prisma', base: 'https://www.prisma.fi', sitemaps: ['https://www.prisma.fi/sitemap.xml'], product: /\/tuotteet\/\d+\//, keep: 'all' },
-  karkkainen: { retailerId: 'karkkainen', base: 'https://www.karkkainen.com', sitemaps: ['https://www.karkkainen.com/files/sitemap/sitemap.xml'], maps: /products_fi/, product: /^https:\/\/www\.karkkainen\.com\/(?!en\/)/, keep: 'all' },
+  karkkainen: { retailerId: 'karkkainen', base: 'https://www.karkkainen.com', sitemaps: ['https://www.karkkainen.com/files/sitemap/sitemap.xml'], maps: /products_/, product: /karkkainen\.com\//, prefer: /karkkainen\.com\/(?!en\/|sv\/)/, keep: 'all' },
+  lidl: { retailerId: 'lidl', base: 'https://www.lidl.fi', sitemaps: ['https://www.lidl.fi/static/sitemap.xml'], maps: /product/, product: /\/p\/[^/]+\/p\d+/, keep: 'all' },
+  apteekki360: { retailerId: 'apteekki360', base: 'https://apteekki360.fi', sitemaps: ['https://apteekki360.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
   ruohonjuuri: { retailerId: 'ruohonjuuri', base: 'https://www.ruohonjuuri.fi', sitemaps: ['https://www.ruohonjuuri.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
   yliopistonapteekki: { retailerId: 'yliopistonapteekki', base: 'https://www.yliopistonapteekki.fi', sitemaps: ['https://www.yliopistonapteekki.fi/pub/media/sitemap.xml'], product: /-\d{3,}$/, keep: 'all' },
   stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'all' },
@@ -78,6 +80,8 @@ while (queue.length && !over()) {
   }
   await sleep(1000)
 }
+// Shops with the same page in several languages: keep the Finnish one.
+if (cfg.prefer && [...urls].some((u) => cfg.prefer.test(u))) for (const u of [...urls]) if (!cfg.prefer.test(u)) urls.delete(u)
 console.log(`${urls.size} product pages in the sitemaps`)
 
 // State: what each page held when last read
