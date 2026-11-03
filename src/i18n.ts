@@ -73,7 +73,7 @@ const en = {
   'home.drops': 'Price drops', 'home.last4w': 'last 4 weeks', 'home.recent': 'Recently viewed',
   // search
   'search.title': 'Search', 'search.placeholder': 'Product, brand or barcode', 'search.clear': 'Clear', 'search.count': '{n} products', 'search.countOne': '1 product', 'search.sort': 'Sort',
-  'search.category': 'Category', 'sort.top': 'Popular', 'sort.price': 'Price', 'sort.unit': '€/kg', 'sort.name': 'A–Z',
+  'search.category': 'Category', 'common.close': 'Close', 'sort.top': 'Popular', 'sort.price': 'Price', 'sort.unit': '€/kg', 'sort.name': 'A–Z',
   'search.none': 'No products match “{q}”.', 'search.noPrice': 'No prices yet',
   // categories
   'cat.all': 'All', 'cat.dairy': 'Dairy & eggs', 'cat.produce': 'Fruit & veg', 'cat.bread': 'Bread',
@@ -163,7 +163,7 @@ const fi: Dict = {
   'home.cheapestAt': '{list} on halvin kaupassa', 'home.saveUpTo': 'Säästä jopa {amount}',
   'home.drops': 'Hinnanlaskut', 'home.last4w': '4 viikkoa', 'home.recent': 'Viimeksi katsotut',
   'search.title': 'Haku', 'search.placeholder': 'Tuote, merkki tai viivakoodi', 'search.clear': 'Tyhjennä', 'search.count': '{n} tuotetta', 'search.countOne': '1 tuote', 'search.sort': 'Järjestys',
-  'search.category': 'Kategoria', 'sort.top': 'Suosittu', 'sort.price': 'Hinta', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
+  'search.category': 'Kategoria', 'common.close': 'Sulje', 'sort.top': 'Suosittu', 'sort.price': 'Hinta', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
   'search.none': 'Ei tuloksia haulle ”{q}”.', 'search.noPrice': 'Ei vielä hintoja',
   'cat.all': 'Kaikki', 'cat.dairy': 'Maito & munat', 'cat.produce': 'Hedelmät & vihannekset', 'cat.bread': 'Leipä',
   'cat.meat': 'Liha', 'cat.pantry': 'Kuivatuotteet', 'cat.drinks': 'Juomat', 'cat.snacks': 'Herkut', 'cat.household': 'Siivous & pesu', 'cat.health': 'Terveys & kauneus', 'cat.pets': 'Lemmikit', 'cat.home': 'Koti & puutarha', 'cat.electronics': 'Elektroniikka', 'cat.toys': 'Lelut & pelit', 'cat.clothing': 'Vaatteet',
@@ -244,7 +244,7 @@ const sv: Dict = {
   'home.cheapestAt': '{list} är billigast hos', 'home.saveUpTo': 'Spara upp till {amount}',
   'home.drops': 'Prissänkningar', 'home.last4w': 'senaste 4 veckorna', 'home.recent': 'Senast visade',
   'search.title': 'Sök', 'search.placeholder': 'Produkt, märke eller streckkod', 'search.clear': 'Rensa', 'search.count': '{n} produkter', 'search.countOne': '1 produkt', 'search.sort': 'Sortera',
-  'search.category': 'Kategori', 'sort.top': 'Populärt', 'sort.price': 'Pris', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
+  'search.category': 'Kategori', 'common.close': 'Stäng', 'sort.top': 'Populärt', 'sort.price': 'Pris', 'sort.unit': '€/kg', 'sort.name': 'A–Ö',
   'search.none': 'Inga produkter matchar ”{q}”.', 'search.noPrice': 'Inga priser ännu',
   'cat.all': 'Alla', 'cat.dairy': 'Mejeri & ägg', 'cat.produce': 'Frukt & grönt', 'cat.bread': 'Bröd',
   'cat.meat': 'Kött', 'cat.pantry': 'Skafferi', 'cat.drinks': 'Drycker', 'cat.snacks': 'Godis & snacks', 'cat.household': 'Tvätt & städ', 'cat.health': 'Hälsa & skönhet', 'cat.pets': 'Djur', 'cat.home': 'Hem & trädgård', 'cat.electronics': 'Elektronik', 'cat.toys': 'Leksaker & spel', 'cat.clothing': 'Kläder',

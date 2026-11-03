@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../data/store'
 import { cheapest, compare, euro, sizeLabel, unitLabel, brandLabel } from '../domain/pricing'
 import type { CategoryId } from '../domain/types'
@@ -7,6 +7,7 @@ import { Check, Plus, Search } from '../ui/icons'
 import { haystack, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
 import { EMOJI } from '../data/collectedPrices'
+import { Sheet } from '../ui/Sheet'
 
 type Sort = 'top' | 'price' | 'unit' | 'name'
 
@@ -19,6 +20,7 @@ export function SearchScreen() {
   const [cat, setCat] = useState<CategoryId | 'all'>(nav.searchCategory)
   const [sort, setSort] = useState<Sort>('top')
   const [picking, setPicking] = useState(false)
+  const closePicker = useCallback(() => setPicking(false), [])
   const input = useRef<HTMLInputElement>(null)
 
   useEffect(() => setCat(nav.searchCategory), [nav.searchCategory])
@@ -109,21 +111,17 @@ export function SearchScreen() {
       </div>
 
       {picking && (
-        <div className="sheet-backdrop" onClick={() => setPicking(false)}>
-          <div className="sheet" role="dialog" aria-modal="true" aria-label={t('search.category')} onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-grab" />
-            <h2 style={{ fontSize: 20, margin: '0 4px 14px' }}>{t('search.category')}</h2>
-            <div className="cat-grid">
-              {CATEGORIES.map((c) => (
-                <button key={c.id} className={'cat-tile' + (cat === c.id ? ' on' : '')} onClick={() => { setCat(c.id); setPicking(false) }}>
-                  <span className="cat-tile-emoji">{catEmoji(c.id)}</span>
-                  <span className="cat-tile-name">{t(c.key)}</span>
-                  <span className="cat-tile-n">{counts.get(c.id) ?? 0}</span>
-                </button>
-              ))}
-            </div>
+        <Sheet title={t('search.category')} onClose={closePicker} closeLabel={t('common.close')}>
+          <div className="cat-grid">
+            {CATEGORIES.map((c) => (
+              <button key={c.id} className={'cat-tile' + (cat === c.id ? ' on' : '')} onClick={() => { setCat(c.id); setPicking(false) }}>
+                <span className="cat-tile-emoji">{catEmoji(c.id)}</span>
+                <span className="cat-tile-name">{t(c.key)}</span>
+                <span className="cat-tile-n">{counts.get(c.id) ?? 0}</span>
+              </button>
+            ))}
           </div>
-        </div>
+        </Sheet>
       )}
 
       <div className="section-head" style={{ marginTop: 20 }}>
