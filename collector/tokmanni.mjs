@@ -15,7 +15,17 @@ const get = async (url) => {
 }
 
 // Respect robots.txt: skip anything it disallows.
-const robots = await get('https://www.tokmanni.fi/robots.txt')
+// A missing robots.txt (404) means no rules; anything else that fails stops the run.
+async function robotsTxt(url) {
+  for (let i = 0; i < 3; i++) {
+    const r = await fetch(url, { headers: { 'User-Agent': UA } }).catch(() => null)
+    if (r?.ok) return r.text()
+    if (r?.status === 404 && i === 2) return ''
+    await sleep(30_000)
+  }
+  throw new Error('robots.txt unavailable')
+}
+const robots = await robotsTxt('https://www.tokmanni.fi/robots.txt')
 // Only rules in groups that apply to us: "User-agent: *" or our own name.
 function rulesFor(text, agent) {
   const groups = []
