@@ -137,7 +137,7 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
   return { shelf, updated: typeof data?.updated === 'string' ? data.updated : undefined }
 }
 
-export function Cover({ chain, l }: { chain: string; l: Leaflet }) {
+export function Cover({ chain, l, showStore }: { chain: string; l: Leaflet; showStore?: boolean }) {
   const { t } = useStore()
   const [broken, setBroken] = useState(false)
   const [wide, setWide] = useState(false)
@@ -158,6 +158,11 @@ export function Cover({ chain, l }: { chain: string; l: Leaflet }) {
           </span>
         )}
       </div>
+      {showStore && (
+        <div className={'cover-store c-' + chain.toLowerCase().replace(/[^a-z]/g, '')}>
+          {l.name.startsWith('K-') ? l.name.split(' ')[0] : chain}
+        </div>
+      )}
       <div className="cover-name">{l.name}</div>
       {l.period && <div className="cover-period">{l.period}</div>}
     </a>

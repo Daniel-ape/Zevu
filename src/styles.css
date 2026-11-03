@@ -997,3 +997,16 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .sheet-close { width: 36px; height: 36px; }
 .cat-tile { min-height: 88px; padding: 10px 6px; gap: 4px; }
 .cat-tile-emoji { font-size: 26px; }
+
+/* Store name above a leaflet's title (home page strip) */
+.cover-store { display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--c, var(--text-2)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cover-store::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.cover-store + .cover-name { margin-top: 2px; font-weight: 500; color: var(--text-2); }
+.cover-store.c-lidl { --c: #0b56b8; }
+.cover-store.c-tokmanni { --c: #c8202f; }
+.cover-store.c-kruoka { --c: #e3600b; }
+.cover-store.c-minimani { --c: #d2481a; }
+.cover-store.c-rusta { --c: #23794b; }
+.cover-store.c-halpahalli { --c: #b5121b; }
+:root[data-theme='dark'] .cover-store { color: color-mix(in srgb, var(--c, #888) 55%, #fff); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .cover-store { color: color-mix(in srgb, var(--c, #888) 55%, #fff); } }
