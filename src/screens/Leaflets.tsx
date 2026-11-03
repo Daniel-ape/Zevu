@@ -163,8 +163,8 @@ export function Cover({ chain, l, showStore }: { chain: string; l: Leaflet; show
           {l.name.startsWith('K-') ? l.name.split(' ')[0] : chain}
         </div>
       )}
-      <div className="cover-name">{l.name}</div>
-      {l.period && <div className="cover-period">{l.period}</div>}
+      {!showStore && <div className="cover-name">{l.name}</div>}
+      {!showStore && l.period && <div className="cover-period">{l.period}</div>}
     </a>
   )
 }
