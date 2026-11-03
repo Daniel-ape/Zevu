@@ -16,7 +16,7 @@ const STORES = {
   halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all' },
   verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'all' },
   prisma: { retailerId: 'prisma', base: 'https://www.prisma.fi', sitemaps: ['https://www.prisma.fi/sitemap.xml'], product: /\/tuotteet\/\d+\//, keep: 'all' },
-  karkkainen: { retailerId: 'karkkainen', base: 'https://www.karkkainen.com', sitemaps: ['https://www.karkkainen.com/files/sitemap/sitemap.xml'], maps: /products_/, product: /karkkainen\.com\//, prefer: /karkkainen\.com\/(?!en\/|sv\/)/, keep: 'all' },
+  karkkainen: { retailerId: 'karkkainen', base: 'https://www.karkkainen.com', sitemaps: ['https://www.karkkainen.com/files/sitemap/sitemap.xml'], maps: /products_/, product: /karkkainen\.com\/verkkokauppa\//, keep: 'all' },
   lidl: { retailerId: 'lidl', base: 'https://www.lidl.fi', sitemaps: ['https://www.lidl.fi/static/sitemap.xml'], maps: /product/, product: /\/p\/[^/]+\/p\d+/, keep: 'all' },
   apteekki360: { retailerId: 'apteekki360', base: 'https://apteekki360.fi', sitemaps: ['https://apteekki360.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
   ruohonjuuri: { retailerId: 'ruohonjuuri', base: 'https://www.ruohonjuuri.fi', sitemaps: ['https://www.ruohonjuuri.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
@@ -32,11 +32,21 @@ const BUDGET = Number(process.env.BUDGET_MIN ?? 270) * 60_000
 const START = Date.now()
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const over = () => Date.now() - START > BUDGET
+// Pages are read with a timeout and a size cap, so one endless or huge
+// response can't stall the run or use up the memory.
+const MAX_BYTES = 8 * 1024 * 1024
 async function get(url) {
-  const r = await fetch(url, { headers: { 'User-Agent': UA } })
+  const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(45_000) })
   if (r.status === 429 || r.status === 403) throw Object.assign(new Error(`${r.status} ${url}`), { stop: true })
   if (!r.ok) throw new Error(`${r.status} ${url}`)
-  const buf = Buffer.from(await r.arrayBuffer())
+  const chunks = []
+  let size = 0
+  for await (const c of r.body) {
+    size += c.length
+    if (size > (/\.xml/i.test(url) ? 10 * MAX_BYTES : MAX_BYTES)) { r.body.cancel?.().catch(() => {}); throw new Error(`too large ${url}`) }
+    chunks.push(c)
+  }
+  const buf = Buffer.concat(chunks)
   return url.endsWith('.gz') ? gunzipSync(buf).toString() : buf.toString()
 }
 
