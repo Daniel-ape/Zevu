@@ -1010,3 +1010,4 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .cover-store.c-halpahalli { --c: #b5121b; }
 :root[data-theme='dark'] .cover-store { color: color-mix(in srgb, var(--c, #888) 55%, #fff); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .cover-store { color: color-mix(in srgb, var(--c, #888) 55%, #fff); } }
+.cover-name.one { -webkit-line-clamp: 2; line-height: 1.25; font-size: 12.5px; font-weight: 500; color: var(--text-2); }

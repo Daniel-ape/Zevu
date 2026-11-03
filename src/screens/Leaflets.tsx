@@ -137,8 +137,8 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
   return { shelf, updated: typeof data?.updated === 'string' ? data.updated : undefined }
 }
 
-/** showStore: the store's name under the cover; storeOnly: nothing else (home page). */
-export function Cover({ chain, l, showStore = true, storeOnly }: { chain: string; l: Leaflet; showStore?: boolean; storeOnly?: boolean }) {
+/** showStore: the store's name under the cover; compact: store + one line of title (home page). */
+export function Cover({ chain, l, showStore = true, compact }: { chain: string; l: Leaflet; showStore?: boolean; compact?: boolean }) {
   const { t } = useStore()
   const [broken, setBroken] = useState(false)
   const [wide, setWide] = useState(false)
@@ -164,8 +164,8 @@ export function Cover({ chain, l, showStore = true, storeOnly }: { chain: string
           {l.name.startsWith('K-') ? l.name.split(' ')[0] : chain}
         </div>
       )}
-      {!storeOnly && <div className="cover-name">{l.name}</div>}
-      {!storeOnly && l.period && <div className="cover-period">{l.period}</div>}
+      <div className={'cover-name' + (compact ? ' one' : '')}>{l.name}</div>
+      {!compact && l.period && <div className="cover-period">{l.period}</div>}
     </a>
   )
 }
