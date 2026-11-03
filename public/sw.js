@@ -1,7 +1,8 @@
 // Keeps Hintaopas working without a connection (e.g. inside a store).
 // App files, product data and the text-recognition engine are cached after
 // first use; pages and prices are fetched fresh when online.
-const CACHE = 'hintaopas-v1'
+// Bump when caching rules change: the old cache is then deleted.
+const CACHE = 'hintaopas-v2'
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './products/fi.json']
 
 // On install, save the app shell and the files index.html loads, so the app
@@ -34,11 +35,12 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url)
   if (url.origin !== location.origin) return // Open Food Facts, fonts: straight to the network
 
-  const fresh = req.mode === 'navigate' || url.pathname.includes('/prices/')
+  // Pages, prices and the product catalogue change: network first (skipping the
+  // browser's own short-term cache), so updates arrive; cached copy offline.
+  const fresh = req.mode === 'navigate' || url.pathname.includes('/prices/') || url.pathname.endsWith('/products/fi.json')
   if (fresh) {
-    // Network first, so updates and new prices arrive; cached copy when offline.
     e.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-cache' })
         .then((res) => {
           if (res.ok) caches.open(CACHE).then((c) => c.put(req, res.clone()))
           return res
@@ -47,7 +49,19 @@ self.addEventListener('fetch', (e) => {
     )
     return
   }
-  // App files (hashed), product data, pictures, OCR engine: cache first.
+  // Product pictures: show the saved copy, refresh it in the background.
+  if (url.pathname.includes('/products/img-')) {
+    e.respondWith(
+      caches.open(CACHE).then(async (c) => {
+        const hit = await c.match(req)
+        const update = fetch(req, { cache: 'no-cache' }).then((res) => { if (res.ok) c.put(req, res.clone()); return res })
+        if (hit) { update.catch(() => {}); return hit }
+        return update
+      }),
+    )
+    return
+  }
+  // App files (named by content, so they never change) and the OCR engine: cache first.
   e.respondWith(
     caches.match(req).then(
       (hit) =>
