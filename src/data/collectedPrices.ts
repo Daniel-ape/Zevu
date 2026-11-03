@@ -2,6 +2,7 @@
 // (public/prices/*.json). Each file lists prices by barcode for one store.
 
 import type { PriceObservation, PriceProvider } from '../domain/types'
+import { fetchData } from './dataFile'
 
 interface File {
   retailerId: string
@@ -17,14 +18,10 @@ export function collectedProvider(file: string, id: 'tokmanni'): PriceProvider {
     label: file,
     isSample: false,
     async getObservations(): Promise<PriceObservation[]> {
-      data ??= fetch(new URL(`prices/${file}`, location.href).href)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null)
+      data ??= fetchData<File>(file)
       const d = await data
       if (!d) return []
-      history ??= fetch(new URL(`prices/${file.replace('.json', '-history.json')}`, location.href).href)
-        .then((r) => (r.ok ? r.json() : {}))
-        .catch(() => ({}))
+      history ??= fetchData<Record<string, [string, number][]>>(file.replace('.json', '-history.json')).then((h) => h ?? {})
       // Earlier prices (one point per change), so history and price drops work.
       const past = Object.entries(await history).flatMap(([ean, points]) =>
         points

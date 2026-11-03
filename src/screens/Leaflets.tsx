@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../data/store'
 import { inAppLink } from '../data/openLink'
+import { fetchData } from '../data/dataFile'
 import type { Key } from '../i18n'
 
 // A shelf of the chains' own weekly leaflets. Covers and links come from the
 // chains' sites (collected daily by collector/leaflets.mjs); the leaflets
 // themselves open on those sites, nothing is copied into the app.
-// S Group has no nationwide leaflet: each regional cooperative makes its own.
-// Osuuskauppa KPO (Jakobstad, Kokkola, Vaasa, Ylivieska) publishes only a few
-// of them online, so the S Group shelf links to S-kaupat's campaigns and to
-// KPO's own publication library.
+// S Group has no nationwide leaflet (each regional cooperative makes its own,
+// and Osuuskauppa KPO does not publish its weekly ads online), so S stores are
+// not listed.
 type Leaflet = { name: string; period?: string; url: string; image?: string }
 type Chain = { chain: string; about: Key; leaflets: Leaflet[] }
 
@@ -34,10 +34,7 @@ function useShelf(): Chain[] {
   const { t } = useStore()
   const [data, setData] = useState<Collected | null>(null)
   useEffect(() => {
-    fetch('./prices/leaflets.json')
-      .then((r) => (r.ok ? r.json() : null))
-      .then(setData)
-      .catch(() => {})
+    fetchData<Collected>('leaflets.json').then(setData)
   }, [])
   const week = t('offers.week', { n: isoWeek() })
   const lidl = (data?.lidl ?? [])
@@ -58,13 +55,6 @@ function useShelf(): Chain[] {
       leaflets: tok.length ? tok : [{ name: 'Tarjoussanomat', period: week, url: TOK_PAGE }],
     },
     {
-      chain: 'S-ryhmä', about: 'offers.sAbout',
-      leaflets: [
-        { name: 'S-kaupat', period: t('offers.sCampaigns'), url: 'https://www.s-kaupat.fi/tuotteet/kampanjat' },
-        { name: 'KPO', period: t('offers.sKpo'), url: 'https://view.sok-julkaisut.fi/library/kpo?cat=-1&sort=date&dir=desc' },
-      ],
-    },
-    {
       chain: 'K-Ruoka', about: 'offers.kAbout',
       leaflets: [
         { name: 'K-Citymarket', period: week, url: 'https://www.k-ruoka.fi/k-citymarket/tarjouslehti' },
@@ -78,14 +68,19 @@ function useShelf(): Chain[] {
 function Cover({ chain, l }: { chain: string; l: Leaflet }) {
   const { t } = useStore()
   const [broken, setBroken] = useState(false)
+  const [wide, setWide] = useState(false)
   return (
     <a className="cover" href={l.url} target="_blank" rel="noreferrer" onClick={inAppLink(l.url)}>
       <div className="cover-img">
         {l.image && !broken ? (
-          <img src={l.image} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setBroken(true)} />
+          <img
+            src={l.image} alt="" loading="lazy" referrerPolicy="no-referrer" className={wide ? 'wide' : undefined}
+            onLoad={(e) => setWide(e.currentTarget.naturalWidth > e.currentTarget.naturalHeight)}
+            onError={() => setBroken(true)}
+          />
         ) : (
           <span className={'cover-blank c-' + chain.toLowerCase().replace(/[^a-z]/g, '')} aria-hidden>
-            <b>{l.name.startsWith('K-') || chain === 'S-ryhmä' ? l.name : chain}</b>
+            <b>{l.name.startsWith('K-') ? l.name : chain}</b>
             <small>{t('offers.leaflet')}</small>
           </span>
         )}
