@@ -613,3 +613,101 @@ button.row:active { opacity: 0.6; }
 .link-product.none { color: var(--text-2); }
 .link-product.guess { background: var(--warn-soft); }
 .guess-tag { font-size: 11px; font-weight: 700; color: var(--warn); flex-shrink: 0; }
+
+/* ============================================================
+   Design system v2 — one calm system for every screen:
+   grey page, white cards that group what belongs together,
+   one accent colour (prices, active tab, main buttons).
+   ============================================================ */
+:root {
+  --bg: #f2f2f6;
+  --card: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1f1f5;
+  --fill: rgba(118, 118, 128, 0.12);
+  --line: #ececf1;
+  --card-shadow: 0 1px 2px rgba(18, 18, 30, 0.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #000000; --card: #1b1b20; --surface: #1b1b20; --surface-2: #26262d; --fill: rgba(118, 118, 128, 0.24);
+    --line: #2b2b32; --card-shadow: none;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #000000; --card: #1b1b20; --surface: #1b1b20; --surface-2: #26262d; --fill: rgba(118, 118, 128, 0.24);
+  --line: #2b2b32; --card-shadow: none;
+}
+@media (min-width: 600px) { body { background: #e6e6ee; } }
+
+/* Typography rhythm */
+h1 { font-size: 30px; }
+.section { margin-top: 28px; }
+.section-head { margin: 0 4px 10px; }
+.section-head h2 { font-size: 19px; font-weight: 700; }
+
+/* Cards: lists of rows and grouped settings */
+.rows, .group-body {
+  background: var(--card); border-radius: 20px; padding: 0 16px; box-shadow: var(--card-shadow);
+}
+.rows .row { padding: 12px 0; }
+.sheet .rows, .shop .rows { background: transparent; padding: 0; box-shadow: none; border-radius: 0; }
+.sheet { background: var(--card); }
+.sheet .search, .sheet .select, .sheet .textarea { background: var(--surface-2); }
+.group-body .seg { background: var(--fill); }
+
+/* Inputs, chips and segmented controls sit on the grey page */
+.search { background: var(--card); box-shadow: var(--card-shadow); }
+.chip { background: var(--card); box-shadow: var(--card-shadow); }
+.chip.on { background: var(--text); color: var(--bg); box-shadow: none; }
+.seg { background: var(--fill); }
+.seg button.on { background: var(--card); }
+
+/* One accent: main actions */
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.ghost { background: var(--card); box-shadow: var(--card-shadow); }
+.search-go { background: var(--accent); color: #fff; }
+
+/* Calm surfaces instead of gradients */
+.hero { background: var(--card); color: var(--text); box-shadow: var(--card-shadow); }
+:root[data-theme='dark'] .hero { color: var(--text); }
+.hero-big { color: var(--accent); }
+.pill { background: var(--surface-2); color: var(--text); }
+.notice-plain, .tip, .price-card, .near-chip, .store-card { background: var(--card); box-shadow: var(--card-shadow); }
+.tip .quick-icon { background: var(--surface-2); }
+.scan-hero, .scan-option { background: var(--card); box-shadow: var(--card-shadow); }
+.new-product .search, .new-product .chip:not(.on), .new-product .btn:not(.primary) { background: var(--surface-2); box-shadow: none; }
+.link-product { background: var(--surface-2); }
+
+/* Leaflet covers: real covers on a white card; fallbacks are softly tinted */
+.cover-img { box-shadow: 0 2px 10px rgba(18, 18, 30, 0.10); background: var(--card); }
+.cover-blank { background: color-mix(in srgb, var(--c, #6b6b78) 14%, var(--card)); color: var(--c, #6b6b78); }
+.cover-blank small { opacity: 0.75; }
+.cover-blank.c-lidl { --c: #0b56b8; background: color-mix(in srgb, #0b56b8 13%, var(--card)); }
+.cover-blank.c-tokmanni { --c: #c8202f; background: color-mix(in srgb, #c8202f 12%, var(--card)); }
+.cover-blank.c-kruoka { --c: #e3600b; background: color-mix(in srgb, #e3600b 13%, var(--card)); }
+.cover-blank.c-minimani { --c: #d2481a; background: color-mix(in srgb, #d2481a 12%, var(--card)); }
+.cover-blank.c-rusta { --c: #23794b; background: color-mix(in srgb, #23794b 13%, var(--card)); }
+.cover-blank.c-halpahalli { --c: #b5121b; background: color-mix(in srgb, #b5121b 12%, var(--card)); }
+.cover-blank b, .cover-blank small { color: var(--c); }
+:root[data-theme='dark'] .cover-blank b, :root[data-theme='dark'] .cover-blank small { color: color-mix(in srgb, var(--c) 45%, #fff); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .cover-blank b, :root:not([data-theme='light']) .cover-blank small { color: color-mix(in srgb, var(--c) 45%, #fff); }
+}
+
+/* Home */
+.home-search {
+  margin-top: 16px; background: var(--card); color: var(--text-3); box-shadow: 0 2px 12px rgba(18, 18, 30, 0.06);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+:root[data-theme='dark'] .home-search { background: var(--card); color: var(--text-3); }
+.list-card { width: 100%; text-align: left; display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 20px; background: var(--card); box-shadow: var(--card-shadow); color: inherit; }
+.list-card .quick-icon { width: 46px; aspect-ratio: 1; border-radius: 14px; background: var(--accent-soft); color: var(--accent); flex-shrink: 0; display: grid; place-items: center; }
+.list-card b { display: block; font-size: 16px; }
+.list-card span.sub { display: block; font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.list-card .price { color: var(--accent); font-weight: 700; font-size: 17px; }
+
+/* Icon button in the title bar */
+.icon-plain { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--card); box-shadow: var(--card-shadow); color: var(--text); font-size: 20px; line-height: 1; }
+.menu-sheet .row { width: 100%; font-weight: 600; }
+.menu-sheet .row.danger { color: var(--accent); }

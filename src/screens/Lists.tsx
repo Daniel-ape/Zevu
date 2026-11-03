@@ -17,6 +17,7 @@ export function Lists() {
   const [toast, setToast] = useState('')
   const [undo, setUndo] = useState<typeof list | null>(null)
   const [shopping, setShopping] = useState(false)
+  const [menu, setMenu] = useState(false)
   const display = (n: string) => (n === 'Weekly shop' ? t('list.defaultName') : n)
 
   const totals = useMemo(
@@ -61,7 +62,7 @@ export function Lists() {
     <div className="screen">
       <div className="topbar">
         <h1 style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{display(list.name)}</h1>
-        {list.items.length > 0 && <button className="link" onClick={share}>{t('list.share')}</button>}
+        <button className="icon-plain" onClick={() => setMenu(true)} aria-label={t('list.more')}>⋯</button>
       </div>
 
       <div className="chips">
@@ -82,12 +83,7 @@ export function Lists() {
             {t(mode === 'new' ? 'list.create' : 'list.save')}
           </button>
         </form>
-      ) : (
-        <div className="tiny" style={{ display: 'flex', gap: 16, margin: '10px 4px 0' }}>
-          <button className="link" style={{ fontSize: 13 }} onClick={() => { setMode('rename'); setName(display(list.name)) }}>{t('list.rename')}</button>
-          {lists.length > 1 && <button className="link" style={{ fontSize: 13 }} onClick={() => { const gone = list; deleteList(list.id); setUndo(gone); setTimeout(() => setUndo((u) => (u === gone ? null : u)), 6000) }}>{t('list.delete')}</button>}
-        </div>
-      )}
+      ) : null}
 
       {list.items.length > 0 && mode === 'none' && (
         <button className="btn primary" style={{ marginTop: 14, height: 50 }} onClick={() => setShopping(true)}>
@@ -169,6 +165,22 @@ export function Lists() {
         </>
       )}
       {shopping && <StoreMode onClose={() => setShopping(false)} />}
+      {menu && (
+        <div className="sheet-backdrop" onClick={() => setMenu(false)}>
+          <div className="sheet menu-sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-grab" />
+            <div className="rows">
+              {list.items.length > 0 && <button className="row" onClick={() => { setMenu(false); share() }}>{t('list.share')}</button>}
+              <button className="row" onClick={() => { setMenu(false); setMode('rename'); setName(display(list.name)) }}>{t('list.rename')}</button>
+              {lists.length > 1 && (
+                <button className="row danger" onClick={() => { setMenu(false); const gone = list; deleteList(list.id); setUndo(gone); setTimeout(() => setUndo((u) => (u === gone ? null : u)), 6000) }}>
+                  {t('list.delete')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {toast && <div className="toast">{toast}</div>}
       {undo && (
         <div className="toast">

@@ -2,10 +2,9 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { ArrowRight, List, Receipt, Scan, Search, Tag } from '../ui/icons'
+import { ArrowRight, List, Receipt, Search } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
-import { PriceSheet } from './PriceSheet'
 import { Cover, useShelf } from './Leaflets'
 import type { Key } from '../i18n'
 
@@ -18,7 +17,6 @@ export function Home() {
   const { products, observations, retailers, list, recent, loading, watched, lang, pricesOf, t } = useStore()
   const nav = useNav()
   const [receipt, setReceipt] = useState(false)
-  const [shelfPrice, setShelfPrice] = useState(false)
   const { shelf } = useShelf()
   const listName = list.name === 'Weekly shop' ? t('list.defaultName') : list.name
   const itemCount = list.items.reduce((n, i) => n + i.quantity, 0)
@@ -67,36 +65,23 @@ export function Home() {
         <h1>{t(greeting())}</h1>
       </div>
 
-      {best && list.items.length > 0 ? (
-        <button className="hero" style={{ width: '100%', textAlign: 'left', marginTop: 18 }} onClick={() => nav.go('lists')}>
-          <div style={{ position: 'relative' }}>
-            <div className="small" style={{ opacity: 0.75, fontWeight: 600 }}>{t('home.cheapestAt', { list: listName })}</div>
-            <div className="hero-big">{best.retailer.name}</div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-              <span className="pill">{euro(best.totalCents)}</span>
-              {saving > 0 && <span className="pill">{t('home.saveUpTo', { amount: euro(saving) })}</span>}
-            </div>
-          </div>
-        </button>
-      ) : (
-        <div className="hero home-hero">
-          <div className="hero-big" style={{ fontSize: 26 }}>{t('home.heroAsk')}</div>
-          <button className="home-search" onClick={() => nav.go('search', { focus: true })}>
-            <Search size={20} />
-            <span>{t('home.heroHint', { n: products.length.toLocaleString(lang === 'en' ? 'en-GB' : 'fi-FI') })}</span>
-          </button>
-        </div>
-      )}
+      <button className="home-search" onClick={() => nav.go('search', { focus: true })}>
+        <Search size={20} />
+        <span>{t('home.heroHint', { n: products.length.toLocaleString(lang === 'en' ? 'en-GB' : 'fi-FI') })}</span>
+      </button>
 
-      <div className="quick">
-        <button onClick={() => nav.go('scan')}><span className="quick-icon"><Scan size={24} /></span>{t('qa.scan')}</button>
-        <button onClick={() => setReceipt(true)}><span className="quick-icon"><Receipt size={24} /></span>{t('qa.receipt')}</button>
-        <button onClick={() => setShelfPrice(true)}><span className="quick-icon"><Tag size={24} /></span>{t('qa.shelf')}</button>
-        <button onClick={() => nav.go('lists')}>
-          <span className="quick-icon"><List size={24} />{itemCount > 0 && <b className="quick-count">{itemCount}</b>}</span>
-          {t('qa.list')}
+      {list.items.length > 0 && (
+        <button className="list-card section" style={{ marginTop: 16 }} onClick={() => nav.go('lists')}>
+          <span className="quick-icon"><List size={22} /></span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <b>{listName} · {itemCount === 1 ? t('list.items1') : t('list.items', { n: itemCount })}</b>
+            <span className="sub">
+              {best ? t('home.cheapestStore', { store: best.retailer.name }) + (saving > 0 ? ' · ' + t('home.saveUpTo', { amount: euro(saving) }) : '') : t('home.noListPrices')}
+            </span>
+          </span>
+          {best ? <span className="price">{euro(best.totalCents)}</span> : <ArrowRight size={16} />}
         </button>
-      </div>
+      )}
 
       {leaflets.length > 0 && (
         <div className="section">
@@ -173,16 +158,17 @@ export function Home() {
         <div className="section">
           <div className="section-head">
             <h2>{t('home.prices')}</h2>
-            <span className="muted tiny">{t('home.pricesSub')}</span>
+            <button className="link small" onClick={() => nav.go('search')}>{t('home.seeAll')} <ArrowRight size={14} /></button>
           </div>
-          <div className="strip">
-            {priced.map(({ p, c }) => (
-              <button key={p.id} className="price-card" onClick={() => nav.openProduct(p.id)}>
+          <div className="rows">
+            {priced.slice(0, 6).map(({ p, c }) => (
+              <button key={p.id} className="row" onClick={() => nav.openProduct(p.id)}>
                 <Tile product={p} />
-                <div className="price-card-name">{p.name}</div>
-                <div className="price-card-size">{sizeLabel(p)}</div>
-                <div className="price-card-price">{euro(c!.current.priceCents)}</div>
-                <div className="price-card-store">{c!.retailer.name}</div>
+                <div className="grow">
+                  <div className="title">{p.name}</div>
+                  <div className="sub">{[sizeLabel(p), c!.retailer.name].filter(Boolean).join(' · ')}</div>
+                </div>
+                <div className="end"><div className="price">{euro(c!.current.priceCents)}</div></div>
               </button>
             ))}
           </div>
@@ -220,7 +206,6 @@ export function Home() {
       )}
 
       {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
-      {shelfPrice && <PriceSheet startWithPhoto onClose={() => setShelfPrice(false)} />}
     </div>
   )
 }
