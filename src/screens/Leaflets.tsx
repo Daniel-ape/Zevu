@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../data/store'
 import { inAppLink } from '../data/openLink'
-import { fetchData } from '../data/dataFile'
+import { loadLeaflets, markLeafletsSeen, type LeafletFeed } from '../data/leafletFeed'
 import type { Key } from '../i18n'
 
 // A shelf of the chains' own weekly leaflets. Covers and links come from the
@@ -19,11 +19,7 @@ const TOK_PAGE = 'https://tarjoussanomat.tokmanni.fi/Tarjoussanomat/'
 const IMG_HOSTS = ['https://imgproxy.leaflets.schwarz/', 'https://cdn.ipaper.io/', 'https://tarjoussanomat.tokmanni.fi/']
 const safeImg = (u?: unknown) => (typeof u === 'string' && IMG_HOSTS.some((h) => u.startsWith(h)) ? u : undefined)
 
-type Collected = {
-  updated?: string
-  lidl?: { name: string; period: string; url: string; image?: string }[] | null
-  tokmanni?: { name: string; url: string; image?: string }[] | { image?: string } | null
-}
+type Collected = LeafletFeed
 
 function isoWeek(d = new Date()) {
   const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
@@ -70,7 +66,7 @@ function useShelf(): { shelf: Chain[]; updated?: string } {
   const { t } = useStore()
   const [data, setData] = useState<Collected | null>(null)
   useEffect(() => {
-    fetchData<Collected>('leaflets.json').then(setData)
+    loadLeaflets().then(setData)
   }, [])
   const week = t('offers.week', { n: isoWeek() })
   const lidl = (data?.lidl ?? [])
@@ -139,6 +135,7 @@ export function Leaflets() {
   const { t, lang } = useStore()
   const { shelf, updated } = useShelf()
   const [only, setOnly] = useState<string>('all')
+  useEffect(() => { markLeafletsSeen() }, [])
   const shown = only === 'all' ? shelf : shelf.filter((c) => c.chain === only)
   const when = updated && !Number.isNaN(+new Date(updated))
     ? new Date(updated).toLocaleString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' })

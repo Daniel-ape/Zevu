@@ -4,6 +4,7 @@ import { basketTotals, cheapest, compare, euro, sizeLabel } from '../domain/pric
 import { useNav } from '../nav'
 import { Check, Minus, Plus } from '../ui/icons'
 import { RankBadge, RetailerMark, Tile } from '../ui/bits'
+import { StoreMode } from './StoreMode'
 
 export function Lists() {
   const {
@@ -15,6 +16,7 @@ export function Lists() {
   const [name, setName] = useState('')
   const [toast, setToast] = useState('')
   const [undo, setUndo] = useState<typeof list | null>(null)
+  const [shopping, setShopping] = useState(false)
   const display = (n: string) => (n === 'Weekly shop' ? t('list.defaultName') : n)
 
   const totals = useMemo(
@@ -85,6 +87,12 @@ export function Lists() {
           <button className="link" style={{ fontSize: 13 }} onClick={() => { setMode('rename'); setName(display(list.name)) }}>{t('list.rename')}</button>
           {lists.length > 1 && <button className="link" style={{ fontSize: 13 }} onClick={() => { const gone = list; deleteList(list.id); setUndo(gone); setTimeout(() => setUndo((u) => (u === gone ? null : u)), 6000) }}>{t('list.delete')}</button>}
         </div>
+      )}
+
+      {list.items.length > 0 && mode === 'none' && (
+        <button className="btn primary" style={{ marginTop: 14, height: 50 }} onClick={() => setShopping(true)}>
+          {t('shop.start')}
+        </button>
       )}
 
       {list.items.length === 0 ? (
@@ -160,6 +168,7 @@ export function Lists() {
           </div>
         </>
       )}
+      {shopping && <StoreMode onClose={() => setShopping(false)} />}
       {toast && <div className="toast">{toast}</div>}
       {undo && (
         <div className="toast">

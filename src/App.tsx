@@ -10,6 +10,8 @@ import { Lists } from './screens/Lists'
 import { Scan } from './screens/Scan'
 import { Profile } from './screens/Profile'
 import { Leaflets } from './screens/Leaflets'
+import { useNewLeaflets } from './data/leafletFeed'
+import { usePriceAlerts } from './data/priceAlerts'
 
 const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile']
 const fromHash = (): Tab => {
@@ -27,6 +29,8 @@ export default function App() {
 
 function Shell() {
   const { t } = useStore()
+  const newLeaflets = useNewLeaflets()
+  usePriceAlerts()
   const [tab, setTab] = useState<Tab>(fromHash)
   const [stack, setStack] = useState<string[]>([]) // product ids opened on top of the tab
   const [searchCategory, setSearchCategory] = useState<CategoryId | 'all'>('all')
@@ -79,7 +83,7 @@ function Shell() {
             {tabBtn('home', t('tab.home'), <HomeIcon />)}
             {tabBtn('search', t('tab.search'), <Search />)}
             {tabBtn('lists', t('tab.list'), <List />)}
-            {tabBtn('leaflets', t('tab.leaflets'), <Paper />)}
+            {tabBtn('leaflets', t('tab.leaflets'), <Paper />, newLeaflets && tab !== 'leaflets')}
             {tabBtn('profile', t('tab.you'), <User />)}
           </div>
           <button className={'dock-scan glass' + (tab === 'scan' && !top ? ' on' : '')} onClick={() => nav.go('scan')} aria-label={t('tab.scan')}>
@@ -90,9 +94,10 @@ function Shell() {
     </NavCtx.Provider>
   )
 
-  function tabBtn(t: Tab, label: string, children: React.ReactNode) {
+  function tabBtn(t: Tab, label: string, children: React.ReactNode, dot = false) {
     return (
       <button key={t} className={'tab' + (tab === t && !top ? ' on' : '')} onClick={() => nav.go(t)} aria-label={label}>
+        {dot && <span className="tab-dot" aria-hidden />}
         {children}
         <span>{label}</span>
       </button>
