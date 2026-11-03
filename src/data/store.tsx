@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { PriceObservation, PriceProvider, Product, Retailer, ShoppingList, Watch } from '../domain/types'
+import type { CategoryId, PriceObservation, PriceProvider, Product, Retailer, ShoppingList, Watch } from '../domain/types'
 import { RETAILERS } from './retailers'
 import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
@@ -56,6 +56,8 @@ interface Store {
   toggleWatch: (productId: string, currentCents: number | null) => void
   /** Barcode lookup: local catalogue first, then Open Food Facts. 'unavailable' = service unreachable. */
   findByBarcode: (ean: string) => Promise<Product | null | 'unavailable'>
+  /** A product the user names themselves when its barcode is unknown. */
+  addOwnProduct: (o: { ean: string; name: string; category: CategoryId }) => Product
   /** Product search in Open Food Facts; 'unavailable' when unreachable. */
   searchOnline: (q: string) => Promise<Product[] | 'unavailable'>
   /** Prices the user added by hand or from a shelf label. */
@@ -98,7 +100,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setRemote((cur) => {
       const byId = new Map(cur.map((p) => [p.id, p]))
       list.forEach((p) => byId.set(p.id, p))
-      return [...byId.values()].slice(-300)
+      // Products the user added themselves are always kept; lookups are a cache.
+      const all = [...byId.values()]
+      return [...all.filter((p) => p.infoSource === 'user'), ...all.filter((p) => p.infoSource !== 'user').slice(-300)]
     })
   const [recent, setRecent] = useState<string[]>(() => load<string[]>('recent', []).filter((id) => !/^p\d+$/.test(id)))
   const [theme, setTheme] = useState<Theme>(() => load('theme', 'system'))
@@ -157,6 +161,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         } catch {
           return 'unavailable'
         }
+      },
+      addOwnProduct: ({ ean, name, category }) => {
+        const emoji: Record<CategoryId, string> = { dairy: '🥛', produce: '🥕', bread: '🍞', meat: '🥩', pantry: '🥫', drinks: '🧃', snacks: '🍫', household: '🧴' }
+        const p: Product = { id: `off:${ean}`, ean, name: name.trim(), brand: '', category, size: { amount: 0, unit: 'pcs' }, emoji: emoji[category], infoSource: 'user' }
+        remember([p])
+        return p
       },
       searchOnline: async (q) => {
         try {

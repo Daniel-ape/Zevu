@@ -29,7 +29,7 @@ export interface Product {
   /** Picture packed in the bundled snapshot (see data/snapshot.ts). */
   imageChunk?: number
   /** Where the product information came from. */
-  infoSource?: 'sample' | 'open-food-facts'
+  infoSource?: 'sample' | 'open-food-facts' | 'user'
 }
 
 export type CategoryId =

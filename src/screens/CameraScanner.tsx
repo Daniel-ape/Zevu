@@ -15,6 +15,7 @@ export function CameraScanner({ onCode, onClose, onFallback }: {
   const { t } = useStore()
   const video = useRef<HTMLVideoElement>(null)
   const [ready, setReady] = useState(false)
+  const [torch, setTorch] = useState<null | { on: boolean; set: (on: boolean) => void }>(null)
 
   useEffect(() => {
     let stream: MediaStream | null = null
@@ -22,21 +23,40 @@ export function CameraScanner({ onCode, onClose, onFallback }: {
     let timer = 0
     const canvas = document.createElement('canvas')
 
+    // Each frame tries one view in turn: the band behind the guide box, the
+    // whole frame, and the band turned 90° (barcodes printed vertically).
+    let n = 0
     const tick = async () => {
       const v = video.current
       if (stopped || !v || v.readyState < 2) { timer = window.setTimeout(tick, 200); return }
-      // Read the centre band of the frame, where the guide box is.
       const w = v.videoWidth, h = v.videoHeight
-      const cw = Math.min(w, 1000), ch = Math.round((cw / w) * h * 0.5)
-      canvas.width = cw
-      canvas.height = ch
-      canvas.getContext('2d', { willReadFrequently: true })!.drawImage(v, 0, h * 0.25, w, h * 0.5, 0, 0, cw, ch)
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+      const mode = n++ % 3
+      if (mode === 0) {
+        const cw = Math.min(w, 1000), ch = Math.round((cw / w) * h * 0.5)
+        canvas.width = cw; canvas.height = ch
+        ctx.drawImage(v, 0, h * 0.25, w, h * 0.5, 0, 0, cw, ch)
+      } else if (mode === 1) {
+        const scale = Math.min(1, 1000 / Math.max(w, h))
+        canvas.width = Math.round(w * scale); canvas.height = Math.round(h * scale)
+        ctx.drawImage(v, 0, 0, canvas.width, canvas.height)
+      } else {
+        // centre column of the frame, rotated so its bars become horizontal
+        const sw = w * 0.5, sh = h
+        const scale = Math.min(1, 1000 / sh)
+        canvas.width = Math.round(sh * scale); canvas.height = Math.round(sw * scale)
+        ctx.save()
+        ctx.translate(canvas.width / 2, canvas.height / 2)
+        ctx.rotate(Math.PI / 2)
+        ctx.drawImage(v, w * 0.25, 0, sw, sh, (-sw * scale) / 2, (-sh * scale) / 2, sw * scale, sh * scale)
+        ctx.restore()
+      }
       const code = await decodeCanvas(canvas).catch(() => null)
       if (stopped) return
       if (code) {
         navigator.vibrate?.(40)
         onCode(code)
-      } else timer = window.setTimeout(tick, 150)
+      } else timer = window.setTimeout(tick, 80)
     }
 
     ;(async () => {
@@ -50,6 +70,19 @@ export function CameraScanner({ onCode, onClose, onFallback }: {
         v.srcObject = stream
         await v.play()
         setReady(true)
+        // Keep focusing, and offer the light where the phone allows it.
+        const track = stream.getVideoTracks()[0]
+        const caps = (track.getCapabilities?.() ?? {}) as MediaTrackCapabilities & { torch?: boolean; focusMode?: string[] }
+        if (caps.focusMode?.includes('continuous')) {
+          track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] }).catch(() => {})
+        }
+        if (caps.torch) {
+          const set = (on: boolean) => {
+            track.applyConstraints({ advanced: [{ torch: on } as MediaTrackConstraintSet] }).catch(() => {})
+            setTorch({ on, set })
+          }
+          setTorch({ on: false, set })
+        }
         tick()
       } catch {
         if (!stopped) onFallback()
@@ -68,7 +101,14 @@ export function CameraScanner({ onCode, onClose, onFallback }: {
       <video ref={video} playsInline muted />
       <div className="camera-guide" />
       <div className="camera-hint">{ready ? t('scan.aim') : t('scan.starting')}</div>
-      <button className="camera-close glass" onClick={onClose}>{t('rc.close')}</button>
+      <div className="camera-actions">
+        {torch && (
+          <button className={'camera-close glass' + (torch.on ? ' on' : '')} onClick={() => torch.set(!torch.on)}>
+            {t('scan.torch')}
+          </button>
+        )}
+        <button className="camera-close glass" onClick={onClose}>{t('rc.close')}</button>
+      </div>
     </div>
   )
 }

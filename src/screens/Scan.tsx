@@ -6,9 +6,14 @@ import { useStore } from '../data/store'
 import { decodeImage } from '../data/barcode'
 import { useNav } from '../nav'
 import { ArrowRight, Receipt, Scan as ScanIcon, Tag } from '../ui/icons'
+import { CATEGORIES } from '../ui/bits'
+import type { CategoryId } from '../domain/types'
 
 export function Scan() {
-  const { findByBarcode, t } = useStore()
+  const { findByBarcode, addOwnProduct, t } = useStore()
+  const [unknown, setUnknown] = useState<{ ean: string; offline: boolean } | null>(null)
+  const [newName, setNewName] = useState('')
+  const [newCat, setNewCat] = useState<CategoryId>('pantry')
   const nav = useNav()
   const [code, setCode] = useState('')
   const [status, setStatus] = useState('')
@@ -21,12 +26,19 @@ export function Scan() {
   const lookup = async (raw: string) => {
     const ean = raw.replace(/\D/g, '')
     if (ean.length < 8) return setStatus(t('scan.short'))
+    setUnknown(null)
     setBusy(true)
     setStatus(t('scan.looking'))
     const res = await findByBarcode(ean)
     setBusy(false)
     if (res && res !== 'unavailable') { setStatus(''); nav.openProduct(res.id) }
-    else setStatus(res === 'unavailable' ? t('scan.offline', { code: ean }) : t('scan.unknown', { code: ean }))
+    else {
+      // Not in the app or in Open Food Facts: let the user name it, so it can
+      // still go on the list and get prices.
+      setStatus('')
+      setNewName('')
+      setUnknown({ ean, offline: res === 'unavailable' })
+    }
   }
 
   const fromPhoto = async (f?: File) => {
@@ -50,6 +62,36 @@ export function Scan() {
         <small>{t('scan.barcodeSub')}</small>
       </button>
       {status && <p className="small" style={{ textAlign: 'center', color: 'var(--text-2)', lineHeight: 1.5 }}>{status}</p>}
+
+      {unknown && (
+        <form
+          className="notice-plain section new-product"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!newName.trim()) return
+            const p = addOwnProduct({ ean: unknown.ean, name: newName, category: newCat })
+            setUnknown(null)
+            nav.openProduct(p.id)
+          }}
+        >
+          <div className="title" style={{ fontWeight: 700, fontSize: 17 }}>{t('scan.newTitle')}</div>
+          <div className="small muted" style={{ lineHeight: 1.5, marginTop: 4 }}>
+            {t(unknown.offline ? 'scan.newOffline' : 'scan.newText', { code: unknown.ean })}
+          </div>
+          <label className="search" style={{ marginTop: 12 }}>
+            <input autoFocus value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t('scan.newName')} />
+          </label>
+          <div className="chip-wrap" style={{ marginTop: 10 }}>
+            {CATEGORIES.filter((c) => c.id !== 'all').map((c) => (
+              <button type="button" key={c.id} className={'chip' + (newCat === c.id ? ' on' : '')} onClick={() => setNewCat(c.id as CategoryId)}>{t(c.key)}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+            <button className="btn primary" style={{ height: 48 }} type="submit" disabled={!newName.trim()}>{t('scan.newSave')}</button>
+            {unknown.offline && <button className="btn" style={{ height: 48 }} type="button" onClick={() => lookup(unknown.ean)}>{t('scan.retry')}</button>}
+          </div>
+        </form>
+      )}
 
       <div className="scan-options">
         <button className="scan-option" onClick={() => setShelf(true)}>
