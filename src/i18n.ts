@@ -81,7 +81,7 @@ const en = {
   // product
   'product.back': 'Back', 'product.lowest': 'Lowest', 'product.per': 'Per {unit}',
   'product.save': 'You save', 'product.stores': 'Stores', 'product.byStore': 'Prices by store', 'product.history': 'Lowest price history', 'product.notFound': 'Product not found.',
-  'product.add': 'Add to list', 'product.inList': 'In your list ({n})', 'chart.notEnough': 'Not enough price history yet.',
+  'product.add': 'Add to list', 'product.inList': 'In your list ({n})', 'chart.notEnough': 'Not enough price history yet.', 'price.lowestDays': 'Lowest price in {n} days', 'price.droppedFrom': 'Down from {amount}', 'price.low': 'Lowest', 'price.high': 'Highest', 'price.since': 'Since', 'price.stable': 'Price unchanged since {date}', 'price.history': 'Price history',
   // freshness
   'time.justNow': 'just now', 'time.hours': '{n} h ago', 'time.yesterday': 'yesterday', 'time.days': '{n} days ago',
   'price.updated': 'Updated {when}', 'price.outdated': 'Outdated · {when}', 'price.offer': 'Offer', 'price.member': 'Member price',
@@ -169,7 +169,7 @@ const fi: Dict = {
   'cat.meat': 'Liha', 'cat.pantry': 'Kuivatuotteet', 'cat.drinks': 'Juomat', 'cat.snacks': 'Herkut', 'cat.household': 'Koti',
   'product.back': 'Takaisin', 'product.lowest': 'Halvin', 'product.per': 'Per {unit}',
   'product.save': 'Säästät', 'product.stores': 'Kauppoja', 'product.byStore': 'Hinnat kaupoittain', 'product.history': 'Halvimman hinnan historia', 'product.notFound': 'Tuotetta ei löytynyt.',
-  'product.add': 'Lisää listaan', 'product.inList': 'Listalla ({n})', 'chart.notEnough': 'Hintahistoriaa ei ole vielä tarpeeksi.',
+  'product.add': 'Lisää listaan', 'product.inList': 'Listalla ({n})', 'chart.notEnough': 'Hintahistoriaa ei ole vielä tarpeeksi.', 'price.lowestDays': 'Halvin hinta {n} päivään', 'price.droppedFrom': 'Laskenut hinnasta {amount}', 'price.low': 'Halvin', 'price.high': 'Kallein', 'price.since': 'Alkaen', 'price.stable': 'Hinta ennallaan {date} lähtien', 'price.history': 'Hintahistoria',
   'time.justNow': 'juuri nyt', 'time.hours': '{n} h sitten', 'time.yesterday': 'eilen', 'time.days': '{n} päivää sitten',
   'price.updated': 'Päivitetty {when}', 'price.outdated': 'Vanhentunut · {when}', 'price.offer': 'Tarjous', 'price.member': 'Jäsenhinta',
   'list.empty': 'Listasi on tyhjä.', 'list.find': 'Etsi tuotteita', 'list.add': 'Lisää tuotteita', 'list.from': 'alkaen {price}',
@@ -250,7 +250,7 @@ const sv: Dict = {
   'cat.meat': 'Kött', 'cat.pantry': 'Skafferi', 'cat.drinks': 'Drycker', 'cat.snacks': 'Godis & snacks', 'cat.household': 'Hushåll',
   'product.back': 'Tillbaka', 'product.lowest': 'Lägst', 'product.per': 'Per {unit}',
   'product.save': 'Du sparar', 'product.stores': 'Butiker', 'product.byStore': 'Priser per butik', 'product.history': 'Lägsta prisets historik', 'product.notFound': 'Produkten hittades inte.',
-  'product.add': 'Lägg till i listan', 'product.inList': 'I din lista ({n})', 'chart.notEnough': 'Inte tillräckligt med prishistorik ännu.',
+  'product.add': 'Lägg till i listan', 'product.inList': 'I din lista ({n})', 'chart.notEnough': 'Inte tillräckligt med prishistorik ännu.', 'price.lowestDays': 'Lägsta priset på {n} dagar', 'price.droppedFrom': 'Sänkt från {amount}', 'price.low': 'Lägst', 'price.high': 'Högst', 'price.since': 'Sedan', 'price.stable': 'Oförändrat pris sedan {date}', 'price.history': 'Prishistorik',
   'time.justNow': 'just nu', 'time.hours': 'för {n} h sedan', 'time.yesterday': 'i går', 'time.days': 'för {n} dagar sedan',
   'price.updated': 'Uppdaterat {when}', 'price.outdated': 'Föråldrat · {when}', 'price.offer': 'Erbjudande', 'price.member': 'Medlemspris',
   'list.empty': 'Din lista är tom.', 'list.find': 'Hitta produkter', 'list.add': 'Lägg till produkter', 'list.from': 'från {price}',

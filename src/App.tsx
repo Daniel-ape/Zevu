@@ -14,6 +14,7 @@ import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
 import { useLiquidGlass } from './ui/LiquidGlass'
+import { WatchAlert } from './ui/WatchAlert'
 import { DOCK_ICONS, NativeDock, wantsNativeDock } from './native/nativeDock'
 
 const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile']
@@ -112,6 +113,7 @@ function Shell() {
     <NavCtx.Provider value={nav}>
       <div className="shell">
         {screen}
+        <WatchAlert />
         {!nativeDock && <nav className="dock" aria-label="Main">
           {barGlass.svg}{scanGlass.svg}
           <div ref={barRef} className={'dock-bar glass' + (barGlass.active ? ' refract' : '')} style={barGlass.style}>

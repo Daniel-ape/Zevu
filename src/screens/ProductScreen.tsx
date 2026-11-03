@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { useStore } from '../data/store'
-import { cheapest, compare, euro, lowestHistory, sizeLabel, trend, unitLabel } from '../domain/pricing'
+import { cheapest, compare, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel } from '../domain/pricing'
+import { LOCALE } from '../i18n'
 import { useNav } from '../nav'
 import { Back, Bell, Check, Plus } from '../ui/icons'
 import { PriceMeta, RankBadge, RetailerMark, Tile, TrendTag } from '../ui/bits'
@@ -10,7 +11,7 @@ import { PriceSheet } from './PriceSheet'
 import { useState } from 'react'
 
 export function ProductScreen({ id }: { id: string }) {
-  const { products, pricesOf, retailers, list, setQuantity, markViewed, watched, toggleWatch, t } = useStore()
+  const { products, pricesOf, retailers, list, setQuantity, markViewed, watched, toggleWatch, t, lang } = useStore()
   const nav = useNav()
   const [adding, setAdding] = useState(false)
   const product = products.find((p) => p.id === id)
@@ -19,7 +20,8 @@ export function ProductScreen({ id }: { id: string }) {
 
   const observations = pricesOf(id)
   const rows = useMemo(() => (product ? compare(product, observations, retailers) : []), [product, observations, retailers])
-  const history = useMemo(() => (product ? lowestHistory(product, observations) : []), [product, observations])
+  const history = useMemo(() => dailyLowest(id, observations), [id, observations])
+  const facts = useMemo(() => priceFacts(history), [history])
   if (!product) return <div className="screen empty">{t('product.notFound')}</div>
 
   const best = cheapest(rows)
@@ -65,6 +67,12 @@ export function ProductScreen({ id }: { id: string }) {
           <div className="best-label">{t('product.cheapestAt')}</div>
           <div className="best-store">{best.retailer.name}</div>
           <div className="best-price">{euro(best.current.priceCents)}</div>
+          {facts && facts.now === best.current.priceCents && (facts.droppedFrom || facts.lowest) && (
+            <div className="price-flags">
+              {facts.droppedFrom && <span className="flag down">{t('price.droppedFrom', { amount: euro(facts.droppedFrom) })}</span>}
+              {facts.lowest && <span className="flag">{t('price.lowestDays', { n: facts.days })}</span>}
+            </div>
+          )}
           <div className="best-meta">
             {[
               best.unitPriceCents != null ? `${euro(best.unitPriceCents)}${unitLabel(product)}` : '',
@@ -109,12 +117,25 @@ export function ProductScreen({ id }: { id: string }) {
         </div>
       </div>
 
-      {history.length > 1 && <div className="section">
+      {history.length > 1 && facts && <div className="section">
         <div className="section-head">
-          <h2>{t('product.history')}</h2>
+          <h2>{t('price.history')}</h2>
           <TrendTag pct={trend(product, observations)} />
         </div>
-        <PriceChart points={history} />
+        <div className="card-plain">
+          <PriceChart points={history} />
+          <div className="price-stats">
+            {facts.max === facts.min ? (
+              <span>{t('price.stable', { date: facts.since.toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' }) })}</span>
+            ) : (
+              <>
+                <span><b>{euro(facts.min)}</b>{t('price.low')}</span>
+                <span><b>{euro(facts.max)}</b>{t('price.high')}</span>
+                <span><b>{facts.since.toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' })}</b>{t('price.since')}</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>}
 
         </>

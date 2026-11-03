@@ -201,3 +201,59 @@ export function splitPlan(
   used.sort((a, b) => picks.filter((p) => p.retailer.id === b.id).length - picks.filter((p) => p.retailer.id === a.id).length)
   return { stores: used, totalCents: best.total, picks, unpriced, single, savingCents: single ? single.totalCents - best.total : 0 }
 }
+
+/**
+ * Lowest price per day across retailers, as it would have looked on each day:
+ * every retailer keeps its last known price until it changes, and prices older
+ * than two weeks on that day are left out. Covers up to `days` back from the
+ * first observation, oldest first.
+ */
+export function dailyLowest(productId: string, observations: PriceObservation[], now = Date.now(), days = 90) {
+  const DAY = 86_400_000
+  const byRetailer = new Map<string, { t: number; cents: number }[]>()
+  for (const o of observations) {
+    if (o.productId !== productId) continue
+    const t = Date.parse(o.observedAt)
+    if (!Number.isFinite(t)) continue
+    const arr = byRetailer.get(o.retailerId) ?? []
+    arr.push({ t, cents: o.priceCents })
+    byRetailer.set(o.retailerId, arr)
+  }
+  if (!byRetailer.size) return []
+  for (const arr of byRetailer.values()) arr.sort((a, b) => a.t - b.t)
+  const first = Math.min(...[...byRetailer.values()].map((a) => a[0].t))
+  const today = Math.floor(now / DAY)
+  const start = Math.max(Math.floor(first / DAY), today - days)
+  const out: { date: Date; cents: number }[] = []
+  for (let d = start; d <= today; d++) {
+    const end = (d + 1) * DAY
+    let low = Infinity
+    for (const arr of byRetailer.values()) {
+      let last: { t: number; cents: number } | undefined
+      for (const p of arr) { if (p.t < end) last = p; else break }
+      if (last && end - last.t <= 14 * DAY && last.cents < low) low = last.cents
+    }
+    if (low < Infinity) out.push({ date: new Date(d * DAY + DAY / 2), cents: low })
+  }
+  return out
+}
+
+/** Facts about the price curve: lowest, highest, and how today compares. */
+export function priceFacts(points: { date: Date; cents: number }[]) {
+  if (!points.length) return null
+  const now = points[points.length - 1].cents
+  const vals = points.map((p) => p.cents)
+  const min = Math.min(...vals), max = Math.max(...vals)
+  // Price just before the latest change, if it was higher.
+  let i = points.length - 1
+  while (i > 0 && points[i - 1].cents === now) i--
+  const before = i > 0 ? points[i - 1].cents : null
+  return {
+    now, min, max,
+    since: points[0].date,
+    days: points.length,
+    lowest: max > min && now === min,
+    droppedFrom: before !== null && before > now ? before : null,
+    changedAt: i > 0 ? points[i].date : null,
+  }
+}

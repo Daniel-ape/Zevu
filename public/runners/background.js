@@ -3,7 +3,9 @@
 // notifies when a watched product has become cheaper than when it was watched
 // (or than the last price we told the user about).
 const LIVE = 'https://daniel-ape.github.io/hintaopas/prices/'
-const FILES = ['tokmanni.json']
+// Every shop the collectors cover (collector/*.mjs).
+const FILES = ['tokmanni.json', 'halpahalli.json', 'verkkokauppa.json', 'prisma.json', 'stockmann.json', 'karkkainen.json', 'ruohonjuuri.json', 'yliopistonapteekki.json', 'lidl.json', 'apteekki360.json']
+const NAMES = { tokmanni: 'Tokmanni', halpahalli: 'Halpa-Halli', verkkokauppa: 'Verkkokauppa.com', prisma: 'Prisma', stockmann: 'Stockmann', karkkainen: 'Kärkkäinen', ruohonjuuri: 'Ruohonjuuri', yliopistonapteekki: 'Yliopiston Apteekki', lidl: 'Lidl', apteekki360: 'Apteekki360' }
 
 function readJson(key, fallback) {
   try {
@@ -33,11 +35,19 @@ addEventListener('checkPrices', async (resolve, reject) => {
     const lang = (CapacitorKV.get('lang') || {}).value || 'fi'
     const told = readJson('told', {})
     const best = {}
+    const want = {}
+    for (const w of watch) want[w.ean] = true
     for (const file of FILES) {
-      const r = await fetch(LIVE + file)
-      if (!r.ok) continue
-      const d = await r.json()
+      let d
+      try {
+        const r = await fetch(LIVE + file)
+        if (!r.ok) continue
+        d = await r.json()
+      } catch (e) {
+        continue
+      }
       for (const p of d.prices || []) {
+        if (!want[p.ean]) continue
         if (best[p.ean] === undefined || p.priceCents < best[p.ean].cents) best[p.ean] = { cents: p.priceCents, store: d.retailerId }
       }
     }
@@ -51,7 +61,7 @@ addEventListener('checkPrices', async (resolve, reject) => {
       const title =
         lang === 'sv' ? 'Billigare nu: ' + w.name : lang === 'en' ? 'Cheaper now: ' + w.name : 'Nyt halvempi: ' + w.name
       const body =
-        (lang === 'sv' ? 'Nu ' : lang === 'en' ? 'Now ' : 'Nyt ') + euro(now.cents) + ' (' + euro(ref) + ')'
+        (lang === 'sv' ? 'Nu ' : lang === 'en' ? 'Now ' : 'Nyt ') + euro(now.cents) + ' (' + euro(ref) + ') · ' + (NAMES[now.store] || now.store)
       notes.push({ id: 1000 + notes.length + (Date.now() % 100000), title, body, scheduleAt: new Date(Date.now() + 1000) })
     }
     CapacitorKV.set('told', JSON.stringify(told))
