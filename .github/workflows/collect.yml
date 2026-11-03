@@ -3,6 +3,7 @@ name: Collect prices
 on:
   schedule:
     - cron: '17 3 * * *'   # 05:17 Finnish time (winter)
+    - cron: '17 15 * * *'  # 17:17 Finnish time
   workflow_dispatch:
 permissions:
   contents: write
