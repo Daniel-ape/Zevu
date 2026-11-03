@@ -12,7 +12,7 @@ type Chain = { chain: string; about: Key; leaflets: Leaflet[] }
 
 const LIDL_PAGE = 'https://www.lidl.fi/c/tarjouslehdet/s10019134'
 const TOK_PAGE = 'https://tarjoussanomat.tokmanni.fi/Tarjoussanomat/'
-const IMG_HOSTS = ['https://imgproxy.leaflets.schwarz/', 'https://tarjoussanomat.tokmanni.fi/', 'https://www.tokmanni.fi/']
+const IMG_HOSTS = ['https://imgproxy.leaflets.schwarz/', 'https://cdn.ipaper.io/', 'https://tarjoussanomat.tokmanni.fi/']
 const safeImg = (u?: unknown) => (typeof u === 'string' && IMG_HOSTS.some((h) => u.startsWith(h)) ? u : undefined)
 
 type Collected = {
@@ -36,6 +36,7 @@ function useShelf(): Chain[] {
       .then(setData)
       .catch(() => {})
   }, [])
+  const week = t('offers.week', { n: isoWeek() })
   const lidl = (data?.lidl ?? [])
     .filter((l) => typeof l.url === 'string' && l.url.startsWith('https://www.lidl.fi/'))
     .slice(0, 9)
@@ -47,16 +48,21 @@ function useShelf(): Chain[] {
     },
     {
       chain: 'Tokmanni', about: 'offers.tok',
-      leaflets: [{ name: 'Tarjoussanomat', period: t('offers.week', { n: isoWeek() }), url: TOK_PAGE, image: safeImg(data?.tokmanni?.image) }],
+      leaflets: [{ name: 'Tarjoussanomat', period: week, url: TOK_PAGE, image: safeImg(data?.tokmanni?.image) }],
     },
     {
-      chain: 'K-Ruoka', about: 'offers.k',
-      leaflets: [{ name: t('offers.pickStore'), url: 'https://www.k-ruoka.fi/tarjouslehdet' }],
+      chain: 'K-Ruoka', about: 'offers.kAbout',
+      leaflets: [
+        { name: 'K-Citymarket', period: week, url: 'https://www.k-ruoka.fi/k-citymarket/tarjouslehti' },
+        { name: 'K-Supermarket', period: week, url: 'https://www.k-ruoka.fi/k-supermarket/tarjouslehti' },
+        { name: 'K-Market', period: week, url: 'https://www.k-ruoka.fi/k-market/tarjouslehti' },
+      ],
     },
   ]
 }
 
 function Cover({ chain, l }: { chain: string; l: Leaflet }) {
+  const { t } = useStore()
   const [broken, setBroken] = useState(false)
   return (
     <a className="cover" href={l.url} target="_blank" rel="noreferrer" onClick={inAppLink(l.url)}>
@@ -64,7 +70,10 @@ function Cover({ chain, l }: { chain: string; l: Leaflet }) {
         {l.image && !broken ? (
           <img src={l.image} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setBroken(true)} />
         ) : (
-          <span className="cover-blank" aria-hidden>{chain[0]}</span>
+          <span className={'cover-blank c-' + chain.toLowerCase().replace(/[^a-z]/g, '')} aria-hidden>
+            <b>{l.name.startsWith('K-') ? l.name : chain}</b>
+            <small>{t('offers.leaflet')}</small>
+          </span>
         )}
       </div>
       <div className="cover-name">{l.name}</div>
