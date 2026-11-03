@@ -3,13 +3,15 @@ import { useStore } from '../data/store'
 import { cheapest, compare, euro, sizeLabel, unitLabel } from '../domain/pricing'
 import type { CategoryId } from '../domain/types'
 import { useNav } from '../nav'
-import { Search } from '../ui/icons'
+import { Check, Plus, Search } from '../ui/icons'
+import { haystack, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
 
 type Sort = 'price' | 'unit' | 'name'
 
 export function SearchScreen() {
-  const { products, observations, retailers, searchOnline, t } = useStore()
+  const { products, observations, retailers, searchOnline, list, setQuantity, t } = useStore()
+  const [added, setAdded] = useState<string | null>(null)
   const [online, setOnline] = useState<'idle' | 'loading' | 'unavailable' | string[]>('idle')
   const nav = useNav()
   const [q, setQ] = useState('')
@@ -35,26 +37,39 @@ export function SearchScreen() {
     return () => { live = false; clearTimeout(timer) }
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const hay = useMemo(() => new Map(products.map((p) => [p.id, haystack(p)])), [products])
   const results = useMemo(() => {
-    const needle = q.trim().toLowerCase()
+    const needle = q.trim()
     const scope = retailers
+    // Strong matches (exact or start of a word) first, typo matches last.
+    const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
     return products
       .filter((p) => cat === 'all' || p.category === cat)
-      .filter((p) => !needle || `${p.name} ${p.brand} ${p.ean}`.toLowerCase().includes(needle) || (Array.isArray(online) && online.includes(p.id)))
-      .map((p) => {
+      .map((p) => ({ p, score: needle ? matchScore(needle, hay.get(p.id)!) || (Array.isArray(online) && online.includes(p.id) ? 2 : 0) : 1 }))
+      .filter((r) => r.score > 0)
+      .map(({ p, score }) => {
         const rows = compare(p, observations, scope)
-        return { p, best: cheapest(rows), count: rows.filter((r) => r.freshness === 'fresh').length }
+        return { p, score, best: cheapest(rows), count: rows.filter((r) => r.freshness === 'fresh').length }
       })
       // Browsing without a query lists only products that have prices.
       .filter((r) => (needle ? true : r.best || r.count > 0))
       .sort((a, b) => {
+        if (needle && tier(a.score) !== tier(b.score)) return tier(a.score) - tier(b.score)
         if (sort === 'name') return a.p.name.localeCompare(b.p.name)
         const av = sort === 'unit' ? a.best?.unitPriceCents : a.best?.current.priceCents
         const bv = sort === 'unit' ? b.best?.unitPriceCents : b.best?.current.priceCents
         return (av ?? Infinity) - (bv ?? Infinity)
       })
       .slice(0, 80)
-  }, [q, cat, sort, products, observations, retailers, online])
+  }, [q, cat, sort, products, observations, retailers, online, hay])
+
+  const inList = (id: string) => list.items.find((i) => i.productId === id)
+  const quickAdd = (id: string) => {
+    const item = inList(id)
+    setQuantity(id, (item?.quantity ?? 0) + 1)
+    setAdded(id)
+    setTimeout(() => setAdded((a) => (a === id ? null : a)), 1600)
+  }
 
   return (
     <div className="screen">
@@ -91,7 +106,8 @@ export function SearchScreen() {
         <div>
           <div className="rows">
             {results.map(({ p, best, count }) => (
-              <button key={p.id} className="row" onClick={() => nav.openProduct(p.id)}>
+              <div key={p.id} className="row search-row">
+              <button className="search-open" onClick={() => nav.openProduct(p.id)}>
                 <Tile product={p} />
                 <div className="grow">
                   <div className="title">{p.name}</div>
@@ -112,10 +128,19 @@ export function SearchScreen() {
                   )}
                 </div>
               </button>
+              <button
+                className={'quick-add' + (inList(p.id) ? ' in' : '')}
+                onClick={() => quickAdd(p.id)}
+                aria-label={t('search.addToList')}
+              >
+                {added === p.id ? <Check size={18} /> : inList(p.id) ? <span>{inList(p.id)!.quantity}</span> : <Plus size={18} />}
+              </button>
+              </div>
             ))}
           </div>
         </div>
       )}
+      {added && <div className="toast">{t('search.added', { list: list.name === 'Weekly shop' ? t('list.defaultName') : list.name })}</div>}
       {online === 'loading' && <p className="tiny muted" style={{ textAlign: 'center' }}>{t('search.onlineLoading')}</p>}
       {online === 'unavailable' && results.length === 0 && <p className="tiny muted" style={{ textAlign: 'center', lineHeight: 1.5 }}>{t('search.onlineOff')}</p>}
     </div>

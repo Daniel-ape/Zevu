@@ -25,6 +25,7 @@ export function snapshotProducts(all: Row[], lang: Lang): Product[] {
     id: `off:${ean}`,
     ean,
     name: (lang === 'sv' && sv) || fi || sv,
+    altName: lang === 'sv' && sv ? fi : sv || undefined,
     brand,
     category,
     size: parseQuantity(quantity),

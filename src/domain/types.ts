@@ -18,6 +18,8 @@ export interface Product {
   id: string
   ean: string
   name: string
+  /** The name in the other language (Finnish or Swedish), used by search. */
+  altName?: string
   brand: string
   category: CategoryId
   size: { amount: number; unit: SizeUnit }

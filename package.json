@@ -12,7 +12,8 @@
     "build:preview": "PREVIEW=1 vite build",
     "test:receipts": "tsx tests/receipts.test.ts",
     "test:off": "tsx tests/openFoodFacts.test.ts",
-    "test": "npm run test:receipts && npm run test:off",
+    "test:search": "tsx tests/search.test.ts",
+    "test": "npm run test:receipts && npm run test:off && npm run test:search",
     "app:sync": "vite build && cap sync",
     "app:android": "vite build && cap sync android && cap open android"
   },
