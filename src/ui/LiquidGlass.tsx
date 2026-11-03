@@ -15,6 +15,8 @@ import { useEffect, useState, type CSSProperties, type RefObject } from 'react'
 
 export const canRefract = (() => {
   if (typeof navigator === 'undefined' || typeof CSS === 'undefined') return false
+  // ?glass=css shows the Safari version in any browser (for testing).
+  if (typeof location !== 'undefined' && location.search.includes('glass=css')) return false
   const ua = navigator.userAgent
   if (/iPhone|iPad|iPod/.test(ua) || /Firefox\//.test(ua)) return false
   if (!/Chrome\/|Chromium\//.test(ua)) return false

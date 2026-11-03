@@ -1011,3 +1011,72 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 :root[data-theme='dark'] .cover-store { color: color-mix(in srgb, var(--c, #888) 55%, #fff); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .cover-store { color: color-mix(in srgb, var(--c, #888) 55%, #fff); } }
 .cover-name.one { -webkit-line-clamp: 2; line-height: 1.25; font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+
+/* ============================================================
+   Liquid Glass for Safari / iPhone (no SVG refraction there).
+   Built from two backdrop layers so it reads as thick glass:
+   ::before  the body: light blur, strong colour, faint tint
+   ::after   the rim: stronger blur and brightness only near the
+             edges (where real glass bends light) plus the thin
+             specular highlight along the edge.
+   The selected tab is a clearer, higher-contrast capsule, as in iOS 27.
+   ============================================================ */
+.dock-bar.glass:not(.refract), .dock-scan.glass:not(.refract) {
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.dock-bar.glass:not(.refract)::before, .dock-scan.glass:not(.refract)::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.32));
+  -webkit-backdrop-filter: blur(6px) saturate(150%) brightness(1.06);
+  backdrop-filter: blur(6px) saturate(150%) brightness(1.06);
+}
+.dock-bar.glass:not(.refract)::after, .dock-scan.glass:not(.refract)::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none; padding: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.28));
+  -webkit-backdrop-filter: blur(16px) saturate(160%) brightness(1.12);
+  backdrop-filter: blur(16px) saturate(160%) brightness(1.12);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.98),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.55),
+    inset 1px 0 0.5px rgba(255, 255, 255, 0.5),
+    inset -1px 0 0.5px rgba(255, 255, 255, 0.5),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.35);
+  -webkit-mask:
+    linear-gradient(90deg, #000 0, transparent 16px, transparent calc(100% - 16px), #000 100%),
+    linear-gradient(180deg, #000 0, transparent 13px, transparent calc(100% - 13px), #000 100%);
+  mask:
+    linear-gradient(90deg, #000 0, transparent 16px, transparent calc(100% - 16px), #000 100%),
+    linear-gradient(180deg, #000 0, transparent 13px, transparent calc(100% - 13px), #000 100%);
+  -webkit-mask-composite: source-over; mask-composite: add;
+}
+.dock-scan.glass:not(.refract)::after {
+  -webkit-mask: radial-gradient(circle, transparent 52%, #000 72%); mask: radial-gradient(circle, transparent 52%, #000 72%);
+}
+/* selected tab: clearer capsule (iOS 27 made it much easier to read) */
+.dock .tab.on { background: rgba(255, 255, 255, 0.62); box-shadow: inset 0 0.5px 0 #fff, 0 1px 4px rgba(0, 0, 0, 0.10); }
+.dock .tab { color: #1d1d1f; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .dock-bar.glass:not(.refract)::before, :root:not([data-theme='light']) .dock-scan.glass:not(.refract)::before {
+    background: linear-gradient(180deg, rgba(44, 44, 48, 0.55), rgba(28, 28, 30, 0.5));
+  }
+  :root:not([data-theme='light']) .dock-bar.glass:not(.refract)::after, :root:not([data-theme='light']) .dock-scan.glass:not(.refract)::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.08));
+    -webkit-backdrop-filter: blur(14px) saturate(200%) brightness(0.95); backdrop-filter: blur(14px) saturate(200%) brightness(0.95);
+    box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.38), inset 0 -1px 0.5px rgba(255, 255, 255, 0.14), inset 0 0 0 0.5px rgba(255, 255, 255, 0.14);
+  }
+  :root:not([data-theme='light']) .dock .tab.on { background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.22); }
+  :root:not([data-theme='light']) .dock .tab { color: #f5f5f7; }
+}
+:root[data-theme='dark'] .dock-bar.glass:not(.refract)::before, :root[data-theme='dark'] .dock-scan.glass:not(.refract)::before {
+  background: linear-gradient(180deg, rgba(44, 44, 48, 0.55), rgba(28, 28, 30, 0.5));
+}
+:root[data-theme='dark'] .dock-bar.glass:not(.refract)::after, :root[data-theme='dark'] .dock-scan.glass:not(.refract)::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.08));
+  -webkit-backdrop-filter: blur(14px) saturate(200%) brightness(0.95); backdrop-filter: blur(14px) saturate(200%) brightness(0.95);
+  box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.38), inset 0 -1px 0.5px rgba(255, 255, 255, 0.14), inset 0 0 0 0.5px rgba(255, 255, 255, 0.14);
+}
+:root[data-theme='dark'] .dock .tab.on { background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme='dark'] .dock .tab { color: #f5f5f7; }
+.dock-scan.glass.on::before, .dock-scan.glass.on::after { display: none; }
