@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { StoreProvider, useStore } from './data/store'
 import type { CategoryId } from './domain/types'
 import { NavCtx, type Nav, type Tab } from './nav'
@@ -13,6 +13,7 @@ import { Leaflets } from './screens/Leaflets'
 import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
+import { useLiquidGlass } from './ui/LiquidGlass'
 
 const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile']
 const fromHash = (): Tab => {
@@ -40,6 +41,10 @@ function Shell() {
     return () => document.removeEventListener('visibilitychange', onShow)
   }, [])
   const [tab, setTab] = useState<Tab>(fromHash)
+  const barRef = useRef<HTMLDivElement>(null)
+  const scanRef = useRef<HTMLButtonElement>(null)
+  const barGlass = useLiquidGlass('lg-bar', barRef)
+  const scanGlass = useLiquidGlass('lg-scan', scanRef, { bezel: 14, scale: 22 })
   const [stack, setStack] = useState<string[]>([]) // product ids opened on top of the tab
   const [searchCategory, setSearchCategory] = useState<CategoryId | 'all'>('all')
   const [searchFocus, setSearchFocus] = useState(false)
@@ -87,14 +92,15 @@ function Shell() {
       <div className="shell">
         {screen}
         <nav className="dock" aria-label="Main">
-          <div className="dock-bar glass">
+          {barGlass.svg}{scanGlass.svg}
+          <div ref={barRef} className={'dock-bar glass' + (barGlass.active ? ' refract' : '')} style={barGlass.style}>
             {tabBtn('home', t('tab.home'), <HomeIcon />)}
             {tabBtn('search', t('tab.search'), <Search />)}
             {tabBtn('lists', t('tab.list'), <List />)}
             {tabBtn('leaflets', t('tab.leaflets'), <Paper />, newLeaflets && tab !== 'leaflets')}
             {tabBtn('profile', t('tab.you'), <User />)}
           </div>
-          <button className={'dock-scan glass' + (tab === 'scan' && !top ? ' on' : '')} onClick={() => nav.go('scan')} aria-label={t('tab.scan')}>
+          <button ref={scanRef} style={tab === 'scan' && !top ? undefined : scanGlass.style} className={'dock-scan glass' + (scanGlass.active ? ' refract' : '') + (tab === 'scan' && !top ? ' on' : '')} onClick={() => nav.go('scan')} aria-label={t('tab.scan')}>
             <ScanIcon size={26} />
           </button>
         </nav>

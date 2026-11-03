@@ -726,62 +726,70 @@ h1 { font-size: 30px; }
 .best-meta { font-size: 13px; color: var(--text-2); margin-top: 6px; line-height: 1.45; }
 
 /* ============================================================
-   Liquid glass dock (iOS style): clear glass that bends light
-   rather than frosting it. Little blur, strong saturation, a
-   bright rim, edge highlights that suggest thickness, and the
-   selected tab as a glass droplet inside the bar.
+   Liquid Glass dock, modelled on the iOS 26 tab bar:
+   - a floating capsule whose colour comes from what is behind it
+   - lensing: content bends at the curved rim (SVG displacement,
+     Chromium/Android only, class .refract, see ui/LiquidGlass.tsx)
+   - chromatic aberration at the rim
+   - a thin specular highlight that follows the edge
+   - the selected tab as a soft grey capsule with a tinted icon
+   Safari/iOS cannot refract, so there it gets light blur instead.
    ============================================================ */
 .dock-bar.glass, .dock-scan.glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%);
-  backdrop-filter: blur(5px) saturate(200%) brightness(1.08) contrast(1.05);
-  -webkit-backdrop-filter: blur(5px) saturate(200%) brightness(1.08) contrast(1.05);
+  background: rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(10px) saturate(190%) brightness(1.04);
+  -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(1.04);
   box-shadow:
-    inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.85),
-    inset -1px -1px 1px rgba(255, 255, 255, 0.35),
-    inset 0 0 18px rgba(255, 255, 255, 0.28),
-    inset 0 -8px 16px -10px rgba(0, 0, 0, 0.10),
-    0 12px 32px rgba(10, 20, 30, 0.16),
-    0 2px 6px rgba(10, 20, 30, 0.08);
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.55),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.45),
+    inset 0 0 14px rgba(255, 255, 255, 0.35),
+    0 8px 28px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.06);
 }
-/* lens highlight: light gathered along the top edge */
+/* refracting glass is clear: no frost, barely tinted */
+.dock-bar.glass.refract, .dock-scan.glass.refract { background: rgba(255, 255, 255, 0.12); }
+/* faint sheen over the upper half, like light on a curved surface */
 .dock-bar.glass::before, .dock-scan.glass::before {
-  background:
-    radial-gradient(140% 70% at 50% -20%, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 60%),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.18));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 50%);
 }
-/* bright rim, strongest top-left and bottom-right like curved glass */
+/* specular edge: bright where light hits (top left, bottom right), fading on the sides */
 .dock-bar.glass::after, .dock-scan.glass::after {
-  padding: 1.2px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.15) 30%, rgba(255, 255, 255, 0.05) 55%, rgba(255, 255, 255, 0.7) 100%);
+  padding: 1px;
+  background: conic-gradient(from 210deg at 50% 50%,
+    rgba(255, 255, 255, 1) 0deg, rgba(255, 255, 255, 0.15) 70deg, rgba(255, 255, 255, 0.1) 110deg,
+    rgba(255, 255, 255, 0.85) 180deg, rgba(255, 255, 255, 0.15) 250deg, rgba(255, 255, 255, 0.1) 290deg,
+    rgba(255, 255, 255, 1) 360deg);
 }
-/* icons stay legible over busy content */
-.dock .tab { color: rgba(30, 30, 40, 0.78); text-shadow: 0 0 8px rgba(255, 255, 255, 0.7); }
-.dock .tab svg { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.65)); }
-/* selected tab: a glass droplet */
+.dock .tab { color: #1c1c1e; text-shadow: none; }
+.dock .tab svg { filter: none; }
+.dock .tab span { font-weight: 600; }
+/* selected tab, as on iOS 26: grey capsule, tinted glyph */
 .dock .tab.on {
   color: var(--accent);
-  background: radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35));
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 1),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(10, 20, 30, 0.12);
+  background: rgba(120, 120, 128, 0.16);
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.6);
 }
 .dock-scan.glass { color: var(--accent); }
 .dock-scan.glass.on { background: var(--accent); color: #fff; }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .dock-bar.glass, :root:not([data-theme='light']) .dock-scan.glass {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
-    box-shadow: inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.35), inset -1px -1px 1px rgba(255, 255, 255, 0.12), inset 0 0 18px rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.5);
+    background: rgba(40, 40, 44, 0.42);
+    box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.18), inset 0 1px 0.5px rgba(255, 255, 255, 0.35), inset 0 0 14px rgba(255, 255, 255, 0.05), 0 8px 28px rgba(0, 0, 0, 0.45);
   }
-  :root:not([data-theme='light']) .dock .tab { color: rgba(255, 255, 255, 0.82); text-shadow: 0 0 8px rgba(0, 0, 0, 0.6); }
-  :root:not([data-theme='light']) .dock .tab svg { filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6)); }
-  :root:not([data-theme='light']) .dock .tab.on { background: radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)); color: var(--accent); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4); }
+  :root:not([data-theme='light']) .dock-bar.glass.refract, :root:not([data-theme='light']) .dock-scan.glass.refract { background: rgba(30, 30, 34, 0.22); }
+  :root:not([data-theme='light']) .dock-bar.glass::before, :root:not([data-theme='light']) .dock-scan.glass::before { background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 50%); }
+  :root:not([data-theme='light']) .dock-bar.glass::after, :root:not([data-theme='light']) .dock-scan.glass::after { opacity: 0.45; }
+  :root:not([data-theme='light']) .dock .tab { color: #f2f2f7; }
+  :root:not([data-theme='light']) .dock .tab.on { color: var(--accent); background: rgba(120, 120, 128, 0.3); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.15); }
 }
 :root[data-theme='dark'] .dock-bar.glass, :root[data-theme='dark'] .dock-scan.glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
-  box-shadow: inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.35), inset -1px -1px 1px rgba(255, 255, 255, 0.12), inset 0 0 18px rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.5);
+  background: rgba(40, 40, 44, 0.42);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.18), inset 0 1px 0.5px rgba(255, 255, 255, 0.35), inset 0 0 14px rgba(255, 255, 255, 0.05), 0 8px 28px rgba(0, 0, 0, 0.45);
 }
-:root[data-theme='dark'] .dock .tab { color: rgba(255, 255, 255, 0.82); text-shadow: 0 0 8px rgba(0, 0, 0, 0.6); }
-:root[data-theme='dark'] .dock .tab svg { filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6)); }
-:root[data-theme='dark'] .dock .tab.on { background: radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)); color: var(--accent); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4); }
+:root[data-theme='dark'] .dock-bar.glass.refract, :root[data-theme='dark'] .dock-scan.glass.refract { background: rgba(30, 30, 34, 0.22); }
+:root[data-theme='dark'] .dock-bar.glass::before, :root[data-theme='dark'] .dock-scan.glass::before { background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 50%); }
+:root[data-theme='dark'] .dock-bar.glass::after, :root[data-theme='dark'] .dock-scan.glass::after { opacity: 0.45; }
+:root[data-theme='dark'] .dock .tab { color: #f2f2f7; }
+:root[data-theme='dark'] .dock .tab.on { color: var(--accent); background: rgba(120, 120, 128, 0.3); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.15); }
