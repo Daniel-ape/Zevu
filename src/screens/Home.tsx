@@ -15,7 +15,7 @@ function greeting(): Key {
 }
 
 export function Home() {
-  const { products, observations, retailers, list, recent, loading, watched, lang, t } = useStore()
+  const { products, observations, retailers, list, recent, loading, watched, lang, pricesOf, t } = useStore()
   const nav = useNav()
   const [receipt, setReceipt] = useState(false)
   const [shelfPrice, setShelfPrice] = useState(false)
@@ -34,24 +34,24 @@ export function Home() {
   const drops = useMemo(
     () =>
       products
-        .map((p) => ({ p, pct: trend(p, observations) }))
+        .filter((p) => pricesOf(p.id).length > 4)
+        .map((p) => ({ p, pct: trend(p, pricesOf(p.id)) }))
         .filter((d): d is { p: typeof d.p; pct: number } => d.pct !== null && d.pct < -1)
         .sort((a, b) => a.pct - b.pct)
         .slice(0, 4),
-    [products, observations],
+    [products, pricesOf],
   )
 
   // Products that have a current price, the most popular first (the catalogue
   // is ordered by popularity), skipping the ones already listed as drops.
   const priced = useMemo(() => {
-    const ids = new Set(observations.map((o) => o.productId))
     const dropped = new Set(drops.map((d) => d.p.id))
     return products
-      .filter((p) => ids.has(p.id) && !dropped.has(p.id))
-      .map((p) => ({ p, c: cheapest(compare(p, observations, retailers)) }))
+      .filter((p) => pricesOf(p.id).length > 0 && !dropped.has(p.id))
+      .map((p) => ({ p, c: cheapest(compare(p, pricesOf(p.id), retailers)) }))
       .filter((x) => x.c)
       .slice(0, 12)
-  }, [products, observations, retailers, drops])
+  }, [products, pricesOf, retailers, drops])
 
   const leaflets = shelf.flatMap((c) => c.leaflets.map((l) => ({ chain: c.chain, l })))
     .sort((a, b) => (a.l.status === 'now' ? 0 : 1) - (b.l.status === 'now' ? 0 : 1))
@@ -118,7 +118,7 @@ export function Home() {
           </div>
           <div className="rows">
             {drops.map(({ p, pct }) => {
-              const c = cheapest(compare(p, observations, retailers))
+              const c = cheapest(compare(p, pricesOf(p.id), retailers))
               return (
                 <button key={p.id} className="row" onClick={() => nav.openProduct(p.id)}>
                   <Tile product={p} />
@@ -144,7 +144,7 @@ export function Home() {
             {watched.map((w) => {
               const p = products.find((x) => x.id === w.productId)
               if (!p) return null
-              const c = cheapest(compare(p, observations, retailers))
+              const c = cheapest(compare(p, pricesOf(p.id), retailers))
               const now = c?.current.priceCents ?? null
               const diff = now !== null && w.baselineCents !== null ? now - w.baselineCents : null
               return (

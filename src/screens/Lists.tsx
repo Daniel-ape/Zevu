@@ -9,7 +9,7 @@ import { StoreMode } from './StoreMode'
 export function Lists() {
   const {
     list, lists, setActiveList, createList, renameList, deleteList, restoreList,
-    products, observations, retailers, setQuantity, toggleChecked, clearChecked, t,
+    products, observations, retailers, setQuantity, toggleChecked, clearChecked, pricesOf, t,
   } = useStore()
   const nav = useNav()
   const [mode, setMode] = useState<'none' | 'new' | 'rename'>('none')
@@ -108,7 +108,7 @@ export function Lists() {
             {items.map((item) => {
               const p = products.find((x) => x.id === item.productId)
               if (!p) return null
-              const c = cheapest(compare(p, observations, retailers))
+              const c = cheapest(compare(p, pricesOf(p.id), retailers))
               return (
                 <div key={p.id} className="row" style={{ opacity: item.checked ? 0.45 : 1 }}>
                   <button className={'tick' + (item.checked ? ' on' : '')} onClick={() => toggleChecked(p.id)} aria-label={t('list.tick')} aria-pressed={!!item.checked}>

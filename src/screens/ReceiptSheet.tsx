@@ -1,10 +1,16 @@
 import { useRef, useState } from 'react'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
-import { matchProduct, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
+import { lineKey, matchLine, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
+import { ProductPicker } from '../ui/ProductPicker'
 import { LOCALE } from '../i18n'
 
 type Draft = Omit<Receipt, 'id' | 'importedAt'>
+
+// Receipt lines the user linked to a product, remembered for the next receipt.
+const LEARNED = 'hintaopas:receiptLinks'
+const readLearned = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(LEARNED) ?? '{}') } catch { return {} } }
+const writeLearned = (v: Record<string, string>) => { try { localStorage.setItem(LEARNED, JSON.stringify(v)) } catch { /* private mode */ } }
 
 /** Bottom sheet: import a new receipt, or show a saved one. */
 export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receipt; onClose: () => void; onDeleted?: (r: Receipt) => void }) {
@@ -17,11 +23,21 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
   const file = useRef<HTMLInputElement>(null)
   const camera = useRef<HTMLInputElement>(null)
   const viewing = !!receipt
+  // Lines whose link is a guess (shown for checking), and the line being re-linked.
+  const [guess, setGuess] = useState<Set<number>>(new Set())
+  const [picking, setPicking] = useState<number | null>(null)
 
   const read = (raw: string) => {
     const parsed = parseReceipt(raw)
     if (!parsed.items.length) return setError(t('rc.noItems'))
-    parsed.items = parsed.items.map((it) => ({ ...it, productId: matchProduct(it.name, products) }))
+    const learned = readLearned()
+    const guesses = new Set<number>()
+    parsed.items = parsed.items.map((it, i) => {
+      const m = matchLine(it.name, products, learned)
+      if (m && !m.sure) guesses.add(i)
+      return { ...it, productId: m?.id }
+    })
+    setGuess(guesses)
     setError('')
     setDraft(parsed)
   }
@@ -57,6 +73,10 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
     if (!draft) return
     if (!draft.retailerId) return setError(t('rc.needStore'))
     addReceipt({ ...draft, id: crypto.randomUUID?.() ?? String(Date.now()), importedAt: new Date().toISOString() })
+    // Remember the links, so the same lines are recognised next time.
+    const learned = readLearned()
+    for (const it of draft.items) if (it.productId) learned[lineKey(it.name)] = it.productId
+    writeLearned(learned)
     onClose()
   }
 
@@ -121,6 +141,7 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
             <div className="small muted" style={{ margin: '18px 0 4px' }}>
               {t('rc.matched', { n: linked, m: draft.items.length })}
               {fromPhoto && !viewing && <>. {t('rc.check')}</>}
+              {!viewing && guess.size > 0 && <>. {t('rc.guesses', { n: guess.size })}</>}
             </div>
             <div className="rows">
               {draft.items.map((it, i) => (
@@ -128,18 +149,10 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
                   <div className="grow">
                     <div className="title" style={{ fontWeight: 500 }}>{it.quantity > 1 ? `${it.quantity} × ` : ''}{it.name}</div>
                     {!viewing ? (
-                      <select
-                        className="select inline"
-                        value={it.productId ?? ''}
-                        onChange={(e) => {
-                          const items = draft.items.slice()
-                          items[i] = { ...it, productId: e.target.value || undefined }
-                          setDraft({ ...draft, items })
-                        }}
-                      >
-                        <option value="">{t('rc.notLinked')}</option>
-                        {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                      </select>
+                      <button className={'link-product' + (guess.has(i) ? ' guess' : '') + (it.productId ? '' : ' none')} onClick={() => setPicking(i)}>
+                        {guess.has(i) && <span className="guess-tag">{t('rc.guess')}</span>}
+                        <span>{products.find((p) => p.id === it.productId)?.name ?? t('rc.notLinked')}</span>
+                      </button>
                     ) : (
                       <div className="sub">{products.find((p) => p.id === it.productId)?.name ?? t('rc.notLinked')}</div>
                     )}
@@ -164,6 +177,19 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
         )}
 
         {error && <div className="small" style={{ color: 'var(--accent)', marginTop: 12 }}>{error}</div>}
+        {picking !== null && draft && (
+          <ProductPicker
+            initial={lineKey(draft.items[picking].name)}
+            onClose={() => setPicking(null)}
+            onPick={(id) => {
+              const items = draft.items.slice()
+              items[picking] = { ...items[picking], productId: id }
+              setDraft({ ...draft, items })
+              setGuess((g) => { const n = new Set(g); n.delete(picking); return n })
+              setPicking(null)
+            }}
+          />
+        )}
       </div>
     </div>
   )

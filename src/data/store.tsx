@@ -37,6 +37,8 @@ interface Store {
   retailers: Retailer[]
   observations: PriceObservation[]
   loading: boolean
+  /** Prices grouped by product, so screens don't scan every price per product. */
+  pricesOf: (productId: string) => PriceObservation[]
   /** All stores the app knows; `retailers` is narrowed to the user's own stores. */
   allRetailers: Retailer[]
   myStores: string[]
@@ -147,6 +149,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (theme === 'system') root.removeAttribute('data-theme')
     else root.setAttribute('data-theme', theme)
   }, [theme])
+  const byProduct = useMemo(() => {
+    const m = new Map<string, PriceObservation[]>()
+    for (const o of effective) {
+      const list = m.get(o.productId)
+      if (list) list.push(o)
+      else m.set(o.productId, [o])
+    }
+    return m
+  }, [effective])
 
   const value = useMemo<Store>(
     () => ({
@@ -164,7 +175,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       addOwnProduct: ({ ean, name, category }) => {
         const emoji: Record<CategoryId, string> = { dairy: '🥛', produce: '🥕', bread: '🍞', meat: '🥩', pantry: '🥫', drinks: '🧃', snacks: '🍫', household: '🧴' }
-        const p: Product = { id: `off:${ean}`, ean, name: name.trim(), brand: '', category, size: { amount: 0, unit: 'pcs' }, emoji: emoji[category], infoSource: 'user' }
+        const id = ean ? `off:${ean}` : `own:${name.trim().toLowerCase().replace(/[^a-z0-9åäö]+/g, '-')}`
+        const p: Product = { id, ean, name: name.trim(), brand: '', category, size: { amount: 0, unit: 'pcs' }, emoji: emoji[category], infoSource: 'user' }
         remember([p])
         return p
       },
@@ -182,6 +194,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       myStores,
       toggleMyStore: (id) => setMyStores((m) => (m.includes(id) ? m.filter((x) => x !== id) : [...m, id])),
       observations: effective,
+      pricesOf: (id: string) => byProduct.get(id) ?? [],
       loading,
       list,
       lists,
@@ -240,7 +253,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setLang,
       t: (key, vars) => translate(lang, key, vars),
     }),
-    [effective, products, loading, lists, list, activeId, myStores, watched, receipts, recent, theme, lang, lastStore],
+    [effective, byProduct, products, loading, lists, list, activeId, myStores, watched, receipts, recent, theme, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

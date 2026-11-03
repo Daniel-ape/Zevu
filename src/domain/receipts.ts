@@ -123,17 +123,58 @@ function norm(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9%]+/g, ' ').trim()
 }
 
-/** Link a receipt line to a catalogue product when every significant word matches. */
-export function matchProduct(name: string, products: Product[]): string | undefined {
-  const line = ` ${norm(name)} `
-  let best: { id: string; score: number } | undefined
+/** Key under which a receipt line's link to a product is remembered. */
+export const lineKey = (name: string) => norm(name).replace(/\b\d+([.,]\d+)?\s?(kg|g|l|dl|cl|ml|kpl|pcs|st)\b/g, '').replace(/\s+/g, ' ').trim()
+
+const UNITS = /^(\d+([.,]\d+)?(kg|g|l|dl|cl|ml|kpl|st|x)?|kg|g|l|dl|cl|ml|kpl|st|x)$/
+
+export type LineMatch = { id: string; sure: boolean }
+
+/**
+ * Link a receipt line to a catalogue product. Receipts abbreviate
+ * ("VALIO RASV MAITO 1L"), so each receipt word may be the start of a product
+ * word. Lines the user linked before are recognised first.
+ */
+export function matchLine(name: string, products: Product[], learned: Record<string, string> = {}): LineMatch | undefined {
+  const key = lineKey(name)
+  const known = learned[key]
+  if (known && products.some((p) => p.id === known)) return { id: known, sure: true }
+  const words = norm(name).split(' ').filter((w) => w.length >= 2 && !UNITS.test(w))
+  if (!words.length) return undefined
+  let best: { id: string; rank: number; score: number; cover: number; hits: number } | undefined
   for (const p of products) {
-    const words = norm(`${p.name}`).split(' ').filter((w) => w.length >= 3)
-    if (!words.length) continue
-    const hits = words.filter((w) => line.includes(` ${w}`)).length
-    if (hits === words.length && (!best || hits > best.score)) best = { id: p.id, score: hits }
+    const nameWords = norm(`${p.name} ${p.altName ?? ''}`).split(' ').filter((w) => w.length >= 2 && !UNITS.test(w))
+    const own = [...nameWords, ...norm(p.brand).split(' ').filter((w) => w.length >= 2)]
+    // exact word 1, receipt abbreviation of a product word 0.85, a shorter
+    // product word inside a longer receipt word 0.5
+    let sum = 0
+    let hits = 0
+    const used = new Set<string>()
+    for (const w of words) {
+      let wt = 0
+      let via = ''
+      for (const o of own) {
+        const v = o === w ? 1 : w.length >= 3 && o.startsWith(w) ? 0.85 : o.length >= 4 && w.startsWith(o) ? 0.5 : 0
+        if (v > wt) { wt = v; via = o }
+      }
+      if (wt) { sum += wt; hits++; used.add(via) }
+    }
+    if (!hits) continue
+    const score = sum / words.length
+    // how much of the product's own name the line covers
+    const cover = nameWords.length ? nameWords.filter((w) => used.has(w)).length / nameWords.length : 0
+    const rank = score * 0.75 + cover * 0.25
+    if (!best || rank > best.rank) best = { id: p.id, rank, score, cover, hits }
   }
-  return best?.id
+  if (!best) return undefined
+  const enough = best.score >= 0.75 && (best.hits >= 2 || (words.length === 1 && words[0].length >= 5))
+  if (!enough) return undefined
+  return { id: best.id, sure: best.score >= 0.9 && best.cover >= 0.6 && best.hits >= 2 }
+}
+
+/** Older name kept for callers: the product id or undefined. */
+export function matchProduct(name: string, products: Product[]): string | undefined {
+  return matchLine(name, products)?.id
 }
 
 export function receiptObservations(receipts: Receipt[]): PriceObservation[] {

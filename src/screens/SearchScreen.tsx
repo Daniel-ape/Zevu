@@ -10,7 +10,7 @@ import { CATEGORIES, Tile } from '../ui/bits'
 type Sort = 'price' | 'unit' | 'name'
 
 export function SearchScreen() {
-  const { products, observations, retailers, searchOnline, list, setQuantity, t } = useStore()
+  const { products, retailers, searchOnline, list, setQuantity, pricesOf, t } = useStore()
   const [added, setAdded] = useState<string | null>(null)
   const [online, setOnline] = useState<'idle' | 'loading' | 'unavailable' | string[]>('idle')
   const nav = useNav()
@@ -47,8 +47,10 @@ export function SearchScreen() {
       .filter((p) => cat === 'all' || p.category === cat)
       .map((p) => ({ p, score: needle ? matchScore(needle, hay.get(p.id)!) || (Array.isArray(online) && online.includes(p.id) ? 2 : 0) : 1 }))
       .filter((r) => r.score > 0)
+      // Browsing without a query lists only products that have prices.
+      .filter((r) => needle || pricesOf(r.p.id).length > 0)
       .map(({ p, score }) => {
-        const rows = compare(p, observations, scope)
+        const rows = compare(p, pricesOf(p.id), scope)
         return { p, score, best: cheapest(rows), count: rows.filter((r) => r.freshness === 'fresh').length }
       })
       // Browsing without a query lists only products that have prices.
@@ -61,7 +63,7 @@ export function SearchScreen() {
         return (av ?? Infinity) - (bv ?? Infinity)
       })
       .slice(0, 80)
-  }, [q, cat, sort, products, observations, retailers, online, hay])
+  }, [q, cat, sort, products, pricesOf, retailers, online, hay])
 
   const inList = (id: string) => list.items.find((i) => i.productId === id)
   const quickAdd = (id: string) => {

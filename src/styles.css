@@ -600,3 +600,13 @@ button.row:active { opacity: 0.6; }
 .near-chip span { font-size: 12.5px; color: var(--text-2); }
 .tip .quick-icon { font-size: 22px; }
 .new-product .search, .new-product .chip:not(.on), .new-product .btn:not(.primary) { background: var(--bg); }
+
+/* Receipt review */
+.link-product {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; padding: 5px 10px; border-radius: 10px;
+  background: var(--surface-2); color: var(--text); font-size: 13px; max-width: 100%; text-align: left;
+}
+.link-product span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-product.none { color: var(--text-2); }
+.link-product.guess { background: var(--warn-soft); }
+.guess-tag { font-size: 11px; font-weight: 700; color: var(--warn); flex-shrink: 0; }
