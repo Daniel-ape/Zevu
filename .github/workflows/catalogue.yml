@@ -1,0 +1,35 @@
+# Rebuilds the bundled product catalogue (public/products) from Open Food Facts.
+# Run by hand from the Actions tab when the catalogue should be refreshed.
+name: Build catalogue
+on:
+  workflow_dispatch:
+    inputs:
+      max:
+        description: 'How many products to fetch'
+        default: '8000'
+      images:
+        description: 'How many products get a picture'
+        default: '2500'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: pip install pillow
+      - run: node scripts/fetch-off.mjs ${{ inputs.max }}
+      - run: rm -f public/products/img-*.json scripts/.image-index.json
+      - run: python3 scripts/snapshot-images.py raw.json ${{ inputs.images }}
+      - run: npx tsx scripts/build-snapshot.ts raw.json
+      - name: Commit catalogue
+        run: |
+          git config user.name "hintaopas-bot"
+          git config user.email "hintaopas-bot@users.noreply.github.com"
+          git add public/products
+          git diff --cached --quiet || (git commit -m "Rebuild product catalogue" && git pull --rebase && git push)
