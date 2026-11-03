@@ -1,15 +1,18 @@
-# Rebuilds the bundled product catalogue (public/products) from Open Food Facts.
-# Run by hand from the Actions tab when the catalogue should be refreshed.
+# Rebuilds the bundled product catalogue (public/products) from Open Food Facts
+# and adds pictures for products that don't have one yet. Runs every Sunday
+# night (the picture server is quieter then) and by hand from the Actions tab.
 name: Build catalogue
 on:
+  schedule:
+    - cron: '7 0 * * 0'   # Sunday 02:07 Finnish time
   workflow_dispatch:
     inputs:
       max:
         description: 'How many products to fetch'
         default: '8000'
       images:
-        description: 'How many products get a picture (0 = keep the current pictures)'
-        default: '0'
+        description: 'How many new pictures to fetch (0 = none)'
+        default: '3000'
 permissions:
   contents: write
 jobs:
@@ -23,14 +26,12 @@ jobs:
           node-version: 22
       - run: npm ci --ignore-scripts
       - run: pip install pillow
-      - run: node scripts/fetch-off.mjs ${{ inputs.max }}
+      - run: node scripts/fetch-off.mjs ${{ inputs.max || '10000' }}
       - name: Pictures
         run: |
-          if [ "${{ inputs.images }}" = "0" ]; then
-            node scripts/reuse-images.mjs
-          else
-            rm -f public/products/img-*.json scripts/.image-index.json
-            python3 scripts/snapshot-images.py raw.json ${{ inputs.images }}
+          node scripts/reuse-images.mjs
+          if [ "${{ inputs.images || '3000' }}" != "0" ]; then
+            python3 scripts/snapshot-images.py raw.json ${{ inputs.images || '3000' }} 80
           fi
       - run: npx tsx scripts/build-snapshot.ts raw.json
       - name: Commit catalogue
