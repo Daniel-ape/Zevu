@@ -5,7 +5,7 @@ let i = 0
 for (const l of d.tokmanni.slice(0, 2)) {
   const buf = Buffer.from(await (await fetch(l.image)).arrayBuffer())
   writeFileSync(`/tmp/t${i}.jpg`, buf)
-  execSync(`convert /tmp/t${i}.jpg -resize 400x /tmp/s${i}.jpg`)
+  execSync(`node -e "require('sharp')('/tmp/t${i}.jpg').resize(400).jpeg({quality:70}).toFile('/tmp/s${i}.jpg')"`)
   console.log('B64', i, readFileSync(`/tmp/s${i}.jpg`).toString('base64'))
   const v = JSON.parse(Buffer.from(new URL(l.image).searchParams.get('v'), 'base64').toString())
   for (const u of [
