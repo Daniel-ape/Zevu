@@ -86,6 +86,22 @@ export function locate(): Promise<void> {
     )
   })
 }
+/**
+ * Called when the app opens: refreshes the position so leaflets follow the
+ * user. Asks for permission once; if the user said no, it never asks again.
+ */
+const ASKED = 'hintaopas:posAsked'
+export function autoLocate() {
+  try {
+    const asked = localStorage.getItem(ASKED)
+    if (asked === 'denied') return
+    locate().then(
+      () => localStorage.setItem(ASKED, 'granted'),
+      (e: GeolocationPositionError | Error) => { if ('code' in e && e.code === 1) localStorage.setItem(ASKED, 'denied') },
+    )
+  } catch { /* no storage: skip */ }
+}
+
 export function forgetLocation() {
   try { localStorage.removeItem(POS); localStorage.removeItem(STORES) } catch { /* ignore */ }
   dispatchEvent(new Event(EVENT))

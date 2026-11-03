@@ -2,7 +2,7 @@
 // link of each), so the app can open a leaflet directly. Only the
 // link is stored; the leaflet stays on Lidl's own site. robots.txt is honoured.
 // Output: public/prices/leaflets.json
-import { writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 
 const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
 const get = async (url) => {
@@ -34,7 +34,7 @@ const out = { updated: new Date().toISOString(), lidl: [] }
 try {
   const base = 'https://www.lidl.fi'
   const page = '/c/tarjouslehdet/s10019134'
-  const disallow = rulesFor(await get(base + '/robots.txt'), 'hintaopasbot')
+  const disallow = rulesFor(await get(base + '/robots.txt').catch(() => ''), 'hintaopasbot')
   const ok = (path) => !disallow.some((r) => blockedBy(r, path))
   if (!ok(page)) throw new Error('robots.txt disallows the leaflet page')
   const html = await get(base + page)
@@ -62,7 +62,8 @@ const meta = (html, prop) =>
   html.match(new RegExp(`<meta[^>]+content="([^"]+)"[^>]+property="${prop}"`, 'i'))?.[1]
 out.tokmanni = []
 try {
-  const main = rulesFor(await get('https://www.tokmanni.fi/robots.txt'), 'hintaopasbot')
+  // A robots.txt that can't be read (e.g. a passing 404) means no rules.
+  const main = rulesFor(await get('https://www.tokmanni.fi/robots.txt').catch(() => ''), 'hintaopasbot')
   if (main.some((r) => blockedBy(r, '/tarjouslehti'))) throw new Error('robots.txt disallows the leaflet page')
   const list = await get('https://www.tokmanni.fi/tarjouslehti')
   const viewer = 'https://tarjoussanomat.tokmanni.fi'
@@ -129,6 +130,20 @@ for (const [shop, cfg] of Object.entries(SHOPS)) {
     console.log(shop, e.message)
   }
 }
+// If a source failed this time, keep what it had last time (up to 3 days), so
+// leaflets don't vanish from the app because of a passing error.
+try {
+  const prev = JSON.parse(readFileSync('public/prices/leaflets.json', 'utf8'))
+  for (const k of ['lidl', 'tokmanni', 'minimani', 'rusta', 'halpahalli']) {
+    const empty = !Array.isArray(out[k]) || out[k].length === 0
+    const since = prev.kept?.[k] ?? prev.updated
+    if (empty && Array.isArray(prev[k]) && prev[k].length && Date.now() - +new Date(since) < 3 * 86_400_000) {
+      out[k] = prev[k]
+      out.kept = { ...(out.kept ?? {}), [k]: since }
+      console.log('kept previous', k)
+    }
+  }
+} catch { /* first run */ }
 console.log('leaflets', JSON.stringify(out))
 mkdirSync('public/prices', { recursive: true })
 writeFileSync('public/prices/leaflets.json', JSON.stringify(out) + '\n')

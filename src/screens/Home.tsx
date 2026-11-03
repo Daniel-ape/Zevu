@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { ArrowRight, List, Receipt, Search } from '../ui/icons'
+import { ArrowRight, List, Receipt } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Cover, useShelf } from './Leaflets'
@@ -65,13 +65,8 @@ export function Home() {
         <h1>{t(greeting())}</h1>
       </div>
 
-      <button className="home-search" onClick={() => nav.go('search', { focus: true })}>
-        <Search size={20} />
-        <span>{t('home.heroHint', { n: products.length.toLocaleString(lang === 'en' ? 'en-GB' : 'fi-FI') })}</span>
-      </button>
-
       {list.items.length > 0 && (
-        <button className="list-card section" style={{ marginTop: 16 }} onClick={() => nav.go('lists')}>
+        <button className="list-card section" style={{ marginTop: 18 }} onClick={() => nav.go('lists')}>
           <span className="quick-icon"><List size={22} /></span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <b>{listName} · {itemCount === 1 ? t('list.items1') : t('list.items', { n: itemCount })}</b>

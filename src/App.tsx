@@ -12,6 +12,7 @@ import { Profile } from './screens/Profile'
 import { Leaflets } from './screens/Leaflets'
 import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
+import { autoLocate } from './data/nearby'
 
 const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile']
 const fromHash = (): Tab => {
@@ -31,6 +32,13 @@ function Shell() {
   const { t } = useStore()
   const newLeaflets = useNewLeaflets()
   usePriceAlerts()
+  // Follow the user's area: nearest stores' leaflets update when the app opens.
+  useEffect(() => {
+    autoLocate()
+    const onShow = () => { if (document.visibilityState === 'visible') autoLocate() }
+    document.addEventListener('visibilitychange', onShow)
+    return () => document.removeEventListener('visibilitychange', onShow)
+  }, [])
   const [tab, setTab] = useState<Tab>(fromHash)
   const [stack, setStack] = useState<string[]>([]) // product ids opened on top of the tab
   const [searchCategory, setSearchCategory] = useState<CategoryId | 'all'>('all')
