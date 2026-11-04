@@ -11,6 +11,9 @@ on:
       budget:
         description: 'Minutes per shop'
         default: '250'
+      only:
+        description: 'Only these shops, JSON list (empty = all)'
+        default: ''
 permissions:
   contents: write
 concurrency:
@@ -23,7 +26,7 @@ jobs:
       fail-fast: false
       max-parallel: 9
       matrix:
-        store: [halpahalli, verkkokauppa, prisma, stockmann, karkkainen, ruohonjuuri, yliopistonapteekki, lidl, apteekki360]
+        store: ${{ fromJSON(inputs.only != '' && inputs.only || '["halpahalli","verkkokauppa","prisma","stockmann","karkkainen","ruohonjuuri","yliopistonapteekki","lidl","apteekki360"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

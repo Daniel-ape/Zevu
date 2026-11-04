@@ -100,6 +100,10 @@ const STATE = `collector/state/${name}.json`
 const state = existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : {}
 const order = [...urls].sort((a, b) => (state[a]?.at ?? '').localeCompare(state[b]?.at ?? ''))
 
+// Text cut out of a page can keep the whole page in memory (V8 "sliced
+// strings"); after thousands of pages that runs out of memory. Copy it.
+const own = (v) => (v == null ? v : Buffer.from(String(v)).toString())
+
 function productFrom(html) {
   for (const [, j] of html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/g)) {
     let d
@@ -114,11 +118,11 @@ function productFrom(html) {
       if (!gtin || !(price > 0)) continue
       const img = [].concat(x.image ?? [])[0]
       return {
-        ean: gtin.length === 14 && gtin.startsWith('0') ? gtin.slice(1) : gtin.length === 12 ? '0' + gtin : gtin,
+        ean: own(gtin.length === 14 && gtin.startsWith('0') ? gtin.slice(1) : gtin.length === 12 ? '0' + gtin : gtin),
         priceCents: Math.round(price * 100),
-        name: String(x.name ?? '').replace(/&amp;/g, '&').trim().slice(0, 120),
-        brand: String((typeof x.brand === 'object' ? x.brand?.name : x.brand) ?? '').slice(0, 60),
-        image: typeof img === 'string' ? img : img?.url,
+        name: own(String(x.name ?? '').replace(/&amp;/g, '&').trim().slice(0, 120)),
+        brand: own(String((typeof x.brand === 'object' ? x.brand?.name : x.brand) ?? '').slice(0, 60)),
+        image: own(typeof img === 'string' ? img : img?.url),
         inStock: !/OutOfStock/i.test(String(offer?.availability ?? '')),
       }
     }
@@ -138,7 +142,10 @@ for (const url of order) {
     if (e.stop) { console.log('stopped by the shop:', e.message); break }
     state[url] = { ...(state[url] ?? {}), at: new Date().toISOString() }
   }
-  if (read % 200 === 0) writeFileSync(STATE, JSON.stringify(state))
+  if (read % 200 === 0) {
+    writeFileSync(STATE, JSON.stringify(state))
+    if (read) console.log(`${read} pages, heap ${Math.round(process.memoryUsage().heapUsed / 1e6)} MB`)
+  }
 }
 // forget pages no longer in the sitemap
 for (const u of Object.keys(state)) if (!urls.has(u) && urls.size) delete state[u]
