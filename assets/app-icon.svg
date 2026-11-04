@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1fc472"/>
+      <stop offset="1" stop-color="#11a85c"/>
+    </linearGradient>
+    <mask id="cut" maskUnits="userSpaceOnUse" x="-600" y="-600" width="1200" height="1200">
+      <rect x="-600" y="-600" width="1200" height="1200" fill="#fff"/>
+      <!-- string hole -->
+      <circle cx="0" cy="-205" r="44" fill="#000"/>
+      <!-- price-drop arrow -->
+      <path d="M -34 -110 H 34 V 10 H 92 L 0 120 L -92 10 H -34 Z" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <g transform="translate(528 520) rotate(22) scale(0.88)">
+    <!-- tag: rounded body with a pointed top -->
+    <path mask="url(#cut)" fill="#fff"
+      d="M -170 -150 L -40 -300 Q 0 -340 40 -300 L 170 -150 Q 190 -128 190 -98 L 190 230 Q 190 290 130 290 L -130 290 Q -190 290 -190 230 L -190 -98 Q -190 -128 -170 -150 Z"/>
+  </g>
+</svg>
