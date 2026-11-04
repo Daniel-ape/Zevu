@@ -1124,3 +1124,11 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .scl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .scl-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scl-price { font-weight: 600; font-variant-numeric: tabular-nums; }
+.missing-row .title { font-weight: 500; }
+.missing-row .sub { color: var(--accent); }
+.missing-add { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--fill); color: var(--accent); flex-shrink: 0; }
+.missing-note { font-size: 14px; color: var(--text-2); margin: -2px 4px 10px; line-height: 1.4; }
+.missing-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.missing-chip { display: inline-flex; align-items: center; gap: 5px; height: 36px; padding: 0 14px 0 11px; border-radius: 999px; background: var(--card); color: var(--text); font-size: 15px; font-weight: 500; }
+.missing-chip svg { color: var(--accent); }
+.missing-chip:active { transform: scale(0.96); }

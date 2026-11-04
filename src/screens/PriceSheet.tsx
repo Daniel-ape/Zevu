@@ -14,15 +14,17 @@ import { Check } from '../ui/icons'
  * Add a price the user saw: photograph a shelf label (barcode + price are
  * read on the phone) or pick the product and type the price.
  */
-export function PriceSheet({ product: initial, startWithPhoto, onClose }: {
+export function PriceSheet({ product: initial, startWithPhoto, store: initialStore, onClose }: {
   product?: Product
   startWithPhoto?: boolean
+  /** Preselect this store (e.g. "add the price at S-market" on a product page). */
+  store?: string
   onClose: () => void
 }) {
   const { products, allRetailers, findByBarcode, addPrice, lastStore, t } = useStore()
   const [product, setProduct] = useState<Product | undefined>(initial)
   const [query, setQuery] = useState('')
-  const [store, setStore] = useState(lastStore ?? '')
+  const [store, setStore] = useState(initialStore ?? lastStore ?? '')
   const [price, setPrice] = useState('')
   const [busy, setBusy] = useState('')
   const [note, setNote] = useState('')

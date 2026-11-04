@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useStore } from '../data/store'
 import { cheapest, compare, dailyByStore, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel, brandLabel } from '../domain/pricing'
 import { LOCALE } from '../i18n'
+import { EVERYDAY } from '../domain/categories'
 import { useNav } from '../nav'
 import { Back, Bell, Check, Plus } from '../ui/icons'
 import { PriceMeta, RankBadge, RetailerMark, Tile, TrendTag } from '../ui/bits'
@@ -14,7 +15,7 @@ import { useState } from 'react'
 export function ProductScreen({ id }: { id: string }) {
   const { products, pricesOf, retailers, list, setQuantity, markViewed, watched, toggleWatch, t, lang } = useStore()
   const nav = useNav()
-  const [adding, setAdding] = useState(false)
+  const [adding, setAdding] = useState<false | { store?: string }>(false)
   const product = products.find((p) => p.id === id)
 
   useEffect(() => markViewed(id), [id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -32,6 +33,12 @@ export function ProductScreen({ id }: { id: string }) {
   if (!product) return <div className="screen empty">{t('product.notFound')}</div>
 
   const best = cheapest(rows)
+  // Grocery chains the user shops at that have no price for this product yet:
+  // listed so the price can be added from a shelf label (S and K groups don't publish theirs).
+  const GROCERY = ['prisma', 's-market', 'sale', 'alepa', 'k-citymarket', 'k-supermarket', 'k-market', 'lidl', 'tokmanni', 'halpahalli']
+  const missing = EVERYDAY.has(product.category)
+    ? retailers.filter((r) => GROCERY.includes(r.id) && !rows.some((x) => x.retailer.id === r.id))
+    : []
   const fresh = rows.filter((r) => r.freshness === 'fresh')
   const spread = best && fresh.length > 1 ? fresh[fresh.length - 1].current.priceCents - best.current.priceCents : 0
   const inList = list.items.find((i) => i.productId === product.id)
@@ -148,6 +155,21 @@ export function ProductScreen({ id }: { id: string }) {
         </>
       )}
 
+      {missing.length > 0 && (
+        <div className="section">
+          <div className="section-head"><h2>{t('product.noPriceAt')}</h2></div>
+          <div className="missing-note">{t('product.addHere')}</div>
+          <div className="missing-chips">
+            {missing.map((r) => (
+              <button key={r.id} className="missing-chip" onClick={() => setAdding({ store: r.id })}>
+                <Plus size={14} /> {r.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+
       <div className="section actions-row">
         {inList ? (
           <button className="btn ghost" onClick={() => nav.go('lists')}>
@@ -158,7 +180,7 @@ export function ProductScreen({ id }: { id: string }) {
             <Plus /> {t('product.add')}
           </button>
         )}
-        <button className="btn ghost" onClick={() => setAdding(true)}>{t('product.addPrice')}</button>
+        <button className="btn ghost" onClick={() => setAdding({})}>{t('product.addPrice')}</button>
       </div>
 
       {product.infoSource === 'open-food-facts' && (
@@ -166,7 +188,7 @@ export function ProductScreen({ id }: { id: string }) {
           <a href={`https://world.openfoodfacts.org/product/${product.ean}`} target="_blank" rel="noreferrer" onClick={inAppLink(`https://world.openfoodfacts.org/product/${product.ean}`)} style={{ color: 'var(--text-3)' }}>{t('product.info')}</a>
         </p>
       )}
-      {adding && <PriceSheet product={product} onClose={() => setAdding(false)} />}
+      {adding && <PriceSheet product={product} store={adding.store} startWithPhoto={!!adding.store} onClose={() => setAdding(false)} />}
     </div>
   )
 }
