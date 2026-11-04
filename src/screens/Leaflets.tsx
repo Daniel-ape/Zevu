@@ -12,7 +12,7 @@ import type { Key } from '../i18n'
 // S Group has no nationwide leaflet (each regional cooperative makes its own,
 // and Osuuskauppa KPO does not publish its weekly ads online), so S stores are
 // not listed.
-type Status = 'now' | 'soon'
+type Status = 'now' | 'soon' | 'last'
 export type Leaflet = { name: string; period?: string; url: string; image?: string; status?: Status }
 type Chain = { chain: string; about: Key; aboutText?: string; leaflets: Leaflet[]; km?: number }
 
@@ -84,7 +84,39 @@ function weekStatus(name: string): Status | 'past' | undefined {
   const ahead = (w - cur + 53) % 53
   return ahead > 0 && ahead < 4 ? 'soon' : 'past'
 }
-const order = (l: Leaflet) => (l.status === 'now' ? 0 : l.status === 'soon' ? 2 : 1)
+const order = (l: Leaflet) => (l.status === 'last' ? 0 : l.status === 'now' ? 0.5 : l.status === 'soon' ? 2 : 1)
+
+const DAYS: Record<string, number> = { ma: 0, ti: 1, ke: 2, to: 3, pe: 4, la: 5, su: 6 }
+const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+/**
+ * The last day a leaflet is valid (YYYY-MM-DD), when it can be told: dates read from the
+ * leaflet, the end of a period ("ma 2.11. – ke 4.11."), or a week with days ("vk 45 ma-ke").
+ */
+function lastDayOf(l: { name: string; period?: string; until?: string }): string | null {
+  if (l.until) return l.until
+  const now = new Date()
+  const p = l.period?.match(/(\d{1,2})\.(\d{1,2})\.?\s*$/)
+  if (p) {
+    const d = new Date(now.getFullYear(), +p[2] - 1, +p[1])
+    if (+now - +d > 180 * 86_400_000) d.setFullYear(d.getFullYear() + 1)
+    return ymd(d)
+  }
+  const w = l.name.match(/\b(?:vk|vko|viikko|week)\.?\s*(\d{1,2})\b(?:.*?\b(ma|ti|ke|to|pe|la|su)\s*[-–]\s*(ma|ti|ke|to|pe|la|su)\b)?/i)
+  if (!w) return null
+  const jan4 = new Date(now.getFullYear(), 0, 4)
+  const monday = new Date(jan4); monday.setDate(jan4.getDate() - ((jan4.getDay() + 6) % 7) + (+w[1] - 1) * 7)
+  const last = new Date(monday); last.setDate(monday.getDate() + (w[3] ? DAYS[w[3].toLowerCase()] : 6))
+  return ymd(last)
+}
+/** Hides leaflets whose last day has passed and marks the ones ending today. */
+function byLastDay<L extends { name: string; period?: string; until?: string; status?: Status | 'past' }>(l: L): L {
+  const end = lastDayOf(l)
+  if (!end) return l
+  const today = ymd(new Date())
+  if (end < today) return { ...l, status: 'past' }
+  if (end === today && l.status !== 'soon') return { ...l, status: 'last' }
+  return l
+}
 
 export function useShelf(): { shelf: Chain[]; updated?: string } {
   const { t } = useStore()
@@ -98,14 +130,14 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
   const lidl = (data?.lidl ?? [])
     .filter((l) => typeof l.url === 'string' && l.url.startsWith('https://www.lidl.fi/'))
     .slice(0, 9)
-    .map((l) => ({ name: l.name, period: l.period, url: l.url, image: safeImg(l.image), status: periodStatus(l.period) }))
+    .map((l) => byLastDay({ name: l.name, period: l.period, url: l.url, image: safeImg(l.image), status: periodStatus(l.period) as Status | 'past' | undefined }))
     .filter((l) => l.status !== 'past')
     .map((l) => ({ ...l, status: l.status as Status | undefined }))
     .sort((a, b) => order(a) - order(b))
   const tok = (Array.isArray(data?.tokmanni) ? data.tokmanni : [])
     .filter((l) => typeof l.url === 'string' && l.url.startsWith('https://tarjoussanomat.tokmanni.fi/'))
     .slice(0, 9)
-    .map((l) => ({ name: l.name.replace(/^Lue uusin\s+/i, ''), url: l.url, image: safeImg(l.image), status: weekStatus(l.name) }))
+    .map((l) => byLastDay({ name: l.name.replace(/^Lue uusin\s+/i, ''), url: l.url, image: safeImg(l.image), status: weekStatus(l.name) }))
     .filter((l) => l.status !== 'past')
     .map((l) => ({ ...l, status: l.status as Status | undefined }))
     .sort((a, b) => order(a) - order(b))
@@ -113,7 +145,7 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
   const tidy = (n: string) => n.replace(/^Halpa ?Halli\s+/i, '').replace(/\bweek\s*(\d+)\s*[-–]\s*(\d+)/i, 'Vko $1–$2').replace(/\bvko\s*(\d+)\s*(20\d{2})?/i, 'Vko $1').replace(/\bDM\s*\d{2}(\d{2})\s*FI\b/i, 'Kuvasto vko $1').replace(/\s+/g, ' ').replace(/^./, (c) => c.toUpperCase())
   const pub = (list?: { name: string; url: string; image?: string; from?: string; until?: string }[]) => (list ?? [])
     .filter((l) => typeof l.url === 'string' && /^https:\/\/view\.(publitas|promozilla)\.com\//.test(l.url))
-    .map((l) => ({ name: tidy(l.name), url: l.url, image: safeImg(l.image), period: periodOf(l), status: datedStatus(l) ?? weekStatus(l.name) }))
+    .map((l) => byLastDay({ name: tidy(l.name), url: l.url, image: safeImg(l.image), period: periodOf(l), until: l.until, status: datedStatus(l) ?? weekStatus(l.name) }))
     .filter((l) => l.status !== 'past')
     .map((l) => ({ ...l, status: l.status as Status | undefined }))
     .sort((a, b) => order(a) - order(b))
@@ -165,7 +197,7 @@ export function Cover({ chain, l, showStore = true, compact, logo }: { chain: st
   return (
     <a className={'cover' + (logo ? ' has-logo' : '')} href={l.url} target="_blank" rel="noreferrer" onClick={inAppLink(l.url)}>
       <div className="cover-img">
-        {l.status && <span className={'cover-badge ' + l.status}>{t(l.status === 'now' ? 'offers.now' : 'offers.soon')}</span>}
+        {l.status && <span className={'cover-badge ' + l.status}>{t(l.status === 'now' ? 'offers.now' : l.status === 'last' ? 'offers.last' : 'offers.soon')}</span>}
         {logo && <ChainMark chain={CHAIN_ID[chain] ?? chain.toLowerCase()} label={l.name.startsWith('K-') ? l.name.split(' ')[0] : chain} />}
         {l.image && !broken ? (
           <img
