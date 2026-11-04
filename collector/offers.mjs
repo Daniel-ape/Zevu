@@ -98,7 +98,7 @@ for (const chain of ['minimani', 'rusta', 'halpahalli']) {
       const published = d.sourceDocumentTitle && Date.parse(d.sourceDocumentTitle)
       if (!until && published) until = iso(new Date(published + 35 * 864e5))
       if (!until) throw new Error('no date')
-      return { pdf: d.config.downloadPdfUrl, from, until, pageImage: (n) => (pages[n - 1]?.images?.at1200 ? m[1] + pages[n - 1].images.at1200 : null) }
+      return { pdf: d.config.downloadPdfUrl, from, until, pageImage: (n) => (pages[n - 1]?.images?.at1200 ? 'https://view.publitas.com' + pages[n - 1].images.at1200 : null) }
     })
   }
 }

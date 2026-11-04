@@ -108,13 +108,13 @@ async function publitas(url) {
   // can show the wrong thing), and the dates come from the first pages' text.
   let cover = image, from = null, until = null
   try {
-    const origin = new URL(final).origin
     await sleep(800)
     const spreads = await (await fetch(final + 'spreads.json', { headers: { 'User-Agent': UA } })).json()
     const pages = spreads.flatMap((x) => x.pages || [])
     const first = pages[0]?.images
     const src = first?.at600 || first?.at800 || first?.at1000
-    if (src) cover = src.startsWith('http') ? src : origin + src
+    // page pictures are served by Publitas' own host, also for Promozilla viewers
+    if (src) cover = src.startsWith('http') ? src : 'https://view.publitas.com' + src
     ;[from, until] = datesFrom(pages.slice(0, 2).map((p) => p.text || '').join(' '))
     if (!until) [from, until] = datesFrom(title + ' ' + final)
   } catch { /* keep the og:image */ }
@@ -161,4 +161,26 @@ try {
 } catch { /* first run */ }
 console.log('leaflets', JSON.stringify(out))
 mkdirSync('public/prices', { recursive: true })
+// Tokmanni (iPaper): the share picture is a wide crop; use the leaflet's first page if it can be fetched.
+async function ipaperCover(og) {
+  try {
+    const v = new URL(og).searchParams.get('v')
+    const guid = JSON.parse(Buffer.from(v, 'base64').toString()).PaperGuid
+    for (const size of ['Normal', 'Zoom', 'Thumbnail']) {
+      const u = `https://cdn.ipaper.io/iPaper/Papers/${guid}/Pages/1/${size}.jpg`
+      const r = await fetch(u, { headers: { 'User-Agent': UA } })
+      if (r.ok && /^image\//.test(r.headers.get('content-type') || '')) { await r.arrayBuffer(); return u }
+    }
+  } catch { /* keep the share picture */ }
+  return null
+}
+if (Array.isArray(out.tokmanni)) {
+  for (const l of out.tokmanni) {
+    if (!l.image?.includes('OpenGraphImage')) continue
+    await sleep(500)
+    const page = await ipaperCover(l.image)
+    console.log('tokmanni cover', l.name, page ?? 'kept share picture')
+    if (page) l.image = page
+  }
+}
 writeFileSync('public/prices/leaflets.json', JSON.stringify(out) + '\n')
