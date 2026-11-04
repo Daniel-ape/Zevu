@@ -244,7 +244,8 @@ export function matchLine(name: string, products: Product[], learned: Record<str
   const sums = new Map<number, { sum: number; hits: number; used: Set<string> }>()
   for (const w of words) {
     const best = new Map<number, { wt: number; via: string }>()
-    const forms = [w, ...(SYNONYMS[w] ?? [])]
+    // the word itself, and catalogue words for it – also when the receipt word is misread ("PCSSUN")
+    const forms = [w, ...Object.entries(SYNONYMS).filter(([k]) => k === w || (w.length >= 4 && ocrDistance(w, k, 1) <= 1)).flatMap(([, v]) => v)]
     for (const o of ix.vocab) {
       if (Math.abs(o.length - w.length) > 2 && !(o.length > w.length && o.startsWith(w.slice(0, 2))) && !(w.length > o.length && w.startsWith(o.slice(0, 2)))) continue
       let wt = 0
