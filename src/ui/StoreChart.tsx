@@ -1,0 +1,79 @@
+import { useRef, useState } from 'react'
+import { euro, type StoreSeries } from '../domain/pricing'
+import { useStore } from '../data/store'
+import { LOCALE } from '../i18n'
+
+// Distinct colours; the cheapest shop today gets the app's green.
+const COLORS = ['var(--accent)', '#2d6cdf', '#e3600b', '#8e44ad', '#c8202f', '#0aa2b5', '#b5871b', '#6b6b78']
+
+/**
+ * Price history for every shop that sells the product: one step line per shop.
+ * Tap or drag to pick a day; the list below shows each shop's price that day.
+ */
+export function StoreChart({ dates, series }: { dates: Date[]; series: StoreSeries[] }) {
+  const { lang } = useStore()
+  const [sel, setSel] = useState<number | null>(null)
+  const ref = useRef<SVGSVGElement>(null)
+  const n = dates.length
+  if (n < 2 || !series.length) return null
+
+  const W = 340, H = 150, padX = 12, padTop = 14, padBottom = 26
+  const all = series.flatMap((s) => s.values.filter((v): v is number => v !== null))
+  const min = Math.min(...all), max = Math.max(...all)
+  const span = Math.max(max - min, Math.max(20, max * 0.1))
+  const lo = min - (span - (max - min)) / 2
+  const x = (i: number) => padX + (i / (n - 1)) * (W - padX * 2)
+  const y = (c: number) => padTop + (1 - (c - lo) / span) * (H - padTop - padBottom)
+  const path = (values: (number | null)[]) => {
+    let d = ''
+    let prev: number | null = null
+    values.forEach((v, i) => {
+      if (v === null) { prev = null; return }
+      d += prev === null ? ` M${x(i).toFixed(1)},${y(v).toFixed(1)}` : ` H${x(i).toFixed(1)} V${y(v).toFixed(1)}`
+      prev = v
+    })
+    return d.trim()
+  }
+  const long = n > 60
+  const fmt = (d: Date) => long ? d.toLocaleDateString(LOCALE[lang], { month: 'short' }).replace('.', '') : `${d.getUTCDate()}.${d.getUTCMonth() + 1}.`
+  const step = Math.max(1, Math.round((n - 1) / 4))
+  const ticks = [...new Set([...Array.from({ length: Math.floor((n - 1) / step) + 1 }, (_, k) => k * step), n - 1])]
+    .filter((i, k, arr) => k === arr.length - 1 || arr[arr.length - 1] - i >= step * 0.6)
+  const s = sel ?? n - 1
+  const pick = (e: React.PointerEvent) => {
+    const r = ref.current?.getBoundingClientRect()
+    if (!r) return
+    const px = ((e.clientX - r.left) / r.width) * W
+    setSel(Math.min(n - 1, Math.max(0, Math.round(((px - padX) / (W - padX * 2)) * (n - 1)))))
+  }
+  const rows = series
+    .map((ser, k) => ({ ser, color: COLORS[k % COLORS.length], v: ser.values[s] }))
+    .sort((a, b) => (a.v ?? Infinity) - (b.v ?? Infinity))
+
+  return (
+    <div className="store-chart">
+      <svg ref={ref} viewBox={`0 0 ${W} ${H}`} width="100%" onPointerDown={pick} onPointerMove={(e) => e.buttons && pick(e)} style={{ touchAction: 'pan-y', cursor: 'crosshair' }}>
+        <line x1={x(s)} x2={x(s)} y1={padTop - 6} y2={H - padBottom} stroke="var(--text-3)" strokeWidth="1" strokeDasharray="3 3" />
+        {series.map((ser, k) => (
+          <path key={ser.retailer.id} d={path(ser.values)} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={k === 0 ? 2.6 : 2} strokeLinejoin="round" strokeLinecap="round" opacity={k === 0 ? 1 : 0.85} />
+        ))}
+        {series.map((ser, k) => ser.values[s] !== null && (
+          <circle key={ser.retailer.id} cx={x(s)} cy={y(ser.values[s]!)} r="4" fill={COLORS[k % COLORS.length]} stroke="var(--card)" strokeWidth="1.5" />
+        ))}
+        {ticks.map((i) => (
+          <text key={i} x={x(i)} y={H - 8} fontSize="11" fill="var(--text-2)" textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}>{fmt(dates[i])}</text>
+        ))}
+      </svg>
+      <div className="store-chart-day">{dates[s].toLocaleDateString(LOCALE[lang], { weekday: 'short', day: 'numeric', month: 'long' })}</div>
+      <div className="store-chart-list">
+        {rows.map(({ ser, color, v }) => (
+          <div key={ser.retailer.id} className={'scl-row' + (v === null ? ' none' : '')}>
+            <span className="scl-dot" style={{ background: color }} />
+            <span className="scl-name">{ser.retailer.name}</span>
+            <span className="scl-price">{v === null ? '–' : euro(v)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}

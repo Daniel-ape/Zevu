@@ -322,3 +322,44 @@ export function storeInsights(
   const ranking = [...rank.values()].filter((r) => r.compared >= 10).sort((a, b) => b.cheapest / b.compared - a.cheapest / a.compared)
   return { gaps: uniq, ranking, compared }
 }
+
+export interface StoreSeries { retailer: Retailer; values: (number | null)[] }
+
+/**
+ * Daily price per shop (each shop's last known price carried forward, left
+ * out once it is more than two weeks old), over the same days as dailyLowest.
+ */
+export function dailyByStore(productId: string, observations: PriceObservation[], retailers: Retailer[], now = Date.now(), days = 90) {
+  const DAY = 86_400_000
+  const by = new Map<string, { t: number; cents: number }[]>()
+  for (const o of observations) {
+    if (o.productId !== productId) continue
+    const t = Date.parse(o.observedAt)
+    if (!Number.isFinite(t)) continue
+    const arr = by.get(o.retailerId) ?? []
+    arr.push({ t, cents: o.priceCents })
+    by.set(o.retailerId, arr)
+  }
+  if (!by.size) return { dates: [] as Date[], series: [] as StoreSeries[] }
+  for (const a of by.values()) a.sort((x, y) => x.t - y.t)
+  const today = Math.floor(now / DAY)
+  const first = Math.min(...[...by.values()].map((a) => a[0].t))
+  const start = Math.max(Math.floor(first / DAY), today - days)
+  const dates: Date[] = []
+  for (let d = start; d <= today; d++) dates.push(new Date(d * DAY + DAY / 2))
+  const series: StoreSeries[] = []
+  for (const [id, arr] of by) {
+    const retailer = retailers.find((r) => r.id === id)
+    if (!retailer) continue
+    const values = dates.map((_, k) => {
+      const end = (start + k + 1) * DAY
+      let last: { t: number; cents: number } | undefined
+      for (const p of arr) { if (p.t < end) last = p; else break }
+      return last && end - last.t <= 14 * DAY ? last.cents : null
+    })
+    if (values.some((v) => v !== null)) series.push({ retailer, values })
+  }
+  // cheapest today first
+  series.sort((a, b) => (a.values[a.values.length - 1] ?? Infinity) - (b.values[b.values.length - 1] ?? Infinity))
+  return { dates, series }
+}

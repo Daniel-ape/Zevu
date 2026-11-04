@@ -1,11 +1,12 @@
 import { useEffect, useMemo } from 'react'
 import { useStore } from '../data/store'
-import { cheapest, compare, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel, brandLabel } from '../domain/pricing'
+import { cheapest, compare, dailyByStore, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel, brandLabel } from '../domain/pricing'
 import { LOCALE } from '../i18n'
 import { useNav } from '../nav'
 import { Back, Bell, Check, Plus } from '../ui/icons'
 import { PriceMeta, RankBadge, RetailerMark, Tile, TrendTag } from '../ui/bits'
 import { PriceChart } from '../ui/PriceChart'
+import { StoreChart } from '../ui/StoreChart'
 import { inAppLink } from '../data/openLink'
 import { PriceSheet } from './PriceSheet'
 import { useState } from 'react'
@@ -22,6 +23,12 @@ export function ProductScreen({ id }: { id: string }) {
   const rows = useMemo(() => (product ? compare(product, observations, retailers) : []), [product, observations, retailers])
   const history = useMemo(() => dailyLowest(id, observations), [id, observations])
   const facts = useMemo(() => priceFacts(history), [history])
+  const perStore = useMemo(() => dailyByStore(id, observations, retailers), [id, observations, retailers])
+  // Lowest and highest over every shop's line when there are several.
+  const range = useMemo(() => {
+    const v = perStore.series.flatMap((x) => x.values.filter((c): c is number => c !== null))
+    return v.length && perStore.series.length > 1 ? { min: Math.min(...v), max: Math.max(...v) } : facts ? { min: facts.min, max: facts.max } : null
+  }, [perStore, facts])
   if (!product) return <div className="screen empty">{t('product.notFound')}</div>
 
   const best = cheapest(rows)
@@ -123,14 +130,14 @@ export function ProductScreen({ id }: { id: string }) {
           <TrendTag pct={trend(product, observations)} />
         </div>
         <div className="card-plain">
-          <PriceChart points={history} />
+          {perStore.series.length > 1 ? <StoreChart dates={perStore.dates} series={perStore.series} /> : <PriceChart points={history} />}
           <div className="price-stats">
-            {facts.max === facts.min ? (
+            {range && range.max === range.min ? (
               <span>{t('price.stable', { date: facts.since.toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' }) })}</span>
             ) : (
               <>
-                <span><b>{euro(facts.min)}</b>{t('price.low')}</span>
-                <span><b>{euro(facts.max)}</b>{t('price.high')}</span>
+                <span><b>{euro(range!.min)}</b>{t('price.low')}</span>
+                <span><b>{euro(range!.max)}</b>{t('price.high')}</span>
                 <span><b>{facts.since.toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' })}</b>{t('price.since')}</span>
               </>
             )}
