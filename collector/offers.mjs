@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { offersOf } from './leafletParse.mjs'
+import { readPpm, refineCrop } from './cropRefine.mjs'
 
 const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)'
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -46,9 +47,27 @@ function datesFrom(text, year = new Date().getUTCFullYear()) {
 
 function readPdf(buf) {
   writeFileSync('/tmp/leaflet.pdf', buf)
-  const html = execFileSync('pdftotext', ['-bbox-layout', '-l', '40', '/tmp/leaflet.pdf', '-'], { maxBuffer: 200e6 }).toString()
-  rmSync('/tmp/leaflet.pdf', { force: true })
-  return html
+  return execFileSync('pdftotext', ['-bbox-layout', '-l', '40', '/tmp/leaflet.pdf', '-'], { maxBuffer: 200e6 }).toString()
+}
+/** A small picture of one page (360 px wide) to find the offer boxes on. */
+function pagePicture(n) {
+  try {
+    execFileSync('pdftoppm', ['-f', String(n), '-l', String(n), '-scale-to-x', '360', '-scale-to-y', '-1', '-singlefile', '/tmp/leaflet.pdf', '/tmp/page'])
+    return readPpm(readFileSync('/tmp/page.ppm'))
+  } catch { return null }
+}
+/** Each offer's whole box (photo, name and price) instead of the rough area around the price. */
+function refineAll(offers) {
+  const pics = new Map()
+  for (const o of offers) {
+    if (!pics.has(o.page)) pics.set(o.page, pagePicture(o.page))
+    const img = pics.get(o.page)
+    if (img && o.region && o.seed) {
+      const box = refineCrop(img, o.region, o.seed)
+      if (box[2] * box[3] < 0.5 && box[2] > 0.08 && box[3] > 0.05) o.crop = box
+    }
+    delete o.region; delete o.seed
+  }
 }
 
 const leaflets = JSON.parse(readFileSync('public/prices/leaflets.json', 'utf8'))
@@ -63,6 +82,8 @@ async function add(chain, l, src) {
     if (until && until < today) return
     const html = readPdf(await get(pdf, true))
     const offers = offersOf(html).filter((o) => o.name.length >= 4)
+    refineAll(offers)
+    rmSync('/tmp/leaflet.pdf', { force: true })
     console.log(chain, l.name, from, until, offers.length, 'offers')
     for (const o of offers) {
       out.offers.push({ chain, leaflet: l.name, url: l.url, ...o, pageImage: pageImage(o.page), validFrom: from, validUntil: until })

@@ -39,11 +39,11 @@ const SIZE = /\b\d+(?:[,.]\d+)?\s?(?:-\s?\d+(?:[,.]\d+)?\s?)?(?:g|kg|ml|cl|dl|l|
  * (a price usually sits at the bottom of its box, so space above it counts as
  * nearer), and the offer gets the part of its region within reach of the price.
  */
-function cropOf(page, p, lines, prices) {
+function cropOf(page, p, lines, prices, wide = false) {
   const dist = (x, y, q) => { const dy = y - q.y; return Math.hypot(x - q.x, dy < 0 ? dy * 0.75 : dy * 1.5) }
   const others = prices.filter((q) => q !== p)
   const nearest = others.length ? Math.min(...others.map((q) => Math.hypot(q.x - p.x, q.y - p.y))) : page.w
-  const reach = Math.min(Math.max(nearest * 0.8, page.w * 0.16), page.w * 0.4)
+  const reach = wide ? Math.min(Math.max(nearest * 1.8, page.w * 0.35), page.w * 0.75) : Math.min(Math.max(nearest * 0.8, page.w * 0.16), page.w * 0.4)
   let x0 = p.w.x0, y0 = p.w.y0, x1 = p.w.x1, y1 = p.w.y1
   const step = page.w / 60
   for (let y = step / 2; y < page.h; y += step) for (let x = step / 2; x < page.w; x += step) {
@@ -59,7 +59,7 @@ function cropOf(page, p, lines, prices) {
   // [left, top, width, height] as parts of the page, then the page's width/height
   const box = [r(x0 / page.w), r(y0 / page.h), r((x1 - x0) / page.w), r((y1 - y0) / page.h), r(page.w / page.h)]
   // a cut-out of most of the page shows nothing useful
-  return box[2] * box[3] > 0.4 ? null : box
+  return !wide && box[2] * box[3] > 0.4 ? null : box
 }
 
 /** "Torkkupeitto Florentina Erittäin pehmeä, …" → "Torkkupeitto Florentina" */
@@ -163,7 +163,13 @@ export function offersOf(html) {
       if (regular && (printed !== null ? Math.abs(computed - printed) > 5 : computed > 60)) regular = null
       // the offer's box on the page (fractions), for a picture cut out of the page image
       const crop = cropOf(page, p, g.filter((l) => l.sure), prices)
-      offers.push({ crop,
+      // for refining against the page picture (collector/cropRefine.mjs): the most the
+      // offer's box can be, and what it must contain (price and name)
+      const region = cropOf(page, p, g.filter((l) => l.sure), prices, true)
+      let sx0 = p.w.x0, sy0 = p.w.y0, sx1 = p.w.x1, sy1 = p.w.y1
+      for (const l of named) if (name.includes(l.text.split(' ')[0])) { sx0 = Math.min(sx0, l.x0); sy0 = Math.min(sy0, l.y0); sx1 = Math.max(sx1, l.x1); sy1 = Math.max(sy1, l.y1) }
+      const seed = [sx0 / page.w, sy0 / page.h, (sx1 - sx0) / page.w, (sy1 - sy0) / page.h]
+      offers.push({ crop, region, seed,
         page: pi + 1, name, details: details || null, priceCents: p.cents, regularCents: regular,
         percent: printed ?? (regular ? computed : null),
         member,

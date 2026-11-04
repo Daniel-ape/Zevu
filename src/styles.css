@@ -1199,8 +1199,8 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .cut { display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fff; }
 .cut-frame { position: relative; overflow: hidden; display: block; max-width: 100%; max-height: 100%; }
 .cut-frame img { position: absolute; max-width: none; height: auto; display: block; }
-.offer-row { grid-template-columns: 84px 1fr auto; }
-.offer-pic { position: relative; width: 84px; height: 84px; border: 0; padding: 0; border-radius: 13px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+.offer-row { grid-template-columns: 96px 1fr auto; }
+.offer-pic { position: relative; width: 96px; height: 96px; border: 0; padding: 0; border-radius: 13px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
 .offer-pic .cut { width: 100%; height: 100%; }
 .offer-pct { position: absolute; left: 4px; bottom: 4px; background: #e0262f; color: #fff; font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 999px; }
 .offer-badge { width: 84px; height: 84px; }
