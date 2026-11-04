@@ -1264,3 +1264,4 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .chain-head .chain-logo.inline.wide img { height: 15px; max-width: 130px; }
 .chain-head .chain-logo.inline.wide + .chain-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .cover-badge.last { background: #e0262f; color: #fff; }
+.cover-soon { color: var(--accent); font-weight: 700; }

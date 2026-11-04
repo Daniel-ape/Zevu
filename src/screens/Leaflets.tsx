@@ -197,7 +197,8 @@ export function Cover({ chain, l, showStore = true, compact, logo }: { chain: st
   return (
     <a className={'cover' + (logo ? ' has-logo' : '')} href={l.url} target="_blank" rel="noreferrer" onClick={inAppLink(l.url)}>
       <div className="cover-img">
-        {l.status && <span className={'cover-badge ' + l.status}>{t(l.status === 'now' ? 'offers.now' : l.status === 'last' ? 'offers.last' : 'offers.soon')}</span>}
+        {/* only the exception that needs action today gets a badge */}
+        {l.status === 'last' && <span className="cover-badge last">{t('offers.last')}</span>}
         {logo && <ChainMark chain={CHAIN_ID[chain] ?? chain.toLowerCase()} label={l.name.startsWith('K-') ? l.name.split(' ')[0] : chain} />}
         {l.image && !broken ? (
           <img
@@ -220,7 +221,12 @@ export function Cover({ chain, l, showStore = true, compact, logo }: { chain: st
       {!(showStore && l.name.trim() === (l.name.startsWith('K-') ? l.name.split(' ')[0] : chain)) && (
         <div className={'cover-name' + (compact ? ' one' : '')}>{l.name}</div>
       )}
-      {!compact && l.period && <div className="cover-period">{l.period}</div>}
+      {!compact && (l.period || l.status === 'soon') && (
+        <div className="cover-period">
+          {l.status === 'soon' ? <><b className="cover-soon">{t('offers.soon')}</b>{l.period ? ' ' + l.period.split(/[–-]/)[0].trim() : ''}</> : l.period}
+        </div>
+      )}
+      {compact && l.status === 'soon' && <div className="cover-period"><b className="cover-soon">{t('offers.soon')}</b></div>}
     </a>
   )
 }
