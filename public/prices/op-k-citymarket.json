@@ -1,0 +1,9 @@
+{"source":"Open Prices (prices.openfoodfacts.org), ODbL","retailerId":"k-citymarket","fetchedAt":"2026-11-04T11:05:27.551Z","prices":[
+{"ean":"3046920022439","priceCents":459,"checkedAt":"2026-09-22T12:00:00.000Z"},
+{"ean":"5410188037401","priceCents":379,"checkedAt":"2026-09-22T12:00:00.000Z"},
+{"ean":"6410405144454","priceCents":125,"checkedAt":"2026-10-03T12:00:00.000Z"},
+{"ean":"6410405333735","priceCents":479,"checkedAt":"2026-09-22T12:00:00.000Z"},
+{"ean":"6430025257068","priceCents":338,"checkedAt":"2026-09-24T12:00:00.000Z"},
+{"ean":"7310532120972","priceCents":285,"checkedAt":"2026-02-10T12:00:00.000Z"},
+{"ean":"8002503232317","priceCents":497,"checkedAt":"2026-09-22T12:00:00.000Z"}
+]}

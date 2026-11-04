@@ -1,0 +1,6 @@
+{"source":"Open Prices (prices.openfoodfacts.org), ODbL","retailerId":"alepa","fetchedAt":"2026-11-04T11:05:27.551Z","prices":[
+{"ean":"2000503701471","priceCents":269,"checkedAt":"2026-09-18T12:00:00.000Z"},
+{"ean":"5690527983303","priceCents":322,"checkedAt":"2026-02-14T12:00:00.000Z"},
+{"ean":"6411200001096","priceCents":537,"checkedAt":"2026-02-11T12:00:00.000Z"},
+{"ean":"7340011497219","priceCents":165,"checkedAt":"2026-09-28T12:00:00.000Z"}
+]}
