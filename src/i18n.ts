@@ -96,7 +96,7 @@ const en = {
   // you
   'you.title': 'You', 'you.language': 'Language', 'you.appearance': 'Appearance',
   'theme.system': 'Auto', 'theme.light': 'Light', 'theme.dark': 'Dark',
-  'you.data': 'Price data', 'you.dataNote': 'Prices: your receipts and shelf labels, and Tokmanni’s website. Products: Open Food Facts (ODbL).',
+  'you.data': 'Price data', 'you.dataNote': 'Prices: your receipts and shelf labels; the shops’ own websites (Tokmanni, Halpa-Halli, Prisma.fi, Verkkokauppa.com, Stockmann, Kärkkäinen, Ruohonjuuri, Lidl, Apteekki360, Yliopiston Apteekki); prices people report to Open Prices by Open Food Facts (ODbL). Products: Open Food Facts (ODbL).',
 }
 
 type Dict = typeof en
@@ -180,7 +180,7 @@ const fi: Dict = {
   'scan.short': 'Viivakoodissa on 8 tai 13 numeroa.',
   'you.title': 'Sinä', 'you.language': 'Kieli', 'you.appearance': 'Ulkoasu',
   'theme.system': 'Auto', 'theme.light': 'Vaalea', 'theme.dark': 'Tumma',
-  'you.data': 'Hintatiedot', 'you.dataNote': 'Hinnat: omat kuittisi ja hintalappusi sekä Tokmannin verkkosivut. Tuotteet: Open Food Facts (ODbL).',
+  'you.data': 'Hintatiedot', 'you.dataNote': 'Hinnat: omat kuittisi ja hintalappusi; kauppojen omat verkkosivut (Tokmanni, Halpa-Halli, Prisma.fi, Verkkokauppa.com, Stockmann, Kärkkäinen, Ruohonjuuri, Lidl, Apteekki360, Yliopiston Apteekki); Open Food Factsin Open Prices -palveluun ilmoitetut hinnat (ODbL). Tuotteet: Open Food Facts (ODbL).',
 }
 
 const sv: Dict = {
@@ -261,7 +261,7 @@ const sv: Dict = {
   'scan.short': 'Streckkoder har 8 eller 13 siffror.',
   'you.title': 'Du', 'you.language': 'Språk', 'you.appearance': 'Utseende',
   'theme.system': 'Auto', 'theme.light': 'Ljust', 'theme.dark': 'Mörkt',
-  'you.data': 'Prisdata', 'you.dataNote': 'Priser: dina kvitton och hyllkantsetiketter samt Tokmannis webbplats. Produkter: Open Food Facts (ODbL).',
+  'you.data': 'Prisdata', 'you.dataNote': 'Priser: dina kvitton och hyllkantsetiketter; butikernas egna webbplatser (Tokmanni, Halpa-Halli, Prisma.fi, Verkkokauppa.com, Stockmann, Kärkkäinen, Ruohonjuuri, Lidl, Apteekki360, Yliopiston Apteekki); priser som folk rapporterat till Open Food Facts Open Prices (ODbL). Produkter: Open Food Facts (ODbL).',
 }
 
 const DICTS: Record<Lang, Dict> = { en, fi, sv }

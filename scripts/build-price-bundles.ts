@@ -29,8 +29,10 @@ const shops: ShopFile[] = readdirSync(DIR)
   .filter((d) => d.retailerId && Array.isArray(d.prices))
 
 const catalogue = new Set<string>(JSON.parse(readFileSync('public/products/fi.json', 'utf8')).rows.map((r: string[]) => r[0]))
-const shopsPerEan = new Map<string, number>()
-for (const s of shops) for (const e of new Set(s.prices.map((p) => p.ean))) shopsPerEan.set(e, (shopsPerEan.get(e) ?? 0) + 1)
+// Distinct chains per product (Prisma can come both from prisma.fi and from Open Prices).
+const chainsPerEan = new Map<string, Set<string>>()
+for (const s of shops) for (const p of s.prices) { const c = chainsPerEan.get(p.ean) ?? new Set(); c.add(s.retailerId); chainsPerEan.set(p.ean, c) }
+const shopsPerEan = new Map([...chainsPerEan].map(([e, c]) => [e, c.size]))
 
 const isCore = (p: Price, shop: string) =>
   catalogue.has(p.ean) || (shopsPerEan.get(p.ean) ?? 0) >= 2 || !p.name || EVERYDAY.has(categoryFor(p.name, shop))
@@ -53,7 +55,7 @@ for (const s of shops) {
   for (const p of s.prices) {
     if (isCore(p, s.retailerId)) { c.i.push(pack(p)); mine.add(p.ean) } else r.i.push(pack(p))
   }
-  coreEans.set(s.retailerId, mine)
+  coreEans.set(s.retailerId, new Set([...(coreEans.get(s.retailerId) ?? []), ...mine]))
   core.push(c)
   rest.push(r)
 }
@@ -62,7 +64,7 @@ for (const s of shops) {
 const history: Record<string, Record<string, [string, number][]>> = {}
 for (const s of shops) {
   const file = `${DIR}/${s.retailerId}-history.json`
-  if (!existsSync(file)) continue
+  if (!existsSync(file) || history[s.retailerId]) continue
   const h = JSON.parse(readFileSync(file, 'utf8')) as Record<string, [string, number][]>
   const keep = coreEans.get(s.retailerId)!
   history[s.retailerId] = Object.fromEntries(Object.entries(h).filter(([e]) => keep.has(e)))
