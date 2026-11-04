@@ -109,4 +109,20 @@ test('Month savings: paid price vs. other shops this month', () => {
   assert.deepEqual(s, { savedCents: 70, missedCents: 40, spentCents: 1000, receipts: 1, compared: 2 })
 })
 
+test('Halpa-Halli: VAT code after the price, informational Ale lines, OCR crumbs', () => {
+  const r = parseReceipt([
+    'HALPA-HALLI', 'JAKOBSTAD / PIETARSAARI', 'Y-tunnus 0955220-7', 'Määräalennukset hyvitetään kuitin lopussa',
+    'NåM FILEEPIHVI 460G ORI         2,40 14  (', '1,00x — 5,99 Ale 60%    -3,59 $%', '520063144                  t',
+    'e       POSSUN FILEEPIHVI PIPPU     3,40 14 )', 'VA           1,00x — 8,49 Ale 60%    -5,09', '520489036',
+    'KANAN FILEELEIKE 600G H .       3,60 14 g', '1,00x —8,99 Ale —60X    -5.39',
+    'RAPEA KANAN SISKFILEE 2          2,00 14', '1,005 — 4,99 Ale 60%    2.9',
+    ') PERLSMUOVIKASSI             0,39 13', 'Yhteensä EUR 11,79', 'PANKKIKORTTI 11,79', '01/03/2026 19:12',
+  ].join('\n'), NOW)
+  assert.equal(r.retailerId, 'halpahalli')
+  assert.deepEqual(r.items.map((i) => [i.name, i.priceCents]), [
+    ['NåM FILEEPIHVI 460G ORI', 240], ['POSSUN FILEEPIHVI PIPPU', 340], ['KANAN FILEELEIKE 600G H', 360], ['RAPEA KANAN SISKFILEE 2', 200], ['PERLSMUOVIKASSI', 39],
+  ])
+  assert.equal(r.totalCents, 1179)
+})
+
 console.log(`${passed} tests passed`)

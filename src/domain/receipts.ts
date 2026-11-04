@@ -32,6 +32,8 @@ const STORE_PATTERNS: Array<[RegExp, string]> = [
   [/\bsale\b/i, 'sale'],
   [/\blidl\b/i, 'lidl'],
   [/tokmanni/i, 'tokmanni'],
+  [/halpa-?\s?hall?i/i, 'halpahalli'],
+  [/k[aä]rkk[aä]inen/i, 'karkkainen'],
 ]
 
 // Lines that are never products.
@@ -42,10 +44,13 @@ const PAYMENT = /(kortti|k[aä]teinen|pankki|card|visa|master|debit|credit|konta
 const DISCOUNT = /(alennus|etu\b|tarjous|rabatt|plussa|kampanja|s[aä][aä]st[oö]|lidl plus|-\d+\s?%)/i
 // Deposit refunds are money back, not a discount on the item above.
 const REFUND = /(palautus|pantti|\bpant\b|returglas|pullonpalautus)/i
-const PRICE_AT_END = /(-?\d{1,4}[,.]\d{2})(-?)\s*(€|eur)?\s*[A-D]?\s*$/i
+// The price may be followed by a VAT code ("2,40 14", "1,29 A") and stray OCR marks.
+const PRICE_AT_END = /(-?\d{1,4}[,.]\d{2})(-?)\s*(€|eur)?\s*(?:[A-D]|\d{1,2})?(?:\s+(?:[^\w\s]{1,3}|[a-z*]{1,2}))?\s*$/i
 const QTY_LINE = /^\s*(\d+)\s*(kpl|st|x)\s*[x*]?\s*(\d+[,.]\d{2})/i
+// "1,00x 5,99 Ale 60%  -3,59": unit price and discount of the item above, whose price is already net.
+const ALE_LINE = /\d[,.]\d{2,3}\s*[xX×5]?\s*[—–-]?\s*\d+[,.]\d{2}\s+ale\b/i
 const WEIGHT_LINE = /^\s*\d+[,.]\d+\s*kg\b/i
-const DATE = /\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b/
+const DATE = /\b(\d{1,2})[./](\d{1,2})[./](\d{2,4})\b/
 
 const cents = (s: string) => Math.round(parseFloat(s.replace(',', '.')) * 100)
 // Price at the end of a line; "0,50-" (minus after the number) counts as negative.
@@ -94,6 +99,15 @@ export function parseReceipt(text: string, now = new Date()): Omit<Receipt, 'id'
       }
       break // everything after the total is payment info
     }
+    if (ALE_LINE.test(line)) {
+      // The item above already shows the price after this discount, unless it shows the full unit price.
+      const unit = line.match(/\d[,.]\d{2,3}\s*[xX×5]?\s*[—–-]?\s*(\d+[,.]\d{2})/)
+      const off = line.match(/-\s?(\d+[,.]\d{2})\W*$/)
+      const last = items[items.length - 1]
+      if (last && unit && off && last.priceCents === cents(unit[1])) last.priceCents -= cents(off[1])
+      pending = ''
+      continue
+    }
     const p = line.match(PRICE_AT_END)
     const qty = line.match(QTY_LINE)
     if (qty || WEIGHT_LINE.test(line)) {
@@ -111,7 +125,8 @@ export function parseReceipt(text: string, now = new Date()): Omit<Receipt, 'id'
       continue
     }
     pending = ''
-    const name = line.slice(0, p.index).trim()
+    // "e POSSUN FILEEPIHVI", ") PERLSMUOVIKASSI": drop OCR crumbs before the name
+    const name = line.slice(0, p.index).trim().replace(/^(?:[^\p{L}\p{N}]+\s*|\p{Ll}\s+(?=\p{Lu}))+/u, '').replace(/[\s.,;:|]+$/, '').trim()
     const value = priceOf(p)
     if (REFUND.test(name)) continue
     // Discounts: negative amounts, or a discount word printed with a plain amount ("ALENNUS 0,30").
