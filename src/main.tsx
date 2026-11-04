@@ -4,6 +4,9 @@ import './styles.css'
 import App from './App'
 import { isNativeApp } from './data/openLink'
 
+// The phone app's dock is drawn natively above the page: styles leave room for it.
+if (isNativeApp) document.documentElement.classList.add('native-app')
+
 // Offline support for the web app (the phone apps already have their files).
 if ('serviceWorker' in navigator && !isNativeApp && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {

@@ -1292,3 +1292,12 @@ html, body { overscroll-behavior-x: none; }
 }
 .mark.logo { background: #fff; padding: 0; overflow: hidden; }
 .mark.logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+/* No sideways drag of a whole page: the scroll box clips sideways, and strips bleed
+   exactly to the screen edge (16 px), not 4 px past it. */
+.screen { overflow-x: hidden; overscroll-behavior-x: none; }
+.strip { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; scroll-padding-inline: 16px; }
+/* In the phone app the native dock floats above everything, sheets included:
+   sheets end with room for it so their last buttons can be scrolled above it. */
+.native-app .sheet { padding-bottom: calc(118px + env(safe-area-inset-bottom)); }
+.offer-big { height: min(46vh, 400px); }

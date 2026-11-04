@@ -28,7 +28,7 @@ export function ProductScreen({ id }: { id: string }) {
   // Lowest and highest over every shop's line when there are several.
   const range = useMemo(() => {
     const v = perStore.series.flatMap((x) => x.values.filter((c): c is number => c !== null))
-    return v.length && perStore.series.length > 1 ? { min: Math.min(...v), max: Math.max(...v) } : facts ? { min: facts.min, max: facts.max } : null
+    return v.length && perStore.series.length > 0 ? { min: Math.min(...v), max: Math.max(...v) } : facts ? { min: facts.min, max: facts.max } : null
   }, [perStore, facts])
   if (!product) return <div className="screen empty">{t('product.notFound')}</div>
 
@@ -131,13 +131,13 @@ export function ProductScreen({ id }: { id: string }) {
         </div>
       </div>
 
-      {history.length > 1 && facts && <div className="section">
+      {(perStore.series.length > 0 || history.length > 1) && facts && <div className="section">
         <div className="section-head">
           <h2>{t('price.history')}</h2>
           <TrendTag pct={trend(product, observations)} />
         </div>
         <div className="card-plain">
-          {perStore.series.length > 1 ? <StoreChart dates={perStore.dates} series={perStore.series} /> : <PriceChart points={history} />}
+          {perStore.series.length > 0 ? <StoreChart dates={perStore.dates} series={perStore.series} /> : <PriceChart points={history} />}
           <div className="price-stats">
             {range && range.max === range.min ? (
               <span>{t('price.stable', { date: facts.since.toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' }) })}</span>
