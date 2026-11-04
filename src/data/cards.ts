@@ -25,7 +25,7 @@ export const CARD_CHAINS: CardChain[] = [
   { id: 'halpahalli', name: 'Halpa-Halli', color: '#b5121b', retailers: ['halpahalli'], leaflets: 'Halpa-Halli' },
   { id: 'minimani', name: 'Minimani', color: '#d2481a', retailers: [], leaflets: 'Minimani' },
   { id: 'rusta', name: 'Rusta', color: '#23794b', retailers: [], leaflets: 'Rusta' },
-  { id: 'karkkainen', name: 'Kärkkäinen', color: '#e2001a', retailers: ['karkkainen'] },
+  { id: 'karkkainen', name: 'Kärkkäinen', color: '#e2001a', retailers: ['karkkainen'], leaflets: 'Kärkkäinen' },
   { id: 'stockmann', name: 'Stockmann', color: '#1d1d1b', retailers: ['stockmann'] },
   { id: 'other', name: '', color: '#6b6b78', retailers: [] },
 ]

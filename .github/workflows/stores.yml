@@ -24,9 +24,9 @@ jobs:
     timeout-minutes: 300
     strategy:
       fail-fast: false
-      max-parallel: 9
+      max-parallel: 10
       matrix:
-        store: ${{ fromJSON(inputs.only != '' && inputs.only || '["halpahalli","verkkokauppa","prisma","stockmann","karkkainen","ruohonjuuri","yliopistonapteekki","lidl","apteekki360"]') }}
+        store: ${{ fromJSON(inputs.only != '' && inputs.only || '["halpahalli","verkkokauppa","prisma","stockmann","karkkainen","ruohonjuuri","yliopistonapteekki","lidl","apteekki360","power"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

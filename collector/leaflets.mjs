@@ -151,11 +151,36 @@ for (const [shop, cfg] of Object.entries(SHOPS)) {
     console.log(shop, e.message)
   }
 }
+// Kärkkäinen: its leaflet page lists the issues (read in issuu); covers from issuu's oEmbed.
+out.karkkainen = []
+try {
+  const page = 'https://www.karkkainen.com/verkkokauppa/nakoislehti'
+  const html = await get(page)
+  const slugs = [...new Set([...html.matchAll(/issuu\.com\/karkkainen\/docs\/([a-z0-9_]+)/gi)].map((m) => m[1]))]
+  const year = new Date().getFullYear()
+  const weekOf = (s) => { const m = s.match(/_(\d{1,2})_(20\d\d)$/); return m ? +m[2] * 100 + +m[1] : 0 }
+  const ads = slugs.filter((s) => /mainoslehti_\d+_20\d\d/.test(s)).sort((a, b) => weekOf(b) - weekOf(a)).slice(0, 2)
+  const others = slugs.filter((s) => !/mainoslehti/.test(s) && +(s.match(/20\d\d/)?.[0] ?? 0) >= year).slice(0, 3)
+  for (const s of [...ads, ...others]) {
+    const w = s.match(/mainoslehti_(\d{1,2})_(20\d\d)/)
+    const name = w ? `Mainoslehti vko ${w[1]}` : s.replace(/^k_rkk_inen_/, '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase())
+    let image
+    try {
+      await sleep(600)
+      const o = await (await fetch(`https://issuu.com/oembed?format=json&url=${encodeURIComponent('https://issuu.com/karkkainen/docs/' + s)}`, { headers: { 'User-Agent': UA } })).json()
+      if (typeof o.thumbnail_url === 'string' && o.thumbnail_url.startsWith('https://')) image = o.thumbnail_url
+    } catch { /* no cover */ }
+    const [from, until] = w ? datesFrom(`vko ${w[1]}/${w[2]}`) : [null, null]
+    out.karkkainen.push({ name, url: `https://www.karkkainen.com/nakoislehti/${s}`, ...(image ? { image } : {}), ...(until ? { from, until } : {}) })
+  }
+  console.log('karkkainen', JSON.stringify(out.karkkainen))
+} catch (e) { console.log('karkkainen', e.message) }
+
 // If a source failed this time, keep what it had last time (up to 3 days), so
 // leaflets don't vanish from the app because of a passing error.
 try {
   const prev = JSON.parse(readFileSync('public/prices/leaflets.json', 'utf8'))
-  for (const k of ['lidl', 'tokmanni', 'minimani', 'rusta', 'halpahalli']) {
+  for (const k of ['lidl', 'tokmanni', 'minimani', 'rusta', 'halpahalli', 'karkkainen']) {
     const empty = !Array.isArray(out[k]) || out[k].length === 0
     const since = prev.kept?.[k] ?? prev.updated
     if (empty && Array.isArray(prev[k]) && prev[k].length && Date.now() - +new Date(since) < 3 * 86_400_000) {

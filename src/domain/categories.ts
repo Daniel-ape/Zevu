@@ -28,12 +28,12 @@ const FOOD: [RegExp, CategoryId][] = [
   [/juoma\b|juomat\b|mehu|kahvi\b|kahvia|papukahvi|suodatinkahvi|\btee\b|kivennäisvesi|limsa|\bolut\b|oluet|kaffe|dryck|energiajuoma|kaurajuoma|palautusjuoma|maitokahvi|pikakahvi/i, 'drinks'],
   [/pasta\b|makaroni|riisi\b|jauho|kastike|säilyke|mauste|ruokaöljy|rypsiöljy|oliiviöljy|kaurahiutale|mysli|muro|puuro|keitto\b|hernekeitto|proteiini|salaattikastike|jauhoseos/i, 'pantry'],
 ]
-const NO_FOOD = new Set(['verkkokauppa', 'stockmann', 'yliopistonapteekki', 'apteekki360'])
+const NO_FOOD = new Set(['verkkokauppa', 'stockmann', 'yliopistonapteekki', 'apteekki360', 'power'])
 export const guess = (name: string, shop: string): CategoryId | undefined =>
   NONFOOD.find(([re]) => re.test(name))?.[1] ?? (NO_FOOD.has(shop) ? undefined : FOOD.find(([re]) => re.test(name))?.[1])
 // When the name gives no clue, the kind of shop does.
 export const SHOP_DEFAULT: Record<string, CategoryId> = {
-  verkkokauppa: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
+  verkkokauppa: 'electronics', power: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
   stockmann: 'health', karkkainen: 'home', halpahalli: 'home', prisma: 'home', lidl: 'home', tokmanni: 'home',
 }
 export const EMOJI: Record<CategoryId, string> = {
