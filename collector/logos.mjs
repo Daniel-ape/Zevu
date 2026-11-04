@@ -47,13 +47,24 @@ for (const [chain, site] of Object.entries(SITES)) {
   try {
     if (!(await allowed(site))) { console.log(chain, 'robots.txt says no'); continue }
     const html = await (await get(site)).text()
-    const headerLogos = HEADER_LOGO.has(chain)
-      ? [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0])
-          .filter((t) => /logo/i.test(t))
-          .map((t) => t.match(/\b(?:data-)?src=["']([^"']+)/i)?.[1])
-          .filter((u) => u && !/^data:/.test(u))
-          .map((u) => ({ url: new URL(u.replace(/&amp;/g, '&'), site).href, score: 2000 }))
-      : []
+    let headerLogos = []
+    if (HEADER_LOGO.has(chain)) {
+      // 1) an inline <svg> inside the header's logo link
+      const a = html.match(/<a\b[^>]*class=["'][^"']*logo[^"']*["'][^>]*>([\s\S]{0,20000}?)<\/a>/i)?.[1] ?? ''
+      const svg = a.match(/<svg[\s\S]*?<\/svg>/i)?.[0]
+      if (svg && svg.length > 200) {
+        const full = svg.includes('xmlns=') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
+        writeFileSync(`public/logos/${chain}.svg`, full)
+        index[chain] = `${chain}.svg`
+        console.log(chain, '← inline header svg', full.length, 'bytes')
+        continue
+      }
+      // 2) a logo picture in the header, or the theme's usual logo file
+      const imgs = [...(a + html).matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]).map((t) => t.match(/\b(?:data-)?src=["']([^"']+)/i)?.[1]).filter((u) => u && /logo/i.test(u) && !/^data:/.test(u))
+      const theme = html.match(/https?:\/\/[^"' ]*\/static\/version\d+\/frontend\/[^"' ]*?\/[a-z]{2}_[A-Z]{2}\//)?.[0]
+      const guesses = theme ? ['images/logo.svg', 'images/logo.png', 'images/logo-header.svg'].map((f) => theme + f) : []
+      headerLogos = [...imgs, ...guesses].map((u) => ({ url: new URL(u.replace(/&amp;/g, '&'), site).href, score: 2000 }))
+    }
     if (headerLogos.length) console.log(chain, 'header logos', headerLogos.map((c) => c.url))
     // <link rel="apple-touch-icon" | "icon" ... href="..." sizes="..."> — prefer big PNG/SVG icons
     const links = [...html.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]).filter((l) => /rel=["'][^"']*icon/i.test(l))

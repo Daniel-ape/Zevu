@@ -218,11 +218,46 @@ export interface LeafletOffer {
 let offersFeed: Promise<{ offers: LeafletOffer[] } | null> | null = null
 export const loadOffers = () => (offersFeed ??= import('../data/dataFile').then((m) => m.fetchData<{ offers: LeafletOffer[] }>('offers.json')))
 
+const savedKey = (o: LeafletOffer) => `${o.chain}:${o.name}:${o.priceCents}`
+const pageUrl = (o: LeafletOffer) => (/publitas|promozilla/.test(o.url) ? o.url.replace(/\/?$/, '/') + 'page/' + o.page : o.url)
+const asCoupon = (o: LeafletOffer): Coupon => ({
+  id: 'lf:' + savedKey(o), added: new Date().toISOString(), chain: CARD_CHAINS.some((x) => x.id === o.chain) ? o.chain : 'other',
+  title: o.name, priceCents: o.priceCents, percent: o.percent, validUntil: o.validUntil, link: pageUrl(o), member: o.member,
+  ...(o.crop && o.pageImage ? { cut: { src: o.pageImage, box: o.crop } } : {}),
+})
+
+/** One offer, big: the cut-out from the leaflet, price, save, card and a link to the leaflet. */
+export function OfferSheet({ o, onClose, onShowCard }: { o: LeafletOffer; onClose: () => void; onShowCard?: (c: LoyaltyCard) => void }) {
+  const { cards, coupons, saveCoupon, t, lang } = useStore()
+  const saved = coupons.some((c) => c.id === 'lf:' + savedKey(o))
+  const card = cards.find((k) => k.chain === o.chain)
+  const [showCard, setShowCard] = useState<LoyaltyCard | null>(null)
+  const fmtDate = (d: string) => new Date(d + 'T12:00').toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' })
+  return (
+    <>
+      <Sheet title={o.name} onClose={onClose}>
+        {o.crop && o.pageImage && <div className="offer-big"><Cut src={o.pageImage} box={o.crop} /><ChainMark chain={o.chain} /></div>}
+        <div className="offer-sheet-info">
+          <span className="offer-price"><b>{euro(o.priceCents)}</b>{o.regularCents && <s>{euro(o.regularCents)}</s>}{o.percent ? <i className="offer-pct inline">−{o.percent}%</i> : null}</span>
+          {o.validUntil && <span className="offer-valid">{t('cp.until', { date: fmtDate(o.validUntil) })}</span>}
+        </div>
+        <div className="offer-sheet-actions">
+          <button className="btn primary" disabled={saved} onClick={() => saveCoupon(asCoupon(o))}>{saved ? t('cp.offerSaved') : t('cp.offerSave')}</button>
+          {card && <button className="btn ghost" onClick={() => (onShowCard ? onShowCard(card) : setShowCard(card))}><CardIcon size={18} /> {t('cp.showCard')}</button>}
+        </div>
+        <a className="link small offer-sheet-link" href={pageUrl(o)} target="_blank" rel="noreferrer">{t('cp.offerOpen')}</a>
+      </Sheet>
+      {showCard && <CardView card={showCard} onClose={() => setShowCard(null)} />}
+    </>
+  )
+}
+
 /** Home page strip: members' offers from the leaflets, the user's own chains first. */
 export function HomeMemberOffers() {
   const { cards, t } = useStore()
   const nav = useNav()
   const [all, setAll] = useState<LeafletOffer[] | null>(null)
+  const [open, setOpen] = useState<LeafletOffer | null>(null)
   useEffect(() => { loadOffers().then((d) => setAll(d?.offers ?? [])) }, [])
   const today = new Date().toISOString().slice(0, 10)
   const mine = new Set(cards.map((c) => c.chain))
@@ -241,7 +276,7 @@ export function HomeMemberOffers() {
         {shown.map((o, i) => {
           const chain = CARD_CHAINS.find((x) => x.id === o.chain)
           return (
-            <button key={i} className="member-card" style={{ ['--c' as string]: chain?.color ?? '#6b6b78' }} onClick={() => nav.go('coupons')}>
+            <button key={i} className="member-card" style={{ ['--c' as string]: chain?.color ?? '#6b6b78' }} onClick={() => setOpen(o)}>
               <span className="member-pic">
                 {o.crop && o.pageImage ? <Cut src={o.pageImage} box={o.crop} /> : <span className="offer-badge"><b>{o.percent ? `−${o.percent}%` : '%'}</b></span>}
                 {o.percent ? <b className="offer-pct">−{o.percent}%</b> : null}
@@ -253,6 +288,7 @@ export function HomeMemberOffers() {
           )
         })}
       </div>
+      {open && <OfferSheet o={open} onClose={() => setOpen(null)} />}
     </div>
   )
 }
@@ -283,9 +319,7 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
     .sort((a, b) => Number(!!b.member && myChains.has(b.chain)) - Number(!!a.member && myChains.has(a.chain)) || (b.percent ?? 0) - (a.percent ?? 0))
   if (all === null || live.length === 0) return null
   const fmtDate = (d: string) => new Date(d + 'T12:00').toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' })
-  const savedKey = (o: LeafletOffer) => `${o.chain}:${o.name}:${o.priceCents}`
   const isSaved = (o: LeafletOffer) => coupons.some((c) => c.id === 'lf:' + savedKey(o))
-  const pageUrl = (o: LeafletOffer) => (/publitas|promozilla/.test(o.url) ? o.url.replace(/\/?$/, '/') + 'page/' + o.page : o.url)
 
   return (
     <div className="section">
@@ -331,7 +365,7 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
                   <button
                     className={'offer-save' + (saved ? ' on' : '')}
                     disabled={saved}
-                    onClick={() => saveCoupon({ id: 'lf:' + savedKey(o), added: new Date().toISOString(), chain: chain ? o.chain : 'other', title: o.name, priceCents: o.priceCents, percent: o.percent, validUntil: o.validUntil, link: pageUrl(o), member: o.member, ...(o.crop && o.pageImage ? { cut: { src: o.pageImage, box: o.crop } } : {}) })}
+                    onClick={() => saveCoupon(asCoupon(o))}
                   >{saved ? t('cp.offerSaved') : t('cp.offerSave')}</button>
                   {card && o.member && <button className="offer-card" onClick={() => onShowCard(card)}><CardIcon size={15} /></button>}
                 </div>
@@ -342,12 +376,7 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
       )}
       {shown.length > limit && <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setLimit(limit + 30)}>{t('cp.offersMore', { n: shown.length - limit })}</button>}
       <div className="group-note">{t('cp.offersNote')}</div>
-      {big && big.crop && big.pageImage && (
-        <Sheet title={big.name} onClose={() => setBig(null)}>
-          <div className="offer-big"><Cut src={big.pageImage} box={big.crop} /></div>
-          <a className="btn primary" href={pageUrl(big)} target="_blank" rel="noreferrer" style={{ marginTop: 14 }}>{t('cp.offerOpen')}</a>
-        </Sheet>
-      )}
+      {big && <OfferSheet o={big} onClose={() => setBig(null)} onShowCard={onShowCard} />}
     </div>
   )
 }
