@@ -1,8 +1,10 @@
 name: iOS build
 
 # Builds the iPhone app on a Mac with Xcode 26 (needed for Liquid Glass),
-# runs it in the iPhone simulator and saves a screenshot. No signing: this
-# checks that the native code compiles and shows how the dock looks.
+# runs it in the iPhone simulator and saves a screenshot, and builds an
+# unsigned Hintaopas.ipa for iPhones. The .ipa is published on the release
+# "iphone" (a fixed download link); Sideloadly on a Windows PC signs it with
+# the user's own Apple ID when installing.
 on:
   push:
     branches: [main]
@@ -55,6 +57,32 @@ jobs:
           xcrun simctl ui "$DEV" appearance dark
           sleep 5
           xcrun simctl io "$DEV" screenshot shots/dark.png
+
+      - name: Build for iPhone (unsigned .ipa)
+        working-directory: ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build-device CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -40
+          APP=build-device/Build/Products/Release-iphoneos/App.app
+          test -d "$APP"
+          rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          zip -qry Hintaopas.ipa Payload
+          ls -la Hintaopas.ipa
+
+      - name: Publish Hintaopas.ipa on the "iphone" release
+        if: github.ref == 'refs/heads/main'
+        working-directory: ios/App
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES="Hintaopas för iPhone, byggd $(date -u +'%Y-%m-%d %H:%M') UTC från ${GITHUB_SHA::7}. Installera med Sideloadly på en Windows-dator (se README)."
+          if gh release view iphone >/dev/null 2>&1; then
+            gh release upload iphone Hintaopas.ipa --clobber
+            gh release edit iphone --notes "$NOTES"
+          else
+            gh release create iphone Hintaopas.ipa --title "Hintaopas för iPhone" --notes "$NOTES" --latest=false
+          fi
 
       - uses: actions/upload-artifact@v4
         if: always()
