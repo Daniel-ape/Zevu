@@ -3,6 +3,7 @@
 // link is stored; the leaflet stays on Lidl's own site. robots.txt is honoured.
 // Output: public/prices/leaflets.json
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { datesFrom } from './leafletDates.mjs'
 
 const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
 const get = async (url) => {
@@ -103,7 +104,21 @@ async function publitas(url) {
   const final = r.url.replace(/\/page\/\d+\/?$/, '/')
   let title = unescape(meta2(html, 'og:title') ?? html.match(/<title>([^<]*)<\/title>/i)?.[1])
   title = title.replace(/^.*? - /, '').replace(/ - Sivu \d+$/i, '').replace(/ - Page \d+$/i, '').replace(/_/g, ' ')
-  return image.startsWith('https://') ? { name: title, url: final, image } : null
+  // The cover is the leaflet's own first page (the og:image is a rendered screenshot that
+  // can show the wrong thing), and the dates come from the first pages' text.
+  let cover = image, from = null, until = null
+  try {
+    const origin = new URL(final).origin
+    await sleep(800)
+    const spreads = await (await fetch(final + 'spreads.json', { headers: { 'User-Agent': UA } })).json()
+    const pages = spreads.flatMap((x) => x.pages || [])
+    const first = pages[0]?.images
+    const src = first?.at600 || first?.at800 || first?.at1000
+    if (src) cover = src.startsWith('http') ? src : origin + src
+    ;[from, until] = datesFrom(pages.slice(0, 2).map((p) => p.text || '').join(' '))
+    if (!until) [from, until] = datesFrom(title + ' ' + final)
+  } catch { /* keep the og:image */ }
+  return cover.startsWith('https://') ? { name: title, url: final, image: cover, ...(until ? { from, until } : {}) } : null
 }
 async function pageLinks(url) {
   try { return [...new Set([...(await get(url)).matchAll(/https:\/\/view\.publitas\.com\/[a-z0-9-]+\/[a-z0-9_-]+\/?/gi)].map((m) => m[0].replace(/\/?$/, '/')))] } catch { return [] }
