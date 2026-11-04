@@ -1308,3 +1308,7 @@ html, body { overscroll-behavior-x: none; }
   background: rgba(30, 30, 34, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
 }
 .camera-actions:empty { display: none; }
+/* A sticky top bar sticks to the very top of the screen (its own padding covers the
+   status bar); with top: 0 it stuck below the screen's top padding, adding the
+   status-bar gap twice. */
+.topbar.sticky { top: calc(-1 * max(20px, env(safe-area-inset-top))); }
