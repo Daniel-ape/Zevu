@@ -32,9 +32,12 @@ const STORE_PATTERNS: Array<[RegExp, string]> = [
   [/\bsale\b/i, 'sale'],
   [/\blidl\b/i, 'lidl'],
   [/tokmanni/i, 'tokmanni'],
-  [/halpa-?\s?hall?i/i, 'halpahalli'],
+  [/halpa-?\s?hall?i|\bhalpa\b/i, 'halpahalli'],
   [/k[aä]rkk[aä]inen/i, 'karkkainen'],
 ]
+
+// A shop's business ID (Y-tunnus) is printed on every receipt and survives when the name is misread.
+const BUSINESS_IDS: Array<[RegExp, string]> = [[/0955220[-–]?7/, 'halpahalli']]
 
 // Lines that are never products.
 const SKIP = /(yhteens|summa|\btotal|\balv\b|\bvero\b|kortti|k[aä]teinen|vaihtoraha|takaisin|maksettu|\bvisa\b|mastercard|debit|credit|bonus|pisteet|kuitti|y-tunnus|\bpuh\b|\bkassa\b|\bnetto\b|brutto|veroton|verollinen|\bmoms\b|att betala|\bkort\b|kontant|tilinumero|arkistointi|\bviite|kiitos|tervetuloa|\bpantti\b|\bpant\b)/i
@@ -48,7 +51,8 @@ const REFUND = /(palautus|pantti|\bpant\b|returglas|pullonpalautus)/i
 const PRICE_AT_END = /(-?\d{1,4}[,.]\d{2})(-?)\s*(€|eur)?\s*(?:[A-D]|\d{1,2})?(?:\s+(?:[^\w\s]{1,3}|[a-z*]{1,2}))?\s*$/i
 const QTY_LINE = /^\s*(\d+)\s*(kpl|st|x)\s*[x*]?\s*(\d+[,.]\d{2})/i
 // "1,00x 5,99 Ale 60%  -3,59": unit price and discount of the item above, whose price is already net.
-const ALE_LINE = /\d[,.]\d{2,3}\s*[xX×5]?\s*[—–-]?\s*\d+[,.]\d{2}\s+ale\b/i
+// Also with OCR slips: "1,007 —=—4,49 Ale", "1,00% — 3,99 Ae 608".
+const ALE_LINE = /^\W*(?:\S\s+)?\d{1,3}[,.]\d{2,3}\S?\s*[—–=\-\s]*\d+[,.]\d{2}\s+(?:a[l1i]?e\b|-?\d{1,2}\s?[%x])/i
 const WEIGHT_LINE = /^\s*\d+[,.]\d+\s*kg\b/i
 const DATE = /\b(\d{1,2})[./](\d{1,2})[./](\d{2,4})\b/
 
@@ -73,6 +77,10 @@ export function parseReceipt(text: string, now = new Date()): Omit<Receipt, 'id'
   for (const line of lines.slice(0, 12)) {
     const hit = STORE_PATTERNS.find(([re]) => re.test(line))
     if (hit) { retailerId = hit[1]; storeName = line; break }
+  }
+  if (!retailerId) {
+    const byId = BUSINESS_IDS.find(([re]) => lines.slice(0, 15).some((l) => re.test(l)))
+    if (byId) retailerId = byId[1]
   }
 
   let date = now
@@ -101,7 +109,7 @@ export function parseReceipt(text: string, now = new Date()): Omit<Receipt, 'id'
     }
     if (ALE_LINE.test(line)) {
       // The item above already shows the price after this discount, unless it shows the full unit price.
-      const unit = line.match(/\d[,.]\d{2,3}\s*[xX×5]?\s*[—–-]?\s*(\d+[,.]\d{2})/)
+      const unit = line.match(/\d[,.]\d{2,3}\S?\s*[—–=\-\s]*(\d+[,.]\d{2})/)
       const off = line.match(/-\s?(\d+[,.]\d{2})\W*$/)
       const last = items[items.length - 1]
       if (last && unit && off && last.priceCents === cents(unit[1])) last.priceCents -= cents(off[1])
@@ -131,7 +139,9 @@ export function parseReceipt(text: string, now = new Date()): Omit<Receipt, 'id'
     if (REFUND.test(name)) continue
     // Discounts: negative amounts, or a discount word printed with a plain amount ("ALENNUS 0,30").
     if (value < 0 || (DISCOUNT.test(name) && items.length && name.split(' ').length <= 3)) {
-      if (items.length) items[items.length - 1].priceCents -= Math.abs(value)
+      // a "discount" bigger than the item is a misread line, not a discount
+      const last = items[items.length - 1]
+      if (last && Math.abs(value) < last.priceCents) last.priceCents -= Math.abs(value)
       continue
     }
     if (!name || name.length < 2 || SKIP.test(name) || /^\d+$/.test(name)) continue

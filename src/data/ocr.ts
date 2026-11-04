@@ -52,9 +52,41 @@ async function getWorker(onProgress: (p: number) => void) {
   return worker
 }
 
+type Photo = CanvasImageSource & { width: number; height: number }
+
+/**
+ * A photo the right way up. iPhone camera photos are stored sideways with a
+ * rotation tag; <img> always honours it, createImageBitmap doesn't on every Safari.
+ */
+async function loadPhoto(file: File): Promise<Photo> {
+  const url = URL.createObjectURL(file)
+  try {
+    const img = new Image()
+    img.src = url
+    await img.decode()
+    // drawn from a canvas so the object URL can be released
+    const c = document.createElement('canvas')
+    c.width = img.naturalWidth; c.height = img.naturalHeight
+    c.getContext('2d')!.drawImage(img, 0, 0)
+    return c
+  } catch {
+    return await createImageBitmap(file, { imageOrientation: 'from-image' } as ImageBitmapOptions)
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
+/** Turned a quarter (receipt photographed with the phone held sideways). */
+function quarterTurn(img: Photo, dir: 1 | -1): HTMLCanvasElement {
+  const c = document.createElement('canvas'); c.width = img.height; c.height = img.width
+  const g = c.getContext('2d')!
+  g.translate(c.width / 2, c.height / 2); g.rotate((dir * Math.PI) / 2); g.drawImage(img, -img.width / 2, -img.height / 2)
+  return c
+}
+
 /** Shelf labels: just downscale (colour photo in good light). */
 async function prepare(file: File): Promise<HTMLCanvasElement> {
-  const img = await createImageBitmap(file)
+  const img = await loadPhoto(file)
   const scale = Math.min(1, 2200 / Math.max(img.width, img.height))
   const c = document.createElement('canvas')
   c.width = Math.round(img.width * scale)
@@ -85,7 +117,7 @@ function otsu(hist: number[], total: number) {
  * Where the receipt is in the photo: the paper is the bright part. Rows and
  * columns that are mostly bright give its bounding box (with a small margin).
  */
-function paperBox(img: ImageBitmap) {
+function paperBox(img: Photo) {
   const W = 400, H = Math.max(1, Math.round((img.height / img.width) * W))
   const c = document.createElement('canvas'); c.width = W; c.height = H
   const g = c.getContext('2d', { willReadFrequently: true })!
@@ -170,8 +202,8 @@ function skewOf(c: HTMLCanvasElement) {
  * crop to the paper, scale by the paper's width (so a long receipt doesn't end
  * up with tiny letters), straighten, then adaptive threshold.
  */
-async function prepareReceipt(file: File, strength = 0.12): Promise<HTMLCanvasElement> {
-  const img = await createImageBitmap(file)
+async function prepareReceipt(file: File | Photo, strength = 0.12): Promise<HTMLCanvasElement> {
+  const img = file instanceof Blob ? await loadPhoto(file) : file
   const box = paperBox(img)
   // ~1500 px across the receipt; limited so huge photos stay fast.
   let scale = Math.min(3, 1500 / box.w)
@@ -207,12 +239,26 @@ export async function photoToText(file: File, onProgress: (p: number) => void = 
   const w = await getWorker(onProgress)
   await w.setParameters({ tessedit_pageseg_mode: '4' as never, preserve_interword_spaces: '1' as never })
   try {
-    const first = (await w.recognize(await prepareReceipt(file))).data.text
+    const photo = await loadPhoto(file)
+    const first = (await w.recognize(await prepareReceipt(photo))).data.text
     const s1 = score(first, judge)
     if (s1 >= 6) return first
     await w.setParameters({ tessedit_pageseg_mode: '6' as never })
-    const second = (await w.recognize(await prepareReceipt(file, 0.06))).data.text
-    return score(second, judge) > s1 ? second : first
+    const second = (await w.recognize(await prepareReceipt(photo, 0.06))).data.text
+    let best = score(second, judge) > s1 ? second : first
+    let bestScore = Math.max(s1, score(second, judge))
+    // Little found and the receipt lies sideways in the picture: read it turned a quarter.
+    const box = paperBox(photo)
+    if (bestScore < 3 && box.w > box.h * 1.1) {
+      await w.setParameters({ tessedit_pageseg_mode: '4' as never })
+      for (const dir of [1, -1] as const) {
+        const text = (await w.recognize(await prepareReceipt(quarterTurn(photo, dir)))).data.text
+        const sc = score(text, judge)
+        if (sc > bestScore) { best = text; bestScore = sc }
+        if (bestScore >= 3) break
+      }
+    }
+    return best
   } finally {
     await w.setParameters({ tessedit_pageseg_mode: '3' as never, preserve_interword_spaces: '0' as never })
   }

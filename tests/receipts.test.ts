@@ -125,4 +125,14 @@ test('Halpa-Halli: VAT code after the price, informational Ale lines, OCR crumbs
   assert.equal(r.totalCents, 1179)
 })
 
+test('Halpa-Halli from a camera photo: misread name, misread Ale lines', () => {
+  const r = parseReceipt([
+    'A-HALLI', 'Y-tunnus 0955220-7            W',
+    'TAMMINEN WIENERLEIKE 2/          1,80 14', '1,007 —=—4,49 Ale 60%    -2.69', '520043003',
+    'WEWALKA PIZZATAIKINA+KA          1,60 14', 'i 1,00% — 3,99 Ae 608    -2.39',
+  ].join('\n'), NOW)
+  assert.equal(r.retailerId, 'halpahalli')
+  assert.deepEqual(r.items.map((i) => i.priceCents), [180, 160])
+})
+
 console.log(`${passed} tests passed`)
