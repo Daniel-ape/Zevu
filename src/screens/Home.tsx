@@ -15,7 +15,7 @@ function greeting(): Key {
 }
 
 export function Home() {
-  const { products, observations, retailers, list, recent, watched, lang, pricesOf, receipts, t } = useStore()
+  const { products, observations, retailers, list, watched, lang, pricesOf, receipts, t } = useStore()
   const nav = useNav()
   const [receipt, setReceipt] = useState(false)
   const { shelf } = useShelf()
@@ -80,9 +80,8 @@ export function Home() {
         )}
       </div>
 
-      <div className="quick3">
+      <div className="quick3 two">
         <button onClick={() => nav.go('scan')}><span className="q-ic"><ScanIcon size={22} /></span>{t('qa.scan')}</button>
-        <button onClick={() => setReceipt(true)}><span className="q-ic"><Receipt size={22} /></span>{t('qa.receipt')}</button>
         <button onClick={() => nav.go('lists')}><span className="q-ic"><List size={22} />{itemCount > 0 && <i>{itemCount}</i>}</span>{t('qa.list')}</button>
       </div>
 
@@ -197,24 +196,6 @@ export function Home() {
         </div>
       )}
 
-      {recent.length > 0 && (
-        <div className="section">
-          <div className="section-head"><h2>{t('home.recent')}</h2></div>
-          <div className="strip">
-            {recent.map((id) => {
-              const p = products.find((x) => x.id === id)
-              if (!p) return null
-              return (
-                <button key={id} className="price-card" onClick={() => nav.openProduct(id)}>
-                  <Tile product={p} />
-                  <div className="price-card-name">{p.name}</div>
-                  <div className="price-card-size">{sizeLabel(p)}</div>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
 
       {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
     </div>

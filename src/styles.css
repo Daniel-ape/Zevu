@@ -1111,3 +1111,6 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .rank-bar { height: 6px; border-radius: 3px; background: var(--fill); margin-top: 6px; overflow: hidden; }
 .rank-bar span { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
 .rows .row.rank-row:not(:last-child)::after { left: 76px; }
+.quick3.two { grid-template-columns: 1fr 1fr; }
+.quick3.two button { flex-direction: row; justify-content: center; gap: 10px; padding: 12px; font-size: 15px; }
+.quick3.two .q-ic { width: 38px; height: 38px; border-radius: 11px; }
