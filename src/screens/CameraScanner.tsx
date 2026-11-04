@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../data/store'
-import { decodeCanvas } from '../data/barcode'
+import { decodeCanvas, decodeCard } from '../data/barcode'
 
 /**
  * Full-screen live camera that reads a barcode and closes.
  * If the camera can't be opened (no permission, not available), onFallback
  * is called so the caller can offer a photo instead.
  */
-export function CameraScanner({ onCode, onClose, onFallback }: {
-  onCode: (code: string) => void
+export function CameraScanner({ onCode, onClose, onFallback, card }: {
+  /** format is set when scanning a loyalty card (card = true) */
+  onCode: (code: string, format?: string) => void
+  /** Read any card code (Code 128, QR…) instead of product barcodes. */
+  card?: boolean
   onClose: () => void
   onFallback: () => void
 }) {
@@ -51,11 +54,14 @@ export function CameraScanner({ onCode, onClose, onFallback }: {
         ctx.drawImage(v, w * 0.25, 0, sw, sh, (-sw * scale) / 2, (-sh * scale) / 2, sw * scale, sh * scale)
         ctx.restore()
       }
-      const code = await decodeCanvas(canvas).catch(() => null)
+      const hit = card
+        ? await decodeCard(canvas).catch(() => null)
+        : await decodeCanvas(canvas).then((c) => (c ? { text: c, format: 'EAN_13' } : null)).catch(() => null)
       if (stopped) return
-      if (code) {
+      if (hit) {
         navigator.vibrate?.(40)
-        onCode(code)
+        if (card) onCode(hit.text, hit.format)
+        else onCode(hit.text)
       } else timer = window.setTimeout(tick, 80)
     }
 

@@ -10,6 +10,7 @@ import { Lists } from './screens/Lists'
 import { Scan } from './screens/Scan'
 import { Profile } from './screens/Profile'
 import { Leaflets } from './screens/Leaflets'
+import { Coupons } from './screens/Coupons'
 import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
@@ -17,7 +18,7 @@ import { useLiquidGlass } from './ui/LiquidGlass'
 import { WatchAlert } from './ui/WatchAlert'
 import { DOCK_ICONS, NativeDock, wantsNativeDock } from './native/nativeDock'
 
-const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile']
+const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile', 'coupons']
 const fromHash = (): Tab => {
   const h = location.hash.slice(1) as Tab
   return TABS.includes(h) ? h : 'home'
@@ -107,6 +108,7 @@ function Shell() {
     : tab === 'scan' ? <Scan key="scan" />
     : tab === 'lists' ? <Lists key="lists" />
     : tab === 'leaflets' ? <Leaflets key="leaflets" />
+    : tab === 'coupons' ? <Coupons key="coupons" />
     : <Profile key="profile" />
 
   return (

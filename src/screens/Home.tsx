@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, storeInsights, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { ArrowRight, List, Receipt, Scan as ScanIcon } from '../ui/icons'
+import { ArrowRight, List, Receipt, Scan as ScanIcon, Ticket } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
 import { monthSavings } from '../domain/receipts'
@@ -15,7 +15,8 @@ function greeting(): Key {
 }
 
 export function Home() {
-  const { products, observations, retailers, list, watched, lang, pricesOf, receipts, t } = useStore()
+  const { products, observations, retailers, list, watched, lang, pricesOf, receipts, coupons, t } = useStore()
+  const activeCoupons = coupons.filter((c) => !c.used && (!c.validUntil || new Date(c.validUntil + 'T23:59') >= new Date())).length
   const nav = useNav()
   const [receipt, setReceipt] = useState(false)
   const { shelf } = useShelf()
@@ -80,9 +81,10 @@ export function Home() {
         )}
       </div>
 
-      <div className="quick3 two">
+      <div className="quick3">
         <button onClick={() => nav.go('scan')}><span className="q-ic"><ScanIcon size={22} /></span>{t('qa.scan')}</button>
         <button onClick={() => nav.go('lists')}><span className="q-ic"><List size={22} />{itemCount > 0 && <i>{itemCount}</i>}</span>{t('qa.list')}</button>
+        <button onClick={() => nav.go('coupons')}><span className="q-ic"><Ticket size={22} />{activeCoupons > 0 && <i>{activeCoupons}</i>}</span>{t('cp.short')}</button>
       </div>
 
       {list.items.length > 0 && (

@@ -7,6 +7,8 @@ import { lookupBarcode, searchProducts } from './openFoodFacts'
 import { loadSnapshot, snapshotProducts } from './snapshot'
 import { EMOJI } from '../domain/categories'
 import { loadShopData } from './shopData'
+import type { LoyaltyCard } from './cards'
+import type { Coupon } from '../domain/coupons'
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -67,6 +69,14 @@ interface Store {
   receipts: Receipt[]
   addReceipt: (r: Receipt) => void
   removeReceipt: (id: string) => void
+  /** Loyalty cards, kept only on this phone. */
+  cards: LoyaltyCard[]
+  addCard: (c: Omit<LoyaltyCard, 'id' | 'added'>) => void
+  removeCard: (id: string) => void
+  /** Saved coupons and members' offers, kept only on this phone. */
+  coupons: Coupon[]
+  saveCoupon: (c: Coupon) => void
+  removeCoupon: (id: string) => void
   recent: string[]
   markViewed: (productId: string) => void
   theme: Theme
@@ -92,6 +102,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setLists((all) => all.map((l) => (l.id === list.id ? fn(l) : l)))
   const [myStores, setMyStores] = useState<string[]>(() => load('myStores', []))
   const [watched, setWatched] = useState<Watch[]>(() => load('watched', []))
+  const [cards, setCards] = useState<LoyaltyCard[]>(() => load('cards', []))
+  useEffect(() => save('cards', cards), [cards])
+  const [coupons, setCoupons] = useState<Coupon[]>(() => load('coupons', []))
+  useEffect(() => {
+    // Photos make this the biggest thing in storage: if the phone says it's full, drop the oldest pictures.
+    try { localStorage.setItem('hintaopas:coupons', JSON.stringify(coupons)) } catch {
+      const slim = coupons.map((c, i) => (i < coupons.length - 10 ? { ...c, image: undefined } : c))
+      try { localStorage.setItem('hintaopas:coupons', JSON.stringify(slim)) } catch { /* keep in memory */ }
+    }
+  }, [coupons])
   const [receipts, setReceipts] = useState<Receipt[]>(() => load('receipts', []))
   const [userPrices, setUserPrices] = useState<PriceObservation[]>(() => load('userPrices', []))
   const [lastStore, setLastStore] = useState<string | null>(() => load('lastStore', null))
@@ -276,6 +296,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       lastStore,
       receipts,
+      cards,
+      addCard: (c) => setCards((all) => [...all.filter((x) => !(x.chain === c.chain && x.number === c.number)), { ...c, id: crypto.randomUUID?.() ?? String(Date.now()), added: new Date().toISOString() }]),
+      removeCard: (id) => setCards((all) => all.filter((x) => x.id !== id)),
+      coupons,
+      saveCoupon: (c) => setCoupons((all) => [...all.filter((x) => x.id !== c.id), c]),
+      removeCoupon: (id) => setCoupons((all) => all.filter((x) => x.id !== id)),
       addReceipt: (r) => setReceipts((all) => [r, ...all]),
       removeReceipt: (id) => setReceipts((all) => all.filter((r) => r.id !== id)),
       recent,
@@ -286,7 +312,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setLang,
       t: (key, vars) => translate(lang, key, vars),
     }),
-    [effective, byProduct, products, loading, rest, loadMore, lists, list, activeId, myStores, watched, receipts, recent, theme, lang, lastStore],
+    [effective, byProduct, products, loading, rest, loadMore, lists, list, activeId, myStores, watched, receipts, cards, coupons, recent, theme, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

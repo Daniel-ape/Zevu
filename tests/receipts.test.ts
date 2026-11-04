@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import { cleanOcrLine, monthSavings, parseReceipt } from '../src/domain/receipts'
 import { pickShelfPrice } from '../src/domain/shelfLabel'
+import { parseCoupon } from '../src/domain/coupons'
 
 const NOW = new Date('2026-11-02T20:00:00')
 const items = (text: string) => parseReceipt(text, NOW).items.map((i) => [i.name, i.quantity, i.priceCents])
@@ -80,6 +81,13 @@ test('OCR-damaged total word and a misread total fixed by the card amount', () =
   assert.equal(r.totalCents, 488)
   const r2 = parseReceipt(`LIDL KOKKOLA\nMAITO 1L 0,99\nJUUSTO 400G 3,89\nYHTEENSÄ 4,38\nKORTTI 4,38`, NOW)
   assert.equal(r2.totalCents, 438) // card agrees with the printed total: keep it
+})
+
+test('Coupon: chain, price, percent and last valid date', () => {
+  const c = parseCoupon(`PLUSSA-ETU\nValio Oltermanni 900 g\n6,99\nnorm. 10,49\n-33 %\nVoimassa 4.-10.11.2026`, NOW)
+  assert.equal(c.chain, 'k'); assert.equal(c.priceCents, 699); assert.equal(c.percent, 33)
+  assert.equal(c.validUntil, '2026-11-10'); assert.equal(c.title, 'Valio Oltermanni 900 g')
+  assert.equal(parseCoupon('S-Etukortilla\nFazer Sininen 200g\n2,49\nasti 15.11.', NOW).chain, 's')
 })
 
 test('Month savings: paid price vs. other shops this month', () => {

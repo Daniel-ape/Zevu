@@ -58,3 +58,9 @@ export const Receipt = ({ size }: P) => (
 export const ArrowRight = ({ size }: P) => (
   <svg {...base(size)}><path d="M5 12h14M13 6l6 6-6 6" /></svg>
 )
+export const Ticket = ({ size }: P) => (
+  <svg {...base(size)}><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5V10a2 2 0 0 0 0 4v2.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5V14a2 2 0 0 0 0-4z" /><path d="M14 6.5v1.5M14 11v2M14 16v1.5" /></svg>
+)
+export const Card = ({ size }: P) => (
+  <svg {...base(size)}><rect x="3.5" y="6" width="17" height="12" rx="2.5" /><path d="M3.5 10h17M7 14.5h4" /></svg>
+)

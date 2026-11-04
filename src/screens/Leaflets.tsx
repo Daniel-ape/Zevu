@@ -164,7 +164,9 @@ export function Cover({ chain, l, showStore = true, compact }: { chain: string; 
           {l.name.startsWith('K-') ? l.name.split(' ')[0] : chain}
         </div>
       )}
-      <div className={'cover-name' + (compact ? ' one' : '')}>{l.name}</div>
+      {!(showStore && l.name.trim() === (l.name.startsWith('K-') ? l.name.split(' ')[0] : chain)) && (
+        <div className={'cover-name' + (compact ? ' one' : '')}>{l.name}</div>
+      )}
       {!compact && l.period && <div className="cover-period">{l.period}</div>}
     </a>
   )

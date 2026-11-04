@@ -83,3 +83,48 @@ export async function decodeImage(file: Blob): Promise<string | null> {
   }
   return null
 }
+
+// Loyalty cards use many kinds of codes (Code 128, Code 39, EAN, ITF, QR…),
+// and their numbers have no product check digit. A separate reader for them.
+export interface CardCode { text: string; format: string }
+let zxAny: Promise<{ lib: Zx; reader: InstanceType<Zx['MultiFormatReader']> }> | null = null
+function zxingAny() {
+  zxAny ??= import('@zxing/library').then((lib) => {
+    const reader = new lib.MultiFormatReader()
+    const hints = new Map()
+    hints.set(lib.DecodeHintType.POSSIBLE_FORMATS, [
+      lib.BarcodeFormat.CODE_128, lib.BarcodeFormat.CODE_39, lib.BarcodeFormat.EAN_13, lib.BarcodeFormat.EAN_8,
+      lib.BarcodeFormat.ITF, lib.BarcodeFormat.UPC_A, lib.BarcodeFormat.CODABAR, lib.BarcodeFormat.QR_CODE,
+      lib.BarcodeFormat.PDF_417, lib.BarcodeFormat.DATA_MATRIX, lib.BarcodeFormat.AZTEC,
+    ])
+    hints.set(lib.DecodeHintType.TRY_HARDER, true)
+    reader.setHints(hints)
+    return { lib, reader }
+  })
+  return zxAny
+}
+
+/** Read whatever code a loyalty card carries; the format is kept so it can be shown the same way. */
+export async function decodeCard(canvas: HTMLCanvasElement): Promise<CardCode | null> {
+  const BD = (globalThis as unknown as { BarcodeDetector?: { new (o: object): { detect: (s: CanvasImageSource) => Promise<{ rawValue: string; format: string }[]> } } }).BarcodeDetector
+  if (BD) {
+    try {
+      const det = new BD({ formats: ['code_128', 'code_39', 'ean_13', 'ean_8', 'itf', 'upc_a', 'codabar', 'qr_code', 'pdf417', 'data_matrix', 'aztec'] })
+      const hit = (await det.detect(canvas))[0]
+      if (hit?.rawValue) return { text: hit.rawValue, format: hit.format.toUpperCase().replace('PDF417', 'PDF_417') }
+    } catch { /* fall back to ZXing */ }
+  }
+  const { lib, reader } = await zxingAny()
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+  const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  const lum = new Uint8ClampedArray(width * height)
+  for (let i = 0, j = 0; j < lum.length; i += 4, j++) lum[j] = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000
+  const source = new lib.RGBLuminanceSource(lum, width, height)
+  for (const bin of [new lib.HybridBinarizer(source), new lib.GlobalHistogramBinarizer(source)]) {
+    try {
+      const r = reader.decode(new lib.BinaryBitmap(bin))
+      return { text: r.getText(), format: lib.BarcodeFormat[r.getBarcodeFormat()] }
+    } catch { /* not found */ }
+  }
+  return null
+}

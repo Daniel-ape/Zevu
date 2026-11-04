@@ -3,7 +3,7 @@ import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
-import { Back, Bell, Check, Chevron, Home, Info, Plus, Receipt as ReceiptIcon, Tag } from '../ui/icons'
+import { Back, Bell, Check, Chevron, Home, Info, Plus, Receipt as ReceiptIcon, Tag, Ticket } from '../ui/icons'
 import { cheapest, compare } from '../domain/pricing'
 import { Tile } from '../ui/bits'
 import { useNav } from '../nav'
@@ -25,7 +25,7 @@ function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: stri
 }
 
 export function Profile() {
-  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, products, observations, retailers, t } = useStore()
+  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, products, observations, retailers, cards, t } = useStore()
   const nav = useNav()
   const [page, setPage] = useState<Page | null>(null)
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
@@ -185,6 +185,7 @@ export function Profile() {
       <div className="section rows">
         <MenuRow icon={<Home size={18} />} title={t('stores.title')} value={myStores.length ? String(myStores.length) : t('you.allStores')} onClick={() => setPage('stores')} />
         <MenuRow icon={<Bell size={18} />} title={t('watch.title')} value={String(watched.length)} onClick={() => setPage('watched')} />
+        <MenuRow icon={<Ticket size={18} />} title={t('cp.title')} value={String(cards.length)} onClick={() => nav.go('coupons')} />
       </div>
 
       <div className="section rows">
