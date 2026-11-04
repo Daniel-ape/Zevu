@@ -148,9 +148,9 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
             </div>
             <div className="rows">
               {draft.items.map((it, i) => (
-                <div key={i} className="row" style={{ padding: '10px 0' }}>
+                <div key={i} className="row receipt-line">
                   <div className="grow">
-                    <div className="title" style={{ fontWeight: 500 }}>{it.quantity > 1 ? `${it.quantity} × ` : ''}{it.name}</div>
+                    <div className="title receipt-name">{it.quantity > 1 ? `${it.quantity} × ` : ''}{it.name}</div>
                     {!viewing ? (
                       <button className={'link-product' + (guess.has(i) ? ' guess' : '') + (it.productId ? '' : ' none')} onClick={() => setPicking(i)}>
                         {guess.has(i) && <span className="guess-tag">{t('rc.guess')}</span>}
@@ -160,10 +160,10 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
                       <div className="sub">{products.find((p) => p.id === it.productId)?.name ?? t('rc.notLinked')}</div>
                     )}
                   </div>
-                  <div className="price" style={{ fontSize: 15 }}>{euro(it.priceCents)}</div>
+                  <div className="price receipt-price">{euro(it.priceCents)}</div>
                 </div>
               ))}
-              <div className="row">
+              <div className="row receipt-total">
                 <div className="grow title">{t('rc.total')}</div>
                 <div className="price">{euro(draft.totalCents ?? sum)}</div>
               </div>

@@ -1266,3 +1266,10 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .cover-badge.last { background: #e0262f; color: #fff; }
 .cover-soon { color: var(--accent); font-weight: 700; }
 
+/* Receipt review: lines with the same margins as the total, calmer names, chip under the name */
+.rows .row.receipt-line { padding-top: 11px; padding-bottom: 11px; align-items: flex-start; }
+.receipt-name { font-size: 15px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.receipt-price { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; padding-top: 1px; white-space: nowrap; }
+.receipt-line .link-product { margin-top: 6px; padding: 4px 9px; font-size: 12.5px; border-radius: 8px; }
+.rows .row.receipt-total .title { font-weight: 700; }
+.rows .row.receipt-total .price { font-size: 17px; font-weight: 800; }
