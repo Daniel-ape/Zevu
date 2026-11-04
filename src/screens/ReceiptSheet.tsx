@@ -50,7 +50,9 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
     try {
       if (isPhoto) {
         const { photoToText } = await import('../data/ocr')
-        const text = await photoToText(f, (p) => setBusy(t('rc.scanning', { p: Math.round(p * 100) })))
+        // Judge a read by what the receipt parser gets out of it: items, plus a bonus when they add up to the total.
+        const judge = (text: string) => { const r = parseReceipt(text); const sum = r.items.reduce((a, i) => a + i.priceCents, 0); return r.items.length + (r.totalCents !== null && r.totalCents === sum ? 3 : 0) + (r.retailerId ? 1 : 0) }
+        const text = await photoToText(f, (p) => setBusy(t('rc.scanning', { p: Math.round(p * 100) })), judge)
         setFromPhoto(true)
         read(text)
       } else if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {

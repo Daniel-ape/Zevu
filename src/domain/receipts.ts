@@ -36,7 +36,9 @@ const STORE_PATTERNS: Array<[RegExp, string]> = [
 
 // Lines that are never products.
 const SKIP = /(yhteens|summa|\btotal|\balv\b|\bvero\b|kortti|k[aä]teinen|vaihtoraha|takaisin|maksettu|\bvisa\b|mastercard|debit|credit|bonus|pisteet|kuitti|y-tunnus|\bpuh\b|\bkassa\b|\bnetto\b|brutto|veroton|verollinen|\bmoms\b|att betala|\bkort\b|kontant|tilinumero|arkistointi|\bviite|kiitos|tervetuloa|\bpantti\b|\bpant\b)/i
-const TOTAL = /(yhteens[aä]|summa|total|att betala|maksettava)/i
+// Also OCR-damaged forms ("HTEENSÄ", "YHTEENSA").
+const TOTAL = /(y?hteens[aä]|yhteens|summa\b|total|att betala|maksettava)/i
+const PAYMENT = /(kortti|k[aä]teinen|pankki|card|visa|master|debit|credit|kontant|maksukortti)/i
 const DISCOUNT = /(alennus|etu\b|tarjous|rabatt|plussa|kampanja|s[aä][aä]st[oö]|lidl plus|-\d+\s?%)/i
 // Deposit refunds are money back, not a discount on the item above.
 const REFUND = /(palautus|pantti|\bpant\b|returglas|pullonpalautus)/i
@@ -81,10 +83,15 @@ export function parseReceipt(text: string, now = new Date()): Omit<Receipt, 'id'
   const items: ReceiptItem[] = []
   let totalCents: number | null = null
   let pending = '' // item name whose price is on the next line ("2 KPL X 0,95   1,90")
-  for (const line of lines) {
+  const paid: number[] = [] // amounts on the payment lines after the total
+  for (const [k, line] of lines.entries()) {
     if (TOTAL.test(line)) {
       const p = line.match(PRICE_AT_END)
       if (p) totalCents = priceOf(p)
+      for (const next of lines.slice(k + 1, k + 5)) {
+        const q = PAYMENT.test(next) && next.match(PRICE_AT_END)
+        if (q) paid.push(priceOf(q))
+      }
       break // everything after the total is payment info
     }
     const p = line.match(PRICE_AT_END)
@@ -115,6 +122,12 @@ export function parseReceipt(text: string, now = new Date()): Omit<Receipt, 'id'
     if (!name || name.length < 2 || SKIP.test(name) || /^\d+$/.test(name)) continue
     items.push({ name, quantity: 1, priceCents: value })
   }
+
+  // A digit misread in the total ("16,67" for "16,07"): when the items add up to
+  // what was paid by card or cash, that is the total.
+  const sum = items.reduce((a, i) => a + i.priceCents, 0)
+  if (items.length && totalCents !== sum && paid.includes(sum)) totalCents = sum
+  if (totalCents === null && paid.length) totalCents = paid[0]
 
   return { retailerId, storeName, date: date.toISOString(), items, totalCents }
 }

@@ -75,6 +75,13 @@ test('Shelf label: the biggest price wins, unit prices ignored', () => {
   assert.equal(pickShelfPrice([W('Kookosmaito', 64, 'K'), W('Freshona', 60, 'F'), W('1,29', 24, '1,29 €N'), W('4056489367611', 21, '4056489367611')]), null)
 })
 
+test('OCR-damaged total word and a misread total fixed by the card amount', () => {
+  const r = parseReceipt(`LIDL KOKKOLA\nMAITO 1L 0,99\nJUUSTO 400G 3,89\nHTEENSÄ 4,38\nKORTTI 4,88`, NOW)
+  assert.equal(r.totalCents, 488)
+  const r2 = parseReceipt(`LIDL KOKKOLA\nMAITO 1L 0,99\nJUUSTO 400G 3,89\nYHTEENSÄ 4,38\nKORTTI 4,38`, NOW)
+  assert.equal(r2.totalCents, 438) // card agrees with the printed total: keep it
+})
+
 test('Month savings: paid price vs. other shops this month', () => {
   const obs = (id: string, shop: string, c: number) => ({ productId: id, retailerId: shop, priceCents: c, observedAt: '2026-11-01T06:00:00Z', source: 'shop' as const })
   const prices: Record<string, ReturnType<typeof obs>[]> = {
