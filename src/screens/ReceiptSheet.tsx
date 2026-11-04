@@ -29,7 +29,8 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
 
   const read = (raw: string) => {
     const parsed = parseReceipt(raw)
-    if (!parsed.items.length) return setError(t('rc.noItems'))
+    // Nothing found: show what was read, so it can be fixed by hand (or sent to us).
+    if (!parsed.items.length) { setText(raw); return setError(t('rc.noItems')) }
     const learned = readLearned()
     const guesses = new Set<number>()
     parsed.items = parsed.items.map((it, i) => {
