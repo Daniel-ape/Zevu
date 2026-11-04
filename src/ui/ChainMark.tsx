@@ -5,6 +5,13 @@ let logoIndex: Promise<Record<string, string>> | null = null
 const loadLogos = () =>
   (logoIndex ??= fetch(new URL('logos/index.json', location.href).href).then((r) => (r.ok ? r.json() : {})).catch(() => ({})) as Promise<Record<string, string>>)
 
+/** URL of a chain's logo, or null while unknown / when there is none. */
+export function useLogo(chain: string): string | null {
+  const [logo, setLogo] = useState<string | null>(null)
+  useEffect(() => { loadLogos().then((i) => setLogo(i[chain] ? new URL('logos/' + i[chain], location.href).href : null)) }, [chain])
+  return logo
+}
+
 /** The store's own logo in the corner of an offer picture (its name in its colour if there is no logo). */
 export function ChainMark({ chain, label, inline }: { chain: string; label?: string; inline?: boolean }) {
   const c = CARD_CHAINS.find((x) => x.id === chain)

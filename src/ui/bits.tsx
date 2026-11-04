@@ -1,3 +1,4 @@
+import { useLogo } from './ChainMark'
 import { useEffect, useState } from 'react'
 import { snapshotImage } from '../data/snapshot'
 import type { CategoryId, Product, Retailer } from '../domain/types'
@@ -33,6 +34,18 @@ export function Tile({ product, large }: { product: Product; large?: boolean }) 
 
 export function RetailerMark({ retailer }: { retailer: Retailer }) {
   const initials = retailer.name.replace('-', ' ').split(' ').map((w) => w[0]).join('').slice(0, 2)
+  const chain = retailer.chain ?? retailer.id
+  const icon = useLogo(chain + '-icon')
+  const main = useLogo(chain)
+  const logo = icon ?? main
+  const [ok, setOk] = useState(true)
+  // A square logo fits the circle; a wide one (a written name) would be unreadable, so initials stay.
+  if (logo && ok)
+    return (
+      <div className="mark logo" aria-hidden>
+        <img src={logo} alt="" onLoad={(e) => { if (e.currentTarget.naturalWidth > e.currentTarget.naturalHeight * 1.4) setOk(false) }} onError={() => setOk(false)} />
+      </div>
+    )
   return (
     <div className="mark" aria-hidden>
       {initials}

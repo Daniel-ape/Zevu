@@ -13,6 +13,12 @@ const SITES = {
   tokmanni: 'https://www.tokmanni.fi/',
   karkkainen: 'https://www.karkkainen.com/',
   stockmann: 'https://www.stockmann.com/',
+  verkkokauppa: 'https://www.verkkokauppa.com/',
+  ruohonjuuri: 'https://www.ruohonjuuri.fi/',
+  apteekki360: 'https://www.apteekki360.fi/',
+  yliopistonapteekki: 'https://www.yliopistonapteekki.fi/',
+  // square icon for small round marks, next to Tokmanni's wide header logo
+  'tokmanni-icon': 'https://www.tokmanni.fi/',
 }
 // Chains whose site icon is not their logo: use the logo in the page header instead.
 const HEADER_LOGO = new Set(['tokmanni'])
