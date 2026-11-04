@@ -50,6 +50,22 @@ function periodStatus(period: string | undefined, now = new Date()): Status | 'p
   if (now > end) return 'past'
   return now >= start ? 'now' : 'soon'
 }
+/** "4.–8.11." from the dates read out of the leaflet. */
+function periodOf(l: { from?: string; until?: string }) {
+  if (!l.until) return undefined
+  const [, um, ud] = l.until.split('-').map(Number)
+  if (!l.from) return `–${ud}.${um}.`
+  const [, fm, fd] = l.from.split('-').map(Number)
+  return fm === um ? `${fd}.–${ud}.${um}.` : `${fd}.${fm}.–${ud}.${um}.`
+}
+/** Now / coming / past from the dates read out of the leaflet. */
+function datedStatus(l: { from?: string; until?: string }): Status | 'past' | undefined {
+  if (!l.until) return undefined
+  const today = new Date().toISOString().slice(0, 10)
+  if (l.until < today) return 'past'
+  return l.from && l.from > today ? 'soon' : 'now'
+}
+
 function weekStatus(name: string): Status | 'past' | undefined {
   // Tokmanni's Tarjoussanomat link always opens the newest issue.
   if (/^tarjoussanomat$/i.test(name.trim())) return 'now'
@@ -95,9 +111,9 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
     .sort((a, b) => order(a) - order(b))
   // Shops publishing on Publitas: titles tidied, old issues hidden.
   const tidy = (n: string) => n.replace(/^Halpa ?Halli\s+/i, '').replace(/\bweek\s*(\d+)\s*[-–]\s*(\d+)/i, 'Vko $1–$2').replace(/\bvko\s*(\d+)\s*(20\d{2})?/i, 'Vko $1').replace(/\bDM\s*\d{2}(\d{2})\s*FI\b/i, 'Kuvasto vko $1').replace(/\s+/g, ' ').replace(/^./, (c) => c.toUpperCase())
-  const pub = (list?: { name: string; url: string; image?: string }[]) => (list ?? [])
+  const pub = (list?: { name: string; url: string; image?: string; from?: string; until?: string }[]) => (list ?? [])
     .filter((l) => typeof l.url === 'string' && /^https:\/\/view\.(publitas|promozilla)\.com\//.test(l.url))
-    .map((l) => ({ name: tidy(l.name), url: l.url, image: safeImg(l.image), status: weekStatus(l.name) }))
+    .map((l) => ({ name: tidy(l.name), url: l.url, image: safeImg(l.image), period: periodOf(l), status: datedStatus(l) ?? weekStatus(l.name) }))
     .filter((l) => l.status !== 'past')
     .map((l) => ({ ...l, status: l.status as Status | undefined }))
     .sort((a, b) => order(a) - order(b))
@@ -195,6 +211,7 @@ export function Leaflets() {
       <div className="chips" style={{ marginTop: 14 }}>
         {['all', ...shelf.map((c) => c.chain)].map((c) => (
           <button key={c} className={'chip' + (only === c ? ' on' : '')} onClick={() => setOnly(c)}>
+            {c !== 'all' && <ChainMark chain={CHAIN_ID[c] ?? c.toLowerCase()} inline />}
             {c === 'all' ? t('offers.allChains') : c}
           </button>
         ))}
@@ -202,11 +219,11 @@ export function Leaflets() {
       {shown.map((c) => (
         <div key={c.chain} className="section">
           <div className="section-head">
-            <h2>{c.chain}</h2>
+            <h2 className="chain-head"><ChainMark chain={CHAIN_ID[c.chain] ?? c.chain.toLowerCase()} inline /><span className="chain-name">{c.chain}</span></h2>
             <span className="muted tiny" style={{ textAlign: 'right' }}>{c.aboutText ?? t(c.about)}</span>
           </div>
           <div className="shelf">
-            {c.leaflets.map((l) => <Cover key={l.url} chain={c.chain} l={l} />)}
+            {c.leaflets.map((l) => <Cover key={l.url} chain={c.chain} l={l} showStore={c.chain === 'K-Ruoka'} />)}
           </div>
         </div>
       ))}

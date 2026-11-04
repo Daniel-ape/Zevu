@@ -1250,3 +1250,16 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .cover-img .chain-logo.wide img { height: 9px; max-width: 60px; }
 .member-pic .chain-logo.wide img, .offer-pic .chain-logo.wide img { height: 10px; max-width: 64px; }
 .has-logo .cover-blank { padding-bottom: 34px !important; }
+/* logos beside headings and in chips */
+.chain-logo.inline { position: static; display: inline-grid; width: 26px; height: 26px; border-radius: 7px; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); vertical-align: middle; flex-shrink: 0; }
+.chain-logo.inline.wide { width: auto; height: 22px; padding: 0 6px; }
+.chain-logo.inline.wide img { height: 11px; width: auto; max-width: 80px; }
+.chain-head { display: flex; align-items: center; gap: 10px; }
+.chip .chain-logo.inline { width: 20px; height: 20px; border-radius: 5px; margin-right: 6px; box-shadow: none; }
+.chip .chain-logo.inline.wide { height: 18px; padding: 0 4px; }
+.chip .chain-logo.inline.wide img { height: 8px; max-width: 54px; }
+.chip { display: inline-flex; align-items: center; }
+/* a logo that is the name itself (Tokmanni) replaces the heading text */
+.chain-head .chain-logo.inline.wide { height: 30px; padding: 0 9px; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); }
+.chain-head .chain-logo.inline.wide img { height: 15px; max-width: 130px; }
+.chain-head .chain-logo.inline.wide + .chain-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
