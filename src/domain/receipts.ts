@@ -199,3 +199,49 @@ export function receiptObservations(receipts: Receipt[]): PriceObservation[] {
 export function retailerName(r: Receipt, retailers: Retailer[]) {
   return retailers.find((x) => x.id === r.retailerId)?.name ?? (r.storeName || '—')
 }
+
+export interface MonthSavings {
+  savedCents: number // paid less than the other shops' average
+  missedCents: number // paid more than the cheapest other shop
+  spentCents: number
+  receipts: number
+  compared: number // receipt lines that could be compared
+}
+
+/**
+ * What this month's shopping saved: for every receipt line linked to a product,
+ * the price paid is compared with the average price of the same product at the
+ * other shops we have prices for (around the receipt date). Only real prices
+ * from the shops are used, never the user's own receipts.
+ */
+export function monthSavings(receipts: Receipt[], pricesOf: (id: string) => PriceObservation[], now = new Date()): MonthSavings {
+  const out: MonthSavings = { savedCents: 0, missedCents: 0, spentCents: 0, receipts: 0, compared: 0 }
+  for (const r of receipts) {
+    const d = new Date(r.date)
+    if (d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) continue
+    out.receipts++
+    out.spentCents += r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0)
+    const at = d.getTime()
+    for (const it of r.items) {
+      if (!it.productId || it.quantity < 1) continue
+      const unit = it.priceCents / it.quantity
+      // latest price per other shop, within 30 days of the receipt
+      const latest = new Map<string, { t: number; c: number }>()
+      for (const o of pricesOf(it.productId)) {
+        if (o.source === 'user-report' || o.retailerId === r.retailerId) continue
+        const t = Date.parse(o.observedAt)
+        if (Math.abs(t - at) > 30 * 86_400_000) continue
+        const prev = latest.get(o.retailerId)
+        if (!prev || t > prev.t) latest.set(o.retailerId, { t, c: o.priceCents })
+      }
+      if (!latest.size) continue
+      const prices = [...latest.values()].map((x) => x.c)
+      const avg = prices.reduce((a, b) => a + b, 0) / prices.length
+      const min = Math.min(...prices)
+      out.compared++
+      if (unit < avg) out.savedCents += Math.round((avg - unit) * it.quantity)
+      if (unit > min) out.missedCents += Math.round((unit - min) * it.quantity)
+    }
+  }
+  return out
+}

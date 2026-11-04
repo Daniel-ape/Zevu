@@ -1,6 +1,6 @@
 // Run: npm run test:receipts
 import assert from 'node:assert/strict'
-import { cleanOcrLine, parseReceipt } from '../src/domain/receipts'
+import { cleanOcrLine, monthSavings, parseReceipt } from '../src/domain/receipts'
 import { pickShelfPrice } from '../src/domain/shelfLabel'
 
 const NOW = new Date('2026-11-02T20:00:00')
@@ -73,6 +73,25 @@ test('Shelf label: the biggest price wins, unit prices ignored', () => {
   assert.equal(pickShelfPrice([W('Juusto', 30, 'Juusto')]), null)
   // Only small print (the unit price) was read: leave the field empty rather than guess.
   assert.equal(pickShelfPrice([W('Kookosmaito', 64, 'K'), W('Freshona', 60, 'F'), W('1,29', 24, '1,29 €N'), W('4056489367611', 21, '4056489367611')]), null)
+})
+
+test('Month savings: paid price vs. other shops this month', () => {
+  const obs = (id: string, shop: string, c: number) => ({ productId: id, retailerId: shop, priceCents: c, observedAt: '2026-11-01T06:00:00Z', source: 'shop' as const })
+  const prices: Record<string, ReturnType<typeof obs>[]> = {
+    a: [obs('a', 'tokmanni', 200), obs('a', 'prisma', 300)], // avg 2,50, min 2,00
+    b: [obs('b', 'tokmanni', 100)],
+  }
+  const r = {
+    id: '1', retailerId: 'lidl', storeName: 'Lidl', date: '2026-11-02T12:00:00Z', totalCents: 1000, importedAt: '',
+    items: [
+      { name: 'A', quantity: 2, priceCents: 440, productId: 'a' }, // 2,20 each: saves 0,30 x2 vs avg, 0,20 x2 over min
+      { name: 'B', quantity: 1, priceCents: 90, productId: 'b' }, // saves 0,10
+      { name: 'C', quantity: 1, priceCents: 470 }, // not linked
+    ],
+  }
+  const old = { ...r, id: '2', date: '2026-10-20T12:00:00Z' }
+  const s = monthSavings([r, old], (id) => prices[id] ?? [], NOW)
+  assert.deepEqual(s, { savedCents: 70, missedCents: 40, spentCents: 1000, receipts: 1, compared: 2 })
 })
 
 console.log(`${passed} tests passed`)

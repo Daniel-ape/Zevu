@@ -5,6 +5,7 @@ import { useNav } from '../nav'
 import { ArrowRight, List, Receipt } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
+import { monthSavings } from '../domain/receipts'
 import { Cover, useShelf } from './Leaflets'
 import type { Key } from '../i18n'
 
@@ -14,7 +15,7 @@ function greeting(): Key {
 }
 
 export function Home() {
-  const { products, observations, retailers, list, recent, loading, watched, lang, pricesOf, t } = useStore()
+  const { products, observations, retailers, list, recent, watched, lang, pricesOf, receipts, t } = useStore()
   const nav = useNav()
   const [receipt, setReceipt] = useState(false)
   const { shelf } = useShelf()
@@ -29,6 +30,9 @@ export function Home() {
   const worst = [...totals].filter((x) => x.missing === 0).sort((a, b) => b.totalCents - a.totalCents)[0]
   const saving = best && worst ? worst.totalCents - best.totalCents : 0
 
+  const savings = useMemo(() => monthSavings(receipts, pricesOf), [receipts, pricesOf])
+  const month = new Date().toLocaleDateString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { month: 'long' })
+
   const drops = useMemo(
     () =>
       products
@@ -40,29 +44,37 @@ export function Home() {
     [products, pricesOf],
   )
 
-  // Products that have a current price, the most popular first (the catalogue
-  // is ordered by popularity), skipping the ones already listed as drops.
-  const priced = useMemo(() => {
-    const dropped = new Set(drops.map((d) => d.p.id))
-    return products
-      .filter((p) => pricesOf(p.id).length > 0 && !dropped.has(p.id))
-      .map((p) => ({ p, c: cheapest(compare(p, pricesOf(p.id), retailers)) }))
-      .filter((x) => x.c)
-      .slice(0, 12)
-  }, [products, pricesOf, retailers, drops])
-
   const leaflets = shelf.flatMap((c) => c.leaflets.map((l) => ({ chain: c.chain, l })))
     .sort((a, b) => (a.l.status === 'now' ? 0 : 1) - (b.l.status === 'now' ? 0 : 1))
     .slice(0, 8)
 
   const today = new Date().toLocaleDateString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
-  const noOwnPrices = !loading && !observations.some((o) => o.source === 'user-report')
 
   return (
     <div className="screen home">
       <div className="home-head">
         <div className="eyebrow">{today}</div>
         <h1>{t(greeting())}</h1>
+      </div>
+
+      <div className="save-card">
+        <div className="save-label">{t('save.title', { month })}</div>
+        <div className="save-amount">{euro(savings.savedCents)}</div>
+        {savings.receipts === 0 ? (
+          <>
+            <div className="save-sub">{t('save.empty')}</div>
+            <button className="btn primary save-btn" onClick={() => setReceipt(true)}><Receipt size={18} /> {t('save.scan')}</button>
+          </>
+        ) : (
+          <>
+            <div className="save-sub">
+              {t('save.vsAvg')} · {t(savings.receipts === 1 ? 'save.receipts1' : 'save.receipts', { n: savings.receipts })} · {t('save.spent', { amount: euro(savings.spentCents) })}
+            </div>
+            {savings.missedCents > 0 && <div className="save-missed">{t('save.missed', { amount: euro(savings.missedCents) })}</div>}
+            {savings.compared === 0 && <div className="save-missed">{t('save.noCompare')}</div>}
+            <button className="save-link" onClick={() => setReceipt(true)}><Receipt size={16} /> {t('save.add')}</button>
+          </>
+        )}
       </div>
 
       {list.items.length > 0 && (
@@ -147,38 +159,6 @@ export function Home() {
             })}
           </div>
         </div>
-      )}
-
-      {priced.length > 0 && (
-        <div className="section">
-          <div className="section-head">
-            <h2>{t('home.prices')}</h2>
-            <button className="link small" onClick={() => nav.go('search')}>{t('home.seeAll')} <ArrowRight size={14} /></button>
-          </div>
-          <div className="rows">
-            {priced.slice(0, 6).map(({ p, c }) => (
-              <button key={p.id} className="row" onClick={() => nav.openProduct(p.id)}>
-                <Tile product={p} />
-                <div className="grow">
-                  <div className="title">{p.name}</div>
-                  <div className="sub">{[sizeLabel(p), c!.retailer.name].filter(Boolean).join(' · ')}</div>
-                </div>
-                <div className="end"><div className="price">{euro(c!.current.priceCents)}</div></div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {noOwnPrices && (
-        <button className="tip section" onClick={() => setReceipt(true)}>
-          <span className="quick-icon"><Receipt size={22} /></span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <b>{t('home.startTitle')}</b>
-            <span>{t('home.startShort')}</span>
-          </span>
-          <ArrowRight size={16} />
-        </button>
       )}
 
       {recent.length > 0 && (
