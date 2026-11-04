@@ -74,6 +74,8 @@ export function Coupons() {
         </button>
       </div>
 
+      <LeafletOffers onShowCard={setShowCard} />
+
       {/* Coupons */}
       <div className="section">
         <div className="section-head">
@@ -138,8 +140,6 @@ export function Coupons() {
           </div>
         )}
       </div>
-
-      <LeafletOffers onShowCard={setShowCard} />
 
       {/* Leaflets of the user's chains */}
       {leaflets.length > 0 && (
@@ -231,13 +231,14 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
   const fail = (u: string) => setFailed((f) => (f.has(u) ? f : new Set(f).add(u)))
   useEffect(() => { loadOffers().then((d) => setAll(d?.offers ?? [])) }, [])
   const today = new Date().toISOString().slice(0, 10)
-  const live = useMemo(() => (all ?? []).filter((o) => !o.validUntil || o.validUntil >= today), [all, today])
+  // only offers that need a loyalty card or app – the rest are ordinary leaflet prices
+  const live = useMemo(() => (all ?? []).filter((o) => o.member && (!o.validUntil || o.validUntil >= today)), [all, today])
   const chains = [...new Set(live.map((o) => o.chain))]
   const mineAvailable = chains.some((c) => myChains.has(c))
   const f = filter || (mineAvailable ? 'mine' : 'all')
   const words = q.toLowerCase().split(/\s+/).filter(Boolean)
   const shown = live
-    .filter((o) => f === 'all' || (f === 'mine' ? myChains.has(o.chain) : f === 'member' ? !!o.member : o.chain === f))
+    .filter((o) => f === 'all' || (f === 'mine' ? myChains.has(o.chain) : o.chain === f))
     .filter((o) => words.every((w) => (o.name + ' ' + (o.details ?? '')).toLowerCase().includes(w)))
     // members' prices first, then the biggest discounts
     .sort((a, b) => Number(!!b.member && myChains.has(b.chain)) - Number(!!a.member && myChains.has(a.chain)) || (b.percent ?? 0) - (a.percent ?? 0))
@@ -249,12 +250,11 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
 
   return (
     <div className="section">
-      <div className="section-head"><h2>{t('cp.offers')}</h2><span className="muted tiny">{shown.length}</span></div>
+      <div className="section-head"><h2>{t('cp.memberOffers')}</h2><span className="muted tiny">{shown.length}</span></div>
       <label className="search"><SearchIcon /><input type="search" placeholder={t('cp.offersSearch')} value={q} onChange={(e) => { setQ(e.target.value); setLimit(20) }} /></label>
       <div className="chips" style={{ margin: '10px 0 12px' }}>
         {mineAvailable && <button className={'chip' + (f === 'mine' ? ' on' : '')} onClick={() => setFilter('mine')}>{t('cp.offersMine')}</button>}
         <button className={'chip' + (f === 'all' ? ' on' : '')} onClick={() => setFilter('all')}>{t('cp.offersAll')}</button>
-        {live.some((o) => o.member) && <button className={'chip' + (f === 'member' ? ' on' : '')} onClick={() => setFilter('member')}>{t('cp.offersMember')}</button>}
         {chains.map((id) => (
           <button key={id} className={'chip' + (f === id ? ' on' : '')} onClick={() => setFilter(id)}>{CARD_CHAINS.find((x) => x.id === id)?.name.replace(' Plus', '') || id}</button>
         ))}
