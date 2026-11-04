@@ -270,3 +270,53 @@ export function brandLabel(brand: string): string {
   if (b.length > 3 && b === b.toUpperCase() && /[A-ZÅÄÖ]/.test(b)) b = b.toLowerCase().replace(/(^|[\s\-&/])([a-zåäöü])/g, (_, s, c) => s + c.toUpperCase())
   return b
 }
+
+export interface PriceGap { product: Product; low: RetailerPrice; high: RetailerPrice; saveCents: number; pct: number }
+export interface ShopRank { retailer: Retailer; cheapest: number; compared: number }
+
+/**
+ * From products sold by at least two shops (fresh prices only):
+ * - gaps: where choosing the right shop saves the most (biggest % difference)
+ * - ranking: how often each shop is the cheapest of the shops that sell it
+ */
+export function storeInsights(
+  products: Product[],
+  pricesOf: (id: string) => PriceObservation[],
+  retailers: Retailer[],
+  now = Date.now(),
+): { gaps: PriceGap[]; ranking: ShopRank[]; compared: number } {
+  const gaps: PriceGap[] = []
+  const rank = new Map<string, ShopRank>()
+  let compared = 0
+  for (const p of products) {
+    const obs = pricesOf(p.id)
+    if (obs.length < 2 || new Set(obs.map((o) => o.retailerId)).size < 2) continue
+    const fresh = compare(p, obs, retailers, now).filter((r) => r.freshness === 'fresh')
+    if (fresh.length < 2) continue
+    compared++
+    const low = fresh[0], high = fresh[fresh.length - 1]
+    for (const r of fresh) {
+      const x = rank.get(r.retailer.id) ?? { retailer: r.retailer, cheapest: 0, compared: 0 }
+      x.compared++
+      if (r.current.priceCents === low.current.priceCents) x.cheapest++
+      rank.set(r.retailer.id, x)
+    }
+    const saveCents = high.current.priceCents - low.current.priceCents
+    const pct = saveCents / high.current.priceCents
+    // Over ~60 % apart is almost always a pack-size mix-up (one shop prices a single piece), so skip it.
+    if (saveCents >= 50 && pct >= 0.1 && pct <= 0.6 && high.current.priceCents <= 30000) gaps.push({ product: p, low, high, saveCents, pct })
+  }
+  gaps.sort((a, b) => b.pct - a.pct || b.saveCents - a.saveCents)
+  const seen = new Set<string>()
+  // One product name once, and at most three gaps per pair of shops so the list stays varied.
+  const pairs = new Map<string, number>()
+  const uniq = gaps.filter((g) => {
+    const k = g.product.name.toLowerCase().replace(/\d+([.,]\d+)?\s*(cm|mm|m|g|kg|ml|l|kpl|x)\b/g, '').replace(/\s+/g, ' ').slice(0, 24)
+    const pair = g.low.retailer.id + '>' + g.high.retailer.id
+    if (seen.has(k) || (pairs.get(pair) ?? 0) >= 3) return false
+    seen.add(k); pairs.set(pair, (pairs.get(pair) ?? 0) + 1)
+    return true
+  })
+  const ranking = [...rank.values()].filter((r) => r.compared >= 10).sort((a, b) => b.cheapest / b.compared - a.cheapest / a.compared)
+  return { gaps: uniq, ranking, compared }
+}

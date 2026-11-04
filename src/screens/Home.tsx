@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
-import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
+import { basketTotals, cheapest, compare, euro, sizeLabel, storeInsights, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { ArrowRight, List, Receipt } from '../ui/icons'
-import { Tile, TrendTag } from '../ui/bits'
+import { ArrowRight, List, Receipt, Scan as ScanIcon } from '../ui/icons'
+import { RetailerMark, Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
 import { monthSavings } from '../domain/receipts'
 import { Cover, useShelf } from './Leaflets'
@@ -32,6 +32,9 @@ export function Home() {
 
   const savings = useMemo(() => monthSavings(receipts, pricesOf), [receipts, pricesOf])
   const month = new Date().toLocaleDateString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { month: 'long' })
+
+  const insights = useMemo(() => storeInsights(products, pricesOf, retailers), [products, pricesOf, retailers])
+  const [gapsAll, setGapsAll] = useState(false)
 
   const drops = useMemo(
     () =>
@@ -75,6 +78,12 @@ export function Home() {
             <button className="save-link" onClick={() => setReceipt(true)}><Receipt size={16} /> {t('save.add')}</button>
           </>
         )}
+      </div>
+
+      <div className="quick3">
+        <button onClick={() => nav.go('scan')}><span className="q-ic"><ScanIcon size={22} /></span>{t('qa.scan')}</button>
+        <button onClick={() => setReceipt(true)}><span className="q-ic"><Receipt size={22} /></span>{t('qa.receipt')}</button>
+        <button onClick={() => nav.go('lists')}><span className="q-ic"><List size={22} />{itemCount > 0 && <i>{itemCount}</i>}</span>{t('qa.list')}</button>
       </div>
 
       {list.items.length > 0 && (
@@ -158,6 +167,61 @@ export function Home() {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {insights.gaps.length > 0 && (
+        <div className="section">
+          <div className="section-head">
+            <h2>{t('gap.title')}</h2>
+            <span className="muted tiny">{t('gap.sub', { n: insights.compared })}</span>
+          </div>
+          <div className="rows">
+            {insights.gaps.slice(0, gapsAll ? 20 : 5).map((g) => (
+              <button key={g.product.id} className="row" onClick={() => nav.openProduct(g.product.id)}>
+                <Tile product={g.product} />
+                <div className="grow">
+                  <div className="title">{g.product.name}</div>
+                  <div className="sub">{t('gap.line', { low: g.low.retailer.name, high: g.high.retailer.name, price: euro(g.high.current.priceCents) })}</div>
+                </div>
+                <div className="end">
+                  <div className="price" style={{ color: 'var(--accent)' }}>{euro(g.low.current.priceCents)}</div>
+                  <div className="gap-save">−{Math.round(g.pct * 100)} %</div>
+                </div>
+              </button>
+            ))}
+          </div>
+          {insights.gaps.length > 5 && (
+            <button className="more-btn" onClick={() => setGapsAll((x) => !x)}>{gapsAll ? t('gap.less') : t('gap.more', { n: Math.min(20, insights.gaps.length) })}</button>
+          )}
+        </div>
+      )}
+
+      {insights.ranking.length > 1 && (
+        <div className="section">
+          <div className="section-head">
+            <h2>{t('rank.title')}</h2>
+          </div>
+          <div className="rows">
+            {insights.ranking.slice(0, 6).map((r, i) => {
+              const pct = Math.round((r.cheapest / r.compared) * 100)
+              return (
+                <div key={r.retailer.id} className="row rank-row">
+                  <div className="rank-n">{i + 1}</div>
+                  <RetailerMark retailer={r.retailer} />
+                  <div className="grow">
+                    <div className="title">{r.retailer.name}</div>
+                    <div className="rank-bar"><span style={{ width: pct + '%' }} /></div>
+                  </div>
+                  <div className="end">
+                    <div className="price">{pct} %</div>
+                    <div className="sub">{t('rank.of', { a: r.cheapest, b: r.compared })}</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="group-note">{t('rank.note')}</div>
         </div>
       )}
 
