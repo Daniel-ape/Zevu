@@ -6,7 +6,7 @@ import { isActive, parseCoupon, type Coupon } from '../domain/coupons'
 import { euro } from '../domain/pricing'
 import { LOCALE } from '../i18n'
 import { Sheet } from '../ui/Sheet'
-import { Card as CardIcon, Plus, Ticket } from '../ui/icons'
+import { Card as CardIcon, Plus, Search as SearchIcon, Ticket } from '../ui/icons'
 import { CameraScanner } from './CameraScanner'
 import { Cover, useShelf } from './Leaflets'
 
@@ -138,6 +138,8 @@ export function Coupons() {
         )}
       </div>
 
+      <LeafletOffers onShowCard={setShowCard} />
+
       {/* Leaflets of the user's chains */}
       {leaflets.length > 0 && (
         <div className="section">
@@ -163,6 +165,93 @@ export function Coupons() {
           onClose={() => setEditing(null)}
         />
       )}
+    </div>
+  )
+}
+
+export interface LeafletOffer {
+  chain: string; leaflet: string; url: string; page: number; pageImage?: string | null
+  name: string; details: string | null; priceCents: number; regularCents: number | null; percent: number | null
+  member: string | null; validFrom: string | null; validUntil: string | null
+}
+let offersFeed: Promise<{ offers: LeafletOffer[] } | null> | null = null
+export const loadOffers = () => (offersFeed ??= import('../data/dataFile').then((m) => m.fetchData<{ offers: LeafletOffer[] }>('offers.json')))
+
+/** Offers read from the shops' online leaflets (collector/offers.mjs). */
+function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void }) {
+  const { cards, coupons, saveCoupon, t, lang } = useStore()
+  const [all, setAll] = useState<LeafletOffer[] | null>(null)
+  const myChains = useMemo(() => new Set(cards.map((c) => c.chain)), [cards])
+  const [filter, setFilter] = useState<string>('')
+  const [q, setQ] = useState('')
+  const [limit, setLimit] = useState(20)
+  useEffect(() => { loadOffers().then((d) => setAll(d?.offers ?? [])) }, [])
+  const today = new Date().toISOString().slice(0, 10)
+  const live = useMemo(() => (all ?? []).filter((o) => !o.validUntil || o.validUntil >= today), [all, today])
+  const chains = [...new Set(live.map((o) => o.chain))]
+  const mineAvailable = chains.some((c) => myChains.has(c))
+  const f = filter || (mineAvailable ? 'mine' : 'all')
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean)
+  const shown = live
+    .filter((o) => f === 'all' || (f === 'mine' ? myChains.has(o.chain) : f === 'member' ? !!o.member : o.chain === f))
+    .filter((o) => words.every((w) => (o.name + ' ' + (o.details ?? '')).toLowerCase().includes(w)))
+    // members' prices first, then the biggest discounts
+    .sort((a, b) => Number(!!b.member && myChains.has(b.chain)) - Number(!!a.member && myChains.has(a.chain)) || (b.percent ?? 0) - (a.percent ?? 0))
+  if (all === null || live.length === 0) return null
+  const fmtDate = (d: string) => new Date(d + 'T12:00').toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' })
+  const savedKey = (o: LeafletOffer) => `${o.chain}:${o.name}:${o.priceCents}`
+  const isSaved = (o: LeafletOffer) => coupons.some((c) => c.id === 'lf:' + savedKey(o))
+  const pageUrl = (o: LeafletOffer) => (/publitas|promozilla/.test(o.url) ? o.url.replace(/\/?$/, '/') + 'page/' + o.page : o.url)
+
+  return (
+    <div className="section">
+      <div className="section-head"><h2>{t('cp.offers')}</h2><span className="muted tiny">{shown.length}</span></div>
+      <label className="search"><SearchIcon /><input type="search" placeholder={t('cp.offersSearch')} value={q} onChange={(e) => { setQ(e.target.value); setLimit(20) }} /></label>
+      <div className="chips" style={{ margin: '10px 0 12px' }}>
+        {mineAvailable && <button className={'chip' + (f === 'mine' ? ' on' : '')} onClick={() => setFilter('mine')}>{t('cp.offersMine')}</button>}
+        <button className={'chip' + (f === 'all' ? ' on' : '')} onClick={() => setFilter('all')}>{t('cp.offersAll')}</button>
+        {live.some((o) => o.member) && <button className={'chip' + (f === 'member' ? ' on' : '')} onClick={() => setFilter('member')}>{t('cp.offersMember')}</button>}
+        {chains.map((id) => (
+          <button key={id} className={'chip' + (f === id ? ' on' : '')} onClick={() => setFilter(id)}>{CARD_CHAINS.find((x) => x.id === id)?.name.replace(' Plus', '') || id}</button>
+        ))}
+      </div>
+      {shown.length === 0 ? <div className="group-note">{t('cp.offersNone')}</div> : (
+        <div className="offer-list">
+          {shown.slice(0, limit).map((o, i) => {
+            const chain = CARD_CHAINS.find((x) => x.id === o.chain)
+            const card = cards.find((k) => k.chain === o.chain)
+            const saved = isSaved(o)
+            return (
+              <div key={i} className="offer-row" style={{ ['--c' as string]: chain?.color ?? '#6b6b78' }}>
+                <a className="offer-badge" href={pageUrl(o)} target="_blank" rel="noreferrer" aria-label={t('cp.offerOpen')}>
+                  {o.percent ? <b>−{o.percent}%</b> : <b>%</b>}
+                  <small>{chain?.name.replace(' Plus', '') ?? o.chain}</small>
+                </a>
+                <a className="offer-body" href={pageUrl(o)} target="_blank" rel="noreferrer">
+                  <span className="offer-name">{o.name}</span>
+                  {o.details && <span className="offer-details">{o.details}</span>}
+                  <span className="offer-price">
+                    <b>{euro(o.priceCents)}</b>
+                    {o.regularCents && <s>{euro(o.regularCents)}</s>}
+                    {o.member && <i className="offer-member">{o.member}</i>}
+                  </span>
+                  {o.validUntil && <span className="offer-valid">{t('cp.until', { date: fmtDate(o.validUntil) })}</span>}
+                </a>
+                <div className="offer-actions">
+                  <button
+                    className={'offer-save' + (saved ? ' on' : '')}
+                    disabled={saved}
+                    onClick={() => saveCoupon({ id: 'lf:' + savedKey(o), added: new Date().toISOString(), chain: chain ? o.chain : 'other', title: o.name, priceCents: o.priceCents, percent: o.percent, validUntil: o.validUntil })}
+                  >{saved ? t('cp.offerSaved') : t('cp.offerSave')}</button>
+                  {card && o.member && <button className="offer-card" onClick={() => onShowCard(card)}><CardIcon size={15} /></button>}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {shown.length > limit && <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setLimit(limit + 30)}>{t('cp.offersMore', { n: shown.length - limit })}</button>}
+      <div className="group-note">{t('cp.offersNote')}</div>
     </div>
   )
 }

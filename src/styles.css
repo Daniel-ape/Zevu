@@ -1175,3 +1175,22 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .cardview-hint { font-size: 13px; color: #6b6b78; text-align: center; padding: 0 18px 12px; }
 .cardview-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
 .cardview-actions .btn.ghost { background: #f2f2f7; color: #c8202f; }
+
+/* ---- Offers read from the online leaflets (Coupons page) ---- */
+.offer-list { display: flex; flex-direction: column; gap: 10px; }
+.offer-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; background: var(--card); border-radius: 16px; padding: 10px 12px 10px 10px; box-shadow: var(--card-shadow); }
+.offer-badge { width: 64px; height: 64px; border-radius: 13px; background: var(--c); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; gap: 2px; }
+.offer-badge b { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+.offer-badge small { font-size: 10px; font-weight: 600; opacity: 0.9; max-width: 58px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.offer-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; color: inherit; text-decoration: none; }
+.offer-name { font-weight: 600; font-size: 15px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.offer-details { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.offer-price { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.offer-price b { font-size: 17px; color: var(--accent); font-weight: 800; }
+.offer-price s { font-size: 13px; color: var(--text-2); }
+.offer-member { font-style: normal; font-size: 11px; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); padding: 2px 7px; border-radius: 999px; }
+.offer-valid { font-size: 12px; color: var(--text-2); }
+.offer-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+.offer-save { border: 0; background: var(--fill); color: var(--accent); font-weight: 700; font-size: 13px; padding: 8px 12px; border-radius: 999px; }
+.offer-save.on { color: var(--text-2); }
+.offer-card { border: 0; background: var(--fill); color: var(--c); padding: 7px; border-radius: 999px; display: grid; place-items: center; }
