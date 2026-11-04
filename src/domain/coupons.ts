@@ -10,6 +10,7 @@ export interface Coupon {
   image?: string // small JPEG data URL
   cut?: { src: string; box: number[] } // part of a leaflet page (offers read from leaflets)
   link?: string // the leaflet it came from
+  member?: string | null // offer only with a card/app: 'Lidl Plus', 'K-Plussa', 'S-Etukortti', 'Kanta-asiakas', 'Kuponki'
   used?: boolean
   added: string
 }

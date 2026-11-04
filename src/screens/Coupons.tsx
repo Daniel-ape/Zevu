@@ -4,7 +4,7 @@ import { useNav } from '../nav'
 import { CARD_CHAINS, cardName, chainOf, guessFormat, type LoyaltyCard } from '../data/cards'
 import { isActive, parseCoupon, type Coupon } from '../domain/coupons'
 import { euro } from '../domain/pricing'
-import { LOCALE } from '../i18n'
+import { LOCALE, type Key } from '../i18n'
 import { Sheet } from '../ui/Sheet'
 import { Card as CardIcon, Plus, Search as SearchIcon, Ticket } from '../ui/icons'
 import { CameraScanner } from './CameraScanner'
@@ -117,6 +117,7 @@ export function Coupons() {
                         {c.priceCents !== null && <b>{euro(c.priceCents)}</b>}
                         {c.percent !== null && <i>−{c.percent} %</i>}
                       </span>
+                      {c.member && <span className="offer-member" style={{ ['--c' as string]: chain.color }}><CardIcon size={13} /> {memberText(c.member, c.chain, t)}</span>}
                       {c.validUntil && (
                         <span className={'coupon-valid' + (left !== null && left <= 2 ? ' soon' : '')}>
                           {left === 0 ? t('cp.lastDay') : left === 1 ? t('cp.tomorrow') : t('cp.until', { date: fmtDate(c.validUntil) })}
@@ -198,6 +199,16 @@ export function Cut({ src, box, className, onFail }: { src: string; box: number[
   )
 }
 
+/** "Gäller bara med Lidl Plus-appen" etc. for an offer that needs a card or app. */
+export function memberText(member: string, chain: string, t: (k: Key, v?: Record<string, string | number>) => string) {
+  if (/lidl plus/i.test(member)) return t('cp.needApp')
+  if (/plussa/i.test(member)) return t('cp.needPlussa')
+  if (/s-etukortti/i.test(member)) return t('cp.needS')
+  if (/kuponki/i.test(member)) return t('cp.needCoupon')
+  const name = CARD_CHAINS.find((x) => x.id === chain)?.name || chain
+  return t('cp.needCard', { chain: name })
+}
+
 export interface LeafletOffer {
   chain: string; leaflet: string; url: string; page: number; pageImage?: string | null
   name: string; details: string | null; priceCents: number; regularCents: number | null; percent: number | null
@@ -274,15 +285,15 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
                   <span className="offer-price">
                     <b>{euro(o.priceCents)}</b>
                     {o.regularCents && <s>{euro(o.regularCents)}</s>}
-                    {o.member && <i className="offer-member">{o.member}</i>}
                   </span>
+                  {o.member && <span className="offer-member"><CardIcon size={13} /> {memberText(o.member, o.chain, t)}</span>}
                   {o.validUntil && <span className="offer-valid">{t('cp.until', { date: fmtDate(o.validUntil) })}</span>}
                 </a>
                 <div className="offer-actions">
                   <button
                     className={'offer-save' + (saved ? ' on' : '')}
                     disabled={saved}
-                    onClick={() => saveCoupon({ id: 'lf:' + savedKey(o), added: new Date().toISOString(), chain: chain ? o.chain : 'other', title: o.name, priceCents: o.priceCents, percent: o.percent, validUntil: o.validUntil, link: pageUrl(o), ...(o.crop && o.pageImage ? { cut: { src: o.pageImage, box: o.crop } } : {}) })}
+                    onClick={() => saveCoupon({ id: 'lf:' + savedKey(o), added: new Date().toISOString(), chain: chain ? o.chain : 'other', title: o.name, priceCents: o.priceCents, percent: o.percent, validUntil: o.validUntil, link: pageUrl(o), member: o.member, ...(o.crop && o.pageImage ? { cut: { src: o.pageImage, box: o.crop } } : {}) })}
                   >{saved ? t('cp.offerSaved') : t('cp.offerSave')}</button>
                   {card && o.member && <button className="offer-card" onClick={() => onShowCard(card)}><CardIcon size={15} /></button>}
                 </div>
