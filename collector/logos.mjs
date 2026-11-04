@@ -14,6 +14,8 @@ const SITES = {
   karkkainen: 'https://www.karkkainen.com/',
   stockmann: 'https://www.stockmann.com/',
 }
+// Chains whose site icon is not their logo: use the logo in the page header instead.
+const HEADER_LOGO = new Set(['tokmanni'])
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 async function get(u) {
   await sleep(1000)
@@ -45,6 +47,14 @@ for (const [chain, site] of Object.entries(SITES)) {
   try {
     if (!(await allowed(site))) { console.log(chain, 'robots.txt says no'); continue }
     const html = await (await get(site)).text()
+    const headerLogos = HEADER_LOGO.has(chain)
+      ? [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0])
+          .filter((t) => /logo/i.test(t))
+          .map((t) => t.match(/\b(?:data-)?src=["']([^"']+)/i)?.[1])
+          .filter((u) => u && !/^data:/.test(u))
+          .map((u) => ({ url: new URL(u.replace(/&amp;/g, '&'), site).href, score: 2000 }))
+      : []
+    if (headerLogos.length) console.log(chain, 'header logos', headerLogos.map((c) => c.url))
     // <link rel="apple-touch-icon" | "icon" ... href="..." sizes="..."> — prefer big PNG/SVG icons
     const links = [...html.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]).filter((l) => /rel=["'][^"']*icon/i.test(l))
     const cand = links.map((l) => {
@@ -52,7 +62,7 @@ for (const [chain, site] of Object.entries(SITES)) {
       const size = +(l.match(/sizes=["'](\d+)/i)?.[1] || 0)
       const score = (/apple-touch/i.test(l) ? 400 : 0) + (/\.svg/i.test(href || '') ? 300 : 0) + Math.min(size, 256) + (/\.ico/i.test(href || '') ? -100 : 0)
       return href && { url: new URL(href.replace(/&amp;/g, '&'), site).href, score }
-    }).filter(Boolean).sort((a, b) => b.score - a.score)
+    }).filter(Boolean).concat(headerLogos).sort((a, b) => b.score - a.score)
     cand.push({ url: new URL('/favicon.ico', site).href, score: -1000 })
     for (const c of cand) {
       try {
