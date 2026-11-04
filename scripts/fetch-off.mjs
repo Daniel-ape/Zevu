@@ -2,7 +2,7 @@
 // build-snapshot.ts. Runs in GitHub Actions (workflow "Build catalogue").
 // Uses Search-a-licious (deep paging allowed); falls back to the classic search
 // split by category, which only serves the first 10 pages of each query.
-import { writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 
 const UA = 'Hintaopas/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
 const FIELDS = 'code,product_name,product_name_fi,product_name_sv,product_name_en,brands,quantity,categories_tags,image_front_small_url,unique_scans_n'
@@ -58,6 +58,27 @@ if (byCode.size < MAX / 2) {
     if (byCode.size >= MAX) break
   }
 }
+// 3. Barcodes the shops sell (public/prices/<shop>.json) that the Finnish list
+// above doesn't have: look them up, so they get proper names (also Swedish),
+// pictures, sizes and categories. 100 codes per query.
+const shopEans = new Set()
+if (existsSync('public/prices')) {
+  for (const f of readdirSync('public/prices')) {
+    if (!f.endsWith('.json') || f.includes('-history') || f === 'leaflets.json') continue
+    try { for (const p of JSON.parse(readFileSync(`public/prices/${f}`, 'utf8')).prices ?? []) if (/^\d{8,14}$/.test(p.ean) && !byCode.has(p.ean)) shopEans.add(p.ean) } catch { /* not a price file */ }
+  }
+}
+const codes = [...shopEans]
+console.log('shop barcodes not in the list', codes.length)
+const before = byCode.size
+for (let i = 0; i < codes.length; i += 100) {
+  const d = await get(`https://world.openfoodfacts.org/api/v2/search?code=${codes.slice(i, i + 100).join(',')}&page_size=100&fields=${FIELDS}`)
+  // Only real products with a name; marked so they sort after the Finnish favourites.
+  add((d?.products ?? []).filter((p) => p.product_name || p.product_name_fi || p.product_name_sv).map((p) => ({ ...p, unique_scans_n: p.unique_scans_n ?? 0 })))
+  await sleep(6500)
+}
+console.log('found in Open Food Facts', byCode.size - before)
+
 const all = [...byCode.values()].sort((a, b) => (b.unique_scans_n ?? 0) - (a.unique_scans_n ?? 0))
 writeFileSync('raw.json', JSON.stringify(all))
 console.log('raw products', all.length)
