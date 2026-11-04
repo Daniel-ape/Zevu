@@ -217,10 +217,18 @@ export interface LeafletOffer {
 let offersFeed: Promise<{ offers: LeafletOffer[] } | null> | null = null
 export const loadOffers = () => (offersFeed ??= import('../data/dataFile').then((m) => m.fetchData<{ offers: LeafletOffer[] }>('offers.json')))
 
-/** Small store mark in the chain's colour, for the corner of an offer picture. */
+let logoIndex: Promise<Record<string, string>> | null = null
+const loadLogos = () =>
+  (logoIndex ??= fetch(new URL('logos/index.json', location.href).href).then((r) => (r.ok ? r.json() : {})).catch(() => ({})) as Promise<Record<string, string>>)
+
+/** The store's own logo in the corner of an offer picture (its name in its colour if there is no logo). */
 export function ChainMark({ chain }: { chain: string }) {
   const c = CARD_CHAINS.find((x) => x.id === chain)
-  const name = (c?.name || chain).replace(/ Plus$/, '').replace(/^K-Plussa$/, 'K').replace(/^S-Etukortti$/, 'S')
+  const [logo, setLogo] = useState<string | null>(null)
+  const [bad, setBad] = useState(false)
+  useEffect(() => { loadLogos().then((i) => setLogo(i[chain] ? new URL('logos/' + i[chain], location.href).href : null)) }, [chain])
+  const name = (c?.name || chain).replace(/ Plus$/, '')
+  if (logo && !bad) return <span className="chain-logo"><img src={logo} alt={name} onError={() => setBad(true)} /></span>
   return <span className="chain-mark" style={{ background: c?.color ?? '#6b6b78' }}>{name}</span>
 }
 

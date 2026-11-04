@@ -1222,3 +1222,5 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .member-card .offer-member { font-size: 10.5px; padding: 2px 7px; }
 /* store mark in the corner of an offer picture */
 .chain-mark { position: absolute; top: 5px; right: 5px; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: 0.2px; padding: 3px 7px; border-radius: 7px; box-shadow: 0 1px 3px rgba(0,0,0,0.25); line-height: 1.1; max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chain-logo { position: absolute; top: 5px; right: 5px; width: 26px; height: 26px; border-radius: 7px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.3); display: grid; place-items: center; overflow: hidden; }
+.chain-logo img { width: 100%; height: 100%; object-fit: contain; }
