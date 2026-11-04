@@ -109,7 +109,7 @@ export function Coupons() {
               return (
                 <div key={c.id} className="coupon" style={{ ['--c' as string]: chain.color }}>
                   <button className="coupon-main" onClick={() => setEditing(c)}>
-                    {c.image ? <img className="coupon-img" src={c.image} alt="" /> : <span className="coupon-img blank"><Ticket size={26} /></span>}
+                    {c.image ? <img className="coupon-img" src={c.image} alt="" /> : c.cut ? <Cut className="coupon-img" src={c.cut.src} box={c.cut.box} /> : <span className="coupon-img blank"><Ticket size={26} /></span>}
                     <span className="coupon-body">
                       <span className="coupon-chain">{chain.name || t('cp.other')}</span>
                       <span className="coupon-title">{c.title || t('cp.noTitle')}</span>
@@ -169,9 +169,23 @@ export function Coupons() {
   )
 }
 
+/** A part of a leaflet page: box = [left, top, width, height] as parts of the page, then page width/height. */
+export function Cut({ src, box, className }: { src: string; box: number[]; className?: string }) {
+  const [x, y, w, h, pageAspect] = box
+  const aspect = (w / h) * (pageAspect || 0.7)
+  return (
+    <span className={'cut ' + (className ?? '')}>
+      <span className="cut-frame" style={{ aspectRatio: String(aspect), ...(aspect >= 1 ? { width: '100%' } : { height: '100%' }) }}>
+        <img src={src} alt="" loading="lazy" style={{ width: `${100 / w}%`, left: `${(-x / w) * 100}%`, top: `${(-y / h) * 100}%` }} />
+      </span>
+    </span>
+  )
+}
+
 export interface LeafletOffer {
   chain: string; leaflet: string; url: string; page: number; pageImage?: string | null
   name: string; details: string | null; priceCents: number; regularCents: number | null; percent: number | null
+  crop?: number[] | null
   member: string | null; validFrom: string | null; validUntil: string | null
 }
 let offersFeed: Promise<{ offers: LeafletOffer[] } | null> | null = null
@@ -185,6 +199,7 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
   const [filter, setFilter] = useState<string>('')
   const [q, setQ] = useState('')
   const [limit, setLimit] = useState(20)
+  const [big, setBig] = useState<LeafletOffer | null>(null)
   useEffect(() => { loadOffers().then((d) => setAll(d?.offers ?? [])) }, [])
   const today = new Date().toISOString().slice(0, 10)
   const live = useMemo(() => (all ?? []).filter((o) => !o.validUntil || o.validUntil >= today), [all, today])
@@ -223,11 +238,19 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
             const saved = isSaved(o)
             return (
               <div key={i} className="offer-row" style={{ ['--c' as string]: chain?.color ?? '#6b6b78' }}>
-                <a className="offer-badge" href={pageUrl(o)} target="_blank" rel="noreferrer" aria-label={t('cp.offerOpen')}>
-                  {o.percent ? <b>−{o.percent}%</b> : <b>%</b>}
-                  <small>{chain?.name.replace(' Plus', '') ?? o.chain}</small>
-                </a>
+                {o.crop && o.pageImage ? (
+                  <button className="offer-pic" onClick={() => setBig(o)} aria-label={o.name}>
+                    <Cut src={o.pageImage} box={o.crop} />
+                    {o.percent ? <b className="offer-pct">−{o.percent}%</b> : null}
+                  </button>
+                ) : (
+                  <a className="offer-badge" href={pageUrl(o)} target="_blank" rel="noreferrer" aria-label={t('cp.offerOpen')}>
+                    {o.percent ? <b>−{o.percent}%</b> : <b>%</b>}
+                    <small>{chain?.name.replace(' Plus', '') ?? o.chain}</small>
+                  </a>
+                )}
                 <a className="offer-body" href={pageUrl(o)} target="_blank" rel="noreferrer">
+                  <span className="offer-chain" style={{ color: chain?.color }}>{chain?.name.replace(' Plus', '') ?? o.chain}</span>
                   <span className="offer-name">{o.name}</span>
                   {o.details && <span className="offer-details">{o.details}</span>}
                   <span className="offer-price">
@@ -241,7 +264,7 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
                   <button
                     className={'offer-save' + (saved ? ' on' : '')}
                     disabled={saved}
-                    onClick={() => saveCoupon({ id: 'lf:' + savedKey(o), added: new Date().toISOString(), chain: chain ? o.chain : 'other', title: o.name, priceCents: o.priceCents, percent: o.percent, validUntil: o.validUntil })}
+                    onClick={() => saveCoupon({ id: 'lf:' + savedKey(o), added: new Date().toISOString(), chain: chain ? o.chain : 'other', title: o.name, priceCents: o.priceCents, percent: o.percent, validUntil: o.validUntil, link: pageUrl(o), ...(o.crop && o.pageImage ? { cut: { src: o.pageImage, box: o.crop } } : {}) })}
                   >{saved ? t('cp.offerSaved') : t('cp.offerSave')}</button>
                   {card && o.member && <button className="offer-card" onClick={() => onShowCard(card)}><CardIcon size={15} /></button>}
                 </div>
@@ -252,6 +275,12 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
       )}
       {shown.length > limit && <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setLimit(limit + 30)}>{t('cp.offersMore', { n: shown.length - limit })}</button>}
       <div className="group-note">{t('cp.offersNote')}</div>
+      {big && big.crop && big.pageImage && (
+        <Sheet title={big.name} onClose={() => setBig(null)}>
+          <div className="offer-big"><Cut src={big.pageImage} box={big.crop} /></div>
+          <a className="btn primary" href={pageUrl(big)} target="_blank" rel="noreferrer" style={{ marginTop: 14 }}>{t('cp.offerOpen')}</a>
+        </Sheet>
+      )}
     </div>
   )
 }

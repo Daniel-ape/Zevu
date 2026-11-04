@@ -77,7 +77,7 @@ for (const l of leaflets.lidl || []) {
   if (!slug) continue
   await add('lidl', l, async () => {
     const f = JSON.parse(await get(`https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=${slug}&region_id=0&region_code=0`)).flyer
-    return { pdf: f.pdfUrl, from: f.offerStartDate || f.startDate, until: f.offerEndDate || f.endDate, pageImage: (n) => f.pages?.[n - 1]?.thumbnail ?? null }
+    return { pdf: f.pdfUrl, from: f.offerStartDate || f.startDate, until: f.offerEndDate || f.endDate, pageImage: (n) => f.pages?.[n - 1]?.image ?? f.pages?.[n - 1]?.thumbnail ?? null }
   })
 }
 
@@ -99,7 +99,7 @@ for (const chain of ['minimani', 'rusta', 'halpahalli']) {
       const published = d.sourceDocumentTitle && Date.parse(d.sourceDocumentTitle)
       if (!until && published) until = iso(new Date(published + 35 * 864e5))
       if (!until) throw new Error('no date')
-      return { pdf: d.config.downloadPdfUrl, from, until, pageImage: (n) => (pages[n - 1]?.images?.at600 ? m[1] + pages[n - 1].images.at600 : null) }
+      return { pdf: d.config.downloadPdfUrl, from, until, pageImage: (n) => (pages[n - 1]?.images?.at1200 ? m[1] + pages[n - 1].images.at1200 : null) }
     })
   }
 }

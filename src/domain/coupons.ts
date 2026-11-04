@@ -8,6 +8,8 @@ export interface Coupon {
   percent: number | null // "-30 %"
   validUntil: string | null // YYYY-MM-DD
   image?: string // small JPEG data URL
+  cut?: { src: string; box: number[] } // part of a leaflet page (offers read from leaflets)
+  link?: string // the leaflet it came from
   used?: boolean
   added: string
 }
