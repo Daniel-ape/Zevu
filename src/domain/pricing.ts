@@ -1,7 +1,13 @@
 import type { PriceObservation, Product, Retailer, ShoppingList } from './types'
 
-/** Prices older than this are shown as outdated and excluded from "cheapest". */
-export const STALE_AFTER_DAYS = 7
+/**
+ * Prices older than this are shown as outdated and excluded from "cheapest".
+ * The collectors re-read every product page in rotation (a full round takes
+ * one to four weeks), so shop prices count for longer than a receipt or a
+ * shelf label the user scanned, which only says what one store charged that day.
+ */
+export const STALE_AFTER_DAYS = 35
+export const STALE_OWN_AFTER_DAYS = 14
 
 export type Freshness = 'fresh' | 'outdated'
 
@@ -18,7 +24,8 @@ export function ageDays(iso: string, now = Date.now()): number {
 }
 
 export function freshnessOf(o: PriceObservation, now = Date.now()): Freshness {
-  return ageDays(o.observedAt, now) > STALE_AFTER_DAYS ? 'outdated' : 'fresh'
+  const limit = o.source === 'user-report' ? STALE_OWN_AFTER_DAYS : STALE_AFTER_DAYS
+  return ageDays(o.observedAt, now) > limit ? 'outdated' : 'fresh'
 }
 
 /** Price per kg, per litre or per piece, in cents. */
@@ -231,7 +238,7 @@ export function dailyLowest(productId: string, observations: PriceObservation[],
     for (const arr of byRetailer.values()) {
       let last: { t: number; cents: number } | undefined
       for (const p of arr) { if (p.t < end) last = p; else break }
-      if (last && end - last.t <= 14 * DAY && last.cents < low) low = last.cents
+      if (last && end - last.t <= STALE_AFTER_DAYS * DAY && last.cents < low) low = last.cents
     }
     if (low < Infinity) out.push({ date: new Date(d * DAY + DAY / 2), cents: low })
   }
@@ -355,7 +362,7 @@ export function dailyByStore(productId: string, observations: PriceObservation[]
       const end = (start + k + 1) * DAY
       let last: { t: number; cents: number } | undefined
       for (const p of arr) { if (p.t < end) last = p; else break }
-      return last && end - last.t <= 14 * DAY ? last.cents : null
+      return last && end - last.t <= STALE_AFTER_DAYS * DAY ? last.cents : null
     })
     if (values.some((v) => v !== null)) series.push({ retailer, values })
   }

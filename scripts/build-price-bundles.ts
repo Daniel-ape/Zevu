@@ -21,6 +21,31 @@ interface ShopFile { retailerId: string; fetchedAt: string; prices: Price[] }
 type Item = [string, number, string, string, string, string, string]
 interface Shop { r: string; at: string; o: string; i: Item[] }
 
+// Names as shops print them: HTML entities decoded, odd spaces removed, and
+// ALL-CAPS names (pharmacies) written in normal case.
+const ENTITIES: Record<string, string> = { amp: '&', apos: "'", quot: '"', lt: '<', gt: '>', nbsp: ' ', '#39': "'" }
+const SMALL = new Set(['ja', 'tai', 'ilman', 'with', 'and', 'for', 'och', 'med', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'kpl', 'cm', 'mm', 'm', 'x', 'st', 'pss', 'rll'])
+export function cleanName(raw: string): string {
+  let n = raw.replace(/&(#?\w+);/g, (m, e) => ENTITIES[e] ?? (e.startsWith('#') ? String.fromCharCode(+e.slice(1)) : m))
+  n = n.replace(/[\u00a0\s]+/g, ' ').trim()
+  const letters = n.replace(/[^A-Za-zÅÄÖåäöÉéÜü]/g, '')
+  if (letters.length >= 4 && letters === letters.toUpperCase()) {
+    n = n.split(' ').map((w, i) => {
+      if (/\d/.test(w)) return w // codes and sizes as printed ("7,5CMX4,5M", "V392")
+      const lw = w.toLowerCase()
+      if (i > 0 && SMALL.has(lw)) return lw
+      return lw.charAt(0).toUpperCase() + lw.slice(1)
+    }).join(' ')
+  }
+  return n
+}
+
+// How many pieces a name says the pack has ("24 rullaa", "10-PACK", "2 kpl").
+const packOf = (name: string) => {
+  const m = name.match(/(\d+)\s*-?\s*(kpl|rullaa|rll|pack|paria|pss|st|tabl|kaps|annosta|x)\b/i)
+  return m ? +m[1] : 1
+}
+
 const DIR = 'public/prices'
 const OUT = `${DIR}/app`
 const shops: ShopFile[] = readdirSync(DIR)
@@ -34,8 +59,28 @@ const chainsPerEan = new Map<string, Set<string>>()
 for (const s of shops) for (const p of s.prices) { const c = chainsPerEan.get(p.ean) ?? new Set(); c.add(s.retailerId); chainsPerEan.set(p.ean, c) }
 const shopsPerEan = new Map([...chainsPerEan].map(([e, c]) => [e, c.size]))
 
+// Same barcode, very different price: usually one shop sells a multipack under
+// the single item's barcode ("24 rullaa" vs "1 kpl"). Leave the bigger pack out
+// of that product so the comparison isn't between different amounts.
+const offers = new Map<string, { shop: string; p: Price }[]>()
+for (const s of shops) for (const p of s.prices) { const a = offers.get(p.ean) ?? []; a.push({ shop: s.retailerId, p }); offers.set(p.ean, a) }
+const dropped = new Set<Price>()
+for (const list of offers.values()) {
+  if (list.length < 2) continue
+  const prices = list.map((x) => x.p.priceCents)
+  if (Math.max(...prices) < 2.5 * Math.min(...prices)) continue
+  const packs = list.map((x) => packOf(x.p.name ?? ''))
+  const small = Math.min(...packs)
+  const min = Math.min(...prices)
+  if (Math.max(...packs) > small) list.forEach((x, k) => { if (packs[k] > small) dropped.add(x.p) })
+  // Four times the price or more for the "same" item is a pack the name doesn't reveal.
+  else if (Math.max(...prices) >= 4 * min) list.forEach((x) => { if (x.p.priceCents >= 2.5 * min) dropped.add(x.p) })
+}
+for (const s of shops) s.prices = s.prices.filter((p) => !dropped.has(p))
+console.log(`left out ${dropped.size} multipack prices sold under a single item's barcode`)
+
 const isCore = (p: Price, shop: string) =>
-  catalogue.has(p.ean) || (shopsPerEan.get(p.ean) ?? 0) >= 2 || !p.name || EVERYDAY.has(categoryFor(p.name, shop))
+  catalogue.has(p.ean) || (shopsPerEan.get(p.ean) ?? 0) >= 2 || !p.name || EVERYDAY.has(categoryFor(cleanName(p.name), shop))
 
 const core: Shop[] = []
 const rest: Shop[] = []
@@ -45,7 +90,7 @@ for (const s of shops) {
   for (const p of s.prices) if (p.url?.startsWith('https://')) { const o = new URL(p.url).origin; origins.set(o, (origins.get(o) ?? 0) + 1) }
   const o = [...origins.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? ''
   const pack = (p: Price): Item => [
-    p.ean, p.priceCents, p.name ?? '', p.brand ?? '', p.image?.startsWith('https://') ? p.image : '',
+    p.ean, p.priceCents, cleanName(p.name ?? ''), cleanName(p.brand ?? ''), p.image?.startsWith('https://') ? p.image : '',
     p.url?.startsWith('https://') ? (o && p.url.startsWith(o + '/') ? p.url.slice(o.length) : p.url) : '',
     (p.checkedAt ?? s.fetchedAt).slice(0, 16),
   ]
