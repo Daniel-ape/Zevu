@@ -147,7 +147,7 @@ export function Cover({ chain, l, showStore = true, compact, logo }: { chain: st
   const [broken, setBroken] = useState(false)
   const [wide, setWide] = useState(false)
   return (
-    <a className="cover" href={l.url} target="_blank" rel="noreferrer" onClick={inAppLink(l.url)}>
+    <a className={'cover' + (logo ? ' has-logo' : '')} href={l.url} target="_blank" rel="noreferrer" onClick={inAppLink(l.url)}>
       <div className="cover-img">
         {l.status && <span className={'cover-badge ' + l.status}>{t(l.status === 'now' ? 'offers.now' : 'offers.soon')}</span>}
         {logo && <ChainMark chain={CHAIN_ID[chain] ?? chain.toLowerCase()} label={l.name.startsWith('K-') ? l.name.split(' ')[0] : chain} />}
