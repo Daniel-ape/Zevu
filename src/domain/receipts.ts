@@ -168,10 +168,70 @@ const UNITS = /^(\d+([.,]\d+)?(kg|g|l|dl|cl|ml|kpl|st|x)?|kg|g|l|dl|cl|ml|kpl|st
 
 export type LineMatch = { id: string; sure: boolean }
 
+// Letters OCR mixes up on receipt print: substituting one for the other is cheap.
+const CONFUSABLE = ['co', 'c0', 'o0', 'il', 'i1', 'l1', 'sz', 's5', 'b8', 'g6', 'g9', 'aä', 'oö', 'hn', 'rn', 'nm', 'uv', 'ce', 'ec', 'kx', 'tf']
+const cheap = new Set(CONFUSABLE.flatMap((p) => [p, p[1] + p[0]]))
+/** Edit cost with OCR-confusable letters costing 0.3; gives up above `max`. */
+function ocrDistance(a: string, b: string, max: number): number {
+  if (Math.abs(a.length - b.length) > max) return Infinity
+  let prev = Array.from({ length: b.length + 1 }, (_, k) => k)
+  for (let x = 1; x <= a.length; x++) {
+    const cur = [x]
+    let rowMin = x
+    for (let y = 1; y <= b.length; y++) {
+      const sub = a[x - 1] === b[y - 1] ? 0 : cheap.has(a[x - 1] + b[y - 1]) ? 0.3 : 1
+      const v = Math.min(prev[y - 1] + sub, prev[y] + 1, cur[y - 1] + 1)
+      cur.push(v)
+      if (v < rowMin) rowMin = v
+    }
+    if (rowMin > max) return Infinity
+    prev = cur
+  }
+  return prev[b.length]
+}
+
+// Receipt words that mean the same as catalogue words.
+const SYNONYMS: Record<string, string[]> = { possun: ['porsaan'], possu: ['porsas', 'porsaan'], nauta: ['naudan'], kana: ['kanan'], broiler: ['broilerin'] }
+
+type Indexed = { vocab: string[]; byWord: Map<string, number[]>; nameWords: string[][] }
+const indexes = new WeakMap<Product[], Indexed>()
+function indexOf(products: Product[]): Indexed {
+  let ix = indexes.get(products)
+  if (ix) return ix
+  const byWord = new Map<string, number[]>()
+  const nameWords: string[][] = []
+  products.forEach((p, k) => {
+    const nw = norm(`${p.name} ${p.altName ?? ''}`).split(' ').filter((w) => w.length >= 2 && !UNITS.test(w))
+    nameWords.push(nw)
+    for (const w of new Set([...nw, ...norm(p.brand ?? '').split(' ').filter((w) => w.length >= 2)])) {
+      const list = byWord.get(w)
+      if (list) list.push(k); else byWord.set(w, [k])
+    }
+  })
+  ix = { vocab: [...byWord.keys()], byWord, nameWords }
+  indexes.set(products, ix)
+  return ix
+}
+
+/** How well a receipt word stands for a catalogue word (0 = not at all). */
+function wordWeight(w: string, o: string): number {
+  if (o === w) return 1
+  if (w.length >= 3 && o.startsWith(w)) return 0.85 // receipt abbreviation: "RASV" → "rasvaton"
+  if (o.length >= 4 && w.startsWith(o)) return 0.5 // compound on the receipt: "KANAFILEE" ⊃ "kana"
+  if (w.length >= 4) {
+    // misread letters: "PCSSUN" for "POSSUN", also in an abbreviation
+    const max = w.length >= 7 ? 1.3 : 1
+    if (ocrDistance(w, o, max) <= max) return 0.8
+    if (o.length > w.length && ocrDistance(w, o.slice(0, w.length), max) <= max) return 0.7
+  }
+  return 0
+}
+
 /**
  * Link a receipt line to a catalogue product. Receipts abbreviate
- * ("VALIO RASV MAITO 1L"), so each receipt word may be the start of a product
- * word. Lines the user linked before are recognised first.
+ * ("VALIO RASV MAITO 1L") and photos get letters wrong ("PCSSUN"), so each
+ * receipt word may be the start of a product word, or nearly it. Lines the
+ * user linked before are recognised first.
  */
 export function matchLine(name: string, products: Product[], learned: Record<string, string> = {}): LineMatch | undefined {
   const key = lineKey(name)
@@ -179,35 +239,40 @@ export function matchLine(name: string, products: Product[], learned: Record<str
   if (known && products.some((p) => p.id === known)) return { id: known, sure: true }
   const words = norm(name).split(' ').filter((w) => w.length >= 2 && !UNITS.test(w))
   if (!words.length) return undefined
-  let best: { id: string; rank: number; score: number; cover: number; hits: number } | undefined
-  for (const p of products) {
-    const nameWords = norm(`${p.name} ${p.altName ?? ''}`).split(' ').filter((w) => w.length >= 2 && !UNITS.test(w))
-    const own = [...nameWords, ...norm(p.brand).split(' ').filter((w) => w.length >= 2)]
-    // exact word 1, receipt abbreviation of a product word 0.85, a shorter
-    // product word inside a longer receipt word 0.5
-    let sum = 0
-    let hits = 0
-    const used = new Set<string>()
-    for (const w of words) {
+  const ix = indexOf(products)
+  // per product: summed weight of the receipt words it explains, and which of its words were used
+  const sums = new Map<number, { sum: number; hits: number; used: Set<string> }>()
+  for (const w of words) {
+    const best = new Map<number, { wt: number; via: string }>()
+    const forms = [w, ...(SYNONYMS[w] ?? [])]
+    for (const o of ix.vocab) {
+      if (Math.abs(o.length - w.length) > 2 && !(o.length > w.length && o.startsWith(w.slice(0, 2))) && !(w.length > o.length && w.startsWith(o.slice(0, 2)))) continue
       let wt = 0
-      let via = ''
-      for (const o of own) {
-        const v = o === w ? 1 : w.length >= 3 && o.startsWith(w) ? 0.85 : o.length >= 4 && w.startsWith(o) ? 0.5 : 0
-        if (v > wt) { wt = v; via = o }
+      for (const f of forms) wt = Math.max(wt, wordWeight(f, o))
+      if (!wt) continue
+      for (const k of ix.byWord.get(o)!) {
+        const b = best.get(k)
+        if (!b || wt > b.wt) best.set(k, { wt, via: o })
       }
-      if (wt) { sum += wt; hits++; used.add(via) }
     }
-    if (!hits) continue
-    const score = sum / words.length
-    // how much of the product's own name the line covers
-    const cover = nameWords.length ? nameWords.filter((w) => used.has(w)).length / nameWords.length : 0
-    const rank = score * 0.75 + cover * 0.25
-    if (!best || rank > best.rank) best = { id: p.id, rank, score, cover, hits }
+    for (const [k, { wt, via }] of best) {
+      const s = sums.get(k) ?? { sum: 0, hits: 0, used: new Set<string>() }
+      s.sum += wt; s.hits++; s.used.add(via)
+      sums.set(k, s)
+    }
   }
-  if (!best) return undefined
-  const enough = best.score >= 0.75 && (best.hits >= 2 || (words.length === 1 && words[0].length >= 5))
+  let top: { id: string; rank: number; score: number; cover: number; hits: number } | undefined
+  for (const [k, s] of sums) {
+    const score = s.sum / words.length
+    const nw = ix.nameWords[k]
+    const cover = nw.length ? nw.filter((x) => s.used.has(x)).length / nw.length : 0
+    const rank = score * 0.75 + cover * 0.25
+    if (!top || rank > top.rank) top = { id: products[k].id, rank, score, cover, hits: s.hits }
+  }
+  if (!top) return undefined
+  const enough = top.score >= 0.7 && (top.hits >= 2 || (words.length === 1 && words[0].length >= 5))
   if (!enough) return undefined
-  return { id: best.id, sure: best.score >= 0.9 && best.cover >= 0.6 && best.hits >= 2 }
+  return { id: top.id, sure: top.score >= 0.9 && top.cover >= 0.6 && top.hits >= 2 }
 }
 
 /** Older name kept for callers: the product id or undefined. */

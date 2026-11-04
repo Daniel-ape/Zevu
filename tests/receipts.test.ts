@@ -1,6 +1,6 @@
 // Run: npm run test:receipts
 import assert from 'node:assert/strict'
-import { cleanOcrLine, monthSavings, parseReceipt } from '../src/domain/receipts'
+import { cleanOcrLine, matchLine, monthSavings, parseReceipt } from '../src/domain/receipts'
 import { pickShelfPrice } from '../src/domain/shelfLabel'
 import { parseCoupon } from '../src/domain/coupons'
 
@@ -133,6 +133,18 @@ test('Halpa-Halli from a camera photo: misread name, misread Ale lines', () => {
   ].join('\n'), NOW)
   assert.equal(r.retailerId, 'halpahalli')
   assert.deepEqual(r.items.map((i) => i.priceCents), [180, 160])
+})
+
+test('Matching survives misread letters and receipt words for the same thing', () => {
+  const products = [
+    { id: 'w', name: 'Porsaan wienerleike', brand: 'Tamminen' },
+    { id: 'k', name: 'Kanan fileeleike', brand: 'Pirkka' },
+    { id: 'm', name: 'Rasvaton maito', brand: 'Valio' },
+  ] as never[]
+  assert.equal(matchLine('PCSSUN WIENERLEIKE', products)?.id, 'w')
+  assert.equal(matchLine('KANAN FILEELE1KE 600G', products)?.id, 'k')
+  assert.equal(matchLine('VALIO RASV MAITO 1L', products)?.id, 'm')
+  assert.equal(matchLine('PERLSMUOVIKASSI', products), undefined)
 })
 
 console.log(`${passed} tests passed`)
