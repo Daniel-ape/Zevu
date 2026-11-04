@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { StoreProvider, useStore } from './data/store'
 import type { CategoryId } from './domain/types'
 import { NavCtx, type Nav, type Tab } from './nav'
-import { Home as HomeIcon, List, Paper, Scan as ScanIcon, Search, User } from './ui/icons'
+import { Bag, Home as HomeIcon, List, Paper, Scan as ScanIcon, User } from './ui/icons'
 import { Home } from './screens/Home'
 import { SearchScreen } from './screens/SearchScreen'
 import { ProductScreen } from './screens/ProductScreen'
@@ -120,7 +120,7 @@ function Shell() {
           {barGlass.svg}{scanGlass.svg}
           <div ref={barRef} className={'dock-bar glass' + (barGlass.active ? ' refract' : '')} style={barGlass.style}>
             {tabBtn('home', t('tab.home'), <HomeIcon />)}
-            {tabBtn('search', t('tab.search'), <Search />)}
+            {tabBtn('search', t('tab.search'), <Bag />)}
             {tabBtn('lists', t('tab.list'), <List />)}
             {tabBtn('leaflets', t('tab.leaflets'), <Paper />, newLeaflets && tab !== 'leaflets')}
             {tabBtn('profile', t('tab.you'), <User />)}

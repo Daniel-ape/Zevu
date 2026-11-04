@@ -11,6 +11,9 @@ export const Home = ({ size }: P) => (
 export const Search = ({ size }: P) => (
   <svg {...base(size)}><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
 )
+export const Bag = ({ size }: P) => (
+  <svg {...base(size)}><path d="M5.5 8h13l-1 11a1.5 1.5 0 0 1-1.5 1.4H8a1.5 1.5 0 0 1-1.5-1.4z" /><path d="M9 10V7a3 3 0 0 1 6 0v3" /></svg>
+)
 export const Scan = ({ size }: P) => (
   <svg {...base(size)}><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M8 9v6M11 9v6M14 9v6M17 9v6" /></svg>
 )

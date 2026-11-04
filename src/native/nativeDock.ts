@@ -16,7 +16,7 @@ export const wantsNativeDock = Capacitor.getPlatform() === 'ios' && Capacitor.is
 /** SF Symbols for each tab. */
 export const DOCK_ICONS: Record<string, string> = {
   home: 'house.fill',
-  search: 'magnifyingglass',
+  search: 'bag',
   lists: 'list.bullet.rectangle',
   leaflets: 'newspaper',
   profile: 'person.crop.circle',
