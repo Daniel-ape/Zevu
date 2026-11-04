@@ -21,6 +21,7 @@
   "dependencies": {
     "@capacitor/background-runner": "^3.0.0",
     "@capacitor/browser": "^8.0.5",
+    "@capacitor/camera": "^8.2.6",
     "@capacitor/core": "^8.6.0",
     "@tesseract.js-data/eng": "^1.0.0",
     "@tesseract.js-data/fin": "^1.0.0",

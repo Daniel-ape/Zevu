@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { openCamera } from '../data/takePhoto'
 import { ReceiptSheet } from './ReceiptSheet'
 import { CameraScanner } from './CameraScanner'
 import { PriceSheet } from './PriceSheet'
@@ -123,7 +124,7 @@ export function Scan() {
         <CameraScanner
           onCode={(c) => { setCamera(false); lookup(c) }}
           onClose={() => setCamera(false)}
-          onFallback={() => { setCamera(false); setStatus(t('scan.noCamera')); photo.current?.click() }}
+          onFallback={() => { setCamera(false); setStatus(t('scan.noCamera')); openCamera(photo.current, fromPhoto) }}
         />
       )}
       {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}

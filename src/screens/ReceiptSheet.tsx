@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { openCamera } from '../data/takePhoto'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
 import { lineKey, matchLine, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
@@ -99,7 +100,7 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
           <>
             <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onFile(e.target.files?.[0])} />
             <input ref={file} type="file" accept="application/pdf,.pdf,text/plain,.txt,image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-            <button className="btn primary" disabled={!!busy} onClick={() => camera.current?.click()}>
+            <button className="btn primary" disabled={!!busy} onClick={() => openCamera(camera.current, onFile)}>
               {busy || t('rc.photo')}
             </button>
             <button className="btn ghost" style={{ marginTop: 10 }} disabled={!!busy} onClick={() => file.current?.click()}>

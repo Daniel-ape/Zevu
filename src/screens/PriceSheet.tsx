@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { openCamera } from '../data/takePhoto'
 import { useStore } from '../data/store'
 import { decodeImage, isValidEan } from '../data/barcode'
 import { pickShelfPrice, type LabelWord } from '../domain/shelfLabel'
@@ -33,7 +34,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
   const photo = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (startWithPhoto) photo.current?.click()
+    if (startWithPhoto) openCamera(photo.current, fromPhoto)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const matches = useMemo(() => {
@@ -82,7 +83,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
 
   const again = () => {
     setSaved(null); setProduct(undefined); setPrice(''); setQuery(''); setNote(''); setFromShelf(false)
-    photo.current?.click()
+    openCamera(photo.current, fromPhoto)
   }
 
   return (
@@ -106,7 +107,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
           <>
             {!product && (
               <>
-                <button className="btn primary" disabled={!!busy} onClick={() => photo.current?.click()}>{busy || t('ap.shelf')}</button>
+                <button className="btn primary" disabled={!!busy} onClick={() => openCamera(photo.current, fromPhoto)}>{busy || t('ap.shelf')}</button>
                 <p className="tiny muted" style={{ lineHeight: 1.5 }}>{t('ap.tip')}</p>
                 <div className="small muted" style={{ margin: '14px 0 8px' }}>{t('ap.or')}</div>
                 <label className="search"><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('ap.search')} /></label>

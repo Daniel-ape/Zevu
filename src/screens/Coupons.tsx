@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { openCamera } from '../data/takePhoto'
 import { useStore } from '../data/store'
 import { useNav } from '../nav'
 import { CARD_CHAINS, cardName, chainOf, guessFormat, type LoyaltyCard } from '../data/cards'
@@ -83,7 +84,7 @@ export function Coupons() {
           <h2>{t('cp.coupons')}</h2>
           <span className="muted tiny">{active.length ? t('cp.count', { n: active.length }) : ''}</span>
         </div>
-        <button className="btn primary" onClick={() => photo.current?.click()} disabled={!!reading}>
+        <button className="btn primary" onClick={() => openCamera(photo.current, onPhoto)} disabled={!!reading}>
           <Ticket size={20} /> {reading || t('cp.add')}
         </button>
         <input ref={photo} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
