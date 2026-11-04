@@ -114,7 +114,13 @@ async function publitas(url) {
     const first = pages[0]?.images
     const src = first?.at600 || first?.at800 || first?.at1000
     // page pictures are served by Publitas' own host, also for Promozilla viewers
-    if (src) cover = src.startsWith('http') ? src : 'https://view.publitas.com' + src
+    if (src) {
+      const u = src.startsWith('http') ? src : 'https://view.publitas.com' + src
+      const r = await fetch(u, { headers: { 'User-Agent': UA } }).catch(() => null)
+      if (r?.ok && /^image\//.test(r.headers.get('content-type') || '')) cover = u
+      else console.log('page picture not loadable, keeping og:image', u.slice(0, 80))
+      await r?.arrayBuffer().catch(() => {})
+    }
     ;[from, until] = datesFrom(pages.slice(0, 2).map((p) => p.text || '').join(' '))
     if (!until) [from, until] = datesFrom(title + ' ' + final)
   } catch { /* keep the og:image */ }

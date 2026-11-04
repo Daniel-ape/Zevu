@@ -1265,3 +1265,22 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .chain-head .chain-logo.inline.wide + .chain-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .cover-badge.last { background: #e0262f; color: #fff; }
 .cover-soon { color: var(--accent); font-weight: 700; }
+
+/* ---- Dock: tabs share the bar evenly, the selected capsule stays inside it, labels shrink on narrow phones ---- */
+.dock { padding: 0 8px; gap: 8px; }
+.dock .dock-bar { flex: 1 1 auto; max-width: 400px; min-width: 0; gap: 0; padding: 4px; }
+.dock .dock-bar .tab {
+  flex: 1 1 0; min-width: 0; width: auto; height: 54px; padding: 0 2px;
+  font-size: clamp(9px, 2.6vw, 10.5px); letter-spacing: -0.1px; white-space: nowrap;
+}
+.dock .dock-bar .tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.dock .dock-scan { width: 58px; height: 58px; flex: 0 0 58px; }
+.dock .dock-bar .tab.on { background: transparent; box-shadow: none; }
+.dock .dock-bar .tab.on::before {
+  content: ''; position: absolute; inset: 3px 2px; border-radius: 999px; z-index: -1;
+  background: rgba(120, 120, 128, 0.15); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .dock .dock-bar .tab.on::before { background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.2); }
+}
+:root[data-theme='dark'] .dock .dock-bar .tab.on::before { background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.2); }
