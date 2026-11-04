@@ -12,18 +12,21 @@ export const CATEGORIES: { id: CategoryId | 'all'; key: Key }[] = (
 ).map((id) => ({ id, key: `cat.${id}` as Key }))
 
 export function Tile({ product, large }: { product: Product; large?: boolean }) {
+  // The shop's own picture (imageUrl) first; the catalogue picture packed with
+  // the app (imageChunk) only when there is none or it fails to load.
   const [broken, setBroken] = useState(false)
   const [packed, setPacked] = useState<string>()
+  const useShop = !!product.imageUrl && !broken
   useEffect(() => {
-    if (product.imageChunk === undefined) return
+    if (useShop || product.imageChunk === undefined) return
     let live = true
     snapshotImage(product.imageChunk, product.ean).then((src) => live && setPacked(src))
     return () => { live = false }
-  }, [product.imageChunk, product.ean])
-  const src = packed ?? product.imageUrl
+  }, [useShop, product.imageChunk, product.ean])
+  const src = useShop ? product.imageUrl : packed
   return (
     <div className={'tile' + (large ? ' lg' : '')} aria-hidden>
-      {src && !broken ? <img src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setBroken(true)} /> : product.emoji}
+      {src ? <img key={src} src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => (useShop ? setBroken(true) : setPacked(undefined))} /> : product.emoji}
     </div>
   )
 }

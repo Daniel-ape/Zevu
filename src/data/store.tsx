@@ -150,8 +150,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const all = [...snapshotProducts(snapshotRows, lang), ...remote, ...shopProducts]
     return all
       .filter((p) => (seen.has(p.ean) ? false : (seen.add(p.ean), true)))
-      // No picture in the catalogue: use the one a shop shows for the same barcode.
-      .map((p) => (p.imageChunk === undefined && !p.imageUrl && shopPics.has(p.ean) ? { ...p, imageUrl: shopPics.get(p.ean) } : p))
+      // A shop's own picture of the same barcode replaces the catalogue's (which stays as a fallback).
+      .map((p) => (shopPics.has(p.ean) && p.imageUrl !== shopPics.get(p.ean) ? { ...p, imageUrl: shopPics.get(p.ean) } : p))
   }, [remote, snapshotRows, lang, shopProducts, shopPics])
 
 
