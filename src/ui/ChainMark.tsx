@@ -10,9 +10,15 @@ export function ChainMark({ chain, label }: { chain: string; label?: string }) {
   const c = CARD_CHAINS.find((x) => x.id === chain)
   const [logo, setLogo] = useState<string | null>(null)
   const [bad, setBad] = useState(false)
+  const [wide, setWide] = useState(false)
   useEffect(() => { loadLogos().then((i) => setLogo(i[chain] ? new URL('logos/' + i[chain], location.href).href : null)) }, [chain])
   const name = label || (c?.name || chain).replace(/ Plus$/, '')
-  if (logo && !bad) return <span className="chain-logo"><img src={logo} alt={name} onError={() => setBad(true)} /></span>
+  if (logo && !bad)
+    return (
+      <span className={'chain-logo' + (wide ? ' wide' : '')}>
+        <img src={logo} alt={name} onError={() => setBad(true)} onLoad={(e) => setWide(e.currentTarget.naturalWidth > e.currentTarget.naturalHeight * 1.6)} />
+      </span>
+    )
   return <span className="chain-mark" style={{ background: c?.color ?? '#6b6b78' }}>{name}</span>
 }
 

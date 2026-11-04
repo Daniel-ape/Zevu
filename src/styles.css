@@ -1239,3 +1239,8 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .offer-sheet-actions { display: flex; gap: 10px; }
 .offer-sheet-actions .btn { flex: 1; }
 .offer-sheet-link { display: block; text-align: center; margin: 14px 0 4px; text-decoration: none; }
+/* wide logos (a name, like Tokmanni's) get a wider white plate */
+.chain-logo.wide, .cover-img .chain-logo.wide, .offer-big .chain-logo.wide { width: auto; height: 22px; padding: 0 6px; }
+.chain-logo.wide img, .cover-img .chain-logo.wide img { width: auto; height: 12px; max-width: 76px; object-fit: contain; }
+.offer-big .chain-logo.wide { height: 30px; padding: 0 9px; }
+.offer-big .chain-logo.wide img { height: 16px; max-width: 110px; }
