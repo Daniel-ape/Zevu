@@ -110,7 +110,7 @@ export function Home() {
             <button className="link small" onClick={() => nav.go('leaflets')}>{t('home.seeAll')} <ArrowRight size={14} /></button>
           </div>
           <div className="strip covers-strip">
-            {leaflets.map(({ chain, l }) => <Cover key={l.url} chain={chain} l={l} compact />)}
+            {leaflets.map(({ chain, l }) => <Cover key={l.url} chain={chain} l={l} compact logo />)}
           </div>
         </div>
       )}

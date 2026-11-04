@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ChainMark } from '../ui/ChainMark'
 import { useStore } from '../data/store'
 import { inAppLink } from '../data/openLink'
 import { loadLeaflets, markLeafletsSeen, type LeafletFeed } from '../data/leafletFeed'
@@ -137,8 +138,11 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
   return { shelf, updated: typeof data?.updated === 'string' ? data.updated : undefined }
 }
 
-/** showStore: the store's name under the cover; compact: store + one line of title (home page). */
-export function Cover({ chain, l, showStore = true, compact }: { chain: string; l: Leaflet; showStore?: boolean; compact?: boolean }) {
+const CHAIN_ID: Record<string, string> = { Lidl: 'lidl', Tokmanni: 'tokmanni', Minimani: 'minimani', Rusta: 'rusta', 'Halpa-Halli': 'halpahalli', 'K-Ruoka': 'k' }
+
+/** showStore: the store's name under the cover; compact: store + one line of title; logo: the store's logo in the corner instead of its name underneath (home page). */
+export function Cover({ chain, l, showStore = true, compact, logo }: { chain: string; l: Leaflet; showStore?: boolean; compact?: boolean; logo?: boolean }) {
+  if (logo) showStore = false
   const { t } = useStore()
   const [broken, setBroken] = useState(false)
   const [wide, setWide] = useState(false)
@@ -146,6 +150,7 @@ export function Cover({ chain, l, showStore = true, compact }: { chain: string; 
     <a className="cover" href={l.url} target="_blank" rel="noreferrer" onClick={inAppLink(l.url)}>
       <div className="cover-img">
         {l.status && <span className={'cover-badge ' + l.status}>{t(l.status === 'now' ? 'offers.now' : 'offers.soon')}</span>}
+        {logo && <ChainMark chain={CHAIN_ID[chain] ?? chain.toLowerCase()} label={l.name.startsWith('K-') ? l.name.split(' ')[0] : chain} />}
         {l.image && !broken ? (
           <img
             src={l.image} alt="" loading="lazy" referrerPolicy="no-referrer" className={wide ? 'wide' : undefined}
