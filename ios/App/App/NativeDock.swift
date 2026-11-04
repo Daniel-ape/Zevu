@@ -95,8 +95,11 @@ struct DockView: View {
                     .frame(maxWidth: .infinity, minHeight: 54)
                     .background {
                         if model.selected == tab.id {
+                            // kept a little inside the tab, so it never reaches past the bar's rounded edge
                             Capsule()
                                 .fill(Color.primary.opacity(0.09))
+                                .padding(.horizontal, 2)
+                                .padding(.vertical, 1)
                                 .matchedGeometryEffect(id: "sel", in: selection)
                         }
                     }
@@ -196,5 +199,11 @@ public class NativeDockPlugin: CAPPlugin, CAPBridgedPlugin {
 class HintaopasViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(NativeDockPlugin())
+        // The page scrolls up and down only: no sideways drag or bounce of the whole page.
+        if let scroll = webView?.scrollView {
+            scroll.alwaysBounceHorizontal = false
+            scroll.showsHorizontalScrollIndicator = false
+            scroll.isDirectionalLockEnabled = true
+        }
     }
 }

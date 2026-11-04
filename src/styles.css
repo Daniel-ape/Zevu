@@ -1273,3 +1273,7 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .receipt-line .link-product { margin-top: 6px; padding: 4px 9px; font-size: 12.5px; border-radius: 8px; }
 .rows .row.receipt-total .title { font-weight: 700; }
 .rows .row.receipt-total .price { font-size: 17px; font-weight: 800; }
+/* The page itself never scrolls sideways (only strips and chips inside it do). */
+html, body { overscroll-behavior-x: none; }
+/* clip, not hidden: no new scroll container, so the page still scrolls normally */
+#root { overflow-x: clip; }
