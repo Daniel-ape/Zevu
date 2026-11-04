@@ -1212,3 +1212,11 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 /* while a leaflet picture loads */
 .cut:not(.loaded) { background: linear-gradient(100deg, var(--fill) 30%, color-mix(in srgb, var(--fill) 40%, #fff) 50%, var(--fill) 70%) 0 0 / 200% 100%; animation: cut-shimmer 1.2s linear infinite; }
 @keyframes cut-shimmer { to { background-position: -200% 0; } }
+/* Members' offers strip on Home */
+.member-strip { gap: 12px; }
+.member-card { flex: 0 0 148px; display: flex; flex-direction: column; gap: 4px; text-align: left; background: var(--card); border: 0; border-radius: 16px; padding: 8px 8px 10px; box-shadow: var(--card-shadow); color: inherit; }
+.member-pic { position: relative; width: 132px; height: 132px; border-radius: 12px; overflow: hidden; background: #fff; }
+.member-pic .cut, .member-pic .offer-badge { width: 100%; height: 100%; }
+.member-name { font-size: 13px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 32px; }
+.member-price { font-size: 16px; font-weight: 800; color: var(--accent); }
+.member-card .offer-member { font-size: 10.5px; padding: 2px 7px; }

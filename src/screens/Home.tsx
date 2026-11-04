@@ -7,6 +7,7 @@ import { Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
 import { monthSavings } from '../domain/receipts'
 import { Cover, useShelf } from './Leaflets'
+import { HomeMemberOffers } from './Coupons'
 import type { Key } from '../i18n'
 
 function greeting(): Key {
@@ -99,6 +100,8 @@ export function Home() {
           {best ? <span className="price">{euro(best.totalCents)}</span> : <ArrowRight size={16} />}
         </button>
       )}
+
+      <HomeMemberOffers />
 
       {leaflets.length > 0 && (
         <div className="section">

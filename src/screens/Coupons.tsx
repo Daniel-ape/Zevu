@@ -218,6 +218,45 @@ export interface LeafletOffer {
 let offersFeed: Promise<{ offers: LeafletOffer[] } | null> | null = null
 export const loadOffers = () => (offersFeed ??= import('../data/dataFile').then((m) => m.fetchData<{ offers: LeafletOffer[] }>('offers.json')))
 
+/** Home page strip: members' offers from the leaflets, the user's own chains first. */
+export function HomeMemberOffers() {
+  const { cards, t } = useStore()
+  const nav = useNav()
+  const [all, setAll] = useState<LeafletOffer[] | null>(null)
+  useEffect(() => { loadOffers().then((d) => setAll(d?.offers ?? [])) }, [])
+  const today = new Date().toISOString().slice(0, 10)
+  const mine = new Set(cards.map((c) => c.chain))
+  const shown = (all ?? [])
+    .filter((o) => o.member && (!o.validUntil || o.validUntil >= today) && (!o.validFrom || o.validFrom <= today))
+    .sort((a, b) => Number(mine.has(b.chain)) - Number(mine.has(a.chain)) || (b.percent ?? 0) - (a.percent ?? 0))
+    .slice(0, 12)
+  if (!shown.length) return null
+  return (
+    <div className="section">
+      <div className="section-head">
+        <h2>{t('cp.memberOffers')}</h2>
+        <button className="link small" onClick={() => nav.go('coupons')}>{t('home.seeAll')}</button>
+      </div>
+      <div className="strip member-strip">
+        {shown.map((o, i) => {
+          const chain = CARD_CHAINS.find((x) => x.id === o.chain)
+          return (
+            <button key={i} className="member-card" style={{ ['--c' as string]: chain?.color ?? '#6b6b78' }} onClick={() => nav.go('coupons')}>
+              <span className="member-pic">
+                {o.crop && o.pageImage ? <Cut src={o.pageImage} box={o.crop} /> : <span className="offer-badge"><b>{o.percent ? `−${o.percent}%` : '%'}</b></span>}
+                {o.percent ? <b className="offer-pct">−{o.percent}%</b> : null}
+              </span>
+              <span className="member-name">{o.name}</span>
+              <span className="member-price">{euro(o.priceCents)}</span>
+              <span className="offer-member"><CardIcon size={12} /> {memberText(o.member!, o.chain, t)}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /** Offers read from the shops' online leaflets (collector/offers.mjs). */
 function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void }) {
   const { cards, coupons, saveCoupon, t, lang } = useStore()
