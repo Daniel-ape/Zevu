@@ -3,7 +3,7 @@ import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, storeInsights, trend } from '../domain/pricing'
 import { useNav } from '../nav'
 import { ArrowRight, List, Receipt, Scan as ScanIcon } from '../ui/icons'
-import { RetailerMark, Tile, TrendTag } from '../ui/bits'
+import { Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
 import { monthSavings } from '../domain/receipts'
 import { Cover, useShelf } from './Leaflets'
@@ -194,33 +194,6 @@ export function Home() {
           {insights.gaps.length > 3 && (
             <button className="more-btn" onClick={() => setGapsAll((x) => !x)}>{gapsAll ? t('gap.less') : t('gap.moreShort')}</button>
           )}
-        </div>
-      )}
-
-      {insights.ranking.length > 1 && (
-        <div className="section">
-          <div className="section-head">
-            <h2>{t('rank.title')}</h2>
-          </div>
-          <div className="rows">
-            {insights.ranking.slice(0, 3).map((r, i) => {
-              const pct = Math.round((r.cheapest / r.compared) * 100)
-              return (
-                <div key={r.retailer.id} className="row rank-row">
-                  <div className="rank-n">{i + 1}</div>
-                  <RetailerMark retailer={r.retailer} />
-                  <div className="grow">
-                    <div className="title">{r.retailer.name}</div>
-                    <div className="rank-bar"><span style={{ width: pct + '%' }} /></div>
-                  </div>
-                  <div className="end">
-                    <div className="price">{pct} %</div>
-                    <div className="sub">{t('rank.of', { a: r.cheapest, b: r.compared })}</div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
         </div>
       )}
 

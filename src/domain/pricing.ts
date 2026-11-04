@@ -306,7 +306,9 @@ export function storeInsights(
     // Over ~60 % apart is almost always a pack-size mix-up (one shop prices a single piece), so skip it.
     if (saveCents >= 50 && pct >= 0.1 && pct <= 0.6 && high.current.priceCents <= 30000) gaps.push({ product: p, low, high, saveCents, pct })
   }
-  gaps.sort((a, b) => b.pct - a.pct || b.saveCents - a.saveCents)
+  // Everyday goods (food, drugstore, cleaning, pets) first: that is what people shop for weekly.
+  const everyday = new Set(['dairy', 'bread', 'produce', 'meat', 'pantry', 'drinks', 'snacks', 'household', 'health', 'pets'])
+  gaps.sort((a, b) => (everyday.has(b.product.category) ? 1 : 0) - (everyday.has(a.product.category) ? 1 : 0) || b.pct - a.pct || b.saveCents - a.saveCents)
   const seen = new Set<string>()
   // One product name once, and at most three gaps per pair of shops so the list stays varied.
   const pairs = new Map<string, number>()
