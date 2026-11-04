@@ -177,7 +177,7 @@ export function Home() {
             <span className="muted tiny">{t('gap.sub', { n: insights.compared })}</span>
           </div>
           <div className="rows">
-            {insights.gaps.slice(0, gapsAll ? 20 : 5).map((g) => (
+            {insights.gaps.slice(0, gapsAll ? 10 : 3).map((g) => (
               <button key={g.product.id} className="row" onClick={() => nav.openProduct(g.product.id)}>
                 <Tile product={g.product} />
                 <div className="grow">
@@ -191,8 +191,8 @@ export function Home() {
               </button>
             ))}
           </div>
-          {insights.gaps.length > 5 && (
-            <button className="more-btn" onClick={() => setGapsAll((x) => !x)}>{gapsAll ? t('gap.less') : t('gap.more', { n: Math.min(20, insights.gaps.length) })}</button>
+          {insights.gaps.length > 3 && (
+            <button className="more-btn" onClick={() => setGapsAll((x) => !x)}>{gapsAll ? t('gap.less') : t('gap.moreShort')}</button>
           )}
         </div>
       )}
@@ -203,7 +203,7 @@ export function Home() {
             <h2>{t('rank.title')}</h2>
           </div>
           <div className="rows">
-            {insights.ranking.slice(0, 6).map((r, i) => {
+            {insights.ranking.slice(0, 3).map((r, i) => {
               const pct = Math.round((r.cheapest / r.compared) * 100)
               return (
                 <div key={r.retailer.id} className="row rank-row">
@@ -221,7 +221,6 @@ export function Home() {
               )
             })}
           </div>
-          <div className="group-note">{t('rank.note')}</div>
         </div>
       )}
 

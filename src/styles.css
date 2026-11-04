@@ -1105,7 +1105,7 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .q-ic { position: relative; width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
 .q-ic i { position: absolute; top: -5px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: #fff; font-style: normal; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
 .gap-save { display: inline-block; margin-top: 3px; font-size: 12px; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); padding: 2px 7px; border-radius: 999px; }
-.more-btn { display: block; width: 100%; margin-top: 8px; padding: 12px; border-radius: var(--radius); background: var(--card); color: var(--accent); font-weight: 600; font-size: 15px; }
+.more-btn { display: block; width: 100%; margin-top: 8px; padding: 10px; border-radius: var(--radius); background: var(--card); color: var(--accent); font-weight: 600; font-size: 15px; }
 .rank-n { width: 20px; text-align: center; font-weight: 700; color: var(--text-2); flex-shrink: 0; }
 .rank-row .mark { width: 34px; height: 34px; }
 .rank-bar { height: 6px; border-radius: 3px; background: var(--fill); margin-top: 6px; overflow: hidden; }
