@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)'
 const SITES = {
   lidl: 'https://www.lidl.fi/',
-  rusta: 'https://www.rusta.com/fi/',
+  rusta: 'https://www.rusta.com/',
   minimani: 'https://www.minimani.fi/',
   halpahalli: 'https://www.halpahalli.fi/',
   tokmanni: 'https://www.tokmanni.fi/',
