@@ -23,6 +23,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npx tsx scripts/build-price-bundles.ts
       - run: npm run build
       - run: npx cap sync ios
 

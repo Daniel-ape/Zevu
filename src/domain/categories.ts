@@ -1,21 +1,7 @@
-// Prices collected daily by collector/*.mjs and published with the app
-// (public/prices/*.json). Each file lists prices by barcode for one store.
-
-import type { CategoryId, PriceObservation, PriceProvider, PriceSource, Product } from '../domain/types'
-import { fetchData } from './dataFile'
-import { parseQuantity } from './openFoodFacts'
-
-interface File {
-  retailerId: string
-  fetchedAt: string
-  prices: { ean: string; priceCents: number; checkedAt?: string; name?: string; brand?: string; image?: string; url?: string }[]
-}
-
-const files = new Map<string, Promise<File | null>>()
-const load = (file: string) => {
-  if (!files.has(file)) files.set(file, fetchData<File>(file))
-  return files.get(file)!
-}
+// Product categories for shop products, guessed from the product name (and
+// the kind of shop when the name gives no clue). Pure code: used by the app
+// and by scripts/build-price-bundles.ts.
+import type { CategoryId } from './types'
 
 // Category guess from a Finnish/Swedish product name; the first match wins.
 // Non-food words come first so "kissanruoka" is pet food and "puhdistusmaito"
@@ -43,10 +29,10 @@ const FOOD: [RegExp, CategoryId][] = [
   [/pasta\b|makaroni|riisi\b|jauho|kastike|säilyke|mauste|ruokaöljy|rypsiöljy|oliiviöljy|kaurahiutale|mysli|muro|puuro|keitto\b|hernekeitto|proteiini|salaattikastike|jauhoseos/i, 'pantry'],
 ]
 const NO_FOOD = new Set(['verkkokauppa', 'stockmann', 'yliopistonapteekki', 'apteekki360'])
-const guess = (name: string, shop: string): CategoryId | undefined =>
+export const guess = (name: string, shop: string): CategoryId | undefined =>
   NONFOOD.find(([re]) => re.test(name))?.[1] ?? (NO_FOOD.has(shop) ? undefined : FOOD.find(([re]) => re.test(name))?.[1])
 // When the name gives no clue, the kind of shop does.
-const SHOP_DEFAULT: Record<string, CategoryId> = {
+export const SHOP_DEFAULT: Record<string, CategoryId> = {
   verkkokauppa: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
   stockmann: 'health', karkkainen: 'home', halpahalli: 'home', prisma: 'home', lidl: 'home', tokmanni: 'home',
 }
@@ -64,59 +50,11 @@ export function refineCategory(name: string, category: CategoryId): CategoryId {
   return FOOD.find(([re]) => re.test(name))?.[1] ?? category
 }
 
-/** Product pictures the shops show, by barcode (fallback for catalogue products without one). */
-export async function shopImages(file: string): Promise<[string, string][]> {
-  const d = await load(file)
-  if (!d) return []
-  return d.prices.filter((p) => p.image && /^https:\/\//.test(p.image)).map((p) => [p.ean, p.image!])
+
+/** The category a shop product ends up in. */
+export function categoryFor(name: string, shop: string): CategoryId {
+  return guess(name, shop) ?? SHOP_DEFAULT[shop] ?? 'household'
 }
 
-/** Products a shop sells that aren't in the catalogue, built from the shop's own data. */
-export async function collectedProducts(file: string): Promise<Product[]> {
-  const d = await load(file)
-  if (!d) return []
-  return d.prices.filter((p) => p.name).map((p) => {
-    const category = guess(p.name!, d.retailerId) ?? SHOP_DEFAULT[d.retailerId] ?? 'household'
-    return {
-      id: `off:${p.ean}`, ean: p.ean, name: p.name!, brand: p.brand ?? '', category,
-      // Shops rarely give the size separately, but it is usually in the name ("400 g", "6 x 0,33 l").
-      size: parseQuantity(p.name), emoji: EMOJI[category],
-      imageUrl: p.image && /^https:\/\//.test(p.image) ? p.image : undefined,
-    }
-  })
-}
-
-export function collectedProvider(file: string, id: string): PriceProvider {
-  const source: PriceSource = id === 'tokmanni' ? 'tokmanni' : 'shop'
-  let data: Promise<File | null> | null = null
-  let history: Promise<Record<string, [string, number][]>> | null = null
-  return {
-    id: source,
-    label: file,
-    isSample: false,
-    async getObservations(): Promise<PriceObservation[]> {
-      data ??= load(file)
-      const d = await data
-      if (!d) return []
-      history ??= fetchData<Record<string, [string, number][]>>(file.replace('.json', '-history.json')).then((h) => h ?? {})
-      // Earlier prices (one point per change), so history and price drops work.
-      const past = Object.entries(await history).flatMap(([ean, points]) =>
-        points
-          .filter(([day]) => day < d.fetchedAt.slice(0, 10))
-          .map(([day, cents]) => ({
-            productId: `off:${ean}`, retailerId: d.retailerId, priceCents: cents,
-            observedAt: `${day}T06:00:00.000Z`, source,
-          })),
-      )
-      return [...past, ...d.prices.map((p) => ({
-        productId: `off:${p.ean}`,
-        retailerId: d.retailerId,
-        priceCents: p.priceCents,
-        // When this price was last checked on the store's site.
-        observedAt: p.checkedAt ?? d.fetchedAt,
-        source,
-        url: p.url && /^https:\/\//.test(p.url) ? p.url : undefined,
-      }))]
-    },
-  }
-}
+/** What people buy week to week: loaded when the app starts. */
+export const EVERYDAY = new Set<CategoryId>(['dairy', 'bread', 'produce', 'meat', 'pantry', 'drinks', 'snacks', 'household', 'health', 'pets'])

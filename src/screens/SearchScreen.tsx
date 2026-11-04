@@ -6,13 +6,13 @@ import { useNav } from '../nav'
 import { Check, Plus, Search } from '../ui/icons'
 import { haystack, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
-import { EMOJI } from '../data/collectedPrices'
+import { EMOJI, EVERYDAY } from '../domain/categories'
 import { Sheet } from '../ui/Sheet'
 
 type Sort = 'top' | 'price' | 'unit' | 'name'
 
 export function SearchScreen() {
-  const { products, retailers, searchOnline, list, setQuantity, pricesOf, t } = useStore()
+  const { products, retailers, searchOnline, list, setQuantity, pricesOf, loadMore, moreLoaded, t } = useStore()
   const [added, setAdded] = useState<string | null>(null)
   const [online, setOnline] = useState<'idle' | 'loading' | 'unavailable' | string[]>('idle')
   const nav = useNav()
@@ -24,6 +24,11 @@ export function SearchScreen() {
   const input = useRef<HTMLInputElement>(null)
 
   useEffect(() => setCat(nav.searchCategory), [nav.searchCategory])
+  // Everyday goods load with the app; the rest of the shops' ranges are fetched
+  // the first time someone searches or opens a non-everyday category.
+  useEffect(() => {
+    if (q.trim().length >= 2 || (cat !== 'all' && !EVERYDAY.has(cat))) loadMore()
+  }, [q, cat, loadMore])
   useEffect(() => {
     if (nav.searchFocus) input.current?.focus()
   }, [nav.searchFocus])
@@ -179,6 +184,7 @@ export function SearchScreen() {
         </div>
       )}
       {added && <div className="toast">{t('search.added', { list: list.name === 'Weekly shop' ? t('list.defaultName') : list.name })}</div>}
+      {moreLoaded === 'loading' && <p className="tiny muted" style={{ textAlign: 'center' }}>{t('search.moreLoading')}</p>}
       {online === 'loading' && <p className="tiny muted" style={{ textAlign: 'center' }}>{t('search.onlineLoading')}</p>}
       {online === 'unavailable' && results.length === 0 && <p className="tiny muted" style={{ textAlign: 'center', lineHeight: 1.5 }}>{t('search.onlineOff')}</p>}
     </div>

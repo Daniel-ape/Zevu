@@ -6,7 +6,7 @@
 import type { CategoryId, Product } from '../domain/types'
 import type { Lang } from '../i18n'
 import { parseQuantity } from './openFoodFacts'
-import { refineCategory } from './collectedPrices'
+import { refineCategory } from '../domain/categories'
 
 // [ean, nameFi, nameSv, brand, quantity, category, emoji, imageChunk(-1 = none)]
 type Row = [string, string, string, string, string, CategoryId, string, number]

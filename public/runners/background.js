@@ -3,8 +3,9 @@
 // notifies when a watched product has become cheaper than when it was watched
 // (or than the last price we told the user about).
 const LIVE = 'https://daniel-ape.github.io/hintaopas/prices/'
-// Every shop the collectors cover (collector/*.mjs).
-const FILES = ['tokmanni.json', 'halpahalli.json', 'verkkokauppa.json', 'prisma.json', 'stockmann.json', 'karkkainen.json', 'ruohonjuuri.json', 'yliopistonapteekki.json', 'lidl.json', 'apteekki360.json']
+// Packed shop prices (scripts/build-price-bundles.ts): core first, the rest
+// only when a watched product wasn't in it.
+const FILES = ['app/core.json', 'app/rest.json']
 const NAMES = { tokmanni: 'Tokmanni', halpahalli: 'Halpa-Halli', verkkokauppa: 'Verkkokauppa.com', prisma: 'Prisma', stockmann: 'Stockmann', karkkainen: 'Kärkkäinen', ruohonjuuri: 'Ruohonjuuri', yliopistonapteekki: 'Yliopiston Apteekki', lidl: 'Lidl', apteekki360: 'Apteekki360' }
 
 function readJson(key, fallback) {
@@ -37,7 +38,9 @@ addEventListener('checkPrices', async (resolve, reject) => {
     const best = {}
     const want = {}
     for (const w of watch) want[w.ean] = true
+    let missing = Object.keys(want).length
     for (const file of FILES) {
+      if (!missing) break
       let d
       try {
         const r = await fetch(LIVE + file)
@@ -46,9 +49,13 @@ addEventListener('checkPrices', async (resolve, reject) => {
       } catch (e) {
         continue
       }
-      for (const p of d.prices || []) {
-        if (!want[p.ean]) continue
-        if (best[p.ean] === undefined || p.priceCents < best[p.ean].cents) best[p.ean] = { cents: p.priceCents, store: d.retailerId }
+      for (const s of d.shops || []) {
+        for (const it of s.i || []) {
+          const ean = it[0], cents = it[1]
+          if (!want[ean]) continue
+          if (best[ean] === undefined) missing--
+          if (best[ean] === undefined || cents < best[ean].cents) best[ean] = { cents: cents, store: s.r }
+        }
       }
     }
     const notes = []

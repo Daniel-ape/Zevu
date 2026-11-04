@@ -1,23 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { CategoryId, PriceObservation, PriceProvider, Product, Retailer, ShoppingList, Watch } from '../domain/types'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { CategoryId, PriceObservation, Product, Retailer, ShoppingList, Watch } from '../domain/types'
 import { RETAILERS } from './retailers'
 import { detectLang, translate, type Key, type Lang } from '../i18n'
 import { receiptObservations, type Receipt } from '../domain/receipts'
 import { lookupBarcode, searchProducts } from './openFoodFacts'
 import { loadSnapshot, snapshotProducts } from './snapshot'
-import { EMOJI, collectedProducts, collectedProvider, shopImages } from './collectedPrices'
-
-// Registered price providers: prices collected from stores that allow it
-// (Tokmanni, see collector/). Receipts and the user's own prices are added
-// on top. The UI only ever sees PriceObservations.
-// Prices collected daily from the shops' own sites (collector/*.mjs).
-const SHOP_FILES: [string, string][] = [
-  ['tokmanni.json', 'tokmanni'], ['halpahalli.json', 'halpahalli'], ['verkkokauppa.json', 'verkkokauppa'],
-  ['prisma.json', 'prisma'], ['stockmann.json', 'stockmann'], ['karkkainen.json', 'karkkainen'],
-  ['ruohonjuuri.json', 'ruohonjuuri'], ['yliopistonapteekki.json', 'yliopistonapteekki'],
-  ['lidl.json', 'lidl'], ['apteekki360.json', 'apteekki360'],
-]
-const PROVIDERS: PriceProvider[] = SHOP_FILES.map(([file, id]) => collectedProvider(file, id))
+import { EMOJI } from '../domain/categories'
+import { loadShopData } from './shopData'
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -44,6 +33,9 @@ interface Store {
   retailers: Retailer[]
   observations: PriceObservation[]
   loading: boolean
+  /** Load the rest of the shops' ranges (beyond everyday goods); 'done' once loaded. */
+  loadMore: () => void
+  moreLoaded: 'no' | 'loading' | 'done'
   /** Prices grouped by product, so screens don't scan every price per product. */
   pricesOf: (productId: string) => PriceObservation[]
   /** All stores the app knows; `retailers` is narrowed to the user's own stores. */
@@ -122,10 +114,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Products shops sell that the catalogue doesn't have (named by the shop).
   const [shopProducts, setShopProducts] = useState<Product[]>([])
   const [shopPics, setShopPics] = useState<Map<string, string>>(new Map())
+  // Shop prices: everyday goods and comparable products when the app opens,
+  // the rest of the shops' ranges the first time it's needed (search).
   useEffect(() => {
-    Promise.all(SHOP_FILES.map(([f]) => collectedProducts(f).catch(() => []))).then((all) => setShopProducts(all.flat()))
-    Promise.all(SHOP_FILES.map(([f]) => shopImages(f).catch(() => []))).then((all) => setShopPics(new Map(all.flat())))
+    loadShopData('core')
+      .then((d) => { setShopProducts(d.products); setShopPics(new Map(d.images)); setObservations(d.observations) })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
+  const [rest, setRest] = useState<'no' | 'loading' | 'done'>('no')
+  const loadMore = useCallback(() => {
+    setRest((st) => {
+      if (st !== 'no') return st
+      loadShopData('rest')
+        .then((d) => {
+          setShopProducts((p) => [...p, ...d.products])
+          setShopPics((m) => new Map([...m, ...d.images]))
+          setObservations((o) => [...o, ...d.observations])
+        })
+        .catch(() => {})
+        .finally(() => setRest('done'))
+      return 'loading'
+    })
+  }, [])
+  // Something on the user's list or watch list is outside the everyday range: fetch the rest.
+  useEffect(() => {
+    if (loading || rest !== 'no') return
+    const have = new Set(shopProducts.map((p) => p.id))
+    for (const p of snapshotRows) have.add(`off:${p[0]}`)
+    const wanted = [...lists.flatMap((l) => l.items.map((i) => i.productId)), ...watched.map((w) => w.productId)]
+    if (wanted.some((id) => id.startsWith('off:') && !have.has(id))) loadMore()
+  }, [loading, rest, shopProducts, snapshotRows, lists, watched, loadMore])
   const products = useMemo(() => {
     const seen = new Set<string>()
     const all = [...snapshotProducts(snapshotRows, lang), ...remote, ...shopProducts]
@@ -135,11 +154,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .map((p) => (p.imageChunk === undefined && !p.imageUrl && shopPics.has(p.ean) ? { ...p, imageUrl: shopPics.get(p.ean) } : p))
   }, [remote, snapshotRows, lang, shopProducts, shopPics])
 
-  useEffect(() => {
-    Promise.all(PROVIDERS.map((p) => p.getObservations([]).catch(() => [])))
-      .then((all) => setObservations(all.flat()))
-      .finally(() => setLoading(false))
-  }, [])
 
   useEffect(() => save('lists', lists), [lists])
   useEffect(() => save('activeList', activeId), [activeId])
@@ -213,6 +227,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       observations: effective,
       pricesOf: (id: string) => byProduct.get(id) ?? [],
       loading,
+      loadMore,
+      moreLoaded: rest,
       list,
       lists,
       setActiveList: setActiveId,
@@ -270,7 +286,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setLang,
       t: (key, vars) => translate(lang, key, vars),
     }),
-    [effective, byProduct, products, loading, lists, list, activeId, myStores, watched, receipts, recent, theme, lang, lastStore],
+    [effective, byProduct, products, loading, rest, loadMore, lists, list, activeId, myStores, watched, receipts, recent, theme, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

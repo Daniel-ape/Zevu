@@ -23,6 +23,7 @@ jobs:
           java-version: 21
       # The runner image already includes the Android SDK (ANDROID_HOME).
       - run: npm ci
+      - run: npx tsx scripts/build-price-bundles.ts
       - run: npx vite build && npx cap sync android
       - run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
         working-directory: android
