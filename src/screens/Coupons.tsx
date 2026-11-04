@@ -170,13 +170,29 @@ export function Coupons() {
 }
 
 /** A part of a leaflet page: box = [left, top, width, height] as parts of the page, then page width/height. */
-export function Cut({ src, box, className }: { src: string; box: number[]; className?: string }) {
+export function Cut({ src, box, className, onFail }: { src: string; box: number[]; className?: string; onFail?: () => void }) {
   const [x, y, w, h, pageAspect] = box
   const aspect = (w / h) * (pageAspect || 0.7)
+  const ref = useRef<HTMLSpanElement>(null)
+  const [show, setShow] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  // Start loading when the frame comes near the screen. (The picture itself is a whole
+  // page shifted out of view, so the browser's own lazy loading can skip it on iPhone.)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || show) return
+    if (!('IntersectionObserver' in window)) { setShow(true); return }
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { setShow(true); io.disconnect() } }, { rootMargin: '400px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [show])
   return (
-    <span className={'cut ' + (className ?? '')}>
+    <span ref={ref} className={'cut ' + (loaded ? 'loaded ' : '') + (className ?? '')}>
       <span className="cut-frame" style={{ aspectRatio: String(aspect), ...(aspect >= 1 ? { width: '100%' } : { height: '100%' }) }}>
-        <img src={src} alt="" loading="lazy" style={{ width: `${100 / w}%`, left: `${(-x / w) * 100}%`, top: `${(-y / h) * 100}%` }} />
+        {show && (
+          <img src={src} alt="" decoding="async" onLoad={() => setLoaded(true)} onError={() => onFail?.()}
+            style={{ width: `${100 / w}%`, left: `${(-x / w) * 100}%`, top: `${(-y / h) * 100}%` }} />
+        )}
       </span>
     </span>
   )
@@ -200,6 +216,8 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
   const [q, setQ] = useState('')
   const [limit, setLimit] = useState(20)
   const [big, setBig] = useState<LeafletOffer | null>(null)
+  const [failed, setFailed] = useState<Set<string>>(new Set())
+  const fail = (u: string) => setFailed((f) => (f.has(u) ? f : new Set(f).add(u)))
   useEffect(() => { loadOffers().then((d) => setAll(d?.offers ?? [])) }, [])
   const today = new Date().toISOString().slice(0, 10)
   const live = useMemo(() => (all ?? []).filter((o) => !o.validUntil || o.validUntil >= today), [all, today])
@@ -238,9 +256,9 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
             const saved = isSaved(o)
             return (
               <div key={i} className="offer-row" style={{ ['--c' as string]: chain?.color ?? '#6b6b78' }}>
-                {o.crop && o.pageImage ? (
+                {o.crop && o.pageImage && !failed.has(o.pageImage) ? (
                   <button className="offer-pic" onClick={() => setBig(o)} aria-label={o.name}>
-                    <Cut src={o.pageImage} box={o.crop} />
+                    <Cut src={o.pageImage} box={o.crop} onFail={() => fail(o.pageImage!)} />
                     {o.percent ? <b className="offer-pct">−{o.percent}%</b> : null}
                   </button>
                 ) : (

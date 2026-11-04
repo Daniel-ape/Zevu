@@ -130,6 +130,19 @@ for (const o of previous.offers || []) {
   const stillListed = Object.values(leaflets).some((v) => Array.isArray(v) && v.some((l) => l.url === o.url))
   if (!done.has(o.url) && stillListed && (!o.validUntil || o.validUntil >= today)) out.offers.push(o)
 }
+// Keep only page pictures that can actually be loaded.
+const ok = new Map()
+for (const u of new Set(out.offers.map((o) => o.pageImage).filter(Boolean))) {
+  try {
+    const r = await fetch(u, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(30000) })
+    ok.set(u, r.ok && /^image\//.test(r.headers.get('content-type') || ''))
+    await r.arrayBuffer()
+  } catch { ok.set(u, false) }
+  await sleep(200)
+}
+let dropped = 0
+for (const o of out.offers) if (o.pageImage && !ok.get(o.pageImage)) { o.pageImage = null; dropped++ }
+console.log('page pictures', ok.size, 'not loadable', [...ok.values()].filter((v) => !v).length, 'offers without picture', dropped)
 out.offers.sort((a, b) => (a.validUntil || '9').localeCompare(b.validUntil || '9') || a.chain.localeCompare(b.chain) || a.page - b.page)
 writeFileSync('public/prices/offers.json', JSON.stringify(out) + '\n')
 console.log('total', out.offers.length)

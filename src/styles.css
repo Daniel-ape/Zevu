@@ -1209,3 +1209,6 @@ button.row:active, a.row:active, .search-open:active { background: var(--fill-2)
 .offer-big .cut { width: 100%; height: 100%; }
 .coupon-img.cut { display: flex; }
 .offer-big + .btn { text-decoration: none; }
+/* while a leaflet picture loads */
+.cut:not(.loaded) { background: linear-gradient(100deg, var(--fill) 30%, color-mix(in srgb, var(--fill) 40%, #fff) 50%, var(--fill) 70%) 0 0 / 200% 100%; animation: cut-shimmer 1.2s linear infinite; }
+@keyframes cut-shimmer { to { background-position: -200% 0; } }
