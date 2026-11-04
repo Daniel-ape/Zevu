@@ -6,6 +6,7 @@
 import type { CategoryId, Product } from '../domain/types'
 import type { Lang } from '../i18n'
 import { parseQuantity } from './openFoodFacts'
+import { refineCategory } from './collectedPrices'
 
 // [ean, nameFi, nameSv, brand, quantity, category, emoji, imageChunk(-1 = none)]
 type Row = [string, string, string, string, string, CategoryId, string, number]
@@ -27,7 +28,7 @@ export function snapshotProducts(all: Row[], lang: Lang): Product[] {
     name: (lang === 'sv' && sv) || fi || sv,
     altName: lang === 'sv' && sv ? fi : sv || undefined,
     brand,
-    category,
+    category: refineCategory((lang === 'sv' && sv) || fi || sv, category),
     size: parseQuantity(quantity),
     emoji,
     imageChunk: chunk >= 0 ? chunk : undefined,

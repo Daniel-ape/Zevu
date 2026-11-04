@@ -47,6 +47,7 @@ export type CategoryId =
   | 'electronics'
   | 'toys'
   | 'clothing'
+  | 'office'
 
 /** Where a price came from. 'sample' must always be shown as such in the UI. */
 export type PriceSource = 'sample' | 'k-ruoka' | 's-kaupat' | 'tokmanni' | 'lidl-offers' | 'user-report' | 'shop'
