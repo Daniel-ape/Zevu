@@ -57,15 +57,15 @@ for (const sm of [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])) {
     const m = u.match(/-(\d{8}|\d{13})$/)
     if (!m) continue
     stats.withEan++
-    if (!known.has(m[1])) continue
-    stats.known++
+    // Every product with a barcode; the ones in the app's catalogue are read first.
+    if (known.has(m[1])) stats.known++
     const path = new URL(u).pathname
     if (allowed(path)) urls.set(m[1], u)
     else if (!stats.blockedExample) stats.blockedExample = `${path} by ${disallow.find((r) => !allowed.call(null, path) && blockedBy(r, path))}`
   }
 }
 console.log('sitemap stats', JSON.stringify(stats), 'known in app', known.size, 'rules', disallow.length)
-console.log(`${urls.size} Tokmanni products match the app's catalogue`)
+console.log(`${urls.size} Tokmanni products with a barcode (${stats.known} in the app's catalogue)`)
 
 // Price, plus the product picture Tokmanni shows (used when the catalogue has none).
 function productFrom(html) {
@@ -76,7 +76,11 @@ function productFrom(html) {
       if (d['@type'] === 'Product' && offer?.price) {
         const img = [].concat(d.image ?? [])[0]
         const image = typeof img === 'string' ? img : img?.url
-        return { cents: Math.round(parseFloat(offer.price) * 100), image: image?.startsWith('https://') ? image : undefined }
+        const brand = typeof d.brand === 'object' ? d.brand?.name : d.brand
+        return {
+          cents: Math.round(parseFloat(offer.price) * 100), image: image?.startsWith('https://') ? image : undefined,
+          name: String(d.name ?? '').replace(/&amp;/g, '&').trim().slice(0, 120) || undefined, brand: brand ? String(brand).slice(0, 60) : undefined,
+        }
       }
     } catch {
       /* not JSON we understand */
@@ -94,9 +98,10 @@ const BUDGET = 270 * 60_000
 const FILE = 'public/prices/tokmanni.json'
 const previous = existsSync(FILE) ? JSON.parse(readFileSync(FILE, 'utf8')) : { prices: [] }
 const prev = new Map(previous.prices.map((p) => [p.ean, { ...p, checkedAt: p.checkedAt ?? previous.fetchedAt }]))
+// Never read first (catalogue products before the rest), then the ones read longest ago.
 const order = [...urls.entries()].sort(([a], [b]) => {
-  const ta = prev.get(a)?.checkedAt ?? ''
-  const tb = prev.get(b)?.checkedAt ?? ''
+  const ta = prev.get(a)?.checkedAt ?? (known.has(a) ? '' : '0')
+  const tb = prev.get(b)?.checkedAt ?? (known.has(b) ? '' : '0')
   return ta < tb ? -1 : ta > tb ? 1 : 0
 })
 const fresh = new Map()
@@ -106,20 +111,20 @@ for (const [ean, url] of order) {
   try {
     const got = productFrom(await get(url))
     const cents = got?.cents
-    if (cents && cents > 0 && cents < 100000) fresh.set(ean, { ean, priceCents: cents, url, image: got.image, checkedAt: new Date().toISOString() })
+    if (cents && cents > 0 && cents < 100000) fresh.set(ean, { ean, priceCents: cents, name: got.name, brand: got.brand, url, image: got.image, checkedAt: new Date().toISOString() })
   } catch (e) {
     console.log('skip', ean, String(e).slice(0, 80))
   }
 }
-const keepAfter = new Date(Date.now() - 10 * 86_400_000).toISOString()
+// A full round of ~38 000 pages at one per 10 s takes about two weeks, so keep prices for 21 days.
+const keepAfter = new Date(Date.now() - 21 * 86_400_000).toISOString()
 const prices = [...fresh.values()]
 for (const [ean, p] of prev) if (!fresh.has(ean) && urls.has(ean) && p.checkedAt >= keepAfter) prices.push(p)
 console.log(`checked ${fresh.size} of ${urls.size}, kept ${prices.length - fresh.size} earlier prices`)
 mkdirSync('public/prices', { recursive: true })
-writeFileSync(
-  'public/prices/tokmanni.json',
-  JSON.stringify({ source: 'tokmanni.fi product pages', retailerId: 'tokmanni', fetchedAt: new Date().toISOString(), prices }),
-)
+// One product per line, so daily changes stay small in git.
+const head = JSON.stringify({ source: 'tokmanni.fi product pages', retailerId: 'tokmanni', fetchedAt: new Date().toISOString() }).slice(0, -1)
+writeFileSync('public/prices/tokmanni.json', `${head},"prices":[\n${prices.sort((a, b) => a.ean.localeCompare(b.ean)).map((p) => JSON.stringify(p)).join(',\n')}\n]}\n`)
 console.log(`saved ${prices.length} prices`)
 
 // Price history: one point per day when the price changes, last 180 days.
