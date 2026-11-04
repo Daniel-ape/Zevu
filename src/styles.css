@@ -1301,3 +1301,10 @@ html, body { overscroll-behavior-x: none; }
    sheets end with room for it so their last buttons can be scrolled above it. */
 .native-app .sheet { padding-bottom: calc(118px + env(safe-area-inset-bottom)); }
 .offer-big { height: min(46vh, 400px); }
+/* Camera: back button in the top corner (the dock is hidden while scanning) */
+.camera-back {
+  position: absolute; z-index: 2; top: max(16px, env(safe-area-inset-top)); left: 16px;
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+  background: rgba(30, 30, 34, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.camera-actions:empty { display: none; }

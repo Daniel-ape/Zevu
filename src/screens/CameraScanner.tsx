@@ -1,3 +1,4 @@
+import { Back } from '../ui/icons'
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../data/store'
 import { decodeCanvas, decodeCard } from '../data/barcode'
@@ -105,6 +106,7 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
   return (
     <div className="camera" role="dialog" aria-label={t('scan.camera')}>
       <video ref={video} playsInline muted />
+      <button className="camera-back glass" onClick={onClose} aria-label={t('rc.close')}><Back size={22} /></button>
       <div className="camera-guide" />
       <div className="camera-hint">{ready ? t('scan.aim') : t('scan.starting')}</div>
       <div className="camera-actions">
@@ -113,7 +115,6 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
             {t('scan.torch')}
           </button>
         )}
-        <button className="camera-close glass" onClick={onClose}>{t('rc.close')}</button>
       </div>
     </div>
   )
