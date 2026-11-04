@@ -44,6 +44,8 @@ jobs:
           test -d build/Build/Products/Debug-iphonesimulator/App.app
 
       - name: Run in simulator and take screenshots
+        # the simulator sometimes fails to start; that must not stop the .ipa
+        continue-on-error: true
         working-directory: ios/App
         run: |
           DEV=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for r,l in sorted(d.items(), reverse=True) if 'iOS' in r for x in l if x['name'].startswith('iPhone') and 'Pro' not in x['name']))")
@@ -91,7 +93,7 @@ jobs:
           path: ios/App/shots/
 
       - name: Publish screenshots to the ios-shots branch
-        if: success()
+        if: success() && hashFiles('ios/App/shots/*.png') != ''
         run: |
           cd ios/App/shots
           git init -q && git checkout -q -b ios-shots
