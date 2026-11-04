@@ -119,7 +119,6 @@ export function Coupons() {
                         {c.priceCents !== null && <b>{euro(c.priceCents)}</b>}
                         {c.percent !== null && <i>−{c.percent} %</i>}
                       </span>
-                      {c.member && <span className="offer-member" style={{ ['--c' as string]: chain.color }}><CardIcon size={13} /> {memberText(c.member, c.chain, t)}</span>}
                       {c.validUntil && (
                         <span className={'coupon-valid' + (left !== null && left <= 2 ? ' soon' : '')}>
                           {left === 0 ? t('cp.lastDay') : left === 1 ? t('cp.tomorrow') : t('cp.until', { date: fmtDate(c.validUntil) })}
@@ -218,6 +217,13 @@ export interface LeafletOffer {
 let offersFeed: Promise<{ offers: LeafletOffer[] } | null> | null = null
 export const loadOffers = () => (offersFeed ??= import('../data/dataFile').then((m) => m.fetchData<{ offers: LeafletOffer[] }>('offers.json')))
 
+/** Small store mark in the chain's colour, for the corner of an offer picture. */
+export function ChainMark({ chain }: { chain: string }) {
+  const c = CARD_CHAINS.find((x) => x.id === chain)
+  const name = (c?.name || chain).replace(/ Plus$/, '').replace(/^K-Plussa$/, 'K').replace(/^S-Etukortti$/, 'S')
+  return <span className="chain-mark" style={{ background: c?.color ?? '#6b6b78' }}>{name}</span>
+}
+
 /** Home page strip: members' offers from the leaflets, the user's own chains first. */
 export function HomeMemberOffers() {
   const { cards, t } = useStore()
@@ -245,10 +251,10 @@ export function HomeMemberOffers() {
               <span className="member-pic">
                 {o.crop && o.pageImage ? <Cut src={o.pageImage} box={o.crop} /> : <span className="offer-badge"><b>{o.percent ? `−${o.percent}%` : '%'}</b></span>}
                 {o.percent ? <b className="offer-pct">−{o.percent}%</b> : null}
+                <ChainMark chain={o.chain} />
               </span>
               <span className="member-name">{o.name}</span>
               <span className="member-price">{euro(o.priceCents)}</span>
-              <span className="offer-member"><CardIcon size={12} /> {memberText(o.member!, o.chain, t)}</span>
             </button>
           )
         })}
@@ -310,6 +316,7 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
                   <button className="offer-pic" onClick={() => setBig(o)} aria-label={o.name}>
                     <Cut src={o.pageImage} box={o.crop} onFail={() => fail(o.pageImage!)} />
                     {o.percent ? <b className="offer-pct">−{o.percent}%</b> : null}
+                    <ChainMark chain={o.chain} />
                   </button>
                 ) : (
                   <a className="offer-badge" href={pageUrl(o)} target="_blank" rel="noreferrer" aria-label={t('cp.offerOpen')}>
@@ -318,14 +325,12 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
                   </a>
                 )}
                 <a className="offer-body" href={pageUrl(o)} target="_blank" rel="noreferrer">
-                  <span className="offer-chain" style={{ color: chain?.color }}>{chain?.name.replace(' Plus', '') ?? o.chain}</span>
                   <span className="offer-name">{o.name}</span>
                   {o.details && <span className="offer-details">{o.details}</span>}
                   <span className="offer-price">
                     <b>{euro(o.priceCents)}</b>
                     {o.regularCents && <s>{euro(o.regularCents)}</s>}
                   </span>
-                  {o.member && <span className="offer-member"><CardIcon size={13} /> {memberText(o.member, o.chain, t)}</span>}
                   {o.validUntil && <span className="offer-valid">{t('cp.until', { date: fmtDate(o.validUntil) })}</span>}
                 </a>
                 <div className="offer-actions">
