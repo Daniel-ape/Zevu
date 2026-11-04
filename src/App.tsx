@@ -86,8 +86,21 @@ function Shell() {
     const h = NativeDock.addListener('tap', (e) => goRef.current(e.id as Tab))
     return () => { h.then((x) => x.remove()).catch(() => {}) }
   }, [nativeDock])
+  // Sheets and full-screen views (camera, card, shopping mode) are drawn by the page,
+  // but the app's native dock floats above everything: hide it while one is open.
+  const [overlay, setOverlay] = useState(false)
   useEffect(() => {
     if (!nativeDock) return
+    const SEL = '.sheet-backdrop, .shop, .cardview, .camera'
+    const check = () => setOverlay(!!document.querySelector(SEL))
+    const mo = new MutationObserver(check)
+    mo.observe(document.body, { childList: true, subtree: true })
+    check()
+    return () => mo.disconnect()
+  }, [nativeDock])
+  useEffect(() => {
+    if (!nativeDock) return
+    if (overlay) { NativeDock.hide().catch(() => {}); return }
     const ids: Tab[] = ['home', 'search', 'lists', 'leaflets', 'profile']
     const label = { home: 'tab.home', search: 'tab.search', lists: 'tab.list', leaflets: 'tab.leaflets', profile: 'tab.you' } as const
     NativeDock.show({
@@ -96,7 +109,7 @@ function Shell() {
       badges: newLeaflets && tab !== 'leaflets' ? ['leaflets'] : [],
       scanLabel: t('tab.scan'),
     }).catch(() => setNativeDock(false))
-  }, [nativeDock, tab, top, newLeaflets, t])
+  }, [nativeDock, tab, top, newLeaflets, t, overlay])
   useEffect(() => {
     window.scrollTo(0, 0)
     document.querySelector('.screen')?.scrollTo(0, 0)
