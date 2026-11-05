@@ -11,6 +11,10 @@ permissions:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    # Google sign-in (Supabase); without these secrets the app simply has no sign-in
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

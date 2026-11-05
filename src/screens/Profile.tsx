@@ -1,4 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { accountsEnabled, onSession, signInWithGoogle, signOut } from '../data/account'
 import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
@@ -167,6 +169,7 @@ export function Profile() {
   return (
     <div className="screen">
       <div className="topbar"><h1>{t('you.title')}</h1></div>
+      <AccountCard />
 
       <button className="list-card" onClick={() => setPage('spending')}>
         <span className="quick-icon"><ReceiptIcon size={22} /></span>
@@ -197,6 +200,40 @@ export function Profile() {
         <MenuRow icon={<Info size={18} />} title={t('you.groupAbout')} onClick={() => setPage('about')} />
       </div>
       {sheets}
+    </div>
+  )
+}
+
+/** Signed in with Google (synced) or not; hidden when accounts are not set up. */
+function AccountCard() {
+  const { t } = useStore()
+  const [session, setSession] = useState<Session | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  useEffect(() => onSession(setSession), [])
+  if (!accountsEnabled) return null
+  if (session) {
+    const email = session.user.email ?? ''
+    const name = (session.user.user_metadata?.full_name as string | undefined) ?? email
+    const pic = session.user.user_metadata?.avatar_url as string | undefined
+    return (
+      <div className="account-card">
+        {pic ? <img className="account-pic" src={pic} alt="" referrerPolicy="no-referrer" /> : <span className="account-pic">{name.slice(0, 1).toUpperCase()}</span>}
+        <div className="grow">
+          <b>{name}</b>
+          <span className="sub">{t('acc.synced')}</span>
+        </div>
+        <button className="link small" disabled={busy} onClick={async () => { setBusy(true); await signOut().catch(() => {}); setBusy(false) }}>{t('acc.signOut')}</button>
+      </div>
+    )
+  }
+  return (
+    <div className="account-card">
+      <div className="grow"><span className="sub">{t('acc.signInHint')}</span></div>
+      <button className="btn google small" disabled={busy} onClick={async () => { setBusy(true); setError(''); try { await signInWithGoogle() } catch { setError(t('acc.failed')) } finally { setBusy(false) } }}>
+        {busy ? t('acc.signingIn') : t('acc.google')}
+      </button>
+      {error && <div className="error">{error}</div>}
     </div>
   )
 }

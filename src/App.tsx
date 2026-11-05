@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Welcome } from './screens/Welcome'
+import { onSession, startAutoSync } from './data/account'
 import { StoreProvider, useStore } from './data/store'
 import type { CategoryId } from './domain/types'
 import { NavCtx, type Nav, type Tab } from './nav'
@@ -44,6 +46,19 @@ function Shell() {
     return () => document.removeEventListener('visibilitychange', onShow)
   }, [])
   const [tab, setTab] = useState<Tab>(fromHash)
+  // First start: a welcome page with Google sign-in (shown once per device).
+  const [welcomed, setWelcomed] = useState(() => { try { return localStorage.getItem('hintaopas:welcomed') === '1' } catch { return true } })
+  const finishWelcome = () => { try { localStorage.setItem('hintaopas:welcomed', '1') } catch { /* private mode */ } setWelcomed(true) }
+  // Signed in: keep lists, cards, coupons… in sync; reload when newer data arrived from another device.
+  useEffect(() => {
+    let stopSync = () => {}
+    const stop = onSession((s) => {
+      stopSync()
+      stopSync = s ? startAutoSync(() => location.reload()) : () => {}
+      if (s) finishWelcome()
+    })
+    return () => { stop(); stopSync() }
+  }, [])
   const barRef = useRef<HTMLDivElement>(null)
   const scanRef = useRef<HTMLButtonElement>(null)
   const barGlass = useLiquidGlass('lg-bar', barRef)
@@ -127,6 +142,7 @@ function Shell() {
   return (
     <NavCtx.Provider value={nav}>
       <div className="shell">
+        {!welcomed && <Welcome onDone={finishWelcome} />}
         {screen}
         <WatchAlert />
         {!nativeDock && <nav className="dock" aria-label="Main">

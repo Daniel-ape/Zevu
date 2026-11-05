@@ -81,5 +81,16 @@
 	<string>Kameraa käytetään viivakoodien ja kuittien skannaamiseen. Kuvat käsitellään puhelimessa.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Valitse kuitin tai viivakoodin kuva.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>fi.hintaopas.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fi.hintaopas.app</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

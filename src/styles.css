@@ -1312,3 +1312,29 @@ html, body { overscroll-behavior-x: none; }
    status bar); with top: 0 it stuck below the screen's top padding, adding the
    status-bar gap twice. */
 .topbar.sticky { top: calc(-1 * max(20px, env(safe-area-inset-top))); }
+
+/* ---- Welcome (first start) ---- */
+.welcome {
+  position: fixed; inset: 0; z-index: 80; background: var(--bg); overflow-y: auto;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 28px;
+  padding: calc(max(24px, env(safe-area-inset-top)) + 28px) 24px calc(max(20px, env(safe-area-inset-bottom)) + 12px);
+}
+.welcome-top { text-align: center; }
+.welcome-icon { width: 92px; height: 92px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); }
+.welcome h1 { font-size: 34px; letter-spacing: -0.03em; margin: 18px 0 6px; }
+.welcome-tag { color: var(--text-2); font-size: 17px; line-height: 1.4; max-width: 320px; margin: 0 auto; }
+.welcome-points { list-style: none; padding: 0; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; max-width: 360px; width: 100%; }
+.welcome-points li { display: flex; gap: 14px; align-items: center; }
+.welcome-points b { display: block; font-size: 16px; }
+.welcome-points small { color: var(--text-2); font-size: 14px; }
+.wp-icon { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex-shrink: 0; }
+.welcome-actions { display: flex; flex-direction: column; gap: 10px; max-width: 400px; width: 100%; margin: 0 auto; }
+.welcome-actions .btn { width: 100%; }
+.welcome-note { color: var(--text-2); font-size: 12.5px; text-align: center; line-height: 1.45; margin: 4px 8px 0; }
+.btn.google { background: #fff; color: #1f1f1f; border: 1px solid #dadce0; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; }
+.btn.google.small { width: auto; height: 38px; padding: 0 14px; font-size: 14px; }
+/* account on the "You" page */
+.account-card { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--card); border-radius: 18px; padding: 14px 16px; margin-bottom: 14px; box-shadow: var(--card-shadow); }
+.account-card .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.account-card .sub { color: var(--text-2); font-size: 13px; }
+.account-pic { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 700; }
