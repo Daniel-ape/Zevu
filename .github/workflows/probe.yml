@@ -1,0 +1,18 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
+          g(){ curl -sL -A "$UA" --max-time 40 "$1"; }
+          echo "=== tokmanni robots"; g https://www.tokmanni.fi/robots.txt | head -120
+          echo "=== tokmanni sitemap index"; g https://www.tokmanni.fi/sitemap/sitemap.xml | grep -o '<loc>[^<]*' | head -40
+          sleep 10
+          echo "=== tokmanni home links"; g https://www.tokmanni.fi/ | grep -o 'href="/[^"]*"' | sort -u | grep -iE 'ruoka|elintarv|juoma|makeis|kahvi' | head -40
+          sleep 10
+          echo "=== halpahalli robots"; g https://www.halpahalli.fi/robots.txt | head -80
+          echo "=== halpahalli home links"; g https://www.halpahalli.fi/ | grep -o 'href="[^"]*"' | sort -u | grep -iE 'ruoka|elintarv|juoma|makeis|kahvi|herkut' | head -40
+          echo "=== lidl robots"; g https://www.lidl.fi/robots.txt | head -60
+          echo "=== lidl home links"; g https://www.lidl.fi/ | grep -o 'href="[^"]*"' | sort -u | grep -iE 'ruoka|elintarv|juoma|/c/|/h/' | head -60
