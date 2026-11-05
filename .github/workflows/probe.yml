@@ -7,12 +7,17 @@ jobs:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
           g(){ curl -sL -A "$UA" --max-time 40 "$1"; }
-          echo "=== tokmanni robots"; g https://www.tokmanni.fi/robots.txt | head -120
-          echo "=== tokmanni sitemap index"; g https://www.tokmanni.fi/sitemap/sitemap.xml | grep -o '<loc>[^<]*' | head -40
+          for u in /c/ruoka-ja-juoma/s10068374 /c/valikoima/s10021111 /c/store/alkuviikon-tarjoukset/a10106527; do
+            echo "=== lidl $u"; g "https://www.lidl.fi$u" > p.html; wc -c p.html
+            echo "product links: $(grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | sort -u | wc -l)"
+            grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | sort -u | head -8
+            grep -o 'href="/[ach]/[^"]*"' p.html | sort -u | grep -v assets | head -40
+            grep -o '"price":[^,]*' p.html | head -5
+            sleep 4
+          done
+          echo "=== tokmanni food page"
+          g https://www.tokmanni.fi/ > t.html; grep -o 'href="https://www.tokmanni.fi/[a-z-]*"' t.html | sort -u | head -60
           sleep 10
-          echo "=== tokmanni home links"; g https://www.tokmanni.fi/ | grep -o 'href="/[^"]*"' | sort -u | grep -iE 'ruoka|elintarv|juoma|makeis|kahvi' | head -40
-          sleep 10
-          echo "=== halpahalli robots"; g https://www.halpahalli.fi/robots.txt | head -80
-          echo "=== halpahalli home links"; g https://www.halpahalli.fi/ | grep -o 'href="[^"]*"' | sort -u | grep -iE 'ruoka|elintarv|juoma|makeis|kahvi|herkut' | head -40
-          echo "=== lidl robots"; g https://www.lidl.fi/robots.txt | head -60
-          echo "=== lidl home links"; g https://www.lidl.fi/ | grep -o 'href="[^"]*"' | sort -u | grep -iE 'ruoka|elintarv|juoma|/c/|/h/' | head -60
+          g https://www.tokmanni.fi/ruoka-ja-juomat > f.html; wc -c f.html; grep -o 'href="https://www.tokmanni.fi/[a-z0-9-]*-[0-9]\{8,13\}"' f.html | sort -u | wc -l; grep -o 'href="https://www.tokmanni.fi/ruoka[^"]*"' f.html | sort -u | head -60; grep -o 'toolbar-number">[0-9]*' f.html | head
+          echo "=== halpahalli food page"
+          g https://www.halpahalli.fi/elintarvikkeet.html > h.html; wc -c h.html; grep -o 'toolbar-number">[0-9]*' h.html | head; grep -o 'product-item-link"[^>]*href="[^"]*' h.html | head -3; grep -c 'product-item-link' h.html
