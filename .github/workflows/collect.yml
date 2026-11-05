@@ -1,9 +1,11 @@
-# Collects Tokmanni prices once a day and publishes them with the web app.
+# Collects Tokmanni prices three times a day (one page per 10 s, as Tokmanni's
+# robots.txt asks) and publishes them with the web app. Food is read first.
 name: Collect prices
 on:
   schedule:
     - cron: '17 3 * * *'   # 05:17 Finnish time (winter)
-    - cron: '17 15 * * *'  # 17:17 Finnish time
+    - cron: '17 11 * * *'  # 13:17
+    - cron: '17 19 * * *'  # 21:17
   workflow_dispatch:
 permissions:
   contents: write

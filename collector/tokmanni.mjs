@@ -4,6 +4,7 @@
 // (matched by the barcode at the end of Tokmanni's product URLs).
 // Output: public/prices/tokmanni.json, served with the web app.
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { foodRank } from './foodGuess.mjs'
 
 const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
 const DELAY = 10_000 // Crawl-delay: 10
@@ -86,8 +87,13 @@ function productFrom(html) {
       /* not JSON we understand */
     }
   }
+  // Food pages have no Product JSON-LD: the price is in the page, the name in its title.
   const m = html.match(/data-price-amount="([\d.]+)"/)
-  return m ? { cents: Math.round(parseFloat(m[1]) * 100) } : null
+  if (!m) return null
+  const text = (t) => t?.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim()
+  const name = text(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1]) || text(html.match(/<meta property="og:title" content="([^"]*)"/)?.[1])?.replace(/\s*[|–-]\s*Tokmanni.*$/i, '')
+  const image = html.match(/<meta property="og:image" content="(https:\/\/[^"]+)"/)?.[1]
+  return { cents: Math.round(parseFloat(m[1]) * 100), name: name ? name.slice(0, 120) : undefined, image }
 }
 
 // Each run has a time budget (GitHub stops jobs after 6 h). Products never
@@ -98,12 +104,21 @@ const BUDGET = 270 * 60_000
 const FILE = 'public/prices/tokmanni.json'
 const previous = existsSync(FILE) ? JSON.parse(readFileSync(FILE, 'utf8')) : { prices: [] }
 const prev = new Map(previous.prices.map((p) => [p.ean, { ...p, checkedAt: p.checkedAt ?? previous.fetchedAt }]))
-// Never read first (catalogue products before the rest), then the ones read longest ago.
-const order = [...urls.entries()].sort(([a], [b]) => {
-  const ta = prev.get(a)?.checkedAt ?? (known.has(a) ? '' : '0')
-  const tb = prev.get(b)?.checkedAt ?? (known.has(b) ? '' : '0')
-  return ta < tb ? -1 : ta > tb ? 1 : 0
-})
+// Order: never read (or read without a name) first, catalogue products and
+// food before the rest; then the ones read longest ago, where food counts as
+// older so its prices are checked more often than the rest of the range.
+const DAY = 86_400_000
+const rankOf = new Map([...urls].map(([ean, url]) => [ean, known.has(ean) ? -1 : foodRank(url)]))
+const keyOf = (ean) => {
+  const p = prev.get(ean)
+  const rank = rankOf.get(ean)
+  if (!p?.checkedAt || !p.name) return `0 ${rank + 1}`
+  const bonus = rank <= 0 ? 10 * DAY : rank === 1 ? 4 * DAY : 0
+  return `1 ${new Date(Date.parse(p.checkedAt) - bonus).toISOString()}`
+}
+const keys = new Map([...urls.keys()].map((e) => [e, keyOf(e)]))
+const order = [...urls.entries()].sort(([a], [b]) => (keys.get(a) < keys.get(b) ? -1 : keys.get(a) > keys.get(b) ? 1 : 0))
+console.log(`food-looking products: ${[...rankOf.values()].filter((r) => r <= 0).length} sure, ${[...rankOf.values()].filter((r) => r === 1).length} maybe`)
 const fresh = new Map()
 for (const [ean, url] of order) {
   if (Date.now() - START > BUDGET) { console.log('time budget reached'); break }

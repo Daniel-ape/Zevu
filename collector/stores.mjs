@@ -11,9 +11,10 @@
 // Output: public/prices/<store>.json — barcode, price, name, picture, link.
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
+import { foodRank } from './foodGuess.mjs'
 
 const STORES = {
-  halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all' },
+  halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all', foodFirst: true },
   verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'all' },
   prisma: { retailerId: 'prisma', base: 'https://www.prisma.fi', sitemaps: ['https://www.prisma.fi/sitemap.xml'], product: /\/tuotteet\/\d+\//, keep: 'all' },
   karkkainen: { retailerId: 'karkkainen', base: 'https://www.karkkainen.com', sitemaps: ['https://www.karkkainen.com/files/sitemap/sitemap.xml'], maps: /products_/, product: /karkkainen\.com\/verkkokauppa\//, keep: 'all' },
@@ -99,7 +100,17 @@ console.log(`${urls.size} product pages in the sitemaps`)
 mkdirSync('collector/state', { recursive: true })
 const STATE = `collector/state/${name}.json`
 const state = existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : {}
-const order = [...urls].sort((a, b) => (state[a]?.at ?? '').localeCompare(state[b]?.at ?? ''))
+// Never read first, then the ones read longest ago. Shops that also sell
+// food read it first and count food as older, so it is checked more often.
+const DAY = 86_400_000
+const keyOf = (u) => {
+  const rank = cfg.foodFirst ? foodRank(u) : 0
+  const at = state[u]?.at
+  if (!at) return `0 ${rank}`
+  return `1 ${new Date(Date.parse(at) - (cfg.foodFirst ? [7, 3, 0][rank] * DAY : 0)).toISOString()}`
+}
+const keys = new Map([...urls].map((u) => [u, keyOf(u)]))
+const order = [...urls].sort((a, b) => keys.get(a).localeCompare(keys.get(b)))
 
 // Text cut out of a page can keep the whole page in memory (V8 "sliced
 // strings"); after thousands of pages that runs out of memory. Copy it.
