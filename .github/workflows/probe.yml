@@ -7,13 +7,11 @@ jobs:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
           g(){ curl -sL -A "$UA" --max-time 40 "$1"; }
-          g https://www.lidl.fi/c/ruoka-ja-juoma/s10068374 > r.html
-          echo "=== h links"; grep -o 'href="/h/[^"]*"' r.html | sort -u
-          for u in /h/hedelmaet-ja-vihannekset/h10071012 /h/juomat/h10071022; do
-            sleep 4; echo "=== $u"; g "https://www.lidl.fi$u" > p.html; wc -c p.html
-            echo "product links: $(grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | sort -u | wc -l)"
-            grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | sort -u | head -5
-            grep -oE '"(numFound|totalCount|total|offset|fetchsize|itemsPerPage)":[0-9]+' p.html | sort | uniq -c | head
-            grep -o 'offset=[0-9]*' p.html | sort -u | head
-          done
-          sleep 4; echo "=== product page"; g "https://www.lidl.fi$(grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | head -1)" > q.html; grep -o 'application/ld+json[^<]*' q.html | head -c 1500
+          g https://www.lidl.fi/h/juomat/h10071022 > p.html
+          echo "=== api refs"; grep -oE '/q/[a-zA-Z0-9/_.-]*' p.html | sort | uniq -c | sort -rn | head -30
+          echo "=== numFound ctx"; grep -oE '.{300}"numFound":298.{600}' p.html | head -c 1800; echo
+          echo "=== ean in page"; grep -oE '"(ean|gtin|gtin13|eans)":[^,]{0,40}' p.html | head -5
+          echo "=== js chunks"; grep -oE '/c/assets/[A-Za-z0-9_.-]*\.js' p.html | sort -u | head -40
+          sleep 4; echo "=== api try"
+          for u in "/q/api/category/juomat/h10071022?offset=12&fetchsize=12&locale=fi_FI&assortment=FI&version=2.1.0" "/q/api/search?category.id=h10071022&offset=12&fetchsize=12&locale=fi_FI&assortment=FI&version=2.1.0"; do echo "-- $u"; curl -s -A "$UA" -o a.json -w '%{http_code} %{content_type}\n' "https://www.lidl.fi$u"; head -c 600 a.json; echo; sleep 4; done
+          g https://www.lidl.fi/p/solevita-tuorepuristettu-appelsiinitaysmehu-xxl/p11006113 > q.html; echo "=== product ean"; grep -oE '.{80}(ean|gtin)[^a-z].{80}' q.html | head -5
