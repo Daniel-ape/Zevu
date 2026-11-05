@@ -7,17 +7,13 @@ jobs:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
           g(){ curl -sL -A "$UA" --max-time 40 "$1"; }
-          for u in /c/ruoka-ja-juoma/s10068374 /c/valikoima/s10021111 /c/store/alkuviikon-tarjoukset/a10106527; do
-            echo "=== lidl $u"; g "https://www.lidl.fi$u" > p.html; wc -c p.html
+          g https://www.lidl.fi/c/ruoka-ja-juoma/s10068374 > r.html
+          echo "=== h links"; grep -o 'href="/h/[^"]*"' r.html | sort -u
+          for u in /h/hedelmaet-ja-vihannekset/h10071012 /h/juomat/h10071022; do
+            sleep 4; echo "=== $u"; g "https://www.lidl.fi$u" > p.html; wc -c p.html
             echo "product links: $(grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | sort -u | wc -l)"
-            grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | sort -u | head -8
-            grep -o 'href="/[ach]/[^"]*"' p.html | sort -u | grep -v assets | head -40
-            grep -o '"price":[^,]*' p.html | head -5
-            sleep 4
+            grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | sort -u | head -5
+            grep -oE '"(numFound|totalCount|total|offset|fetchsize|itemsPerPage)":[0-9]+' p.html | sort | uniq -c | head
+            grep -o 'offset=[0-9]*' p.html | sort -u | head
           done
-          echo "=== tokmanni food page"
-          g https://www.tokmanni.fi/ > t.html; grep -o 'href="https://www.tokmanni.fi/[a-z-]*"' t.html | sort -u | head -60
-          sleep 10
-          g https://www.tokmanni.fi/ruoka-ja-juomat > f.html; wc -c f.html; grep -o 'href="https://www.tokmanni.fi/[a-z0-9-]*-[0-9]\{8,13\}"' f.html | sort -u | wc -l; grep -o 'href="https://www.tokmanni.fi/ruoka[^"]*"' f.html | sort -u | head -60; grep -o 'toolbar-number">[0-9]*' f.html | head
-          echo "=== halpahalli food page"
-          g https://www.halpahalli.fi/elintarvikkeet.html > h.html; wc -c h.html; grep -o 'toolbar-number">[0-9]*' h.html | head; grep -o 'product-item-link"[^>]*href="[^"]*' h.html | head -3; grep -c 'product-item-link' h.html
+          sleep 4; echo "=== product page"; g "https://www.lidl.fi$(grep -o '/p/[a-z0-9-]*/p[0-9]*' p.html | head -1)" > q.html; grep -o 'application/ld+json[^<]*' q.html | head -c 1500
