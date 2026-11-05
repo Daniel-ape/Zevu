@@ -6,12 +6,13 @@ jobs:
     steps:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
-          g(){ curl -sL -A "$UA" --max-time 40 "$1"; }
-          g https://www.lidl.fi/h/juomat/h10071022 > p.html
-          echo "=== api refs"; grep -oE '/q/[a-zA-Z0-9/_.-]*' p.html | sort | uniq -c | sort -rn | head -30
-          echo "=== numFound ctx"; grep -oE '.{300}"numFound":298.{600}' p.html | head -c 1800; echo
-          echo "=== ean in page"; grep -oE '"(ean|gtin|gtin13|eans)":[^,]{0,40}' p.html | head -5
-          echo "=== js chunks"; grep -oE '/c/assets/[A-Za-z0-9_.-]*\.js' p.html | sort -u | head -40
-          sleep 4; echo "=== api try"
-          for u in "/q/api/category/juomat/h10071022?offset=12&fetchsize=12&locale=fi_FI&assortment=FI&version=2.1.0" "/q/api/search?category.id=h10071022&offset=12&fetchsize=12&locale=fi_FI&assortment=FI&version=2.1.0"; do echo "-- $u"; curl -s -A "$UA" -o a.json -w '%{http_code} %{content_type}\n' "https://www.lidl.fi$u"; head -c 600 a.json; echo; sleep 4; done
-          g https://www.lidl.fi/p/solevita-tuorepuristettu-appelsiinitaysmehu-xxl/p11006113 > q.html; echo "=== product ean"; grep -oE '.{80}(ean|gtin)[^a-z].{80}' q.html | head -5
+          curl -s -A "$UA" -o a.json "https://www.lidl.fi/q/api/category/h/juomat/h10071022?assortment=FI&locale=fi_FI&version=v2.0.0&pageId=10068374%2F10071022&offset=0&fetchsize=1000"
+          wc -c a.json
+          node -e '
+          const d=JSON.parse(require("fs").readFileSync("a.json"));
+          console.log("numFound",d.numFound,"items",d.items?.length, Object.keys(d));
+          const it=d.items||[];
+          const g=it[0]?.gridbox?.data ?? it[0];
+          console.log(JSON.stringify(it[0]).slice(0,3500));
+          const s=JSON.stringify(d); console.log("ean-like keys", [...new Set([...s.matchAll(/"(ean[a-zA-Z]*|gtin[a-zA-Z0-9]*|gs1[a-zA-Z]*)"/g)].map(m=>m[1]))]);
+          '
