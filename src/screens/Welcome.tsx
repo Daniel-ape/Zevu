@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../data/store'
-import { accountsEnabled, signInWithGoogle } from '../data/account'
+import { accountsEnabled, signInWithGoogle, takeSignInError } from '../data/account'
 import { RETAILERS } from '../data/retailers'
 import { RetailerMark } from '../ui/bits'
 
@@ -26,7 +26,7 @@ function GoogleG() {
 export function Welcome({ onDone }: { onDone: () => void }) {
   const { t } = useStore()
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(() => (takeSignInError() ? t('acc.failed') : ''))
   const google = async () => {
     setBusy(true); setError('')
     try {

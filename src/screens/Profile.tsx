@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { accountsEnabled, onSession, signInWithGoogle, signOut } from '../data/account'
+import { accountsEnabled, onSession, signInWithGoogle, signOut, takeSignInError } from '../data/account'
 import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
@@ -209,7 +209,7 @@ function AccountCard() {
   const { t } = useStore()
   const [session, setSession] = useState<Session | null>(null)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(() => (takeSignInError() ? t('acc.failed') : ''))
   useEffect(() => onSession(setSession), [])
   if (!accountsEnabled) return null
   if (session) {

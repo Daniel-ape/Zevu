@@ -49,6 +49,24 @@ export async function signInWithGoogle(): Promise<void> {
   })
 }
 
+/**
+ * When Google or Supabase sent the web page back with an error (?error=…), take
+ * it out of the address and report it once, so the screen can say sign-in failed.
+ */
+let signInError: string | null | undefined
+export function takeSignInError(): string | null {
+  if (signInError !== undefined) { const e = signInError; signInError = null; return e }
+  signInError = null
+  try {
+    const q = new URLSearchParams(location.search)
+    const e = q.get('error_description') || q.get('error')
+    if (!e) return null
+    console.warn('sign-in failed:', e)
+    history.replaceState(null, '', location.pathname + location.hash)
+    return e
+  } catch { return null }
+}
+
 export async function signOut() {
   const sb = await supabase()
   await sb.auth.signOut()
