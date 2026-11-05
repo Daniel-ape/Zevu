@@ -1316,21 +1316,78 @@ html, body { overscroll-behavior-x: none; }
 /* ---- Welcome (first start) ---- */
 .welcome {
   position: fixed; inset: 0; z-index: 80; background: var(--bg); overflow-y: auto;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 28px;
-  padding: calc(max(24px, env(safe-area-inset-top)) + 28px) 24px calc(max(20px, env(safe-area-inset-bottom)) + 12px);
+  display: flex; flex-direction: column;
+  padding: 0 0 calc(max(16px, env(safe-area-inset-bottom)) + 8px);
 }
-.welcome-top { text-align: center; }
-.welcome-icon { width: 92px; height: 92px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); }
-.welcome h1 { font-size: 34px; letter-spacing: -0.03em; margin: 18px 0 6px; }
-.welcome-tag { color: var(--text-2); font-size: 17px; line-height: 1.4; max-width: 320px; margin: 0 auto; }
-.welcome-points { list-style: none; padding: 0; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; max-width: 360px; width: 100%; }
-.welcome-points li { display: flex; gap: 14px; align-items: center; }
-.welcome-points b { display: block; font-size: 16px; }
-.welcome-points small { color: var(--text-2); font-size: 14px; }
-.wp-icon { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex-shrink: 0; }
-.welcome-actions { display: flex; flex-direction: column; gap: 10px; max-width: 400px; width: 100%; margin: 0 auto; }
-.welcome-actions .btn { width: 100%; }
-.welcome-note { color: var(--text-2); font-size: 12.5px; text-align: center; line-height: 1.45; margin: 4px 8px 0; }
+/* Top: a picture of what the app does, on the brand colour */
+.welcome-hero {
+  position: relative; flex: 1 1 auto; min-height: 330px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  padding: calc(max(20px, env(safe-area-inset-top)) + 28px) 24px 36px;
+  background:
+    radial-gradient(120% 80% at 85% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(160deg, #13a862 0%, #0b7d47 100%);
+  border-radius: 0 0 32px 32px;
+  overflow: hidden;
+}
+.welcome-hero::after {
+  content: ''; position: absolute; width: 340px; height: 340px; border-radius: 50%;
+  right: -140px; bottom: -170px; background: rgba(255, 255, 255, 0.07);
+}
+.wh-card {
+  position: relative; z-index: 1; width: 100%; max-width: 320px; background: #fff; color: #121216;
+  border-radius: 22px; padding: 16px 14px 8px; box-shadow: 0 24px 50px rgba(0, 40, 20, 0.28);
+  animation: wh-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.wh-product { display: flex; align-items: center; gap: 12px; padding: 0 4px 12px; border-bottom: 1px solid #ececf1; margin-bottom: 4px; }
+.wh-product b { display: block; font-size: 16px; }
+.wh-product small { color: #6b6b78; font-size: 13px; }
+.wh-thumb { width: 44px; height: 44px; border-radius: 12px; background: #f2f3f6; display: grid; place-items: center; font-size: 24px; }
+.wh-row { display: flex; align-items: center; gap: 10px; padding: 9px 4px; }
+.wh-row + .wh-row { border-top: 1px solid #f2f2f5; }
+.wh-row .mark { width: 30px; height: 30px; font-size: 11px; box-shadow: 0 0 0 1px #ececf1; }
+.wh-name { flex: 1; font-size: 15px; font-weight: 500; }
+.wh-price { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; color: #6b6b78; }
+.wh-row.best .wh-price { color: #0b7d47; font-weight: 700; }
+.wh-chip { font-size: 11.5px; font-weight: 700; color: #0b7d47; background: #e2f5ea; padding: 3px 8px; border-radius: 99px; }
+.wh-save {
+  position: relative; z-index: 2; align-self: flex-end; margin: -18px max(0px, calc(50% - 190px)) 0 0;
+  background: #121216; color: #fff; border-radius: 16px; padding: 10px 14px; display: flex; flex-direction: column;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25); animation: wh-in 0.6s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.wh-save span { font-size: 11.5px; opacity: 0.7; }
+.wh-save b { font-size: 19px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+@keyframes wh-in { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) { .wh-card, .wh-save { animation: none; } }
+
+/* Middle: name and promise */
+.welcome-body { padding: 26px 28px 8px; max-width: 460px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+.welcome-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: var(--text-2); }
+.welcome-brand img { width: 24px; height: 24px; border-radius: 7px; }
+.welcome-body h1 { font-size: 30px; line-height: 1.12; letter-spacing: -0.025em; margin: 12px 0 10px; font-weight: 750; }
+.welcome-body p { margin: 0; color: var(--text-2); font-size: 16px; line-height: 1.45; }
+
+/* Bottom: sign in or carry on */
+.welcome-actions { display: flex; flex-direction: column; gap: 6px; max-width: 460px; width: 100%; margin: 0 auto; padding: 18px 24px 0; box-sizing: border-box; }
+.welcome-btn {
+  height: 54px; border-radius: 16px; font-size: 16.5px; font-weight: 600; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-family: inherit;
+}
+.welcome-btn.google { background: var(--text); color: var(--bg); }
+.welcome-btn.google svg { background: #fff; border-radius: 50%; padding: 3px; width: 24px; height: 24px; box-sizing: border-box; }
+.welcome-btn.primary { background: var(--accent); color: var(--accent-ink); }
+.welcome-btn.plain { background: transparent; color: var(--text); height: 46px; }
+.welcome-btn:disabled { opacity: 0.6; }
+.welcome-btn:active { transform: scale(0.985); }
+.welcome-note { color: var(--text-2); font-size: 12.5px; text-align: center; line-height: 1.45; margin: 2px 8px 0; }
+@media (max-height: 720px) {
+  .welcome-hero { min-height: 270px; padding-top: calc(max(16px, env(safe-area-inset-top)) + 14px); padding-bottom: 28px; }
+  .wh-card { padding-top: 12px; }
+  .wh-row { padding: 6px 4px; }
+  .welcome-body { padding-top: 18px; }
+  .welcome-body h1 { font-size: 26px; margin: 8px 0 8px; }
+  .welcome-body p { font-size: 15px; }
+}
 .btn.google { background: #fff; color: #1f1f1f; border: 1px solid #dadce0; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; }
 .btn.google.small { width: auto; height: 38px; padding: 0 14px; font-size: 14px; }
 /* account on the "You" page */
