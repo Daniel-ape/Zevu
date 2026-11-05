@@ -106,7 +106,7 @@ function Shell() {
   const [overlay, setOverlay] = useState(false)
   useEffect(() => {
     if (!nativeDock) return
-    const SEL = '.sheet-backdrop, .shop, .cardview, .camera'
+    const SEL = '.sheet-backdrop, .shop, .cardview, .camera, .welcome'
     const check = () => setOverlay(!!document.querySelector(SEL))
     const mo = new MutationObserver(check)
     mo.observe(document.body, { childList: true, subtree: true })
@@ -115,7 +115,8 @@ function Shell() {
   }, [nativeDock])
   useEffect(() => {
     if (!nativeDock) return
-    if (overlay) { NativeDock.hide().catch(() => {}); return }
+    // The welcome page covers the whole screen too, with its own buttons at the bottom.
+    if (overlay || !welcomed) { NativeDock.hide().catch(() => {}); return }
     const ids: Tab[] = ['home', 'search', 'lists', 'leaflets', 'profile']
     const label = { home: 'tab.home', search: 'tab.search', lists: 'tab.list', leaflets: 'tab.leaflets', profile: 'tab.you' } as const
     NativeDock.show({
@@ -124,7 +125,7 @@ function Shell() {
       badges: newLeaflets && tab !== 'leaflets' ? ['leaflets'] : [],
       scanLabel: t('tab.scan'),
     }).catch(() => setNativeDock(false))
-  }, [nativeDock, tab, top, newLeaflets, t, overlay])
+  }, [nativeDock, tab, top, newLeaflets, t, overlay, welcomed])
   useEffect(() => {
     window.scrollTo(0, 0)
     document.querySelector('.screen')?.scrollTo(0, 0)
