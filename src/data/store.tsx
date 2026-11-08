@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { CategoryId, PriceObservation, Product, Retailer, ShoppingList, Watch } from '../domain/types'
 import { RETAILERS } from './retailers'
 import { detectLang, translate, type Key, type Lang } from '../i18n'
@@ -157,6 +157,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .finally(() => setRest('done'))
       return 'loading'
     })
+  }, [])
+  // The shops are read twice a day or more. The installed app is often resumed
+  // rather than restarted, so when it comes back after a few hours, fetch the
+  // prices again (quietly, in place).
+  const loadedAt = useRef(Date.now())
+  const restNow = useRef(rest)
+  restNow.current = rest
+  useEffect(() => {
+    const onShow = async () => {
+      if (document.visibilityState !== 'visible' || Date.now() - loadedAt.current < 3 * 3_600_000) return
+      loadedAt.current = Date.now()
+      const parts: ('core' | 'rest')[] = restNow.current === 'done' ? ['core', 'rest'] : ['core']
+      const got = await Promise.all(parts.map((p) => loadShopData(p).catch(() => null)))
+      if (got.some((d) => !d || !d.observations.length)) return
+      setShopProducts(got.flatMap((d) => d!.products))
+      setShopPics(new Map(got.flatMap((d) => d!.images)))
+      setObservations(got.flatMap((d) => d!.observations))
+    }
+    document.addEventListener('visibilitychange', onShow)
+    return () => document.removeEventListener('visibilitychange', onShow)
   }, [])
   // Something on the user's list or watch list is outside the everyday range: fetch the rest.
   useEffect(() => {

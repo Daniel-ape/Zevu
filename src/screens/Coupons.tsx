@@ -45,6 +45,15 @@ export function Coupons() {
     }
   }
 
+  // Deleting is instant, with a few seconds to undo.
+  const [undo, setUndo] = useState<typeof coupons[number] | null>(null)
+  const undoTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const remove = (c: typeof coupons[number]) => {
+    removeCoupon(c.id)
+    setUndo(c)
+    clearTimeout(undoTimer.current)
+    undoTimer.current = setTimeout(() => setUndo(null), 5000)
+  }
   const fmtDate = (d: string) => new Date(d + 'T12:00').toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' })
   const daysLeft = (d: string) => Math.ceil((new Date(d + 'T23:59').getTime() - Date.now()) / 86_400_000)
 
@@ -106,6 +115,7 @@ export function Coupons() {
                   </button>
                   <div className="coupon-actions">
                     <button className="coupon-used" onClick={() => saveCoupon({ ...c, used: true })}>{t('cp.used')}</button>
+                    <button className="coupon-del" onClick={() => remove(c)} aria-label={t('cp.delete')}>{t('cp.delete')}</button>
                   </div>
                 </div>
               )
@@ -113,6 +123,13 @@ export function Coupons() {
           </div>
         )}
       </div>
+
+      {undo && (
+        <div className="toast">
+          {t('cp.deleted')}
+          <button onClick={() => { saveCoupon(undo); setUndo(null) }}>{t('undo.undo')}</button>
+        </div>
+      )}
 
       {editing && (
         <CouponEditor

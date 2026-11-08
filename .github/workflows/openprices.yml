@@ -3,6 +3,7 @@ name: Collect Open Prices
 on:
   schedule:
     - cron: '27 5 * * *'
+    - cron: '27 16 * * *'
   workflow_dispatch:
 permissions:
   contents: write
