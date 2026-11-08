@@ -2,7 +2,7 @@ name: iOS build
 
 # Builds the iPhone app on a Mac with Xcode 26 (needed for Liquid Glass),
 # runs it in the iPhone simulator and saves a screenshot, and builds an
-# unsigned Hintaopas.ipa for iPhones. The .ipa is published on the release
+# unsigned ZEVU.ipa for iPhones. The .ipa is published on the release
 # "iphone" (a fixed download link); Sideloadly on a Windows PC signs it with
 # the user's own Apple ID when installing.
 on:
@@ -73,21 +73,22 @@ jobs:
           APP=build-device/Build/Products/Release-iphoneos/App.app
           test -d "$APP"
           rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
-          zip -qry Hintaopas.ipa Payload
-          ls -la Hintaopas.ipa
+          zip -qry ZEVU.ipa Payload
+          ls -la ZEVU.ipa
 
-      - name: Publish Hintaopas.ipa on the "iphone" release
+      - name: Publish ZEVU.ipa on the "iphone" release
         if: github.ref == 'refs/heads/main'
         working-directory: ios/App
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          NOTES="Hintaopas för iPhone, byggd $(date -u +'%Y-%m-%d %H:%M') UTC från ${GITHUB_SHA::7}. Installera med Sideloadly på en Windows-dator (se README)."
+          NOTES="ZEVU för iPhone, byggd $(date -u +'%Y-%m-%d %H:%M') UTC från ${GITHUB_SHA::7}. Installera med Sideloadly på en Windows-dator (se README)."
           if gh release view iphone >/dev/null 2>&1; then
-            gh release upload iphone Hintaopas.ipa --clobber
-            gh release edit iphone --notes "$NOTES"
+            gh release upload iphone ZEVU.ipa --clobber
+            gh release delete-asset iphone Hintaopas.ipa -y || true
+            gh release edit iphone --notes "$NOTES" --title "ZEVU för iPhone"
           else
-            gh release create iphone Hintaopas.ipa --title "Hintaopas för iPhone" --notes "$NOTES" --latest=false
+            gh release create iphone ZEVU.ipa --title "ZEVU för iPhone" --notes "$NOTES" --latest=false
           fi
 
       - uses: actions/upload-artifact@v4

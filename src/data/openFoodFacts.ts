@@ -8,7 +8,7 @@ import type { Lang } from '../i18n'
 const BASE = 'https://world.openfoodfacts.org'
 const FIELDS = 'code,product_name,product_name_fi,product_name_sv,product_name_en,brands,quantity,categories_tags,image_front_small_url'
 // OFF asks apps to identify themselves.
-const HEADERS = { 'User-Agent': 'Hintaopas/0.1 (grocery price comparison, Finland)' }
+const HEADERS = { 'User-Agent': 'ZEVU/0.1 (grocery price comparison, Finland)' }
 
 export interface OffProduct {
   code?: string

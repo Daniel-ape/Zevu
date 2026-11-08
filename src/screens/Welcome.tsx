@@ -70,7 +70,8 @@ export function Welcome({ onDone }: { onDone: () => void }) {
       <div className="welcome-body">
         <div className="welcome-brand">
           <img src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" />
-          <span>Hintaopas</span>
+          <span className="wb-name">ZEVU</span>
+          <span className="wb-slogan">Compare More. Spend Less.</span>
         </div>
         <h1>{t('wel.headline')}</h1>
         <p>{t('wel.sub')}</p>

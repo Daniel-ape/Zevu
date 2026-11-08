@@ -6,7 +6,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 // (public/runners/background.js) and sends a notification when one drops.
 const config: CapacitorConfig = {
   appId: 'fi.hintaopas.app',
-  appName: 'Hintaopas',
+  appName: 'ZEVU',
   webDir: 'dist',
   plugins: {
     BackgroundRunner: {
