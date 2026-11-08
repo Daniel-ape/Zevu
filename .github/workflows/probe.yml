@@ -4,8 +4,13 @@ jobs:
   p:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22 }
       - run: |
-          for s in minimani multitronic; do echo "===== $s"; BUDGET_MIN=2 node collector/stores.mjs $s 2>&1 | tail -15; node -e "const d=require('./public/prices/$s.json');console.log('saved',d.prices.length);for(const p of d.prices.slice(0,8))console.log(p.ean,p.priceCents,p.name)" 2>&1 | head -10; done
+          UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
+          for u in https://www.minimani.fi/arla-luonto-ab-mansikkajogurtti-lakton-175-g.html https://www.minimani.fi/apetit-pullea-sokeriherne-300-g.html; do
+            curl -sL -A "$UA" "$u" > p.html; echo "=== $u $(wc -c < p.html)"
+            grep -oE 'application/ld\+json[^<]{0,1500}' p.html | head -3
+            grep -oiE '(gtin|ean|barcode|viivakoodi)[^<]{0,80}' p.html | head -8
+            grep -oE 'data-price-amount="[^"]*"|itemprop="price"[^>]*|"price":"?[0-9.]+' p.html | head -4
+            grep -oE '<h1[^>]*>[^<]*<span[^>]*>[^<]*' p.html | head -2
+            sleep 4
+          done
