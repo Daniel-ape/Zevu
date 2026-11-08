@@ -235,9 +235,7 @@ export function Cover({ chain, l, showStore = true, compact, logo }: { chain: st
 export function Leaflets() {
   const { t, lang } = useStore()
   const { shelf, updated } = useShelf()
-  const [only, setOnly] = useState<string>('all')
   useEffect(() => { markLeafletsSeen() }, [])
-  const shown = only === 'all' ? shelf : shelf.filter((c) => c.chain === only)
   const when = updated && !Number.isNaN(+new Date(updated))
     ? new Date(updated).toLocaleString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
     : null
@@ -247,21 +245,10 @@ export function Leaflets() {
         <h1>{t('offers.title')}</h1>
         <span className="muted small">{t('offers.week', { n: isoWeek() })}</span>
       </div>
-      <div className="chips" style={{ marginTop: 14 }}>
-        {['all', ...shelf.map((c) => c.chain)].map((c) => (
-          <button key={c} className={'chip' + (only === c ? ' on' : '')} onClick={() => setOnly(c)}>
-            {c !== 'all' && <ChainMark chain={CHAIN_ID[c] ?? c.toLowerCase()} inline />}
-            {c === 'all' ? t('offers.allChains') : c}
-          </button>
-        ))}
-      </div>
-      {shown.map((c) => (
-        <div key={c.chain} className="section">
-          <div className="section-head">
-            <h2 className="chain-head"><ChainMark chain={CHAIN_ID[c.chain] ?? c.chain.toLowerCase()} inline /><span className="chain-name">{c.chain}</span></h2>
-            <span className="muted tiny" style={{ textAlign: 'right' }}>{c.aboutText ?? t(c.about)}</span>
-          </div>
-          <div className="shelf">
+      {shelf.map((c) => (
+        <div key={c.chain} className="lf-group">
+          <h2 className="lf-head"><ChainMark chain={CHAIN_ID[c.chain] ?? c.chain.toLowerCase()} inline /><span className="chain-name">{c.chain}</span></h2>
+          <div className="shelf lf-shelf">
             {c.leaflets.map((l) => <Cover key={l.url} chain={c.chain} l={l} showStore={c.chain === 'K-Ruoka'} />)}
           </div>
         </div>
