@@ -1641,3 +1641,5 @@ html, body { overscroll-behavior-x: none; }
 .group-rows .menu-row { padding: 12px 0; }
 .group-rows .menu-row:last-child { border-bottom: 0; }
 .group-rows .menu-icon { width: 30px; height: 30px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); }
+.you-top { display: flex; align-items: center; gap: 12px; }
+.you-top h1 { margin: 0; }

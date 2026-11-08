@@ -282,7 +282,7 @@ export function Lists() {
                   )
                 })}
                 {myStores.length === 0 && (
-                  <button className="trip-tip" onClick={() => { openProfilePage('stores'); nav.go('profile') }}>{t('trip.tip')}</button>
+                  <button className="trip-tip" onClick={() => { openProfilePage('stores', nav.tab); nav.go('profile') }}>{t('trip.tip')}</button>
                 )}
               </div>
             )

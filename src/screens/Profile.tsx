@@ -8,7 +8,7 @@ import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
 import { Back, Bell, Chart, Check, Chevron, Contrast, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket } from '../ui/icons'
-import { useNav } from '../nav'
+import { useNav, type Tab } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 import { WatchList } from '../ui/WatchList'
@@ -16,8 +16,9 @@ import { WatchList } from '../ui/WatchList'
 type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about' | 'privacy' | 'sources' | 'terms' | 'info'
 
 /** Open a page of the You tab from elsewhere (call before nav.go('profile')). */
-let wanted: Page | null = null
-export function openProfilePage(p: Page) { wanted = p }
+let wanted: { page: Page; from: Tab } | null = null
+/** Opens a page of You from another tab; its back button then returns to that tab. */
+export function openProfilePage(page: Page, from: Tab) { wanted = { page, from } }
 
 // One row of the menu: icon, title, current value, chevron.
 function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: string; value?: string; onClick: () => void }) {
@@ -34,7 +35,14 @@ function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: stri
 export function Profile() {
   const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, coupons, t } = useStore()
   const nav = useNav()
-  const [page, setPage] = useState<Page | null>(() => { const p = wanted; wanted = null; return p })
+  // Opened from another tab (bell, savings card…): back on that page goes back there.
+  const [entry] = useState(() => { const w = wanted; wanted = null; return w })
+  const [page, setPage] = useState<Page | null>(entry?.page ?? null)
+  const back = () => {
+    if (page === 'about' || page === 'privacy' || page === 'sources' || page === 'terms') return setPage('info')
+    if (entry && page === entry.page && entry.from !== 'profile') return nav.go(entry.from)
+    setPage(null)
+  }
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
   const [undo, setUndo] = useState<Receipt | null>(null)
 
@@ -70,7 +78,7 @@ export function Profile() {
     return (
       <div className="screen push">
         <div className="topbar sticky">
-          <button className="icon-btn" onClick={() => setPage(page === 'about' || page === 'privacy' || page === 'sources' || page === 'terms' ? 'info' : null)} aria-label={t('product.back')}><Back /></button>
+          <button className="icon-btn" onClick={back} aria-label={t('product.back')}><Back /></button>
           <h2 style={{ flex: 1, textAlign: 'center', marginRight: 44 }}>{titles[page]}</h2>
         </div>
 
@@ -155,7 +163,11 @@ export function Profile() {
 
   return (
     <div className="screen">
-      <div className="topbar"><h1>{t('you.title')}</h1></div>
+      <div className="topbar you-top">
+        {/* You is opened from the picture on Home, so back goes there. */}
+        <button className="icon-btn" onClick={() => nav.go('home')} aria-label={t('product.back')}><Back /></button>
+        <h1>{t('you.title')}</h1>
+      </div>
       <AccountCard />
 
       <div className="group-label">{t('you.groupMoney')}</div>

@@ -21,7 +21,7 @@ export function WatchBell() {
   const { watched, t } = useStore()
   const nav = useNav()
   return (
-    <button className="bell-btn" onClick={() => { openProfilePage('watched'); nav.go('profile') }} aria-label={t('watch.title')}>
+    <button className="bell-btn" onClick={() => { openProfilePage('watched', nav.tab); nav.go('profile') }} aria-label={t('watch.title')}>
       <span className="bell-icon"><Bell size={21} /></span>
       {watched.length > 0 && <i className="bell-n" key={watched.length}>{watched.length}</i>}
     </button>
@@ -51,7 +51,7 @@ export function WatchToast() {
         <b>{t('watch.added')}</b>
         <span>{t('watch.addedSub')}</span>
       </span>
-      <button onClick={() => { setShow(0); openProfilePage('watched'); nav.go('profile') }}>{t('watch.choose')}</button>
+      <button onClick={() => { setShow(0); openProfilePage('watched', nav.tab); nav.go('profile') }}>{t('watch.choose')}</button>
     </div>
   )
 }

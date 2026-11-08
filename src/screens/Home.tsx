@@ -69,7 +69,7 @@ export function Home() {
       </div>
 
       <WatchAlert />
-      <SaveCard month={month} bestShop={best?.retailer.name} onOpen={() => { openProfilePage('spending'); nav.go('profile') }} />
+      <SaveCard month={month} bestShop={best?.retailer.name} onOpen={() => { openProfilePage('spending', nav.tab); nav.go('profile') }} />
 
 
       {list.items.length > 0 && (
