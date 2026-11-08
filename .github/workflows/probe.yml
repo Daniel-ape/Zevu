@@ -6,16 +6,9 @@ jobs:
     steps:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
-          curl -sL -A "$UA" https://www.jimms.fi/ > h.html
-          echo "== list links on home: $(grep -o 'href="/fi/Product/List/[^"?]*"' h.html | sort -u | wc -l)"
-          curl -sL -A "$UA" https://www.jimms.fi/fi/Product/List/000-00P/komponentit--naytonohjaimet > l.html
-          echo "== list size $(wc -c < l.html); show links $(grep -o '/fi/Product/Show/[0-9]*' l.html | sort -u | wc -l)"
-          grep -o -i -E '(href="[^"]*(page|p=|sivu)[^"]*")' l.html | sort -u | head -10
-          grep -o -i -E '(tuotetta|products|totalCount|itemCount|pageSize)[^<]{0,80}' l.html | head -8
-          grep -o -E 'data-[a-z-]*="[^"]{0,60}"' l.html | sort | uniq -c | sort -rn | head -15
-          curl -sL -A "$UA" "https://www.jimms.fi/fi/Product/List/000-00P/komponentit--naytonohjaimet?p=2" > l2.html
-          echo "== p=2 links $(grep -o '/fi/Product/Show/[0-9]*' l2.html | sort -u | wc -l) same? $(diff <(grep -o '/fi/Product/Show/[0-9]*' l.html | sort -u) <(grep -o '/fi/Product/Show/[0-9]*' l2.html | sort -u) >/dev/null && echo yes || echo no)"
-          curl -sL -A "$UA" https://www.jimms.fi/fi/Product/Show/217573 > p.html
-          echo "== product itemprops"; grep -o -E 'itemprop="[a-zA-Z0-9]+"[^>]{0,160}' p.html | head -30
-          grep -c 'ld+json' p.html || true
-          grep -o -E 'og:(title|image)" content="[^"]{0,120}' p.html
+          for id in 217573 195071; do
+          curl -sL -A "$UA" https://www.jimms.fi/fi/Product/Show/$id > p.html
+          echo "== $id"; grep -o -E 'itemprop="[a-zA-Z0-9]+"[^>]{0,140}' p.html | grep -v -E 'itemListElement|"item"|position|"name" class|worstRating|bestRating|ratingValue|reviewCount' | head -30
+          grep -o -E '.{60}gtin13.{60}' p.html | head -3
+          grep -o -i -E '.{40}(varastossa|saatavuus|InStock|OutOfStock).{40}' p.html | head -4
+          done
