@@ -130,6 +130,18 @@ function Shell() {
     window.scrollTo(0, 0)
     document.querySelector('.screen')?.scrollTo(0, 0)
   }, [top, tab])
+  // Which way the page moves in: along the tab bar order for tabs, forward for
+  // a product opened on top, back when it closes. Kept in a ref so re-renders
+  // that are not navigation don't restart the animation.
+  const seen = useRef({ tab, depth: stack.length })
+  const motion = useRef<'enter' | 'right' | 'left' | 'push' | 'pop'>('enter')
+  if (seen.current.tab !== tab || seen.current.depth !== stack.length) {
+    const order: Tab[] = ['home', 'search', 'lists', 'leaflets', 'profile', 'coupons', 'scan']
+    motion.current = stack.length > seen.current.depth ? 'push'
+      : stack.length < seen.current.depth ? 'pop'
+      : order.indexOf(tab) >= order.indexOf(seen.current.tab) ? 'right' : 'left'
+    seen.current = { tab, depth: stack.length }
+  }
   const screen = top ? (
     <ProductScreen key={top + stack.length} id={top} />
   ) : tab === 'home' ? <Home key="home" />
@@ -142,7 +154,7 @@ function Shell() {
 
   return (
     <NavCtx.Provider value={nav}>
-      <div className="shell">
+      <div className="shell" data-motion={motion.current}>
         {!welcomed && <Welcome onDone={finishWelcome} />}
         {screen}
         <WatchAlert />

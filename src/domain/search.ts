@@ -53,7 +53,7 @@ function distance(a: string, b: string, max: number) {
 }
 
 // How well one query word matches the product's words (0 = no match).
-function wordScore(q: string, words: string[], joined: string, named?: Set<string>) {
+function wordScore(q: string, words: string[], joined: string, named?: Set<string>, fuzzy = true) {
   if (/^\d{4,}$/.test(q)) return joined.includes(q) ? 3 : 0
   let best = 0
   for (const w of words) {
@@ -61,7 +61,9 @@ function wordScore(q: string, words: string[], joined: string, named?: Set<strin
     if (w === q) { if (!named || named.has(w)) return 4; best = Math.max(best, 2.5); continue }
     if (w.startsWith(q)) best = Math.max(best, 3)
     else if (q.length >= 3 && w.includes(q)) best = Math.max(best, 2)
-    else if (q.length >= 4) {
+    else if (fuzzy && q.length >= 4) {
+      // Typos rarely hit both of the first two letters: skip the rest early.
+      if (w[0] !== q[0] && w[1] !== q[1]) continue
       const max = q.length >= 7 ? 2 : 1
       // Compare with the start of the word too, so "maitt" finds "maitojuoma".
       if (distance(q, w, max) <= max || distance(q, w.slice(0, q.length), max) <= max) best = Math.max(best, 1)
@@ -76,16 +78,26 @@ export const haystack = (p: Product): Haystack => {
   return { words: joined.split(' '), joined, named: new Set(fold(`${p.name} ${p.altName ?? ''}`).split(' ')) }
 }
 
-/** 0 when the product doesn't match, higher is a better match. */
-export function matchScore(query: string, h: Haystack): number {
-  const terms = fold(query).split(' ').filter(Boolean)
+/** A query prepared once, so scoring thousands of products stays cheap while typing. */
+export type Query = { term: string; alts: string[] }[]
+export function compileQuery(query: string): Query {
+  return fold(query).split(' ').filter(Boolean).map((term) => ({ term, alts: (WORDS[term] ?? []).map(fold) }))
+}
+
+/**
+ * 0 when the product doesn't match, higher is a better match. Without
+ * `fuzzy`, typos are not forgiven (much faster; used first, then again with
+ * typos only when few products match).
+ */
+export function matchScore(query: string | Query, h: Haystack, fuzzy = true): number {
+  const terms = typeof query === 'string' ? compileQuery(query) : query
   if (!terms.length) return 1
   let total = 0
-  for (const t of terms) {
-    let s = wordScore(t, h.words, h.joined, h.named)
-    for (const alt of WORDS[t] ?? []) {
-      const a = fold(alt)
-      s = Math.max(s, a.includes(' ') ? (h.joined.includes(a) ? 3 : 0) : Math.min(3.5, wordScore(a, h.words, h.joined, h.named)))
+  for (const { term, alts } of terms) {
+    let s = wordScore(term, h.words, h.joined, h.named, fuzzy)
+    for (const a of alts) {
+      if (s >= 3.5) break
+      s = Math.max(s, a.includes(' ') ? (h.joined.includes(a) ? 3 : 0) : Math.min(3.5, wordScore(a, h.words, h.joined, h.named, fuzzy)))
     }
     if (!s) return 0
     total += s

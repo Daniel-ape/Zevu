@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, storeInsights, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { ArrowRight, List, Receipt, Scan as ScanIcon, Ticket } from '../ui/icons'
+import { ArrowRight, List, Scan as ScanIcon, Ticket } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
 import { ReceiptSheet } from './ReceiptSheet'
-import { monthSavings } from '../domain/receipts'
 import { Cover, useShelf } from './Leaflets'
 import { HomeMemberOffers } from './Coupons'
 import { openProfilePage } from './Profile'
+import { SaveCard } from '../ui/SaveCard'
 import type { Key } from '../i18n'
 
 function greeting(): Key {
@@ -17,7 +17,7 @@ function greeting(): Key {
 }
 
 export function Home() {
-  const { products, observations, retailers, list, watched, lang, pricesOf, receipts, coupons, t } = useStore()
+  const { products, observations, retailers, list, watched, lang, pricesOf, coupons, t } = useStore()
   const activeCoupons = coupons.filter((c) => !c.used && (!c.validUntil || new Date(c.validUntil + 'T23:59') >= new Date())).length
   const nav = useNav()
   const [receipt, setReceipt] = useState(false)
@@ -33,7 +33,6 @@ export function Home() {
   const worst = [...totals].filter((x) => x.missing === 0).sort((a, b) => b.totalCents - a.totalCents)[0]
   const saving = best && worst ? worst.totalCents - best.totalCents : 0
 
-  const savings = useMemo(() => monthSavings(receipts, pricesOf), [receipts, pricesOf])
   const month = new Date().toLocaleDateString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { month: 'long' })
 
   const insights = useMemo(() => storeInsights(products, pricesOf, retailers), [products, pricesOf, retailers])
@@ -59,32 +58,16 @@ export function Home() {
   return (
     <div className="screen home">
       <div className="home-head">
-        <div className="eyebrow">{today}</div>
-        <h1>{t(greeting())}</h1>
+        <div>
+          <div className="eyebrow">{today}</div>
+          <h1>{t(greeting())}</h1>
+        </div>
+        <button className="home-badge" onClick={() => nav.go('profile')} aria-label={t('tab.you')}>
+          <img src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" />
+        </button>
       </div>
 
-      <div className="save-card">
-        <div className="save-label">{t('save.title', { month })}</div>
-        <div className="save-amount">{euro(savings.savedCents)}</div>
-        {savings.receipts === 0 ? (
-          <>
-            <div className="save-sub">{t('save.empty')}</div>
-            <button className="btn primary save-btn" onClick={() => setReceipt(true)}><Receipt size={18} /> {t('save.scan')}</button>
-          </>
-        ) : (
-          <>
-            <div className="save-sub">
-              {t('save.vsAvg')} · {t(savings.receipts === 1 ? 'save.receipts1' : 'save.receipts', { n: savings.receipts })} · {t('save.spent', { amount: euro(savings.spentCents) })}
-            </div>
-            {savings.missedCents > 0 && <div className="save-missed">{t('save.missed', { amount: euro(savings.missedCents) })}</div>}
-            {savings.compared === 0 && <div className="save-missed">{t('save.noCompare')}</div>}
-            <div className="save-links">
-              <button className="save-link" onClick={() => { openProfilePage('spending'); nav.go('profile') }}>{t('sv.open')} <ArrowRight size={14} /></button>
-              <button className="save-link" onClick={() => setReceipt(true)}><Receipt size={16} /> {t('save.add')}</button>
-            </div>
-          </>
-        )}
-      </div>
+      <SaveCard month={month} bestShop={best?.retailer.name} onScan={() => setReceipt(true)} onOpen={() => { openProfilePage('spending'); nav.go('profile') }} />
 
       <div className="quick3">
         <button onClick={() => nav.go('scan')}><span className="q-ic"><ScanIcon size={22} /></span>{t('qa.scan')}</button>

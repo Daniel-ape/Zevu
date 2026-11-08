@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../data/store'
 import { cheapest, compare, euro, sizeLabel, unitLabel, brandLabel } from '../domain/pricing'
-import type { CategoryId } from '../domain/types'
+import type { CategoryId, Product } from '../domain/types'
 import { useNav } from '../nav'
 import { Check, Plus, Search } from '../ui/icons'
-import { haystack, matchScore } from '../domain/search'
+import { compileQuery, haystack, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
 import { EMOJI, EVERYDAY } from '../domain/categories'
 import { Sheet } from '../ui/Sheet'
@@ -49,22 +49,40 @@ export function SearchScreen() {
   const hay = useMemo(() => new Map(products.map((p) => [p.id, haystack(p)])), [products])
   // Catalogue order is popularity order; shop-only products come after it.
   const rank = useMemo(() => new Map(products.map((p, i) => [p.id, i])), [products])
+  // Typing updates the field at once; the list follows a moment later, so
+  // keys never wait for thousands of products to be scored.
+  const dq = useDeferredValue(q)
   const results = useMemo(() => {
-    const needle = q.trim()
-    const scope = retailers
+    const needle = dq.trim()
+    const query = compileQuery(needle)
+    const onlineIds = Array.isArray(online) ? new Set(online) : null
     // Strong matches (exact or start of a word) first, typo matches last.
     const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
-    return products
-      .filter((p) => cat === 'all' || p.category === cat)
-      .map((p) => ({ p, score: needle ? matchScore(needle, hay.get(p.id)!) || (Array.isArray(online) && online.includes(p.id) ? 2 : 0) : 1 }))
-      .filter((r) => r.score > 0)
-      // Browsing without a query lists only products that have prices.
-      .filter((r) => needle || pricesOf(r.p.id).length > 0)
+    const inCat = cat === 'all' ? products : products.filter((p) => p.category === cat)
+    const scoreAll = (fuzzy: boolean) => {
+      const out: { p: (typeof products)[number]; score: number; priced: boolean }[] = []
+      for (const p of inCat) {
+        const priced = pricesOf(p.id).length > 0
+        // Browsing without a query lists only products that have prices.
+        if (!needle) { if (priced) out.push({ p, score: 1, priced }); continue }
+        const score = matchScore(query, hay.get(p.id)!, fuzzy) || (onlineIds?.has(p.id) ? 2 : 0)
+        if (score > 0) out.push({ p, score, priced })
+      }
+      return out
+    }
+    let found = scoreAll(false)
+    // Forgive typos only when the exact pass finds little.
+    if (needle.length >= 4 && found.length < 24) found = scoreAll(true)
+    // Cheap first cut (match strength, has a price, popularity), then the
+    // price comparison only for the products that can make the list.
+    found.sort((a, b) =>
+      (needle ? tier(a.score) - tier(b.score) : 0) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
+    const pool = sort === 'top' ? found.slice(0, 160) : found.slice(0, 600)
+    return pool
       .map(({ p, score }) => {
-        const rows = compare(p, pricesOf(p.id), scope)
+        const rows = compare(p, pricesOf(p.id), retailers)
         return { p, score, best: cheapest(rows), count: rows.filter((r) => r.freshness === 'fresh').length }
       })
-      // Browsing without a query lists only products that have prices.
       .filter((r) => (needle ? true : r.best || r.count > 0))
       .sort((a, b) => {
         // Typo matches last; otherwise products with a price come first.
@@ -78,7 +96,8 @@ export function SearchScreen() {
         return (av ?? Infinity) - (bv ?? Infinity)
       })
       .slice(0, 80)
-  }, [q, cat, sort, products, pricesOf, retailers, online, hay, rank])
+  }, [dq, cat, sort, products, pricesOf, retailers, online, hay, rank])
+  const stale = dq !== q
 
   // How many products with a price each category has (shown in the picker).
   const counts = useMemo(() => {
@@ -90,12 +109,17 @@ export function SearchScreen() {
   const catEmoji = (id: CategoryId | 'all') => (id === 'all' ? '🛒' : EMOJI[id])
 
   const inList = (id: string) => list.items.find((i) => i.productId === id)
-  const quickAdd = (id: string) => {
-    const item = inList(id)
+  // Stable handlers, so result rows that did not change are not drawn again while typing.
+  const latest = useRef({ list, setQuantity, nav })
+  latest.current = { list, setQuantity, nav }
+  const quickAdd = useCallback((id: string) => {
+    const { list, setQuantity } = latest.current
+    const item = list.items.find((i) => i.productId === id)
     setQuantity(id, (item?.quantity ?? 0) + 1)
     setAdded(id)
     setTimeout(() => setAdded((a) => (a === id ? null : a)), 1600)
-  }
+  }, [])
+  const openProduct = useCallback((id: string) => latest.current.nav.openProduct(id), [])
 
   return (
     <div className="screen">
@@ -147,38 +171,10 @@ export function SearchScreen() {
         <div className="empty">{t('search.none', { q })}</div>
       ) : (
         <div>
-          <div className="rows">
+          <div className="rows" style={{ opacity: stale ? 0.6 : 1, transition: 'opacity 0.15s' }}>
             {results.map(({ p, best, count }) => (
-              <div key={p.id} className="row search-row">
-              <button className="search-open" onClick={() => nav.openProduct(p.id)}>
-                <Tile product={p} />
-                <div className="grow">
-                  <div className="title">{p.name}</div>
-                  <div className="sub">{[brandLabel(p.brand), sizeLabel(p)].filter(Boolean).join(' · ')}</div>
-                </div>
-                <div className="end">
-                  {best ? (
-                    <>
-                      <div className="price">{euro(best.current.priceCents)}</div>
-                      <div className="sub">
-                        {sort === 'unit' && best.unitPriceCents !== null
-                          ? `${euro(best.unitPriceCents)}${unitLabel(p)}`
-                          : `${best.retailer.name}${count > 1 ? ` +${count - 1}` : ''}`}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="sub">{t('search.noPrice')}</div>
-                  )}
-                </div>
-              </button>
-              <button
-                className={'quick-add' + (inList(p.id) ? ' in' : '')}
-                onClick={() => quickAdd(p.id)}
-                aria-label={t('search.addToList')}
-              >
-                {added === p.id ? <Check size={18} /> : inList(p.id) ? <span>{inList(p.id)!.quantity}</span> : <Plus size={18} />}
-              </button>
-              </div>
+              <ResultRow key={p.id} p={p} best={best} count={count} sort={sort} qty={inList(p.id)?.quantity ?? 0}
+                justAdded={added === p.id} onOpen={openProduct} onAdd={quickAdd} noPrice={t('search.noPrice')} addLabel={t('search.addToList')} />
             ))}
           </div>
         </div>
@@ -190,3 +186,39 @@ export function SearchScreen() {
     </div>
   )
 }
+
+type Best = ReturnType<typeof cheapest>
+
+const ResultRow = memo(function ResultRow({ p, best, count, sort, qty, justAdded, onOpen, onAdd, noPrice, addLabel }: {
+  p: Product; best: Best; count: number; sort: Sort; qty: number; justAdded: boolean
+  onOpen: (id: string) => void; onAdd: (id: string) => void; noPrice: string; addLabel: string
+}) {
+  return (
+    <div className="row search-row">
+      <button className="search-open" onClick={() => onOpen(p.id)}>
+        <Tile product={p} />
+        <div className="grow">
+          <div className="title">{p.name}</div>
+          <div className="sub">{[brandLabel(p.brand), sizeLabel(p)].filter(Boolean).join(' · ')}</div>
+        </div>
+        <div className="end">
+          {best ? (
+            <>
+              <div className="price">{euro(best.current.priceCents)}</div>
+              <div className="sub">
+                {sort === 'unit' && best.unitPriceCents !== null
+                  ? `${euro(best.unitPriceCents)}${unitLabel(p)}`
+                  : `${best.retailer.name}${count > 1 ? ` +${count - 1}` : ''}`}
+              </div>
+            </>
+          ) : (
+            <div className="sub">{noPrice}</div>
+          )}
+        </div>
+      </button>
+      <button className={'quick-add' + (qty ? ' in' : '')} onClick={() => onAdd(p.id)} aria-label={addLabel}>
+        {justAdded ? <Check size={18} /> : qty ? <span>{qty}</span> : <Plus size={18} />}
+      </button>
+    </div>
+  )
+})
