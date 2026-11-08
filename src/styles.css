@@ -1661,3 +1661,16 @@ html, body { overscroll-behavior-x: none; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .shell::before { filter: saturate(1.2) brightness(1.5); } }
 .coupon-del { color: #d92d20 !important; }
 .welcome-brand img { box-shadow: 0 0 0 1px var(--line); }
+
+/* Calmer app: no sliding pages, staggered blocks or pulsing; just a quick
+   fade between pages. Colours stay as they are. */
+.screen,
+.shell[data-motion] > .screen,
+.screen.push { animation: calm-in 0.16s ease-out backwards; }
+@keyframes calm-in { from { opacity: 0; } }
+.screen > :not(.sheet-backdrop):not(.shop):not(.cardview):not(.camera):not(.leaflet):not(.topbar) { animation: none; }
+.rows > .row { animation: none; }
+.zc-live i { animation: none; }
+.zc-line, .zc-dot, .zc-proj, .zc-fact { animation: none; }
+.bell-n, .wt-bell { animation: none; }
+.wh-card, .wh-save { animation: none; }

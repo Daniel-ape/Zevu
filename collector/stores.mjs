@@ -13,6 +13,14 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
 import { foodRank } from './foodGuess.mjs'
 
+/** EAN-8/13 with a correct check digit. */
+const validEan = (g) => {
+  if (!/^(\d{8}|\d{13})$/.test(g)) return false
+  const d = [...g].map(Number), last = d.pop()
+  const sum = d.reverse().reduce((n, x, i) => n + x * (i % 2 === 0 ? 3 : 1), 0)
+  return (10 - (sum % 10)) % 10 === last
+}
+
 const STORES = {
   halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all', foodFirst: true },
   verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'all' },
@@ -23,7 +31,7 @@ const STORES = {
   ruohonjuuri: { retailerId: 'ruohonjuuri', base: 'https://www.ruohonjuuri.fi', sitemaps: ['https://www.ruohonjuuri.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
   yliopistonapteekki: { retailerId: 'yliopistonapteekki', base: 'https://www.yliopistonapteekki.fi', sitemaps: ['https://www.yliopistonapteekki.fi/pub/media/sitemap.xml'], product: /-\d{3,}$/, keep: 'all' },
   // Minimani's web shop has its whole range, groceries included (meat, dairy, frozen…).
-  minimani: { retailerId: 'minimani', base: 'https://www.minimani.fi', sitemaps: ['https://www.minimani.fi/sitemap/sitemap.xml'], product: /^https:\/\/www\.minimani\.fi\/[^/]+\.html$/, keep: 'all', foodFirst: true },
+  minimani: { retailerId: 'minimani', base: 'https://www.minimani.fi', sitemaps: ['https://www.minimani.fi/sitemap/sitemap.xml'], product: /^https:\/\/www\.minimani\.fi\/[^/]+\.html$/, keep: 'all', foodFirst: true, skuIsEan: true },
   multitronic: { retailerId: 'multitronic', base: 'https://www.multitronic.fi', sitemaps: ['https://www.multitronic.fi/sitemap.xml'], maps: /sitemap\/fi\/sitemap_product/, product: /\/fi\/products\/\d+$/, keep: 'all' },
   power: { retailerId: 'power', base: 'https://www.power.fi', sitemaps: ['https://www.power.fi/services/sitemap.xml'], maps: /products-\d+\.xml/, product: /\/p-\d+\/?$/, keep: 'all' },
   stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'all' },
@@ -128,6 +136,8 @@ function productFrom(html) {
       // Some shops leave the barcode out of JSON-LD but print it elsewhere on the page.
       const gtin = [].concat(x.gtin13 ?? x.gtin ?? x.gtin8 ?? x.gtin12 ?? x.ean ?? []).map(String).find((g) => /^\d{8,14}$/.test(g))
         ?? html.match(/["'](?:ean|ean13|gtin|gtin13|barcode)["']\s*[:=]\s*["']?(\d{8,14})/i)?.[1]
+        // Some shops (Minimani) put the barcode in sku; only a real EAN (valid check digit) counts.
+        ?? (cfg.skuIsEan && validEan(String(x.sku ?? '')) ? String(x.sku) : undefined)
       const offer = [].concat(x.offers ?? [])[0]
       const price = parseFloat(offer?.price ?? offer?.lowPrice)
       if (!gtin || !(price > 0)) continue

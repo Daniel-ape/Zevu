@@ -1,31 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
 import { savingsReport } from '../domain/receipts'
 import { loadOffers } from '../screens/Coupons'
 import { ArrowRight } from './icons'
-
-/** Counts up to the value when it first shows or changes (skipped with reduced motion). */
-function useCountUp(target: number, ms = 900) {
-  const [v, setV] = useState(0)
-  const from = useRef(0)
-  useEffect(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setV(target); return }
-    const start = performance.now()
-    const a = from.current
-    let raf = 0
-    const step = (now: number) => {
-      const k = Math.min(1, (now - start) / ms)
-      const e = 1 - Math.pow(1 - k, 3)
-      setV(Math.round(a + (target - a) * e))
-      if (k < 1) raf = requestAnimationFrame(step)
-      else from.current = target
-    }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
-  }, [target, ms])
-  return v
-}
 
 /** "5 min", "3 h", "2 d" */
 function ago(ms: number, t: ReturnType<typeof useStore>['t']) {
@@ -45,7 +23,7 @@ export function SaveCard({ month, bestShop, onOpen }: { month: string; bestShop?
   const { receipts, pricesOf, observations, t } = useStore()
   const now = new Date()
   const report = useMemo(() => savingsReport(receipts, pricesOf, now), [receipts, pricesOf]) // eslint-disable-line react-hooks/exhaustive-deps
-  const shown = useCountUp(report.savedCents)
+  const shown = report.savedCents
 
   // Saved so far on each day of the month, for the line.
   const days = now.getDate()
