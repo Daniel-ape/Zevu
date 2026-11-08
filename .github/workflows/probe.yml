@@ -1,0 +1,19 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
+          g(){ curl -sL -A "$UA" --max-time 40 -w '\n[HTTP %{http_code}]\n' "$1"; }
+          for h in www.jimms.fi www.multitronic.fi www.gigantti.fi; do
+            echo "===== $h robots"; g https://$h/robots.txt | head -60; sleep 3
+          done
+          echo "===== jimms sitemap"; g https://www.jimms.fi/sitemap.xml | head -c 1500; sleep 3
+          echo "===== multitronic sitemap"; g https://www.multitronic.fi/sitemap.xml | head -c 1500; sleep 3
+          echo "===== gigantti sitemap"; g https://www.gigantti.fi/sitemap.xml | head -c 800; sleep 3
+          echo "===== jimms home leaflet links"; curl -sL -A "$UA" https://www.jimms.fi/ | grep -oiE 'href="[^"]*(kampanj|tarjou|mainos|lehti|flyer|kuvasto)[^"]*"' | sort -u | head -20; sleep 3
+          echo "===== multitronic home leaflet links"; curl -sL -A "$UA" https://www.multitronic.fi/ | grep -oiE 'href="[^"]*(kampanj|tarjou|mainos|lehti|flyer|kuvasto|publitas|issuu)[^"]*"' | sort -u | head -20; sleep 3
+          echo "===== power leaflet"; curl -sL -A "$UA" https://www.power.fi/ | grep -oiE 'href="[^"]*(mainos|lehti|flyer|kuvasto|publitas|issuu|tarjouslehti)[^"]*"' | sort -u | head -20; sleep 3
+          echo "===== gigantti home"; curl -sL -A "$UA" -o /dev/null -w '%{http_code}\n' https://www.gigantti.fi/
