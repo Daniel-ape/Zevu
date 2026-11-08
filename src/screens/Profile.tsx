@@ -13,6 +13,10 @@ import { WatchList } from '../ui/WatchList'
 
 type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about'
 
+/** Open a page of the You tab from elsewhere (call before nav.go('profile')). */
+let wanted: Page | null = null
+export function openProfilePage(p: Page) { wanted = p }
+
 // One row of the menu: icon, title, current value, chevron.
 function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: string; value?: string; onClick: () => void }) {
   return (
@@ -28,7 +32,7 @@ function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: stri
 export function Profile() {
   const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, cards, t } = useStore()
   const nav = useNav()
-  const [page, setPage] = useState<Page | null>(null)
+  const [page, setPage] = useState<Page | null>(() => { const p = wanted; wanted = null; return p })
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
   const [undo, setUndo] = useState<Receipt | null>(null)
 

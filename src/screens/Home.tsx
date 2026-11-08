@@ -8,6 +8,7 @@ import { ReceiptSheet } from './ReceiptSheet'
 import { monthSavings } from '../domain/receipts'
 import { Cover, useShelf } from './Leaflets'
 import { HomeMemberOffers } from './Coupons'
+import { openProfilePage } from './Profile'
 import type { Key } from '../i18n'
 
 function greeting(): Key {
@@ -77,7 +78,10 @@ export function Home() {
             </div>
             {savings.missedCents > 0 && <div className="save-missed">{t('save.missed', { amount: euro(savings.missedCents) })}</div>}
             {savings.compared === 0 && <div className="save-missed">{t('save.noCompare')}</div>}
-            <button className="save-link" onClick={() => setReceipt(true)}><Receipt size={16} /> {t('save.add')}</button>
+            <div className="save-links">
+              <button className="save-link" onClick={() => { openProfilePage('spending'); nav.go('profile') }}>{t('sv.open')} <ArrowRight size={14} /></button>
+              <button className="save-link" onClick={() => setReceipt(true)}><Receipt size={16} /> {t('save.add')}</button>
+            </div>
           </>
         )}
       </div>

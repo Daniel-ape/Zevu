@@ -4,12 +4,13 @@ import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan } from '../
 import { useNav } from '../nav'
 import { Check, List as ListIcon, Minus, Plus } from '../ui/icons'
 import { RankBadge, RetailerMark, Tile } from '../ui/bits'
+import { openProfilePage } from './Profile'
 import { StoreMode } from './StoreMode'
 
 export function Lists() {
   const {
     list, lists, setActiveList, createList, renameList, deleteList, restoreList,
-    products, observations, retailers, setQuantity, toggleChecked, clearChecked, pricesOf, t,
+    products, observations, retailers, setQuantity, toggleChecked, clearChecked, pricesOf, myStores, t,
   } = useStore()
   const nav = useNav()
   const [mode, setMode] = useState<'none' | 'new' | 'rename'>('none')
@@ -164,40 +165,73 @@ export function Lists() {
             )}
           </div>
 
-          {plan && (
-            <div className="section">
-              <div className="section-head"><h2>{t('split.title')}</h2></div>
-              <div className="best-card">
-                <div className="best-label">{plan.stores.map((r) => r.name).join(' + ')}</div>
-                <div className="best-price">{euro(plan.totalCents)}</div>
-                <div className="best-meta">
-                  {plan.single ? t('split.saves', { amount: euro(plan.savingCents), store: plan.single.retailer.name }) : t('split.noSingle')}
-                  {plan.unpriced > 0 && <> · {t('split.unpriced', { n: plan.unpriced })}</>}
+          {(plan || best) && list.items.length >= 2 && (() => {
+            // Splitting is worth an extra stop only when it saves at least 1,50 €.
+            const worth = !!plan && (!plan.single || plan.savingCents >= 150)
+            const stores = worth && plan ? plan.stores : []
+            return (
+              <div className="section trip">
+                <div className="section-head"><h2>{t('trip.title')}</h2></div>
+                <div className="trip-compare">
+                  {best && (
+                    <div className={'trip-opt' + (!worth ? ' on' : '')}>
+                      <span className="trip-k">{t('trip.oneStore')}</span>
+                      <span className="trip-n">{best.retailer.name}</span>
+                      <b>{euro(best.totalCents)}</b>
+                    </div>
+                  )}
+                  {plan && (
+                    <div className={'trip-opt' + (worth ? ' on' : '')}>
+                      <span className="trip-k">{t('trip.twoStores')}</span>
+                      <span className="trip-n">{plan.stores.map((r) => r.name).join(' + ')}</span>
+                      <b>{euro(plan.totalCents)}</b>
+                    </div>
+                  )}
                 </div>
+                <div className="trip-verdict">
+                  {worth && plan
+                    ? (plan.single ? t('trip.split', { amount: euro(plan.savingCents) }) : t('split.noSingle'))
+                    : best && t('trip.stay', { store: best.retailer.name }) + (plan ? ' ' + t('trip.only', { amount: euro(plan.savingCents) }) : '')}
+                  {plan && plan.unpriced > 0 && <> {t('split.unpriced', { n: plan.unpriced })}</>}
+                </div>
+                {stores.map((r) => {
+                  const picks = plan!.picks.filter((p) => p.retailer.id === r.id)
+                  const sum = picks.reduce((n, p) => n + p.priceCents * p.quantity, 0)
+                  return (
+                    <div key={r.id} className="trip-store">
+                      <div className="trip-store-head">
+                        <RetailerMark retailer={r} />
+                        <div className="grow">
+                          <div className="title">{r.name}</div>
+                          <div className="sub">{picks.length === 1 ? t('list.items1') : t('list.items', { n: picks.length })}</div>
+                        </div>
+                        <div className="price">{euro(sum)}</div>
+                      </div>
+                      <div className="rows">
+                        {picks.map((pk) => {
+                          const p = products.find((x) => x.id === pk.productId)
+                          if (!p) return null
+                          return (
+                            <button key={pk.productId} className="row" onClick={() => nav.openProduct(p.id)}>
+                              <Tile product={p} />
+                              <div className="grow">
+                                <div className="title">{pk.quantity > 1 ? `${pk.quantity} × ` : ''}{p.name}</div>
+                                <div className="sub">{sizeLabel(p)}</div>
+                              </div>
+                              <div className="price">{euro(pk.priceCents * pk.quantity)}</div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+                {myStores.length === 0 && (
+                  <button className="trip-tip" onClick={() => { openProfilePage('stores'); nav.go('profile') }}>{t('trip.tip')}</button>
+                )}
               </div>
-              {plan.stores.map((r) => (
-                <div key={r.id} style={{ marginTop: 12 }}>
-                  <div className="group-title" style={{ margin: '0 4px 6px' }}>{r.name}</div>
-                  <div className="rows">
-                    {plan.picks.filter((p) => p.retailer.id === r.id).map((pk) => {
-                      const p = products.find((x) => x.id === pk.productId)
-                      if (!p) return null
-                      return (
-                        <button key={pk.productId} className="row" onClick={() => nav.openProduct(p.id)}>
-                          <Tile product={p} />
-                          <div className="grow">
-                            <div className="title">{pk.quantity > 1 ? `${pk.quantity} × ` : ''}{p.name}</div>
-                            <div className="sub">{sizeLabel(p)}</div>
-                          </div>
-                          <div className="price">{euro(pk.priceCents * pk.quantity)}</div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            )
+          })()}
         </>
       )}
       {shopping && <StoreMode onClose={() => setShopping(false)} />}

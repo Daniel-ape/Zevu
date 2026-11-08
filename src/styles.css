@@ -1408,3 +1408,53 @@ html, body { overscroll-behavior-x: none; }
 .watch-own input { flex: 1; min-width: 0; height: 44px; border-radius: 12px; border: 1px solid var(--line, rgba(120,120,128,0.25)); background: var(--card); color: var(--text); padding: 0 14px; font-size: 16px; font-family: inherit; }
 .watch-own .btn { width: auto; padding: 0 18px; height: 44px; }
 .btn.danger-text { background: transparent; color: var(--warn, #d92d20); box-shadow: none; }
+
+/* Savings overview */
+.savings { padding: 4px 0 8px; }
+.sv-month { display: flex; align-items: center; justify-content: space-between; }
+.sv-month-label { font-weight: 600; text-transform: capitalize; }
+.sv-hero { text-align: center; margin: 14px 0 4px; }
+.sv-hero-label { font-size: 13px; color: var(--text-2); font-weight: 600; }
+.sv-hero-amount { font-size: 40px; font-weight: 750; letter-spacing: -0.03em; color: var(--good, #0b7d47); font-variant-numeric: tabular-nums; }
+.sv-hero-sub { font-size: 13px; color: var(--text-2); }
+.sv-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.sv-stats div { background: var(--bg); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.sv-stats span { font-size: 12px; color: var(--text-2); }
+.sv-stats b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.sv-stats b.warn, .sv-amt.warn { color: var(--warn, #c2410c); }
+.sv-section { font-weight: 650; font-size: 15px; margin: 22px 0 10px; }
+.sv-chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; height: 132px; }
+.sv-col { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; font-family: inherit; min-width: 0; }
+.sv-val { font-size: 11px; color: var(--text-2); height: 14px; font-variant-numeric: tabular-nums; }
+.sv-bar { flex: 1; width: 100%; max-width: 34px; display: flex; align-items: flex-end; }
+.sv-bar i { display: block; width: 100%; border-radius: 8px 8px 4px 4px; background: color-mix(in srgb, var(--good, #0b7d47) 30%, transparent); }
+.sv-col.on .sv-bar i { background: var(--good, #0b7d47); }
+.sv-col.on .sv-mon { color: var(--text); font-weight: 650; }
+.sv-mon { font-size: 12px; color: var(--text-2); text-transform: capitalize; }
+.sv-list { display: flex; flex-direction: column; }
+.sv-line { display: flex; align-items: center; gap: 10px; padding: 10px 0; border: 0; background: none; color: inherit; font-family: inherit; text-align: left; width: 100%; }
+.sv-line + .sv-line { border-top: 1px solid var(--line, rgba(120,120,128,0.18)); }
+.sv-name { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv-line .grow { min-width: 0; }
+.sv-sub { font-size: 12.5px; color: var(--text-2); }
+.sv-amt { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sv-amt.good { color: var(--good, #0b7d47); }
+.save-links { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+
+/* Smart shopping trip */
+.trip-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.trip-opt { border-radius: 16px; padding: 12px 14px; background: var(--card); border: 1.5px solid transparent; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.trip-opt.on { border-color: var(--accent); }
+.trip-k { font-size: 12px; color: var(--text-2); font-weight: 600; }
+.trip-n { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trip-opt b { font-size: 20px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.trip-opt.on b { color: var(--accent); }
+.trip-verdict { font-size: 14px; line-height: 1.45; margin: 12px 2px 4px; color: var(--text-2); }
+.trip-store { margin-top: 14px; }
+.trip-store-head { display: flex; align-items: center; gap: 10px; padding: 0 4px 8px; }
+.trip-store-head .title { font-weight: 650; }
+.trip-store-head .sub { font-size: 12.5px; color: var(--text-2); }
+.trip-tip { display: block; margin-top: 12px; background: none; border: 0; padding: 0 2px; color: var(--accent); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.sv-line .grow { flex: 1; }
+.trip-store-head .grow { flex: 1; min-width: 0; }
+.trip-store-head .price { font-weight: 650; font-variant-numeric: tabular-nums; }
