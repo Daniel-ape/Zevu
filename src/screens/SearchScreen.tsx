@@ -198,13 +198,19 @@ export function SearchScreen() {
         {q && <button className="tiny muted" onClick={() => setQ('')}>{t('search.clear')}</button>}
       </label>
 
-      <div className="cat-bar">
+      <div className="cat-bar filter-bar">
         <button className={'cat-btn' + (cat !== 'all' ? ' on' : '')} onClick={() => setPicking(true)} aria-haspopup="dialog">
-          <span className="cat-emoji">{catEmoji(cat)}</span>
           <span>{cat === 'all' ? t('search.category') : catLabel(cat)}</span>
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </button>
         {cat !== 'all' && <button className="cat-clear" onClick={() => setCat('all')} aria-label={t('search.clear')}>✕</button>}
+        <label className="sort-chip">
+          <span>{t(`sort.${sort}`)}</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label={t('search.sort')}>
+            {(['top', 'price', 'unit', 'name'] as Sort[]).map((s) => <option key={s} value={s}>{t(`sort.${s}`)}</option>)}
+          </select>
+        </label>
       </div>
 
       {picking && (
@@ -220,18 +226,6 @@ export function SearchScreen() {
           </div>
         </Sheet>
       )}
-
-      <div className="section-head" style={{ marginTop: 20 }}>
-        <span className="muted small">{results.length === 1 ? t('search.countOne') : t('search.count', { n: results.length })}</span>
-        <div className="seg" role="group" aria-label={t('search.sort')}>
-          {(['top', 'price', 'unit', 'name'] as Sort[]).map((s) => (
-            <button key={s} className={sort === s ? 'on' : ''} onClick={() => setSort(s)}>
-              {t(`sort.${s}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-
 
       {results.length === 0 && !q.trim() ? (
         <div className="empty">{t('search.hint', { n: products.length })}</div>
