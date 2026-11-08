@@ -6,14 +6,9 @@ jobs:
     steps:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
-          g(){ curl -sL -A "$UA" --max-time 40 -w '\n[HTTP %{http_code}]\n' "$1"; }
-          for h in www.jimms.fi www.multitronic.fi www.gigantti.fi; do
-            echo "===== $h robots"; g https://$h/robots.txt | head -60; sleep 3
-          done
-          echo "===== jimms sitemap"; g https://www.jimms.fi/sitemap.xml | head -c 1500; sleep 3
-          echo "===== multitronic sitemap"; g https://www.multitronic.fi/sitemap.xml | head -c 1500; sleep 3
-          echo "===== gigantti sitemap"; g https://www.gigantti.fi/sitemap.xml | head -c 800; sleep 3
-          echo "===== jimms home leaflet links"; curl -sL -A "$UA" https://www.jimms.fi/ | grep -oiE 'href="[^"]*(kampanj|tarjou|mainos|lehti|flyer|kuvasto)[^"]*"' | sort -u | head -20; sleep 3
-          echo "===== multitronic home leaflet links"; curl -sL -A "$UA" https://www.multitronic.fi/ | grep -oiE 'href="[^"]*(kampanj|tarjou|mainos|lehti|flyer|kuvasto|publitas|issuu)[^"]*"' | sort -u | head -20; sleep 3
-          echo "===== power leaflet"; curl -sL -A "$UA" https://www.power.fi/ | grep -oiE 'href="[^"]*(mainos|lehti|flyer|kuvasto|publitas|issuu|tarjouslehti)[^"]*"' | sort -u | head -20; sleep 3
-          echo "===== gigantti home"; curl -sL -A "$UA" -o /dev/null -w '%{http_code}\n' https://www.gigantti.fi/
+          for u in /sitemap /Sitemap.xml /sitemap_index.xml /fi/sitemap.xml /sitemaps/sitemap.xml; do echo "--- jimms $u $(curl -sL -A "$UA" -o j.out -w '%{http_code} %{content_type}' https://www.jimms.fi$u) $(head -c 200 j.out | tr '\n' ' ')"; sleep 3; done
+          echo "=== jimms home product links"; curl -sL -A "$UA" https://www.jimms.fi/ | grep -oE 'href="/fi/Product/Show/[^"]*"' | sort -u | head -5 > jl.txt; cat jl.txt; sleep 3
+          P=$(head -1 jl.txt | sed 's/href="//; s/"$//'); echo "=== jimms product $P"; curl -sL -A "$UA" "https://www.jimms.fi$P" > jp.html; wc -c jp.html; grep -oE '"(gtin13|gtin|ean|sku|price|priceCurrency)"\s*:\s*"?[^",}]*' jp.html | head; grep -oiE 'EAN[^<]{0,60}' jp.html | head -3; sleep 3
+          echo "=== multitronic product sitemap"; curl -sL -A "$UA" https://www.multitronic.fi/sitemap/fi/sitemap_product_4.xml | grep -o '<loc>[^<]*' | head -3 > ml.txt; cat ml.txt; curl -sL -A "$UA" https://www.multitronic.fi/sitemap.xml | grep -c sitemap_product; sleep 3
+          M=$(head -1 ml.txt | sed 's/<loc>//'); echo "=== multitronic product $M"; curl -sL -A "$UA" "$M" > mp.html; wc -c mp.html; grep -oE '"(gtin13|gtin|ean|sku|price|priceCurrency|availability)"\s*:\s*"?[^",}]*' mp.html | head; grep -oiE 'EAN[^<]{0,60}' mp.html | head -3
+          total=0; for s in $(curl -sL -A "$UA" https://www.multitronic.fi/sitemap.xml | grep -o '<loc>[^<]*sitemap_product[^<]*' | sed 's/<loc>//'); do n=$(curl -sL -A "$UA" $s | grep -c '<loc>'); total=$((total+n)); sleep 1; done; echo "multitronic products: $total"
