@@ -4,7 +4,7 @@
 // PriceObservation records *what one retailer charged, when, according to
 // which source*. Prices are never stored on the product itself.
 
-export type ChainId = 's-group' | 'k-group' | 'lidl' | 'tokmanni' | 'halpahalli' | 'verkkokauppa' | 'stockmann' | 'karkkainen' | 'ruohonjuuri' | 'yliopistonapteekki' | 'apteekki360' | 'power' | 'multitronic'
+export type ChainId = 's-group' | 'k-group' | 'lidl' | 'tokmanni' | 'halpahalli' | 'verkkokauppa' | 'stockmann' | 'karkkainen' | 'ruohonjuuri' | 'yliopistonapteekki' | 'apteekki360' | 'power' | 'multitronic' | 'minimani'
 
 export interface Retailer {
   id: string // e.g. "prisma", "k-citymarket"

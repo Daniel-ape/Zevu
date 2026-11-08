@@ -48,7 +48,7 @@ export const guess = (name: string, shop: string): CategoryId | undefined => {
 }
 // When the name gives no clue, the kind of shop does.
 export const SHOP_DEFAULT: Record<string, CategoryId> = {
-  verkkokauppa: 'electronics', power: 'electronics', multitronic: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
+  verkkokauppa: 'electronics', minimani: 'home', power: 'electronics', multitronic: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
   stockmann: 'health', karkkainen: 'home', halpahalli: 'home', prisma: 'home', lidl: 'home', tokmanni: 'home',
 }
 export const EMOJI: Record<CategoryId, string> = {

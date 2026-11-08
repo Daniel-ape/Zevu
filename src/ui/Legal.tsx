@@ -50,7 +50,7 @@ const SV: Doc = {
   sources: { title: 'Datakällor', blocks: [
     { p: 'Priserna i ZEVU kommer från öppet tillgängliga källor. De kan avvika från priset i butiken – kontrollera alltid i butiken innan du köper.' },
     { h: 'Priser', list: [
-      'Butikernas egna webbplatser: Tokmanni, Halpa-Halli, Prisma.fi, Lidl, Verkkokauppa.com, Power, Multitronic, Stockmann, Kärkkäinen, Ruohonjuuri, Apteekki360 och Yliopiston Apteekki. Hämtas i lugn takt och enligt varje webbplats robots.txt.',
+      'Butikernas egna webbplatser: Tokmanni, Halpa-Halli, Minimani, Prisma.fi, Lidl, Verkkokauppa.com, Power, Multitronic, Stockmann, Kärkkäinen, Ruohonjuuri, Apteekki360 och Yliopiston Apteekki. Hämtas i lugn takt och enligt varje webbplats robots.txt.',
       'Open Prices av Open Food Facts: priser som privatpersoner rapporterat.',
       'Dina egna kvitton och hyllpriser (bara för dig).',
     ] },
@@ -108,7 +108,7 @@ const FI: Doc = {
   sources: { title: 'Tietolähteet', blocks: [
     { p: 'ZEVUn hinnat tulevat julkisesti saatavilla olevista lähteistä. Ne voivat poiketa myymälän hinnasta – tarkista aina kaupassa ennen ostoa.' },
     { h: 'Hinnat', list: [
-      'Kauppojen omat verkkosivut: Tokmanni, Halpa-Halli, Prisma.fi, Lidl, Verkkokauppa.com, Power, Multitronic, Stockmann, Kärkkäinen, Ruohonjuuri, Apteekki360 ja Yliopiston Apteekki. Haetaan rauhallisesti ja kunkin sivuston robots.txt-ohjeiden mukaan.',
+      'Kauppojen omat verkkosivut: Tokmanni, Halpa-Halli, Minimani, Prisma.fi, Lidl, Verkkokauppa.com, Power, Multitronic, Stockmann, Kärkkäinen, Ruohonjuuri, Apteekki360 ja Yliopiston Apteekki. Haetaan rauhallisesti ja kunkin sivuston robots.txt-ohjeiden mukaan.',
       'Open Prices (Open Food Facts): yksityishenkilöiden ilmoittamat hinnat.',
       'Omat kuittisi ja hyllyhinnat (vain sinulle).',
     ] },
@@ -166,7 +166,7 @@ const EN: Doc = {
   sources: { title: 'Data sources', blocks: [
     { p: 'Prices in ZEVU come from publicly available sources. They may differ from the price in the shop – always check in store before buying.' },
     { h: 'Prices', list: [
-      'The shops’ own websites: Tokmanni, Halpa-Halli, Prisma.fi, Lidl, Verkkokauppa.com, Power, Multitronic, Stockmann, Kärkkäinen, Ruohonjuuri, Apteekki360 and Yliopiston Apteekki. Read slowly and following each site’s robots.txt.',
+      'The shops’ own websites: Tokmanni, Halpa-Halli, Minimani, Prisma.fi, Lidl, Verkkokauppa.com, Power, Multitronic, Stockmann, Kärkkäinen, Ruohonjuuri, Apteekki360 and Yliopiston Apteekki. Read slowly and following each site’s robots.txt.',
       'Open Prices by Open Food Facts: prices reported by the public.',
       'Your own receipts and shelf labels (for you only).',
     ] },

@@ -22,6 +22,8 @@ const STORES = {
   apteekki360: { retailerId: 'apteekki360', base: 'https://apteekki360.fi', sitemaps: ['https://apteekki360.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
   ruohonjuuri: { retailerId: 'ruohonjuuri', base: 'https://www.ruohonjuuri.fi', sitemaps: ['https://www.ruohonjuuri.fi/sitemap.xml'], maps: /sitemap_products/, product: /\/products\//, keep: 'all' },
   yliopistonapteekki: { retailerId: 'yliopistonapteekki', base: 'https://www.yliopistonapteekki.fi', sitemaps: ['https://www.yliopistonapteekki.fi/pub/media/sitemap.xml'], product: /-\d{3,}$/, keep: 'all' },
+  // Minimani's web shop has its whole range, groceries included (meat, dairy, frozen…).
+  minimani: { retailerId: 'minimani', base: 'https://www.minimani.fi', sitemaps: ['https://www.minimani.fi/sitemap/sitemap.xml'], product: /^https:\/\/www\.minimani\.fi\/[^/]+\.html$/, keep: 'all', foodFirst: true },
   multitronic: { retailerId: 'multitronic', base: 'https://www.multitronic.fi', sitemaps: ['https://www.multitronic.fi/sitemap.xml'], maps: /sitemap\/fi\/sitemap_product/, product: /\/fi\/products\/\d+$/, keep: 'all' },
   power: { retailerId: 'power', base: 'https://www.power.fi', sitemaps: ['https://www.power.fi/services/sitemap.xml'], maps: /products-\d+\.xml/, product: /\/p-\d+\/?$/, keep: 'all' },
   stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'all' },
