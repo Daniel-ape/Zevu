@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useStore } from '../data/store'
-import { basketTotals, cheapest, compare, euro, sizeLabel, storeInsights, trend } from '../domain/pricing'
+import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
 import { useNav } from '../nav'
 import { ArrowRight, List } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
@@ -38,8 +38,6 @@ export function Home() {
 
   const month = new Date().toLocaleDateString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { month: 'long' })
 
-  const insights = useMemo(() => storeInsights(products, pricesOf, retailers), [products, pricesOf, retailers])
-  const [gapsAll, setGapsAll] = useState(false)
 
   const drops = useMemo(
     () =>
@@ -178,32 +176,6 @@ export function Home() {
         </div>
       )}
 
-      {insights.gaps.length > 0 && (
-        <div className="section">
-          <div className="section-head">
-            <h2>{t('gap.title')}</h2>
-            <span className="muted tiny">{t('gap.sub', { n: insights.compared })}</span>
-          </div>
-          <div className="rows">
-            {insights.gaps.slice(0, gapsAll ? 10 : 3).map((g) => (
-              <button key={g.product.id} className="row" onClick={() => nav.openProduct(g.product.id)}>
-                <Tile product={g.product} />
-                <div className="grow">
-                  <div className="title">{g.product.name}</div>
-                  <div className="sub">{t('gap.line', { low: g.low.retailer.name, high: g.high.retailer.name, price: euro(g.high.current.priceCents) })}</div>
-                </div>
-                <div className="end">
-                  <div className="price" style={{ color: 'var(--accent)' }}>{euro(g.low.current.priceCents)}</div>
-                  <div className="gap-save">−{Math.round(g.pct * 100)} %</div>
-                </div>
-              </button>
-            ))}
-          </div>
-          {insights.gaps.length > 3 && (
-            <button className="more-btn" onClick={() => setGapsAll((x) => !x)}>{gapsAll ? t('gap.less') : t('gap.moreShort')}</button>
-          )}
-        </div>
-      )}
 
 
     </div>

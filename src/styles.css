@@ -1707,3 +1707,21 @@ html, body { overscroll-behavior-x: none; }
 .lf-head .chain-logo.inline.wide { height: 26px; padding: 0 8px; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); }
 .lf-head .chain-logo.inline.wide img { height: 13px; max-width: 120px; }
 .lf-head .chain-logo.inline.wide + .chain-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+/* Home savings card: three figures and a saved-share bar */
+.sc { margin-top: 18px; width: 100%; border: 0; text-align: left; font: inherit; color: var(--text); background: var(--card); border-radius: 20px; box-shadow: var(--card-shadow); padding: 16px 18px; display: block; cursor: pointer; }
+.sc:active { transform: scale(0.99); }
+.sc-top { display: flex; align-items: center; justify-content: space-between; color: var(--text-2); font-size: 14px; font-weight: 600; }
+.sc-top::first-letter { text-transform: uppercase; }
+.sc-chev { color: var(--text-3); }
+.sc-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 12px; }
+.sc-stats > div { display: flex; flex-direction: column; gap: 2px; padding-left: 12px; border-left: 1px solid var(--line); }
+.sc-stats > div:first-child { padding-left: 0; border-left: 0; }
+.sc-stats b { font-size: 21px; font-weight: 750; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.sc-stats > div:first-child b { color: var(--accent); }
+.sc-stats span { font-size: 12.5px; color: var(--text-2); }
+.sc-bar-wrap { margin-top: 14px; }
+.sc-bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--fill); gap: 2px; }
+.sc-bar i { display: block; height: 100%; }
+.sc-bar .paid { background: color-mix(in srgb, var(--text) 18%, transparent); border-radius: 99px 0 0 99px; }
+.sc-bar .saved { background: var(--accent); border-radius: 0 99px 99px 0; }
+.sc-bar-label { font-size: 12.5px; color: var(--text-2); margin-top: 6px; }
