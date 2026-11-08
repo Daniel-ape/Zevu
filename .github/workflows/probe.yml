@@ -6,11 +6,16 @@ jobs:
     steps:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
-          echo "== robots"; curl -sL -A "$UA" -w '\nHTTP %{http_code}\n' https://www.jimms.fi/robots.txt | head -60
-          for u in https://www.jimms.fi/sitemap.xml https://www.jimms.fi/sitemap_index.xml https://www.jimms.fi/fi/sitemap.xml; do echo "== $u"; curl -sL -A "$UA" -o /dev/null -w 'HTTP %{http_code} %{content_type}\n' "$u"; done
-          echo "== home"; curl -sL -A "$UA" -w '\nHTTP %{http_code}\n' https://www.jimms.fi/ > h.html; tail -1 h.html; grep -o 'href="/fi/Product/[^"]*"' h.html | sort -u | head -40
-          echo "== product links sample"; grep -o 'href="/fi/Product/Show/[^"]*"' h.html | head -5
-          P=$(grep -o '/fi/Product/Show/[^"]*' h.html | head -1); echo "== product $P"
-          curl -sL -A "$UA" "https://www.jimms.fi$P" > p.html; grep -o 'application/ld+json[^<]*<' p.html | head -2 | cut -c1-1500
-          grep -o -i -E '"?(gtin[0-9]*|ean)"?[^,<]{0,60}' p.html | head -8
-          echo "== api?"; grep -o -E '/api/[A-Za-z/]+' h.html p.html | sort -u | head -20
+          curl -sL -A "$UA" https://www.jimms.fi/ > h.html
+          echo "== list links on home: $(grep -o 'href="/fi/Product/List/[^"?]*"' h.html | sort -u | wc -l)"
+          curl -sL -A "$UA" https://www.jimms.fi/fi/Product/List/000-00P/komponentit--naytonohjaimet > l.html
+          echo "== list size $(wc -c < l.html); show links $(grep -o '/fi/Product/Show/[0-9]*' l.html | sort -u | wc -l)"
+          grep -o -i -E '(href="[^"]*(page|p=|sivu)[^"]*")' l.html | sort -u | head -10
+          grep -o -i -E '(tuotetta|products|totalCount|itemCount|pageSize)[^<]{0,80}' l.html | head -8
+          grep -o -E 'data-[a-z-]*="[^"]{0,60}"' l.html | sort | uniq -c | sort -rn | head -15
+          curl -sL -A "$UA" "https://www.jimms.fi/fi/Product/List/000-00P/komponentit--naytonohjaimet?p=2" > l2.html
+          echo "== p=2 links $(grep -o '/fi/Product/Show/[0-9]*' l2.html | sort -u | wc -l) same? $(diff <(grep -o '/fi/Product/Show/[0-9]*' l.html | sort -u) <(grep -o '/fi/Product/Show/[0-9]*' l2.html | sort -u) >/dev/null && echo yes || echo no)"
+          curl -sL -A "$UA" https://www.jimms.fi/fi/Product/Show/217573 > p.html
+          echo "== product itemprops"; grep -o -E 'itemprop="[a-zA-Z0-9]+"[^>]{0,160}' p.html | head -30
+          grep -c 'ld+json' p.html || true
+          grep -o -E 'og:(title|image)" content="[^"]{0,120}' p.html
