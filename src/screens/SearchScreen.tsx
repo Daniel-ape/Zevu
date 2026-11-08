@@ -6,7 +6,7 @@ import { useNav } from '../nav'
 import { Check, Plus, Search } from '../ui/icons'
 import { compileQuery, haystack, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
-import { EMOJI, EVERYDAY } from '../domain/categories'
+import { EVERYDAY } from '../domain/categories'
 import { Sheet } from '../ui/Sheet'
 
 type Sort = 'top' | 'price' | 'unit' | 'name'
@@ -174,7 +174,6 @@ export function SearchScreen() {
     return () => clearTimeout(id)
   }, [products, pricesOf])
   const catLabel = (id: CategoryId | 'all') => t(CATEGORIES.find((c) => c.id === id)!.key)
-  const catEmoji = (id: CategoryId | 'all') => (id === 'all' ? '🛒' : EMOJI[id])
 
   const inList = (id: string) => list.items.find((i) => i.productId === id)
   // Stable handlers, so result rows that did not change are not drawn again while typing.
@@ -215,12 +214,12 @@ export function SearchScreen() {
 
       {picking && (
         <Sheet title={t('search.category')} onClose={closePicker} closeLabel={t('common.close')}>
-          <div className="cat-grid">
-            {CATEGORIES.map((c) => (
-              <button key={c.id} className={'cat-tile' + (cat === c.id ? ' on' : '') + (counts.size && !counts.get(c.id) && c.id !== 'all' ? ' empty' : '')} onClick={() => { setCat(c.id); setPicking(false) }}>
-                <span className="cat-tile-emoji">{catEmoji(c.id)}</span>
-                <span className="cat-tile-name">{t(c.key)}</span>
-                <span className="cat-tile-n">{counts.get(c.id) ?? 0}</span>
+          <div className="cat-list">
+            {CATEGORIES.filter((c) => c.id === 'all' || !counts.size || counts.get(c.id)).map((c) => (
+              <button key={c.id} className={'cat-item' + (cat === c.id ? ' on' : '')} onClick={() => { setCat(c.id); setPicking(false) }}>
+                <span className="cat-item-name">{t(c.key)}</span>
+                <span className="cat-item-n">{counts.get(c.id) ?? 0}</span>
+                {cat === c.id && <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden><path d="M3.5 8.5 6.5 11.5 12.5 4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
               </button>
             ))}
           </div>

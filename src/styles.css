@@ -1689,3 +1689,12 @@ html, body { overscroll-behavior-x: none; }
 .search-row .price { font-size: 16px; }
 .search-row .quick-add { background: transparent; box-shadow: none; color: var(--text-3); width: 32px; height: 32px; }
 .search-row .quick-add.in { background: var(--accent); color: #fff; }
+/* Category picker: a plain list, name and count, a check on the chosen one */
+.cat-list { display: flex; flex-direction: column; background: var(--card); border-radius: 16px; overflow: hidden; }
+.cat-item { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 16px; text-align: left; color: var(--text); font: inherit; font-size: 15.5px; background: none; border: 0; }
+.cat-item + .cat-item { border-top: 1px solid var(--line); }
+.cat-item-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-item-n { font-size: 13px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.cat-item.on { font-weight: 650; color: var(--accent); }
+.cat-item.on .cat-item-n { color: var(--accent); opacity: 0.7; }
+.cat-item:active { background: var(--fill); }
