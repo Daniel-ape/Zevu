@@ -319,12 +319,48 @@ export interface MonthSavings {
  * from the shops are used, never the user's own receipts.
  */
 export function monthSavings(receipts: Receipt[], pricesOf: (id: string) => PriceObservation[], now = new Date()): MonthSavings {
-  const out: MonthSavings = { savedCents: 0, missedCents: 0, spentCents: 0, receipts: 0, compared: 0 }
+  const { savedCents, missedCents, spentCents, receipts: n, compared } = savingsReport(receipts, pricesOf, now)
+  return { savedCents, missedCents, spentCents, receipts: n, compared }
+}
+
+/** One compared receipt line: what was paid and what the other shops asked. */
+export interface SavingsLine {
+  productId: string
+  name: string
+  quantity: number
+  retailerId: string | null
+  storeName: string
+  paidCents: number
+  savedCents: number // below the other shops' average
+  missedCents: number // above the cheapest other shop
+  cheapestRetailerId: string
+  cheapestCents: number // per unit
+}
+
+export interface SavingsReport extends MonthSavings {
+  lines: SavingsLine[]
+  stores: { retailerId: string | null; storeName: string; spentCents: number; savedCents: number; receipts: number }[]
+}
+
+/**
+ * The month of `month`: what the receipts cost and how that compares with the
+ * other shops' prices around the same day (within 30 days, the user's own
+ * reports left out). Lines without other prices are only counted as spent.
+ */
+export function savingsReport(receipts: Receipt[], pricesOf: (id: string) => PriceObservation[], month = new Date()): SavingsReport {
+  const out: SavingsReport = { savedCents: 0, missedCents: 0, spentCents: 0, receipts: 0, compared: 0, lines: [], stores: [] }
+  const stores = new Map<string, SavingsReport['stores'][number]>()
   for (const r of receipts) {
     const d = new Date(r.date)
-    if (d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) continue
+    if (d.getFullYear() !== month.getFullYear() || d.getMonth() !== month.getMonth()) continue
     out.receipts++
-    out.spentCents += r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0)
+    const spent = r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0)
+    out.spentCents += spent
+    const sk = r.retailerId ?? 'name:' + r.storeName
+    const store = stores.get(sk) ?? { retailerId: r.retailerId, storeName: r.storeName, spentCents: 0, savedCents: 0, receipts: 0 }
+    store.spentCents += spent
+    store.receipts++
+    stores.set(sk, store)
     const at = d.getTime()
     for (const it of r.items) {
       if (!it.productId || it.quantity < 1) continue
@@ -341,11 +377,21 @@ export function monthSavings(receipts: Receipt[], pricesOf: (id: string) => Pric
       if (!latest.size) continue
       const prices = [...latest.values()].map((x) => x.c)
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length
-      const min = Math.min(...prices)
+      let cheapestRetailerId = ''
+      let min = Infinity
+      for (const [id, x] of latest) if (x.c < min) { min = x.c; cheapestRetailerId = id }
       out.compared++
-      if (unit < avg) out.savedCents += Math.round((avg - unit) * it.quantity)
-      if (unit > min) out.missedCents += Math.round((unit - min) * it.quantity)
+      const saved = unit < avg ? Math.round((avg - unit) * it.quantity) : 0
+      const missed = unit > min ? Math.round((unit - min) * it.quantity) : 0
+      out.savedCents += saved
+      out.missedCents += missed
+      store.savedCents += saved
+      out.lines.push({
+        productId: it.productId, name: it.name, quantity: it.quantity, retailerId: r.retailerId, storeName: r.storeName,
+        paidCents: it.priceCents, savedCents: saved, missedCents: missed, cheapestRetailerId, cheapestCents: min,
+      })
     }
   }
+  out.stores = [...stores.values()].sort((a, b) => b.spentCents - a.spentCents)
   return out
 }

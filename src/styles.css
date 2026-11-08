@@ -1395,3 +1395,16 @@ html, body { overscroll-behavior-x: none; }
 .account-card .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .account-card .sub { color: var(--text-2); font-size: 13px; }
 .account-pic { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+
+/* Price watch */
+.wa-eyebrow.offer { color: #c2410c; }
+.watch-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.watch-tags:empty { display: none; }
+.wtag { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--chip, rgba(120,120,128,0.14)); color: var(--text-2); white-space: nowrap; }
+.wtag.offer { background: rgba(234, 88, 12, 0.13); color: #c2410c; }
+.watch-now { display: flex; align-items: center; gap: 14px; padding: 4px 4px 0; }
+.chips.wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0 2px; }
+.watch-own { display: flex; gap: 8px; margin-top: 10px; }
+.watch-own input { flex: 1; min-width: 0; height: 44px; border-radius: 12px; border: 1px solid var(--line, rgba(120,120,128,0.25)); background: var(--card); color: var(--text); padding: 0 14px; font-size: 16px; font-family: inherit; }
+.watch-own .btn { width: auto; padding: 0 18px; height: 44px; }
+.btn.danger-text { background: transparent; color: var(--warn, #d92d20); box-shadow: none; }

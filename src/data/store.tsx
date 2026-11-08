@@ -57,6 +57,7 @@ interface Store {
   clearChecked: () => void
   watched: Watch[]
   toggleWatch: (productId: string, currentCents: number | null) => void
+  setWatchTarget: (productId: string, targetCents: number | null) => void
   /** Barcode lookup: local catalogue first, then Open Food Facts. 'unavailable' = service unreachable. */
   findByBarcode: (ean: string) => Promise<Product | null | 'unavailable'>
   /** A product the user names themselves when its barcode is unknown. */
@@ -279,6 +280,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ? w.filter((x) => x.productId !== productId)
             : [...w, { productId, baselineCents: currentCents, since: new Date().toISOString() }],
         ),
+      setWatchTarget: (productId, targetCents) =>
+        setWatched((w) => w.map((x) => (x.productId === productId ? { ...x, targetCents } : x))),
       setQuantity: (productId, qty) =>
         updateActive((l) => {
           const items = l.items.filter((i) => i.productId !== productId)

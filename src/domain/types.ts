@@ -91,6 +91,8 @@ export interface Watch {
   productId: string
   baselineCents: number | null
   since: string
+  /** Tell only at or below this price (else: any price below the baseline). */
+  targetCents?: number | null
 }
 
 export interface ShoppingList {

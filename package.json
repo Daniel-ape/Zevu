@@ -14,7 +14,8 @@
     "test:receipts": "tsx tests/receipts.test.ts",
     "test:off": "tsx tests/openFoodFacts.test.ts",
     "test:search": "tsx tests/search.test.ts",
-    "test": "npm run test:receipts && npm run test:off && npm run test:search",
+    "test:watch": "tsx tests/watch.test.ts",
+    "test": "npm run test:receipts && npm run test:off && npm run test:search && npm run test:watch",
     "app:sync": "vite build && cap sync",
     "app:android": "vite build && cap sync android && cap open android"
   },

@@ -6,11 +6,10 @@ import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
 import { Back, Bell, Check, Chevron, Home, Info, Plus, Receipt as ReceiptIcon, Tag, Ticket } from '../ui/icons'
-import { cheapest, compare } from '../domain/pricing'
-import { Tile } from '../ui/bits'
 import { useNav } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
+import { WatchList } from '../ui/WatchList'
 
 type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about'
 
@@ -27,7 +26,7 @@ function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: stri
 }
 
 export function Profile() {
-  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, products, observations, retailers, cards, t } = useStore()
+  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, cards, t } = useStore()
   const nav = useNav()
   const [page, setPage] = useState<Page | null>(null)
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
@@ -107,27 +106,7 @@ export function Profile() {
           </>
         )}
 
-        {page === 'watched' && (
-          watched.length === 0 ? <div className="empty">{t('you.noWatched')}</div> : (
-            <div className="rows">
-              {watched.map((w) => {
-                const p = products.find((x) => x.id === w.productId)
-                if (!p) return null
-                const c = cheapest(compare(p, observations, retailers))
-                return (
-                  <button key={w.productId} className="row" onClick={() => nav.openProduct(p.id)}>
-                    <Tile product={p} />
-                    <div className="grow">
-                      <div className="title">{p.name}</div>
-                      <div className="sub">{c ? c.retailer.name : t('watch.noPrice')}</div>
-                    </div>
-                    {c && <div className="price">{euro(c.current.priceCents)}</div>}
-                  </button>
-                )
-              })}
-            </div>
-          )
-        )}
+        {page === 'watched' && <WatchList />}
 
         {page === 'language' && (
           <div className="rows">
