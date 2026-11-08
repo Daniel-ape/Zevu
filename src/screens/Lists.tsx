@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan } from '../domain/pricing'
 import { useNav } from '../nav'
@@ -32,6 +33,11 @@ export function Lists() {
   const itemCount = list.items.reduce((n, i) => n + i.quantity, 0)
   const items = [...list.items].sort((a, b) => Number(!!a.checked) - Number(!!b.checked))
   const ticked = list.items.filter((i) => i.checked).length
+  // Splitting is worth an extra stop only when it saves at least 1,50 €.
+  const worth = !!plan && (!plan.single || plan.savingCents >= 150)
+  const dearest = complete[complete.length - 1]
+  // No shop has everything: the one with the most of the list, then the cheapest.
+  const partial = !best ? [...totals].filter((x) => x.missing < list.items.length).sort((a, b) => a.missing - b.missing || a.totalCents - b.totalCents)[0] : undefined
 
   const share = async () => {
     const lines = list.items.map((i) => {
@@ -87,8 +93,59 @@ export function Lists() {
         </form>
       ) : null}
 
+      {list.items.length > 0 && mode === 'none' && (best || plan || partial) && (
+        <button className="plan-top" onClick={() => document.querySelector('.trip')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+          <span className="pt-label">{t('trip.top')}</span>
+          {worth && plan ? (
+            <>
+              <span className="pt-stores">
+                {plan.stores.map((r) => {
+                  const picks = plan.picks.filter((p) => p.retailer.id === r.id)
+                  return (
+                    <span key={r.id} className="pt-store">
+                      <RetailerMark retailer={r} />
+                      <span className="pt-name">{r.name}</span>
+                      <span className="pt-sub">{picks.length === 1 ? t('list.items1') : t('list.items', { n: picks.length })}</span>
+                      <b>{euro(picks.reduce((n, p) => n + p.priceCents * p.quantity, 0))}</b>
+                    </span>
+                  )
+                })}
+              </span>
+              <span className="pt-foot">
+                <span>{t('trip.total')} <b>{euro(plan.totalCents)}</b></span>
+                {plan.single && <span className="pt-save">−{euro(plan.savingCents)}</span>}
+              </span>
+            </>
+          ) : best ? (
+            <>
+              <span className="pt-one">
+                <RetailerMark retailer={best.retailer} />
+                <span className="pt-name">{best.retailer.name}</span>
+                <b>{euro(best.totalCents)}</b>
+              </span>
+              <span className="pt-foot">
+                <span>{complete.length > 1 ? t('trip.cheapestOf', { n: complete.length }) : t('list.cheapest')}</span>
+                {dearest && dearest !== best && <span className="pt-save">−{euro(dearest.totalCents - best.totalCents)}</span>}
+              </span>
+            </>
+          ) : partial ? (
+            <>
+              <span className="pt-one">
+                <RetailerMark retailer={partial.retailer} />
+                <span className="pt-name">{partial.retailer.name}</span>
+                <b>{euro(partial.totalCents)}</b>
+              </span>
+              <span className="pt-foot">
+                <span>{t('trip.has', { n: list.items.length - partial.missing, of: list.items.length })}</span>
+              </span>
+            </>
+          ) : null}
+          {(worth || best) && <span className="pt-more">{t('trip.showSplit')} ↓</span>}
+        </button>
+      )}
+
       {list.items.length > 0 && mode === 'none' && (
-        <button className="btn primary" style={{ marginTop: 14, height: 50 }} onClick={() => setShopping(true)}>
+        <button className="btn primary" style={{ marginTop: 12, height: 50 }} onClick={() => setShopping(true)}>
           {t('shop.start')}
         </button>
       )}
@@ -166,8 +223,6 @@ export function Lists() {
           </div>
 
           {(plan || best) && list.items.length >= 2 && (() => {
-            // Splitting is worth an extra stop only when it saves at least 1,50 €.
-            const worth = !!plan && (!plan.single || plan.savingCents >= 150)
             const stores = worth && plan ? plan.stores : []
             return (
               <div className="section trip">
@@ -236,7 +291,7 @@ export function Lists() {
       )}
       {shopping && <StoreMode onClose={() => setShopping(false)} />}
       {menu && (
-        <div className="sheet-backdrop" onClick={() => setMenu(false)}>
+        <Portal><div className="sheet-backdrop" onClick={() => setMenu(false)}>
           <div className="sheet menu-sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-grab" />
             <div className="rows">
@@ -249,7 +304,7 @@ export function Lists() {
               )}
             </div>
           </div>
-        </div>
+        </div></Portal>
       )}
       {toast && <div className="toast">{toast}</div>}
       {undo && (

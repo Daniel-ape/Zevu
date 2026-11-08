@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, storeInsights, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { ArrowRight, List, Ticket } from '../ui/icons'
+import { ArrowRight, List } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
 import { Cover, useShelf } from './Leaflets'
 import { HomeMemberOffers } from './Coupons'
@@ -19,8 +19,7 @@ function greeting(): Key {
 }
 
 export function Home() {
-  const { products, observations, retailers, list, watched, lang, pricesOf, coupons, t } = useStore()
-  const activeCoupons = coupons.filter((c) => !c.used && (!c.validUntil || new Date(c.validUntil + 'T23:59') >= new Date())).length
+  const { products, observations, retailers, list, watched, lang, pricesOf, t } = useStore()
   const nav = useNav()
   const { shelf } = useShelf()
   const listName = list.name === 'Weekly shop' ? t('list.defaultName') : list.name
@@ -72,14 +71,6 @@ export function Home() {
       <WatchAlert />
       <SaveCard month={month} bestShop={best?.retailer.name} onOpen={() => { openProfilePage('spending'); nav.go('profile') }} />
 
-      <button className="list-card section coupon-card" style={{ marginTop: 14 }} onClick={() => nav.go('coupons')}>
-        <span className="quick-icon"><Ticket size={22} /></span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <b>{t('cp.short')}</b>
-          <span className="sub">{activeCoupons > 0 ? t('home.couponsN', { n: activeCoupons }) : t('home.couponsNone')}</span>
-        </span>
-        <ArrowRight size={16} />
-      </button>
 
       {list.items.length > 0 && (
         <button className="list-card section" style={{ marginTop: 18 }} onClick={() => nav.go('lists')}>

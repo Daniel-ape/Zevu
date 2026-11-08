@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Portal } from '../ui/Portal'
 import { openCamera } from '../data/takePhoto'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
@@ -88,7 +89,7 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
   const sum = draft ? draft.items.reduce((s, i) => s + i.priceCents, 0) : 0
 
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
+    <Portal><div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={t('rc.title')} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-grab" />
         <div className="section-head" style={{ marginBottom: 16 }}>
@@ -195,6 +196,6 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
           />
         )}
       </div>
-    </div>
+    </div></Portal>
   )
 }

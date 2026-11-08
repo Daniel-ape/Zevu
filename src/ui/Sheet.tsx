@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 /**
  * Bottom sheet, iPhone style: the page behind stays put while it is open,
@@ -7,6 +8,11 @@ import { useEffect, useRef, type ReactNode } from 'react'
 export function Sheet({ title, onClose, children, closeLabel = 'Close' }: { title?: string; onClose: () => void; children: ReactNode; closeLabel?: string }) {
   const sheet = useRef<HTMLDivElement>(null)
   const drag = useRef<{ y: number; dy: number } | null>(null)
+
+  // The latest onClose, so callers can pass a new function each render without
+  // the page lock below being undone and redone (which made the page jump).
+  const close = useRef(onClose)
+  close.current = onClose
 
   // Lock the page behind (iOS needs the fixed-body trick, overflow alone is not enough).
   useEffect(() => {
@@ -17,7 +23,7 @@ export function Sheet({ title, onClose, children, closeLabel = 'Close' }: { titl
     const screen = document.querySelector<HTMLElement>('.screen')
     const prevScreen = screen?.style.overflow ?? ''
     if (screen) screen.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close.current() }
     addEventListener('keydown', onKey)
     return () => {
       Object.assign(b, prev)
@@ -25,7 +31,7 @@ export function Sheet({ title, onClose, children, closeLabel = 'Close' }: { titl
       if (screen) screen.style.overflow = prevScreen
       removeEventListener('keydown', onKey)
     }
-  }, [onClose])
+  }, [])
 
   const start = (e: React.TouchEvent) => {
     if ((sheet.current?.scrollTop ?? 0) > 0) return
@@ -47,7 +53,9 @@ export function Sheet({ title, onClose, children, closeLabel = 'Close' }: { titl
     else sheet.current.style.transform = ''
   }
 
-  return (
+  // Drawn at the top of the page (portal), so no animated or layered parent
+  // can shift it or show through it.
+  return createPortal(
     <div className="sheet-backdrop" onClick={onClose} onTouchMove={(e) => { if (e.target === e.currentTarget) e.preventDefault() }}>
       <div
         ref={sheet} className="sheet sheet-v2" role="dialog" aria-modal="true" aria-label={title}
@@ -64,6 +72,7 @@ export function Sheet({ title, onClose, children, closeLabel = 'Close' }: { titl
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

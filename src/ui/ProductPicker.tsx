@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Portal } from './Portal'
 import { useStore } from '../data/store'
 import { haystack, matchScore } from '../domain/search'
 import { sizeLabel, brandLabel } from '../domain/pricing'
@@ -21,7 +22,7 @@ export function ProductPicker({ initial, onPick, onClose }: { initial: string; o
   }, [q, products, hay])
 
   return (
-    <div className="sheet-backdrop" style={{ zIndex: 70 }} onClick={onClose}>
+    <Portal><div className="sheet-backdrop" style={{ zIndex: 70 }} onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={t('rc.pick')} onClick={(e) => e.stopPropagation()} style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
         <div className="sheet-grab" />
         <div className="section-head" style={{ marginBottom: 12 }}>
@@ -52,6 +53,6 @@ export function ProductPicker({ initial, onPick, onClose }: { initial: string; o
           ))}
         </div>
       </div>
-    </div>
+    </div></Portal>
   )
 }

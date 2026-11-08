@@ -13,6 +13,14 @@ type Sort = 'top' | 'price' | 'unit' | 'name'
 
 // What the Products page looked like when a product was opened from it, so
 // coming back shows the same search, category, order and scroll position.
+// Work that only depends on the product list is kept between visits, so
+// coming back to Products (e.g. from a product) is instant.
+const hayCache = new WeakMap<object, Map<string, ReturnType<typeof haystack>>>()
+const rankCache = new WeakMap<object, Map<string, number>>()
+const countCache = new WeakMap<object, { pricesOf: unknown; c: Map<string, number> }>()
+let lastResults: { key: unknown[]; value: unknown } | null = null
+const sameKey = (a: unknown[], b: unknown[]) => a.length === b.length && a.every((x, i) => x === b[i])
+
 let kept: { q: string; cat: CategoryId | 'all'; sort: Sort; navCat: CategoryId | 'all'; scroll: number } | null = null
 const scroller = () => document.querySelector<HTMLElement>('.screen')
 
@@ -66,19 +74,36 @@ export function SearchScreen() {
     return () => { live = false; clearTimeout(timer) }
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const hay = useMemo(() => new Map(products.map((p) => [p.id, haystack(p)])), [products])
+  const hay = useMemo(() => {
+    let h = hayCache.get(products)
+    if (!h) { h = new Map(products.map((p) => [p.id, haystack(p)])); hayCache.set(products, h) }
+    return h
+  }, [products])
   // Catalogue order is popularity order; shop-only products come after it.
-  const rank = useMemo(() => new Map(products.map((p, i) => [p.id, i])), [products])
+  const rank = useMemo(() => {
+    let r = rankCache.get(products)
+    if (!r) { r = new Map(products.map((p, i) => [p.id, i])); rankCache.set(products, r) }
+    return r
+  }, [products])
   // Typing updates the field at once; the list follows a moment later, so
   // keys never wait for thousands of products to be scored.
   const dq = useDeferredValue(q)
+  // A new category or order closes the picker at once; the list follows.
+  const dcat = useDeferredValue(cat)
+  const dsort = useDeferredValue(sort)
   const results = useMemo(() => {
+    const key = [dq, dcat, dsort, products, pricesOf, retailers, online]
+    if (lastResults && sameKey(lastResults.key, key)) return lastResults.value as ReturnType<typeof compute>
+    const value = compute()
+    lastResults = { key, value }
+    return value
+    function compute() {
     const needle = dq.trim()
     const query = compileQuery(needle)
     const onlineIds = Array.isArray(online) ? new Set(online) : null
     // Strong matches (exact or start of a word) first, typo matches last.
     const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
-    const inCat = cat === 'all' ? products : products.filter((p) => p.category === cat)
+    const inCat = dcat === 'all' ? products : products.filter((p) => p.category === dcat)
     const scoreAll = (fuzzy: boolean) => {
       const out: { p: (typeof products)[number]; score: number; priced: boolean }[] = []
       for (const p of inCat) {
@@ -97,7 +122,7 @@ export function SearchScreen() {
     // price comparison only for the products that can make the list.
     found.sort((a, b) =>
       (needle ? tier(a.score) - tier(b.score) : 0) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
-    const pool = sort === 'top' ? found.slice(0, 160) : found.slice(0, 600)
+    const pool = dsort === 'top' ? found.slice(0, 160) : found.slice(0, 600)
     return pool
       .map(({ p, score }) => {
         const rows = compare(p, pricesOf(p.id), retailers)
@@ -109,15 +134,16 @@ export function SearchScreen() {
         if (needle && (tier(a.score) === 3) !== (tier(b.score) === 3)) return tier(a.score) === 3 ? 1 : -1
         if (!!a.best !== !!b.best) return a.best ? -1 : 1
         if (needle && tier(a.score) !== tier(b.score)) return tier(a.score) - tier(b.score)
-        if (sort === 'top') return rank.get(a.p.id)! - rank.get(b.p.id)!
-        if (sort === 'name') return a.p.name.localeCompare(b.p.name)
-        const av = sort === 'unit' ? a.best?.unitPriceCents : a.best?.current.priceCents
-        const bv = sort === 'unit' ? b.best?.unitPriceCents : b.best?.current.priceCents
+        if (dsort === 'top') return rank.get(a.p.id)! - rank.get(b.p.id)!
+        if (dsort === 'name') return a.p.name.localeCompare(b.p.name)
+        const av = dsort === 'unit' ? a.best?.unitPriceCents : a.best?.current.priceCents
+        const bv = dsort === 'unit' ? b.best?.unitPriceCents : b.best?.current.priceCents
         return (av ?? Infinity) - (bv ?? Infinity)
       })
       .slice(0, 80)
-  }, [dq, cat, sort, products, pricesOf, retailers, online, hay, rank])
-  const stale = dq !== q
+    }
+  }, [dq, dcat, dsort, products, pricesOf, retailers, online, hay, rank])
+  const stale = dq !== q || dcat !== cat || dsort !== sort
   // Back from a product: scroll to where the list was, once the rows are there.
   useEffect(() => {
     const y = restoreScroll.current
@@ -131,10 +157,21 @@ export function SearchScreen() {
   }, [results])
 
   // How many products with a price each category has (shown in the picker).
-  const counts = useMemo(() => {
-    const c = new Map<string, number>()
-    for (const p of products) if (pricesOf(p.id).length) { c.set(p.category, (c.get(p.category) ?? 0) + 1); c.set('all', (c.get('all') ?? 0) + 1) }
-    return c
+  // Counted after the page is drawn (and kept), so opening the picker is instant.
+  const [counts, setCounts] = useState<Map<string, number>>(() => {
+    const hit = countCache.get(products)
+    return hit && hit.pricesOf === pricesOf ? hit.c : new Map()
+  })
+  useEffect(() => {
+    const hit = countCache.get(products)
+    if (hit && hit.pricesOf === pricesOf) { setCounts(hit.c); return }
+    const id = setTimeout(() => {
+      const c = new Map<string, number>()
+      for (const p of products) if (pricesOf(p.id).length) { c.set(p.category, (c.get(p.category) ?? 0) + 1); c.set('all', (c.get('all') ?? 0) + 1) }
+      countCache.set(products, { pricesOf, c })
+      setCounts(c)
+    }, 300)
+    return () => clearTimeout(id)
   }, [products, pricesOf])
   const catLabel = (id: CategoryId | 'all') => t(CATEGORIES.find((c) => c.id === id)!.key)
   const catEmoji = (id: CategoryId | 'all') => (id === 'all' ? '🛒' : EMOJI[id])
@@ -174,7 +211,7 @@ export function SearchScreen() {
         <Sheet title={t('search.category')} onClose={closePicker} closeLabel={t('common.close')}>
           <div className="cat-grid">
             {CATEGORIES.map((c) => (
-              <button key={c.id} className={'cat-tile' + (cat === c.id ? ' on' : '')} onClick={() => { setCat(c.id); setPicking(false) }}>
+              <button key={c.id} className={'cat-tile' + (cat === c.id ? ' on' : '') + (counts.size && !counts.get(c.id) && c.id !== 'all' ? ' empty' : '')} onClick={() => { setCat(c.id); setPicking(false) }}>
                 <span className="cat-tile-emoji">{catEmoji(c.id)}</span>
                 <span className="cat-tile-name">{t(c.key)}</span>
                 <span className="cat-tile-n">{counts.get(c.id) ?? 0}</span>

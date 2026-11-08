@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Portal } from '../ui/Portal'
 import { openCamera } from '../data/takePhoto'
 import { useStore } from '../data/store'
 import { decodeImage, isValidEan } from '../data/barcode'
@@ -87,7 +88,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
   }
 
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
+    <Portal><div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={t('ap.title')} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-grab" />
         <div className="section-head" style={{ marginBottom: 14 }}>
@@ -150,6 +151,6 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
           </>
         )}
       </div>
-    </div>
+    </div></Portal>
   )
 }

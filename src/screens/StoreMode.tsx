@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
 import type { CategoryId } from '../domain/types'
 import { sizeLabel } from '../domain/pricing'
@@ -41,7 +42,7 @@ export function StoreMode({ onClose }: { onClose: () => void }) {
   )
 
   return (
-    <div className="shop" role="dialog" aria-modal="true" aria-label={t('shop.title')}>
+    <Portal><div className="shop" role="dialog" aria-modal="true" aria-label={t('shop.title')}>
       <div className="shop-head">
         <div>
           <div className="eyebrow">{t('shop.title')}</div>
@@ -65,6 +66,6 @@ export function StoreMode({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
-    </div>
+    </div></Portal>
   )
 }

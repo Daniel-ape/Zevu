@@ -1,4 +1,5 @@
 import { Back } from '../ui/icons'
+import { Portal } from '../ui/Portal'
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../data/store'
 import { decodeCanvas, decodeCard } from '../data/barcode'
@@ -104,7 +105,7 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="camera" role="dialog" aria-label={t('scan.camera')}>
+    <Portal><div className="camera" role="dialog" aria-label={t('scan.camera')}>
       <video ref={video} playsInline muted />
       <button className="camera-back glass" onClick={onClose} aria-label={t('rc.close')}><Back size={22} /></button>
       <div className="camera-guide" />
@@ -116,6 +117,6 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
           </button>
         )}
       </div>
-    </div>
+    </div></Portal>
   )
 }

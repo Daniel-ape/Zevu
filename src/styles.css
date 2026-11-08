@@ -1532,14 +1532,13 @@ html, body { overscroll-behavior-x: none; }
 
 /* Modern touches: a soft brand glow behind the home header, the logo as a
    button, and quick actions with gradient icons */
-.screen.home { position: relative; }
+.screen.home { position: relative; isolation: isolate; }
 .screen.home::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 340px; pointer-events: none; z-index: 0;
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 340px; pointer-events: none; z-index: -1;
   background:
     radial-gradient(60% 70% at 15% 0%, rgba(22, 210, 124, 0.16), transparent 70%),
     radial-gradient(50% 60% at 95% 5%, rgba(196, 248, 63, 0.16), transparent 70%);
 }
-.screen.home > :not(.sheet-backdrop):not(.shop):not(.cardview):not(.camera):not(.leaflet):not(.toast) { position: relative; z-index: 1; }
 .home-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .profile-btn { width: 44px; height: 44px; border-radius: 50%; padding: 0; border: 0; overflow: hidden; flex-shrink: 0; margin-bottom: 4px; display: grid; place-items: center;
   background: var(--card); color: var(--text); box-shadow: var(--card-shadow), 0 0 0 1px var(--line); transition: transform 0.15s; }
@@ -1594,3 +1593,44 @@ html, body { overscroll-behavior-x: none; }
 .wt-text span { font-size: 13px; opacity: 0.75; }
 .watch-toast button { border: 0; background: rgba(255, 255, 255, 0.12); color: #C4F83F; font: inherit; font-weight: 700; font-size: 13.5px; padding: 9px 12px; border-radius: 12px; white-space: nowrap; }
 .native-app .watch-toast { bottom: calc(100px + env(safe-area-inset-bottom)); }
+
+/* Lists: the cheapest way to shop, at the top */
+.plan-top {
+  display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 14px; padding: 16px; border: 0; border-radius: 22px; text-align: left;
+  font: inherit; color: #fff; cursor: pointer;
+  background: radial-gradient(80% 70% at 100% 0%, rgba(196, 248, 63, 0.18), transparent 60%), linear-gradient(155deg, #164a36, #06140f);
+  box-shadow: 0 14px 30px rgba(6, 40, 26, 0.28); transition: transform 0.15s;
+}
+.plan-top:active { transform: scale(0.985); }
+.pt-label { font-size: 13px; font-weight: 650; color: rgba(255, 255, 255, 0.72); }
+.pt-stores { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pt-store { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; column-gap: 8px; padding: 10px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); min-width: 0; }
+.pt-store .mark { grid-row: 1 / 3; width: 30px; height: 30px; }
+.pt-name { font-weight: 650; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-sub { font-size: 12px; color: rgba(255, 255, 255, 0.65); }
+.pt-store b { grid-column: 1 / 3; font-size: 20px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.pt-one { display: flex; align-items: center; gap: 10px; }
+.pt-one .mark { width: 36px; height: 36px; }
+.pt-one .pt-name { flex: 1; font-size: 17px; }
+.pt-one b { font-size: 26px; font-variant-numeric: tabular-nums; color: #C4F83F; }
+.pt-foot { display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: rgba(255, 255, 255, 0.8); }
+.pt-foot b { color: #fff; font-size: 16px; font-variant-numeric: tabular-nums; }
+.pt-save { background: #C4F83F; color: #0B2219; font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 99px; }
+.pt-more { font-size: 13px; font-weight: 650; color: #C4F83F; }
+.trip { scroll-margin-top: 16px; }
+
+/* Category picker: a compact two-column list instead of big tiles */
+.cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cat-tile {
+  min-height: 0; height: 48px; padding: 0 12px; gap: 10px; flex-direction: row; justify-content: flex-start; align-items: center;
+  border-radius: 14px; background: var(--card); box-shadow: 0 0 0 1px var(--line); text-align: left;
+}
+.cat-tile-emoji { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+.cat-tile-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-tile-n { font-size: 12px; font-variant-numeric: tabular-nums; }
+.cat-tile.on { background: var(--accent); box-shadow: none; }
+.cat-tile.empty { opacity: 0.4; }
+.cat-tile { height: 44px; padding: 0 10px; gap: 7px; }
+.cat-tile-emoji { font-size: 16px; width: 18px; }
+.cat-tile-name { font-size: 13px; letter-spacing: -0.01em; }
+.cat-tile-n { font-size: 11px; color: var(--text-2); opacity: 0.8; }

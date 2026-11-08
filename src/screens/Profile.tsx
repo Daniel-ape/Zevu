@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Portal } from '../ui/Portal'
 import type { Session } from '@supabase/supabase-js'
 import { accountsEnabled, deleteAccount, onSession, signInWithGoogle, signOut, takeSignInError } from '../data/account'
 import { LegalText, legalTitle } from '../ui/Legal'
@@ -248,7 +249,7 @@ function DeleteData() {
       <button className="btn danger-text" onClick={() => setAsk('local')}>{t('del.local')}</button>
       {msg && <p className="small" style={{ textAlign: 'center' }}>{msg}</p>}
       {ask && (
-        <div className="sheet-backdrop" onClick={() => setAsk(null)}>
+        <Portal><div className="sheet-backdrop" onClick={() => setAsk(null)}>
           <div className="sheet menu-sheet" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-grab" />
             <p style={{ lineHeight: 1.5, margin: '4px 4px 16px' }}>{ask === 'account' ? t('del.accountAsk') : t('del.localAsk')}</p>
@@ -257,7 +258,7 @@ function DeleteData() {
               <button className="btn" onClick={() => setAsk(null)}>{t('common.cancel')}</button>
             </div>
           </div>
-        </div>
+        </div></Portal>
       )}
     </div>
   )
