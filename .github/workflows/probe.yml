@@ -1,0 +1,16 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
+          echo "== robots"; curl -sL -A "$UA" -w '\nHTTP %{http_code}\n' https://www.jimms.fi/robots.txt | head -60
+          for u in https://www.jimms.fi/sitemap.xml https://www.jimms.fi/sitemap_index.xml https://www.jimms.fi/fi/sitemap.xml; do echo "== $u"; curl -sL -A "$UA" -o /dev/null -w 'HTTP %{http_code} %{content_type}\n' "$u"; done
+          echo "== home"; curl -sL -A "$UA" -w '\nHTTP %{http_code}\n' https://www.jimms.fi/ > h.html; tail -1 h.html; grep -o 'href="/fi/Product/[^"]*"' h.html | sort -u | head -40
+          echo "== product links sample"; grep -o 'href="/fi/Product/Show/[^"]*"' h.html | head -5
+          P=$(grep -o '/fi/Product/Show/[^"]*' h.html | head -1); echo "== product $P"
+          curl -sL -A "$UA" "https://www.jimms.fi$P" > p.html; grep -o 'application/ld+json[^<]*<' p.html | head -2 | cut -c1-1500
+          grep -o -i -E '"?(gtin[0-9]*|ean)"?[^,<]{0,60}' p.html | head -8
+          echo "== api?"; grep -o -E '/api/[A-Za-z/]+' h.html p.html | sort -u | head -20
