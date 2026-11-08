@@ -6,7 +6,7 @@ const LIVE = 'https://daniel-ape.github.io/hintaopas/prices/'
 // Packed shop prices (scripts/build-price-bundles.ts): core first, the rest
 // only when a watched product wasn't in it.
 const FILES = ['app/core.json', 'app/rest.json']
-const NAMES = { tokmanni: 'Tokmanni', halpahalli: 'Halpa-Halli', verkkokauppa: 'Verkkokauppa.com', prisma: 'Prisma', stockmann: 'Stockmann', karkkainen: 'Kärkkäinen', ruohonjuuri: 'Ruohonjuuri', yliopistonapteekki: 'Yliopiston Apteekki', lidl: 'Lidl', apteekki360: 'Apteekki360', power: 'Power' }
+const NAMES = { multitronic: 'Multitronic', tokmanni: 'Tokmanni', halpahalli: 'Halpa-Halli', verkkokauppa: 'Verkkokauppa.com', prisma: 'Prisma', stockmann: 'Stockmann', karkkainen: 'Kärkkäinen', ruohonjuuri: 'Ruohonjuuri', yliopistonapteekki: 'Yliopiston Apteekki', lidl: 'Lidl', apteekki360: 'Apteekki360', power: 'Power' }
 
 function readJson(key, fallback) {
   try {

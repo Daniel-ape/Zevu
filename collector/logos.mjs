@@ -15,6 +15,7 @@ const SITES = {
   stockmann: 'https://www.stockmann.com/',
   verkkokauppa: 'https://www.verkkokauppa.com/',
   power: 'https://www.power.fi/',
+  multitronic: 'https://www.multitronic.fi/',
   ruohonjuuri: 'https://www.ruohonjuuri.fi/',
   apteekki360: 'https://www.apteekki360.fi/',
   yliopistonapteekki: 'https://www.yliopistonapteekki.fi/',

@@ -36,7 +36,7 @@ const FOOD: [RegExp, CategoryId][] = [
   [/makkara|nakki|nakit|kinkku|broiler|kanafile|fileesuikale|kananpoika|kanan |\bkana\b|kalkkuna|jauheliha|silava|lihapulla|lihapyörykkä|leikkele|kebab|pihvi|naudan|porsaan|possun|wienerleike|lohifile|kalapuikko|tonnikala|silli|makrilli|sardiini|katkarap|pekoni|salami|chicken|kyckling|\bbeef|\bpork|salmon|\blax\b|\blohi\b|kirjolohi|\bkött|\bkorv\b|korvar\b/i, 'meat'],
   [/omena\b|banaani|peruna\b|perunat|tomaatti\b|tomaatit|kurkku\b|porkkana|hedelmä|vihannes|marja|frukt|mansikka|mansikoita|mustikka|vadelma\b|kukkakaali|parsakaali|pinaatti|salaatti\b|sipuli\b|paprika|avokado|appelsiini\b|sitruuna\b|päärynä\b|rypäle|kurpitsa|herne\b|maissi\b|herkkusien|\bsienet\b|kantarelli|champignon|tomato|strawberr|potato|carrot/i, 'produce'],
 ]
-const NO_FOOD = new Set(['verkkokauppa', 'stockmann', 'yliopistonapteekki', 'apteekki360', 'power'])
+const NO_FOOD = new Set(['verkkokauppa', 'stockmann', 'yliopistonapteekki', 'apteekki360', 'power', 'multitronic'])
 export const guess = (name: string, shop: string): CategoryId | undefined => {
   if (shop === 'prisma' && BOOK.test(name)) return 'office'
   if (!NO_FOOD.has(shop)) { const f = FOOD_FIRST.find(([re]) => re.test(name)); if (f) return f[1] }
@@ -48,7 +48,7 @@ export const guess = (name: string, shop: string): CategoryId | undefined => {
 }
 // When the name gives no clue, the kind of shop does.
 export const SHOP_DEFAULT: Record<string, CategoryId> = {
-  verkkokauppa: 'electronics', power: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
+  verkkokauppa: 'electronics', power: 'electronics', multitronic: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
   stockmann: 'health', karkkainen: 'home', halpahalli: 'home', prisma: 'home', lidl: 'home', tokmanni: 'home',
 }
 export const EMOJI: Record<CategoryId, string> = {
