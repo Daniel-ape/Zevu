@@ -7,13 +7,13 @@ import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
-import { Back, Bell, Check, Chevron, Home, Info, Plus, Receipt as ReceiptIcon, Tag, Ticket } from '../ui/icons'
+import { Back, Bell, Chart, Check, Chevron, Contrast, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket } from '../ui/icons'
 import { useNav } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 import { WatchList } from '../ui/WatchList'
 
-type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about' | 'privacy' | 'sources' | 'terms'
+type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about' | 'privacy' | 'sources' | 'terms' | 'info'
 
 /** Open a page of the You tab from elsewhere (call before nav.go('profile')). */
 let wanted: Page | null = null
@@ -45,7 +45,7 @@ export function Profile() {
   const titles: Record<Page, string> = {
     spending: t('spend.title'), receipts: t('you.groupReceipts'), stores: t('stores.title'), watched: t('watch.title'),
     language: t('you.language'), appearance: t('you.appearance'), about: legalTitle('about', lang),
-    privacy: legalTitle('privacy', lang), sources: legalTitle('sources', lang), terms: legalTitle('terms', lang),
+    privacy: legalTitle('privacy', lang), sources: legalTitle('sources', lang), terms: legalTitle('terms', lang), info: t('you.info'),
   }
 
   const sheets = (
@@ -70,7 +70,7 @@ export function Profile() {
     return (
       <div className="screen push">
         <div className="topbar sticky">
-          <button className="icon-btn" onClick={() => setPage(null)} aria-label={t('product.back')}><Back /></button>
+          <button className="icon-btn" onClick={() => setPage(page === 'about' || page === 'privacy' || page === 'sources' || page === 'terms' ? 'info' : null)} aria-label={t('product.back')}><Back /></button>
           <h2 style={{ flex: 1, textAlign: 'center', marginRight: 44 }}>{titles[page]}</h2>
         </div>
 
@@ -137,8 +137,16 @@ export function Profile() {
           </div>
         )}
 
+        {page === 'info' && (
+          <div className="rows group-rows">
+            <MenuRow icon={<Info size={18} />} title={legalTitle('about', lang)} onClick={() => setPage('about')} />
+            <MenuRow icon={<Shield size={18} />} title={legalTitle('privacy', lang)} onClick={() => setPage('privacy')} />
+            <MenuRow icon={<Chart size={18} />} title={legalTitle('sources', lang)} onClick={() => setPage('sources')} />
+            <MenuRow icon={<Paper size={18} />} title={legalTitle('terms', lang)} onClick={() => setPage('terms')} />
+          </div>
+        )}
+        {page === 'info' && <p className="tiny muted" style={{ textAlign: 'center', marginTop: 20 }}>ZEVU · {t('you.version')} {__APP_VERSION__}</p>}
         {(page === 'about' || page === 'privacy' || page === 'sources' || page === 'terms') && <LegalText page={page} lang={lang} />}
-        {page === 'about' && <p className="tiny muted" style={{ textAlign: 'center', marginTop: 24 }}>ZEVU · {t('you.version')} {__APP_VERSION__}</p>}
         {page === 'privacy' && <DeleteData />}
         {sheets}
       </div>
@@ -150,36 +158,24 @@ export function Profile() {
       <div className="topbar"><h1>{t('you.title')}</h1></div>
       <AccountCard />
 
-      <button className="list-card" onClick={() => setPage('spending')}>
-        <span className="quick-icon"><ReceiptIcon size={22} /></span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <b>{t('you.thisMonth')}</b>
-          <span className="sub">{t('you.receiptsCount', { n: receipts.length })}</span>
-        </span>
-        <span className="price">{euro(monthTotal)}</span>
-      </button>
-
-      <div className="section rows">
+      <div className="group-label">{t('you.groupMoney')}</div>
+      <div className="rows group-rows">
+        <MenuRow icon={<Chart size={18} />} title={t('spend.title')} value={euro(monthTotal)} onClick={() => setPage('spending')} />
         <MenuRow icon={<ReceiptIcon size={18} />} title={t('you.groupReceipts')} value={String(receipts.length)} onClick={() => setPage('receipts')} />
-        <MenuRow icon={<Tag size={18} />} title={t('spend.title')} onClick={() => setPage('spending')} />
       </div>
 
-      <div className="section rows">
-        <MenuRow icon={<Home size={18} />} title={t('stores.title')} value={myStores.length ? String(myStores.length) : t('you.allStores')} onClick={() => setPage('stores')} />
+      <div className="group-label">{t('you.groupShopping')}</div>
+      <div className="rows group-rows">
+        <MenuRow icon={<Store size={18} />} title={t('stores.title')} value={myStores.length ? String(myStores.length) : t('you.allStores')} onClick={() => setPage('stores')} />
         <MenuRow icon={<Bell size={18} />} title={t('watch.title')} value={String(watched.length)} onClick={() => setPage('watched')} />
         <MenuRow icon={<Ticket size={18} />} title={t('cp.title')} value={String(coupons.filter((c) => !c.used).length)} onClick={() => nav.go('coupons')} />
       </div>
 
-      <div className="section rows">
-        <MenuRow icon={<b style={{ fontSize: 14 }}>Aa</b>} title={t('you.language')} value={LANGS.find((l) => l.id === lang)?.label} onClick={() => setPage('language')} />
-        <MenuRow icon={<span style={{ fontSize: 17 }}>◐</span>} title={t('you.appearance')} value={t(`theme.${theme}`)} onClick={() => setPage('appearance')} />
-      </div>
-
-      <div className="section rows">
-        <MenuRow icon={<Info size={18} />} title={legalTitle('about', lang)} onClick={() => setPage('about')} />
-        <MenuRow icon={<span style={{ fontSize: 15 }}>🔒</span>} title={legalTitle('privacy', lang)} onClick={() => setPage('privacy')} />
-        <MenuRow icon={<span style={{ fontSize: 15 }}>🗂</span>} title={legalTitle('sources', lang)} onClick={() => setPage('sources')} />
-        <MenuRow icon={<span style={{ fontSize: 15 }}>📄</span>} title={legalTitle('terms', lang)} onClick={() => setPage('terms')} />
+      <div className="group-label">{t('you.groupSettings')}</div>
+      <div className="rows group-rows">
+        <MenuRow icon={<Globe size={18} />} title={t('you.language')} value={LANGS.find((l) => l.id === lang)?.label} onClick={() => setPage('language')} />
+        <MenuRow icon={<Contrast size={18} />} title={t('you.appearance')} value={t(`theme.${theme}`)} onClick={() => setPage('appearance')} />
+        <MenuRow icon={<Info size={18} />} title={t('you.info')} onClick={() => setPage('info')} />
       </div>
       {sheets}
     </div>

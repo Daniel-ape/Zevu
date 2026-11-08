@@ -67,3 +67,18 @@ export const Ticket = ({ size }: P) => (
 export const Card = ({ size }: P) => (
   <svg {...base(size)}><rect x="3.5" y="6" width="17" height="12" rx="2.5" /><path d="M3.5 10h17M7 14.5h4" /></svg>
 )
+export const Globe = ({ size }: P) => (
+  <svg {...base(size)}><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c2.4 2.6 3.5 5.4 3.5 8.5s-1.1 5.9-3.5 8.5c-2.4-2.6-3.5-5.4-3.5-8.5s1.1-5.9 3.5-8.5z" /></svg>
+)
+export const Contrast = ({ size }: P) => (
+  <svg {...base(size)}><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor" stroke="none" /></svg>
+)
+export const Shield = ({ size }: P) => (
+  <svg {...base(size)}><path d="M12 3.5 19 6v5.5c0 4.3-2.9 7.6-7 9-4.1-1.4-7-4.7-7-9V6z" /><path d="m9 12 2.2 2.2L15.5 10" /></svg>
+)
+export const Store = ({ size }: P) => (
+  <svg {...base(size)}><path d="M4 9.5 5.5 4.5h13L20 9.5M4 9.5h16M4 9.5c0 1.4 1.1 2.5 2.7 2.5S9.3 10.9 9.3 9.5c0 1.4 1.2 2.5 2.7 2.5s2.7-1.1 2.7-2.5c0 1.4 1.1 2.5 2.6 2.5S20 10.9 20 9.5M5.5 12v7.5h13V12M10 19.5v-4.5h4v4.5" /></svg>
+)
+export const Chart = ({ size }: P) => (
+  <svg {...base(size)}><path d="M4 19.5h16M7 16v-4M11.5 16V8M16 16v-6.5" /></svg>
+)

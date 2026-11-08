@@ -1634,3 +1634,10 @@ html, body { overscroll-behavior-x: none; }
 .cat-tile-emoji { font-size: 16px; width: 18px; }
 .cat-tile-name { font-size: 13px; letter-spacing: -0.01em; }
 .cat-tile-n { font-size: 11px; color: var(--text-2); opacity: 0.8; }
+
+/* You: grouped menu with labels */
+.group-label { margin: 24px 6px 8px; font-size: 13px; font-weight: 650; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; }
+.group-rows { background: var(--card); border-radius: 18px; padding: 0 14px; box-shadow: var(--card-shadow); }
+.group-rows .menu-row { padding: 12px 0; }
+.group-rows .menu-row:last-child { border-bottom: 0; }
+.group-rows .menu-icon { width: 30px; height: 30px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); }
