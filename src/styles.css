@@ -1532,14 +1532,8 @@ html, body { overscroll-behavior-x: none; }
 
 /* Modern touches: a soft brand glow behind the home header, the logo as a
    button, and quick actions with gradient icons */
-/* The soft brand glow sits at the top of every page. */
+/* Pages are see-through: the brand backdrop on the app frame shows behind all of them. */
 .screen { position: relative; isolation: isolate; }
-.screen::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 340px; pointer-events: none; z-index: -1;
-  background:
-    radial-gradient(60% 70% at 15% 0%, rgba(22, 210, 124, 0.16), transparent 70%),
-    radial-gradient(50% 60% at 95% 5%, rgba(196, 248, 63, 0.16), transparent 70%);
-}
 .home-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .profile-btn { width: 44px; height: 44px; border-radius: 50%; padding: 0; border: 0; overflow: hidden; flex-shrink: 0; margin-bottom: 4px; display: grid; place-items: center;
   background: var(--card); color: var(--text); box-shadow: var(--card-shadow), 0 0 0 1px var(--line); transition: transform 0.15s; }
@@ -1645,14 +1639,23 @@ html, body { overscroll-behavior-x: none; }
 .you-top { display: flex; align-items: center; gap: 12px; }
 .you-top h1 { margin: 0; }
 
-/* A calm, living backdrop behind every page: brand glows that stay put while
-   the page scrolls (the page scrolls inside .screen, not the body). */
-body {
+/* One backdrop over the whole screen, the same green and lime glow from top
+   to bottom. A fixed layer behind the pages, so it fills the screen and stays
+   put while the page scrolls (iOS ignores fixed background images). */
+.shell { isolation: isolate; }
+.shell::before {
+  content: ''; position: fixed; top: 0; bottom: 0; left: 50%; width: min(430px, 100%); transform: translateX(-50%);
+  z-index: -1; pointer-events: none;
   background:
-    radial-gradient(90% 50% at 100% 100%, rgba(196, 248, 63, 0.10), transparent 70%),
-    radial-gradient(80% 45% at 0% 70%, rgba(22, 210, 124, 0.08), transparent 70%),
-    var(--bg);
-  background-color: var(--bg);
+    radial-gradient(70% 38% at 10% 0%, rgba(22, 210, 124, 0.17), transparent 72%),
+    radial-gradient(60% 34% at 95% 12%, rgba(196, 248, 63, 0.16), transparent 72%),
+    radial-gradient(70% 34% at 0% 52%, rgba(196, 248, 63, 0.12), transparent 72%),
+    radial-gradient(70% 36% at 100% 62%, rgba(22, 210, 124, 0.14), transparent 72%),
+    radial-gradient(80% 36% at 30% 100%, rgba(22, 210, 124, 0.16), transparent 72%),
+    radial-gradient(60% 30% at 95% 98%, rgba(196, 248, 63, 0.14), transparent 72%);
 }
 .see-more { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 0; border-radius: 14px; background: var(--card); color: var(--accent); font: inherit; font-size: 14.5px; font-weight: 600; box-shadow: var(--card-shadow); }
 .see-more:active { transform: scale(0.98); }
+/* Dark mode: the same backdrop, a little stronger so it reads on black. */
+:root[data-theme='dark'] .shell::before { filter: saturate(1.2) brightness(1.5); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .shell::before { filter: saturate(1.2) brightness(1.5); } }
