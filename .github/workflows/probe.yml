@@ -1,0 +1,11 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: |
+          for s in minimani multitronic; do echo "===== $s"; BUDGET_MIN=2 node collector/stores.mjs $s 2>&1 | tail -15; node -e "const d=require('./public/prices/$s.json');console.log('saved',d.prices.length);for(const p of d.prices.slice(0,8))console.log(p.ean,p.priceCents,p.name)" 2>&1 | head -10; done
