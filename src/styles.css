@@ -1675,3 +1675,7 @@ html, body { overscroll-behavior-x: none; }
 .bell-n, .wt-bell { animation: none; }
 .wh-card, .wh-save { animation: none; }
 .you-top { justify-content: flex-start; }
+/* Softer backdrop: a little lighter in light mode, much fainter in dark mode. */
+.shell::before { opacity: 0.8; }
+:root[data-theme='dark'] .shell::before { filter: none; opacity: 0.6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .shell::before { filter: none; opacity: 0.6; } }
