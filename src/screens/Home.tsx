@@ -18,6 +18,9 @@ function greeting(): Key {
   return h < 5 ? 'home.night' : h < 11 ? 'home.morning' : h < 17 ? 'home.day' : h < 22 ? 'home.evening' : 'home.night'
 }
 
+/** How many watched products Home shows; the rest are on the watch page. */
+const HOME_WATCH = 3
+
 export function Home() {
   const { products, observations, retailers, list, watched, lang, pricesOf, t } = useStore()
   const nav = useNav()
@@ -128,14 +131,26 @@ export function Home() {
 
       {watched.length > 0 && (
         <div className="section">
-          <div className="section-head"><h2>{t('watch.title')}</h2></div>
+          <div className="section-head">
+            <h2>{t('watch.title')}</h2>
+            {watched.length > HOME_WATCH && (
+              <button className="link" onClick={() => { openProfilePage('watched', nav.tab); nav.go('profile') }}>{t('home.seeAllN', { n: watched.length })}</button>
+            )}
+          </div>
           <div className="rows">
-            {watched.map((w) => {
-              const p = products.find((x) => x.id === w.productId)
+            {watched
+              .map((w) => {
+                const p = products.find((x) => x.id === w.productId)
+                const c = p ? cheapest(compare(p, pricesOf(p.id), retailers)) : undefined
+                const now = c?.current.priceCents ?? null
+                const diff = now !== null && w.baselineCents !== null ? now - w.baselineCents : null
+                return { w, p, c, now, diff }
+              })
+              // Biggest drops first; Home shows a few, the rest are under "See all".
+              .sort((a, b) => (a.diff ?? 0) - (b.diff ?? 0))
+              .slice(0, HOME_WATCH)
+              .map(({ w, p, c, now, diff }) => {
               if (!p) return null
-              const c = cheapest(compare(p, pricesOf(p.id), retailers))
-              const now = c?.current.priceCents ?? null
-              const diff = now !== null && w.baselineCents !== null ? now - w.baselineCents : null
               return (
                 <button key={w.productId} className="row" onClick={() => nav.openProduct(p.id)}>
                   <Tile product={p} />
@@ -155,6 +170,11 @@ export function Home() {
               )
             })}
           </div>
+          {watched.length > HOME_WATCH && (
+            <button className="see-more" onClick={() => { openProfilePage('watched', nav.tab); nav.go('profile') }}>
+              {t('home.moreWatched', { n: watched.length - HOME_WATCH })}
+            </button>
+          )}
         </div>
       )}
 

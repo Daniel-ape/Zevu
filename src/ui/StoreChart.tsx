@@ -17,9 +17,19 @@ export function StoreChart({ dates, series }: { dates: Date[]; series: StoreSeri
   const ref = useRef<SVGSVGElement>(null)
   const n = dates.length
   if (n < 1 || !series.length) return null
+  // A price holds until the shop changes it: carry each shop's last price over
+  // gaps and up to today, so every line runs to the right edge. Before a shop's
+  // first price the line starts at the left edge too, dashed (not seen yet).
+  const filled = series.map((ser) => {
+    let last: number | null = null
+    const solid = ser.values.map((v) => (v !== null ? (last = v) : last))
+    const first = ser.values.find((v) => v !== null) ?? null
+    const lead = ser.values.map((_, i) => (solid[i] === null ? first : null))
+    return { ser, solid, lead }
+  })
 
   const W = 340, H = 150, padX = 12, padTop = 14, padBottom = 26
-  const all = series.flatMap((s) => s.values.filter((v): v is number => v !== null))
+  const all = filled.flatMap((f) => f.solid.filter((v): v is number => v !== null))
   const min = Math.min(...all), max = Math.max(...all)
   const span = Math.max(max - min, Math.max(20, max * 0.1))
   const lo = min - (span - (max - min)) / 2
@@ -51,18 +61,21 @@ export function StoreChart({ dates, series }: { dates: Date[]; series: StoreSeri
     setSel(Math.min(n - 1, Math.max(0, Math.floor(((px - padX) / (W - padX * 2)) * n))))
   }
   const rows = series
-    .map((ser, k) => ({ ser, color: COLORS[k % COLORS.length], v: ser.values[s] }))
+    .map((ser, k) => ({ ser, color: COLORS[k % COLORS.length], v: filled[k].solid[s] }))
     .sort((a, b) => (a.v ?? Infinity) - (b.v ?? Infinity))
 
   return (
     <div className="store-chart">
       <svg ref={ref} viewBox={`0 0 ${W} ${H}`} width="100%" onPointerDown={pick} onPointerMove={(e) => e.buttons && pick(e)} style={{ touchAction: 'pan-y', cursor: 'crosshair' }}>
         <line x1={x(s)} x2={x(s)} y1={padTop - 6} y2={H - padBottom} stroke="var(--text-3)" strokeWidth="1" strokeDasharray="3 3" />
-        {series.map((ser, k) => (
-          <path key={ser.retailer.id} d={path(ser.values)} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={k === 0 ? 2.6 : 2} strokeLinejoin="round" strokeLinecap="round" opacity={k === 0 ? 1 : 0.85} />
+        {filled.map(({ ser, lead }, k) => lead.some((v) => v !== null) && (
+          <path key={'l' + ser.retailer.id} d={path(lead)} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={1.6} strokeDasharray="2 4" strokeLinecap="round" opacity={0.5} />
         ))}
-        {series.map((ser, k) => ser.values[s] !== null && (
-          <circle key={ser.retailer.id} cx={x(s)} cy={y(ser.values[s]!)} r="4" fill={COLORS[k % COLORS.length]} stroke="var(--card)" strokeWidth="1.5" />
+        {filled.map(({ ser, solid }, k) => (
+          <path key={ser.retailer.id} d={path(solid)} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={k === 0 ? 2.6 : 2} strokeLinejoin="round" strokeLinecap="round" opacity={k === 0 ? 1 : 0.85} />
+        ))}
+        {filled.map(({ ser, solid }, k) => solid[s] !== null && (
+          <circle key={ser.retailer.id} cx={x(s)} cy={y(solid[s]!)} r="4" fill={COLORS[k % COLORS.length]} stroke="var(--card)" strokeWidth="1.5" />
         ))}
         {ticks.map((i) => (
           <text key={i} x={x(i)} y={H - 8} fontSize="11" fill="var(--text-2)" textAnchor="middle">{fmt(dates[i])}</text>
