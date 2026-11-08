@@ -32,6 +32,8 @@ const STORES = {
   yliopistonapteekki: { retailerId: 'yliopistonapteekki', base: 'https://www.yliopistonapteekki.fi', sitemaps: ['https://www.yliopistonapteekki.fi/pub/media/sitemap.xml'], product: /-\d{3,}$/, keep: 'all' },
   // Minimani's web shop has its whole range, groceries included (meat, dairy, frozen…).
   minimani: { retailerId: 'minimani', base: 'https://www.minimani.fi', sitemaps: ['https://www.minimani.fi/sitemap/sitemap.xml'], product: /^https:\/\/www\.minimani\.fi\/[^/]+\.html$/, keep: 'all', foodFirst: true, skuIsEan: true },
+  // Jimm's has no sitemap: its products are found through the category pages (see `lists`).
+  jimms: { retailerId: 'jimms', base: 'https://www.jimms.fi', sitemaps: [], lists: { start: 'https://www.jimms.fi/', link: /\/fi\/Product\/List\/[0-9A-Z]{3}-[0-9A-Z]{3}\/[a-z0-9-]+/g, show: /\/fi\/Product\/Show\/(\d+)/g, share: 0.3, maxPages: 80 }, product: /^https:\/\/www\.jimms\.fi\/fi\/Product\/Show\/\d+$/, keep: 'all' },
   multitronic: { retailerId: 'multitronic', base: 'https://www.multitronic.fi', sitemaps: ['https://www.multitronic.fi/sitemap.xml'], maps: /sitemap\/fi\/sitemap_product/, product: /\/fi\/products\/\d+$/, keep: 'all' },
   power: { retailerId: 'power', base: 'https://www.power.fi', sitemaps: ['https://www.power.fi/services/sitemap.xml'], maps: /products-\d+\.xml/, product: /\/p-\d+\/?$/, keep: 'all' },
   stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'all' },
@@ -84,7 +86,7 @@ console.log(`${name}: ${rules.length} robots rules, ${DELAY / 1000} s between re
 
 // Product links from the sitemaps (sitemap indexes are followed)
 const urls = new Set()
-const queue = [...cfg.sitemaps]
+const queue = [...(cfg.sitemaps ?? [])]
 const seenMaps = new Set()
 while (queue.length && !over()) {
   const map = queue.shift()
@@ -103,9 +105,49 @@ while (queue.length && !over()) {
   }
   await sleep(1000)
 }
+// Shops without a sitemap (Jimm's): product pages are found by going through
+// the category pages, page by page. Only the deepest categories are read (a
+// parent lists its children's products again), the ones read longest ago first,
+// for a share of the time budget. Products not seen for 30 days are dropped.
+if (cfg.lists) {
+  mkdirSync('collector/state', { recursive: true })
+  const LS = `collector/state/${name}-lists.json`
+  const ls = existsSync(LS) ? JSON.parse(readFileSync(LS, 'utf8')) : { lists: {}, products: {} }
+  const home = await get(cfg.lists.start).catch((e) => { console.log('start page', e.message); return '' })
+  const found = [...new Set([...home.matchAll(cfg.lists.link)].map((m) => cfg.base + m[0]))].filter((u) => !blocked(new URL(u).pathname))
+  const slugs = found.map((u) => u.split('/').pop())
+  const leaves = found.filter((u) => { const sl = u.split('/').pop(); return !slugs.some((o) => o !== sl && o.startsWith(sl + '--')) })
+  if (leaves.length) {
+    for (const u of leaves) ls.lists[u] ??= ''
+    for (const u of Object.keys(ls.lists)) if (!leaves.includes(u)) delete ls.lists[u]
+  }
+  const stopAt = START + BUDGET * cfg.lists.share
+  let pages = 0
+  outer: for (const lu of Object.keys(ls.lists).sort((a, b) => ls.lists[a].localeCompare(ls.lists[b]))) {
+    if (Date.now() > stopAt) break
+    const seen = new Set()
+    for (let pg = 1; pg <= cfg.lists.maxPages; pg++) {
+      await sleep(DELAY)
+      let html
+      try { html = await get(pg === 1 ? lu : `${lu}?p=${pg}`); pages++ } catch (e) {
+        if (e.stop) { console.log('stopped by the shop:', e.message); break outer }
+        break
+      }
+      const fresh = [...new Set([...html.matchAll(cfg.lists.show)].map((m) => m[1]))].filter((id) => !seen.has(id))
+      const now = new Date().toISOString()
+      for (const id of fresh) { seen.add(id); ls.products[`${cfg.base}/fi/Product/Show/${id}`] = now }
+      if (fresh.length < 5) break // past the last page (or only the menu's products left)
+    }
+    ls.lists[lu] = new Date().toISOString()
+  }
+  const old = new Date(Date.now() - 30 * 86_400_000).toISOString()
+  for (const [u, at] of Object.entries(ls.products)) { if (at < old) delete ls.products[u]; else if (cfg.product.test(u)) urls.add(u) }
+  writeFileSync(LS, JSON.stringify(ls))
+  console.log(`${found.length} categories (${leaves.length} deepest), ${pages} list pages read, ${urls.size} product pages known`)
+}
 // Shops with the same page in several languages: keep the Finnish one.
 if (cfg.prefer && [...urls].some((u) => cfg.prefer.test(u))) for (const u of [...urls]) if (!cfg.prefer.test(u)) urls.delete(u)
-console.log(`${urls.size} product pages in the sitemaps`)
+if (!cfg.lists) console.log(`${urls.size} product pages in the sitemaps`)
 
 // State: what each page held when last read
 mkdirSync('collector/state', { recursive: true })
@@ -152,7 +194,28 @@ function productFrom(html) {
       }
     }
   }
-  return null
+  return microdataFrom(html)
+}
+
+// schema.org microdata (itemprop attributes) for shops without JSON-LD (Jimm's)
+const decode = (t) => t.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+function microdataFrom(html) {
+  const price = parseFloat(html.match(/itemprop="price"[^>]*?content="([\d.]+)"/)?.[1])
+  const gtin = html.match(/itemprop="gtin13"[^>]*?content="(\d{8,14})"/)?.[1] ?? html.match(/itemprop="gtin13"[^>]*>\s*(\d{8,14})\s*</)?.[1]
+  if (!gtin || !(price > 0)) return null
+  const ean = gtin.length === 14 && gtin.startsWith('0') ? gtin.slice(1) : gtin.length === 12 ? '0' + gtin : gtin
+  if (!validEan(ean)) return null
+  const title = html.match(/property="og:title"\s+content="([^"]+)"/)?.[1] ?? html.match(/<title>([^<]+)/)?.[1] ?? ''
+  const brand = html.match(/itemprop="brand"[\s\S]{0,400}?itemprop="name"(?:\s+content="([^"]*)")?[^>]*>([^<]*)/)
+  const img = html.match(/itemprop="image"[^>]*?(?:src|content|href)="([^"]+)"/)?.[1]
+  return {
+    ean: own(ean),
+    priceCents: Math.round(price * 100),
+    name: own(decode(title.replace(/\s+-\s+[\d\s.,]+\s*(€|&euro;)\s*$/, '')).trim().slice(0, 120)),
+    brand: own(decode(String(brand?.[1] || brand?.[2] || '')).trim().slice(0, 60)),
+    image: own(img ? (img.startsWith('//') ? 'https:' + img : img) : undefined),
+    inStock: !/itemprop="availability"[^>]*schema\.org\/(OutOfStock|Discontinued|SoldOut)/i.test(html),
+  }
 }
 
 let read = 0
