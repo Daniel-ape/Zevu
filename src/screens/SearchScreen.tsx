@@ -11,19 +11,39 @@ import { Sheet } from '../ui/Sheet'
 
 type Sort = 'top' | 'price' | 'unit' | 'name'
 
+// What the Products page looked like when a product was opened from it, so
+// coming back shows the same search, category, order and scroll position.
+let kept: { q: string; cat: CategoryId | 'all'; sort: Sort; navCat: CategoryId | 'all'; scroll: number } | null = null
+const scroller = () => document.querySelector<HTMLElement>('.screen')
+
 export function SearchScreen() {
   const { products, retailers, searchOnline, list, setQuantity, pricesOf, loadMore, moreLoaded, t } = useStore()
   const [added, setAdded] = useState<string | null>(null)
   const [online, setOnline] = useState<'idle' | 'loading' | 'unavailable' | string[]>('idle')
   const nav = useNav()
-  const [q, setQ] = useState('')
-  const [cat, setCat] = useState<CategoryId | 'all'>(nav.searchCategory)
-  const [sort, setSort] = useState<Sort>('top')
+  // Restore only if nobody asked for another category meanwhile (e.g. from Home).
+  const restore = kept && kept.navCat === nav.searchCategory ? kept : null
+  const [q, setQ] = useState(restore?.q ?? '')
+  const [cat, setCat] = useState<CategoryId | 'all'>(restore?.cat ?? nav.searchCategory)
+  const [sort, setSort] = useState<Sort>(restore?.sort ?? 'top')
+  const state = useRef({ q, cat, sort })
+  state.current = { q, cat, sort }
+  const restoreScroll = useRef(restore?.scroll ?? 0)
+  useEffect(() => () => {
+    const el = scroller()
+    kept = { ...state.current, navCat: nav.searchCategory, scroll: el && el.scrollHeight > el.clientHeight ? el.scrollTop : window.scrollY }
+  }, [nav.searchCategory])
   const [picking, setPicking] = useState(false)
   const closePicker = useCallback(() => setPicking(false), [])
   const input = useRef<HTMLInputElement>(null)
 
-  useEffect(() => setCat(nav.searchCategory), [nav.searchCategory])
+  // Follow a category picked elsewhere (e.g. on Home), but only when it changes.
+  const lastNavCat = useRef(nav.searchCategory)
+  useEffect(() => {
+    if (lastNavCat.current === nav.searchCategory) return
+    lastNavCat.current = nav.searchCategory
+    setCat(nav.searchCategory)
+  }, [nav.searchCategory])
   // Everyday goods load with the app; the rest of the shops' ranges are fetched
   // the first time someone searches or opens a non-everyday category.
   useEffect(() => {
@@ -98,6 +118,17 @@ export function SearchScreen() {
       .slice(0, 80)
   }, [dq, cat, sort, products, pricesOf, retailers, online, hay, rank])
   const stale = dq !== q
+  // Back from a product: scroll to where the list was, once the rows are there.
+  useEffect(() => {
+    const y = restoreScroll.current
+    if (!y || !results.length) return
+    restoreScroll.current = 0
+    requestAnimationFrame(() => {
+      const el = scroller()
+      if (el && el.scrollHeight > el.clientHeight) el.scrollTop = y
+      else window.scrollTo(0, y)
+    })
+  }, [results])
 
   // How many products with a price each category has (shown in the picker).
   const counts = useMemo(() => {

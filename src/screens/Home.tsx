@@ -2,13 +2,15 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, storeInsights, trend } from '../domain/pricing'
 import { useNav } from '../nav'
-import { ArrowRight, List, Scan as ScanIcon, Ticket } from '../ui/icons'
+import { ArrowRight, List, Ticket } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
-import { ReceiptSheet } from './ReceiptSheet'
 import { Cover, useShelf } from './Leaflets'
 import { HomeMemberOffers } from './Coupons'
 import { openProfilePage } from './Profile'
 import { SaveCard } from '../ui/SaveCard'
+import { ProfileButton } from '../ui/ProfileButton'
+import { WatchBell } from '../ui/WatchBell'
+import { WatchAlert } from '../ui/WatchAlert'
 import type { Key } from '../i18n'
 
 function greeting(): Key {
@@ -20,7 +22,6 @@ export function Home() {
   const { products, observations, retailers, list, watched, lang, pricesOf, coupons, t } = useStore()
   const activeCoupons = coupons.filter((c) => !c.used && (!c.validUntil || new Date(c.validUntil + 'T23:59') >= new Date())).length
   const nav = useNav()
-  const [receipt, setReceipt] = useState(false)
   const { shelf } = useShelf()
   const listName = list.name === 'Weekly shop' ? t('list.defaultName') : list.name
   const itemCount = list.items.reduce((n, i) => n + i.quantity, 0)
@@ -62,18 +63,23 @@ export function Home() {
           <div className="eyebrow">{today}</div>
           <h1>{t(greeting())}</h1>
         </div>
-        <button className="home-badge" onClick={() => nav.go('profile')} aria-label={t('tab.you')}>
-          <img src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" />
-        </button>
+        <div className="home-actions">
+          <WatchBell />
+          <ProfileButton />
+        </div>
       </div>
 
-      <SaveCard month={month} bestShop={best?.retailer.name} onScan={() => setReceipt(true)} onOpen={() => { openProfilePage('spending'); nav.go('profile') }} />
+      <WatchAlert />
+      <SaveCard month={month} bestShop={best?.retailer.name} onOpen={() => { openProfilePage('spending'); nav.go('profile') }} />
 
-      <div className="quick3">
-        <button onClick={() => nav.go('scan')}><span className="q-ic"><ScanIcon size={22} /></span>{t('qa.scan')}</button>
-        <button onClick={() => nav.go('lists')}><span className="q-ic"><List size={22} />{itemCount > 0 && <i>{itemCount}</i>}</span>{t('qa.list')}</button>
-        <button onClick={() => nav.go('coupons')}><span className="q-ic"><Ticket size={22} />{activeCoupons > 0 && <i>{activeCoupons}</i>}</span>{t('cp.short')}</button>
-      </div>
+      <button className="list-card section coupon-card" style={{ marginTop: 14 }} onClick={() => nav.go('coupons')}>
+        <span className="quick-icon"><Ticket size={22} /></span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <b>{t('cp.short')}</b>
+          <span className="sub">{activeCoupons > 0 ? t('home.couponsN', { n: activeCoupons }) : t('home.couponsNone')}</span>
+        </span>
+        <ArrowRight size={16} />
+      </button>
 
       {list.items.length > 0 && (
         <button className="list-card section" style={{ marginTop: 18 }} onClick={() => nav.go('lists')}>
@@ -189,7 +195,6 @@ export function Home() {
       )}
 
 
-      {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
     </div>
   )
 }

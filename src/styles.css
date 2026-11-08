@@ -806,8 +806,7 @@ h1 { font-size: 30px; }
 
 /* Price drop banner for watched products */
 .watch-alert {
-  position: fixed; z-index: 30; left: 12px; right: 12px; top: max(12px, env(safe-area-inset-top));
-  max-width: 520px; margin: 0 auto; display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 10px;
+  position: relative; margin: 16px 0 0; display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 10px;
   border-radius: 22px; animation: wa-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.15);
 }
 .watch-alert .wa-body { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; text-align: left; color: inherit; }
@@ -1542,6 +1541,12 @@ html, body { overscroll-behavior-x: none; }
 }
 .screen.home > :not(.sheet-backdrop):not(.shop):not(.cardview):not(.camera):not(.leaflet):not(.toast) { position: relative; z-index: 1; }
 .home-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.profile-btn { width: 44px; height: 44px; border-radius: 50%; padding: 0; border: 0; overflow: hidden; flex-shrink: 0; margin-bottom: 4px; display: grid; place-items: center;
+  background: var(--card); color: var(--text); box-shadow: var(--card-shadow), 0 0 0 1px var(--line); transition: transform 0.15s; }
+.profile-btn.in { box-shadow: 0 0 0 2px #C4F83F, 0 6px 16px rgba(6, 40, 26, 0.25); }
+.profile-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.profile-btn:active { transform: scale(0.92); }
+.coupon-card > svg:last-child { color: var(--text-2); flex-shrink: 0; }
 .home-badge { width: 44px; height: 44px; border-radius: 14px; padding: 0; border: 0; overflow: hidden; flex-shrink: 0; margin-bottom: 4px;
   box-shadow: 0 8px 20px rgba(6, 40, 26, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.08); transition: transform 0.15s; background: #0a2a1e; }
 .home-badge img { width: 100%; height: 100%; display: block; }
@@ -1550,3 +1555,42 @@ html, body { overscroll-behavior-x: none; }
 .q-ic { background: linear-gradient(145deg, #16d27c, #0a8f55); color: #fff; box-shadow: 0 6px 14px rgba(14, 154, 87, 0.28); }
 .q-ic i { background: #C4F83F; color: #0B2219; }
 .list-card .quick-icon { background: linear-gradient(145deg, #16d27c, #0a8f55); color: #fff; }
+
+/* Settings: about, privacy, sources, terms */
+.legal { padding: 4px 4px 8px; line-height: 1.55; font-size: 15px; }
+.legal section + section { margin-top: 18px; }
+.legal h3 { font-size: 16px; margin: 0 0 6px; }
+.legal p { margin: 0; color: var(--text); }
+.legal ul { margin: 0; padding-left: 20px; color: var(--text); }
+.legal li + li { margin-top: 6px; }
+.legal a { color: var(--accent); word-break: break-all; }
+.legal-actions { display: grid; gap: 8px; margin-top: 28px; }
+.btn.danger-bg { background: #d92d20; color: #fff; }
+
+/* Watch: bell in the Home corner and the "watching" toast */
+.home-actions { display: flex; gap: 10px; align-items: center; margin-bottom: 4px; }
+.home-actions .profile-btn { margin-bottom: 0; }
+.bell-btn { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0; display: grid; place-items: center;
+  background: var(--card); color: var(--text); box-shadow: var(--card-shadow), 0 0 0 1px var(--line); transition: transform 0.15s; }
+.bell-btn:active { transform: scale(0.92); }
+.bell-n { position: absolute; top: -3px; right: -3px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 99px; font-style: normal;
+  font-size: 11px; font-weight: 800; display: grid; place-items: center; background: #C4F83F; color: #0B2219; box-shadow: 0 0 0 2px var(--bg);
+  animation: bell-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+@keyframes bell-pop { from { transform: scale(0); } }
+.bell-icon { display: grid; transform-origin: 50% 10%; }
+.watch-toast {
+  position: fixed; left: 12px; right: 12px; bottom: calc(108px + env(safe-area-inset-bottom)); z-index: 85; margin: 0 auto; max-width: 440px;
+  display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px; border-radius: 20px; color: #fff;
+  background: linear-gradient(155deg, #164a36, #06140f); box-shadow: 0 16px 36px rgba(6, 40, 26, 0.38);
+  animation: wt-in 0.5s cubic-bezier(0.2, 1.3, 0.4, 1) backwards, wt-out 0.35s 2.85s ease-in forwards;
+}
+@keyframes wt-in { from { opacity: 0; transform: translate3d(0, 30px, 0) scale(0.92); } }
+@keyframes wt-out { to { opacity: 0; transform: translate3d(0, 16px, 0); } }
+.wt-bell { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: #C4F83F; color: #0B2219; flex-shrink: 0;
+  transform-origin: 50% 15%; animation: bell-ring 1s 0.25s ease-in-out; }
+@keyframes bell-ring { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(18deg); } 30% { transform: rotate(-15deg); } 45% { transform: rotate(11deg); } 60% { transform: rotate(-7deg); } 75% { transform: rotate(3deg); } }
+.wt-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.wt-text b { font-size: 15px; }
+.wt-text span { font-size: 13px; opacity: 0.75; }
+.watch-toast button { border: 0; background: rgba(255, 255, 255, 0.12); color: #C4F83F; font: inherit; font-weight: 700; font-size: 13.5px; padding: 9px 12px; border-radius: 12px; white-space: nowrap; }
+.native-app .watch-toast { bottom: calc(100px + env(safe-area-inset-bottom)); }

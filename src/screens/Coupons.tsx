@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { openCamera } from '../data/takePhoto'
+import { inAppLink } from '../data/openLink'
 import { useStore } from '../data/store'
 import { useNav } from '../nav'
-import { CARD_CHAINS, cardName, chainOf, guessFormat, type LoyaltyCard } from '../data/cards'
+import { CARD_CHAINS } from '../data/cards'
 import { isActive, parseCoupon, type Coupon } from '../domain/coupons'
 import { euro } from '../domain/pricing'
 import { LOCALE, type Key } from '../i18n'
 import { Sheet } from '../ui/Sheet'
-import { Card as CardIcon, Plus, Search as SearchIcon, Ticket } from '../ui/icons'
-import { CameraScanner } from './CameraScanner'
-import { Cover, useShelf } from './Leaflets'
+import { Search as SearchIcon, Ticket } from '../ui/icons'
 import { ChainMark } from '../ui/ChainMark'
 
 /**
@@ -18,11 +17,7 @@ import { ChainMark } from '../ui/ChainMark'
  * the chains they have cards for. Everything stays on the phone.
  */
 export function Coupons() {
-  const { cards, coupons, removeCoupon, saveCoupon, t, lang } = useStore()
-  const nav = useNav()
-  const { shelf } = useShelf()
-  const [showCard, setShowCard] = useState<LoyaltyCard | null>(null)
-  const [addingCard, setAddingCard] = useState(false)
+  const { coupons, removeCoupon, saveCoupon, t, lang } = useStore()
   const [editing, setEditing] = useState<Coupon | null>(null)
   const [filter, setFilter] = useState('all')
   const photo = useRef<HTMLInputElement>(null)
@@ -33,10 +28,6 @@ export function Coupons() {
   const shown = active
     .filter((c) => filter === 'all' || c.chain === filter)
     .sort((a, b) => (a.validUntil ?? '9999').localeCompare(b.validUntil ?? '9999'))
-
-  // Leaflets of the chains the user has cards for (that's where members' offers are printed).
-  const myLeafletChains = new Set(cards.map((c) => chainOf(c).leaflets).filter(Boolean) as string[])
-  const leaflets = shelf.filter((c) => myLeafletChains.has(c.chain)).flatMap((c) => c.leaflets.map((l) => ({ chain: c.chain, l }))).slice(0, 8)
 
   const onPhoto = async (f?: File) => {
     if (!f) return
@@ -61,22 +52,7 @@ export function Coupons() {
     <div className="screen coupons">
       <div className="topbar"><h1>{t('cp.title')}</h1></div>
 
-      {/* Loyalty cards */}
-      <div className="section-head" style={{ marginTop: 4 }}><h2>{t('cp.cards')}</h2></div>
-      <div className="strip card-strip">
-        {cards.map((c) => (
-          <button key={c.id} className="loyalty" style={{ background: chainOf(c).color }} onClick={() => setShowCard(c)}>
-            <span className="loyalty-name">{cardName(c)}</span>
-            <span className="loyalty-num">•••• {c.number.slice(-4)}</span>
-          </button>
-        ))}
-        <button className="loyalty add" onClick={() => setAddingCard(true)}>
-          <Plus size={22} />
-          <span>{t('cp.addCard')}</span>
-        </button>
-      </div>
-
-      <LeafletOffers onShowCard={setShowCard} />
+      <LeafletOffers />
 
       {/* Coupons */}
       <div className="section">
@@ -129,10 +105,6 @@ export function Coupons() {
                     </span>
                   </button>
                   <div className="coupon-actions">
-                    {(() => {
-                      const card = cards.find((k) => k.chain === c.chain)
-                      return card ? <button className="coupon-card" onClick={() => setShowCard(card)}><CardIcon size={16} /> {t('cp.showCard')}</button> : null
-                    })()}
                     <button className="coupon-used" onClick={() => saveCoupon({ ...c, used: true })}>{t('cp.used')}</button>
                   </div>
                 </div>
@@ -142,22 +114,6 @@ export function Coupons() {
         )}
       </div>
 
-      {/* Leaflets of the user's chains */}
-      {leaflets.length > 0 && (
-        <div className="section">
-          <div className="section-head">
-            <h2>{t('cp.leaflets')}</h2>
-            <button className="link small" onClick={() => nav.go('leaflets')}>{t('home.seeAll')}</button>
-          </div>
-          <div className="strip covers-strip">
-            {leaflets.map(({ chain, l }) => <Cover key={l.url} chain={chain} l={l} compact />)}
-          </div>
-          <div className="group-note">{t('cp.leafletHint')}</div>
-        </div>
-      )}
-
-      {showCard && <CardView card={showCard} onClose={() => setShowCard(null)} />}
-      {addingCard && <AddCard onClose={() => setAddingCard(false)} />}
       {editing && (
         <CouponEditor
           coupon={editing}
@@ -228,11 +184,9 @@ const asCoupon = (o: LeafletOffer): Coupon => ({
 })
 
 /** One offer, big: the cut-out from the leaflet, price, save, card and a link to the leaflet. */
-export function OfferSheet({ o, onClose, onShowCard }: { o: LeafletOffer; onClose: () => void; onShowCard?: (c: LoyaltyCard) => void }) {
-  const { cards, coupons, saveCoupon, t, lang } = useStore()
+export function OfferSheet({ o, onClose }: { o: LeafletOffer; onClose: () => void }) {
+  const { coupons, saveCoupon, t, lang } = useStore()
   const saved = coupons.some((c) => c.id === 'lf:' + savedKey(o))
-  const card = cards.find((k) => k.chain === o.chain)
-  const [showCard, setShowCard] = useState<LoyaltyCard | null>(null)
   const fmtDate = (d: string) => new Date(d + 'T12:00').toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'short' })
   return (
     <>
@@ -244,11 +198,9 @@ export function OfferSheet({ o, onClose, onShowCard }: { o: LeafletOffer; onClos
         </div>
         <div className="offer-sheet-actions">
           <button className="btn primary" disabled={saved} onClick={() => saveCoupon(asCoupon(o))}>{saved ? t('cp.offerSaved') : t('cp.offerSave')}</button>
-          {card && <button className="btn ghost" onClick={() => (onShowCard ? onShowCard(card) : setShowCard(card))}><CardIcon size={18} /> {t('cp.showCard')}</button>}
         </div>
-        <a className="link small offer-sheet-link" href={pageUrl(o)} target="_blank" rel="noreferrer">{t('cp.offerOpen')}</a>
+        <a className="link small offer-sheet-link" href={pageUrl(o)} target="_blank" rel="noreferrer" onClick={inAppLink(pageUrl(o))}>{t('cp.offerOpen')}</a>
       </Sheet>
-      {showCard && <CardView card={showCard} onClose={() => setShowCard(null)} />}
     </>
   )
 }
@@ -295,7 +247,7 @@ export function HomeMemberOffers() {
 }
 
 /** Offers read from the shops' online leaflets (collector/offers.mjs). */
-function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void }) {
+function LeafletOffers() {
   const { cards, coupons, saveCoupon, t, lang } = useStore()
   const [all, setAll] = useState<LeafletOffer[] | null>(null)
   const myChains = useMemo(() => new Set(cards.map((c) => c.chain)), [cards])
@@ -337,7 +289,6 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
         <div className="offer-list">
           {shown.slice(0, limit).map((o, i) => {
             const chain = CARD_CHAINS.find((x) => x.id === o.chain)
-            const card = cards.find((k) => k.chain === o.chain)
             const saved = isSaved(o)
             return (
               <div key={i} className="offer-row" style={{ ['--c' as string]: chain?.color ?? '#6b6b78' }}>
@@ -348,12 +299,12 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
                     <ChainMark chain={o.chain} />
                   </button>
                 ) : (
-                  <a className="offer-badge" href={pageUrl(o)} target="_blank" rel="noreferrer" aria-label={t('cp.offerOpen')}>
+                  <a className="offer-badge" href={pageUrl(o)} target="_blank" rel="noreferrer" aria-label={t('cp.offerOpen')} onClick={inAppLink(pageUrl(o))}>
                     {o.percent ? <b>−{o.percent}%</b> : <b>%</b>}
                     <small>{chain?.name.replace(' Plus', '') ?? o.chain}</small>
                   </a>
                 )}
-                <a className="offer-body" href={pageUrl(o)} target="_blank" rel="noreferrer">
+                <a className="offer-body" href={pageUrl(o)} target="_blank" rel="noreferrer" onClick={inAppLink(pageUrl(o))}>
                   <span className="offer-name">{o.name}</span>
                   {o.details && <span className="offer-details">{o.details}</span>}
                   <span className="offer-price">
@@ -368,7 +319,6 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
                     disabled={saved}
                     onClick={() => saveCoupon(asCoupon(o))}
                   >{saved ? t('cp.offerSaved') : t('cp.offerSave')}</button>
-                  {card && o.member && <button className="offer-card" onClick={() => onShowCard(card)}><CardIcon size={15} /></button>}
                 </div>
               </div>
             )
@@ -377,7 +327,7 @@ function LeafletOffers({ onShowCard }: { onShowCard: (c: LoyaltyCard) => void })
       )}
       {shown.length > limit && <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setLimit(limit + 30)}>{t('cp.offersMore', { n: shown.length - limit })}</button>}
       <div className="group-note">{t('cp.offersNote')}</div>
-      {big && <OfferSheet o={big} onClose={() => setBig(null)} onShowCard={onShowCard} />}
+      {big && <OfferSheet o={big} onClose={() => setBig(null)} />}
     </div>
   )
 }
@@ -390,86 +340,6 @@ async function shrink(file: File): Promise<string> {
   c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale)
   c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height)
   return c.toDataURL('image/jpeg', 0.72)
-}
-
-/** Full-screen white card with the barcode, for the cashier's scanner. */
-function CardView({ card, onClose }: { card: LoyaltyCard; onClose: () => void }) {
-  const { removeCard, t } = useStore()
-  const svg = useRef<SVGSVGElement>(null)
-  const [qr, setQr] = useState('')
-  useEffect(() => {
-    const f = card.format
-    if (/QR|AZTEC|DATA_MATRIX|PDF/.test(f)) {
-      import('qrcode').then((Q) => Q.toDataURL(card.number, { margin: 1, width: 600, errorCorrectionLevel: 'M' })).then(setQr).catch(() => {})
-      return
-    }
-    import('jsbarcode').then(({ default: JsBarcode }) => {
-      if (!svg.current) return
-      const format = f === 'EAN_13' ? 'EAN13' : f === 'EAN_8' ? 'EAN8' : f === 'CODE_39' ? 'CODE39' : f === 'ITF' ? 'ITF' : f === 'UPC_A' ? 'UPC' : f === 'CODABAR' ? 'codabar' : 'CODE128'
-      try {
-        JsBarcode(svg.current, card.number, { format, displayValue: false, margin: 0, height: 120, width: 2.4, background: '#ffffff', lineColor: '#000000' })
-      } catch {
-        JsBarcode(svg.current, card.number, { format: 'CODE128', displayValue: false, margin: 0, height: 120, width: 2.2 })
-      }
-    })
-  }, [card])
-  return (
-    <div className="cardview" onClick={onClose} role="dialog" aria-label={cardName(card)}>
-      <div className="cardview-inner" onClick={(e) => e.stopPropagation()}>
-        <div className="cardview-head" style={{ background: chainOf(card).color }}>{cardName(card)}</div>
-        <div className="cardview-code">
-          {qr ? <img src={qr} alt="" style={{ width: '70%', maxWidth: 280 }} /> : <svg ref={svg} />}
-          <div className="cardview-num">{card.number.replace(/(.{4})/g, '$1 ').trim()}</div>
-        </div>
-        <div className="cardview-hint">{t('cp.brightness')}</div>
-        <div className="cardview-actions">
-          <button className="btn ghost" onClick={() => { if (confirm(t('cp.removeCard'))) { removeCard(card.id); onClose() } }}>{t('cp.remove')}</button>
-          <button className="btn primary" onClick={onClose}>{t('common.close')}</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function AddCard({ onClose }: { onClose: () => void }) {
-  const { addCard, t } = useStore()
-  const [chain, setChain] = useState('s')
-  const [name, setName] = useState('')
-  const [number, setNumber] = useState('')
-  const [format, setFormat] = useState('')
-  const [camera, setCamera] = useState(false)
-  const close = useCallback(onClose, [onClose])
-  const ok = number.trim().length >= 4 && (chain !== 'other' || name.trim())
-  return (
-    <Sheet title={t('cp.addCard')} onClose={close} closeLabel={t('common.close')}>
-      <div className="cat-grid" style={{ marginBottom: 14 }}>
-        {CARD_CHAINS.map((c) => (
-          <button key={c.id} className={'card-pick' + (chain === c.id ? ' on' : '')} style={{ ['--c' as string]: c.color }} onClick={() => setChain(c.id)}>
-            <span className="card-swatch" />
-            {c.name || t('cp.other')}
-          </button>
-        ))}
-      </div>
-      {chain === 'other' && (
-        <label className="search" style={{ marginBottom: 10 }}>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('cp.cardName')} />
-        </label>
-      )}
-      <button className="btn primary" onClick={() => setCamera(true)}><CardIcon size={20} /> {t('cp.scanCard')}</button>
-      <div className="group-note" style={{ textAlign: 'center', margin: '10px 0' }}>{t('cp.orType')}</div>
-      <label className="search">
-        <input inputMode="numeric" value={number} onChange={(e) => { setNumber(e.target.value.replace(/\s/g, '')); setFormat('') }} placeholder={t('cp.cardNumber')} />
-      </label>
-      {format && <div className="group-note">{t('cp.scanned', { n: number })}</div>}
-      <button className="btn primary" style={{ marginTop: 14 }} disabled={!ok} onClick={() => { addCard({ chain, name: chain === 'other' ? name.trim() : undefined, number: number.trim(), format: format || guessFormat(number.trim()) }); close() }}>
-        {t('cp.saveCard')}
-      </button>
-      <div className="group-note">{t('cp.cardPrivacy')}</div>
-      {camera && (
-        <CameraScanner card onClose={() => setCamera(false)} onFallback={() => setCamera(false)} onCode={(code, f) => { setNumber(code); setFormat(f ?? ''); setCamera(false) }} />
-      )}
-    </Sheet>
-  )
 }
 
 function CouponEditor({ coupon, isNew, onSave, onDelete, onClose }: {

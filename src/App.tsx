@@ -4,7 +4,7 @@ import { onSession, startAutoSync } from './data/account'
 import { StoreProvider, useStore } from './data/store'
 import type { CategoryId } from './domain/types'
 import { NavCtx, type Nav, type Tab } from './nav'
-import { Bag, Home as HomeIcon, List, Paper, Scan as ScanIcon, User } from './ui/icons'
+import { Bag, Home as HomeIcon, List, Paper, Scan as ScanIcon } from './ui/icons'
 import { Home } from './screens/Home'
 import { SearchScreen } from './screens/SearchScreen'
 import { ProductScreen } from './screens/ProductScreen'
@@ -17,7 +17,7 @@ import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
 import { useLiquidGlass } from './ui/LiquidGlass'
-import { WatchAlert } from './ui/WatchAlert'
+import { WatchToast } from './ui/WatchBell'
 import { DOCK_ICONS, NativeDock, wantsNativeDock } from './native/nativeDock'
 
 const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile', 'coupons']
@@ -117,8 +117,9 @@ function Shell() {
     if (!nativeDock) return
     // The welcome page covers the whole screen too, with its own buttons at the bottom.
     if (overlay || !welcomed) { NativeDock.hide().catch(() => {}); return }
-    const ids: Tab[] = ['home', 'search', 'lists', 'leaflets', 'profile']
-    const label = { home: 'tab.home', search: 'tab.search', lists: 'tab.list', leaflets: 'tab.leaflets', profile: 'tab.you' } as const
+    // You is opened from the picture in the top corner of Home, not from the dock.
+    const ids: Tab[] = ['home', 'search', 'lists', 'leaflets']
+    const label = { home: 'tab.home', search: 'tab.search', lists: 'tab.list', leaflets: 'tab.leaflets' } as const
     NativeDock.show({
       tabs: ids.map((id) => ({ id, label: t(label[id as keyof typeof label]), icon: DOCK_ICONS[id] })),
       selected: top ? '' : tab,
@@ -126,10 +127,16 @@ function Shell() {
       scanLabel: t('tab.scan'),
     }).catch(() => setNativeDock(false))
   }, [nativeDock, tab, top, newLeaflets, t, overlay, welcomed])
+  // New page: start at the top. Coming back from a product the page below
+  // restores its own place (Products keeps its search and scroll).
+  const depth = useRef(stack.length)
   useEffect(() => {
+    const back = stack.length < depth.current
+    depth.current = stack.length
+    if (back) return
     window.scrollTo(0, 0)
     document.querySelector('.screen')?.scrollTo(0, 0)
-  }, [top, tab])
+  }, [top, tab, stack.length])
   // Which way the page moves in: along the tab bar order for tabs, forward for
   // a product opened on top, back when it closes. Kept in a ref so re-renders
   // that are not navigation don't restart the animation.
@@ -157,7 +164,7 @@ function Shell() {
       <div className="shell" data-motion={motion.current}>
         {!welcomed && <Welcome onDone={finishWelcome} />}
         {screen}
-        <WatchAlert />
+        <WatchToast />
         {!nativeDock && <nav className="dock" aria-label="Main">
           {barGlass.svg}{scanGlass.svg}
           <div ref={barRef} className={'dock-bar glass' + (barGlass.active ? ' refract' : '')} style={barGlass.style}>
@@ -165,7 +172,6 @@ function Shell() {
             {tabBtn('search', t('tab.search'), <Bag />)}
             {tabBtn('lists', t('tab.list'), <List />)}
             {tabBtn('leaflets', t('tab.leaflets'), <Paper />, newLeaflets && tab !== 'leaflets')}
-            {tabBtn('profile', t('tab.you'), <User />)}
           </div>
           <button ref={scanRef} style={tab === 'scan' && !top ? undefined : scanGlass.style} className={'dock-scan glass' + (scanGlass.active ? ' refract' : '') + (tab === 'scan' && !top ? ' on' : '')} onClick={() => nav.go('scan')} aria-label={t('tab.scan')}>
             <ScanIcon size={26} />

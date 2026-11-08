@@ -67,6 +67,25 @@ export function takeSignInError(): string | null {
   } catch { return null }
 }
 
+/**
+ * Deletes the account and everything stored with it: the synced data row and
+ * the sign-in itself (the `delete_my_account` function in docs/supabase.sql).
+ * Returns 'partial' when only the data could be removed (function missing).
+ * The phone's own copy is left for the caller to clear or keep.
+ */
+export async function deleteAccount(): Promise<'done' | 'partial'> {
+  const sb = await supabase()
+  const { data } = await sb.auth.getSession()
+  const user = data.session?.user
+  if (!user) throw new Error('not signed in')
+  const { error: rowErr } = await sb.from('user_data').delete().eq('user_id', user.id)
+  if (rowErr) throw rowErr
+  const { error } = await sb.rpc('delete_my_account')
+  await sb.auth.signOut().catch(() => {})
+  try { localStorage.removeItem('hintaopas:sync-meta') } catch { /* private mode */ }
+  return error ? 'partial' : 'done'
+}
+
 export async function signOut() {
   const sb = await supabase()
   await sb.auth.signOut()

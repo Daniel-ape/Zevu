@@ -18,3 +18,17 @@ create policy "own row: read"   on public.user_data for select using (auth.uid()
 create policy "own row: insert" on public.user_data for insert with check (auth.uid() = user_id);
 create policy "own row: update" on public.user_data for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own row: delete" on public.user_data for delete using (auth.uid() = user_id);
+
+-- Lets a signed-in user delete their own account from the app (App Store and
+-- GDPR: deletion must be possible in the app). Runs with the owner's rights,
+-- but only ever on the caller's own user id. user_data goes with it (cascade).
+create or replace function public.delete_my_account()
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  delete from auth.users where id = auth.uid();
+$$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

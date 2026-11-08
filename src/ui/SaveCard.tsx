@@ -3,7 +3,7 @@ import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
 import { savingsReport } from '../domain/receipts'
 import { loadOffers } from '../screens/Coupons'
-import { ArrowRight, Receipt } from './icons'
+import { ArrowRight } from './icons'
 
 /** Counts up to the value when it first shows or changes (skipped with reduced motion). */
 function useCountUp(target: number, ms = 900) {
@@ -41,7 +41,7 @@ function ago(ms: number, t: ReturnType<typeof useStore>['t']) {
  * (prices updated in the last day, this week's offers, the cheapest shop for
  * the list, when the data was last updated).
  */
-export function SaveCard({ month, bestShop, onScan, onOpen }: { month: string; bestShop?: string; onScan: () => void; onOpen: () => void }) {
+export function SaveCard({ month, bestShop, onOpen }: { month: string; bestShop?: string; onOpen: () => void }) {
   const { receipts, pricesOf, observations, t } = useStore()
   const now = new Date()
   const report = useMemo(() => savingsReport(receipts, pricesOf, now), [receipts, pricesOf]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -154,14 +154,7 @@ export function SaveCard({ month, bestShop, onScan, onOpen }: { month: string; b
       )}
 
       <div className="zc-actions">
-        {report.receipts === 0 ? (
-          <button className="zc-btn main" onClick={onScan}><Receipt size={18} /> {t('save.scan')}</button>
-        ) : (
-          <>
-            <button className="zc-btn main" onClick={onOpen}>{t('sv.open')} <ArrowRight size={15} /></button>
-            <button className="zc-btn" onClick={onScan}><Receipt size={16} /> {t('save.add')}</button>
-          </>
-        )}
+        <button className="zc-btn main" onClick={onOpen}>{t('sv.open')} <ArrowRight size={15} /></button>
       </div>
     </div>
   )

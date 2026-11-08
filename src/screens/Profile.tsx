@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { accountsEnabled, onSession, signInWithGoogle, signOut, takeSignInError } from '../data/account'
+import { accountsEnabled, deleteAccount, onSession, signInWithGoogle, signOut, takeSignInError } from '../data/account'
+import { LegalText, legalTitle } from '../ui/Legal'
 import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
@@ -11,7 +12,7 @@ import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 import { WatchList } from '../ui/WatchList'
 
-type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about'
+type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about' | 'privacy' | 'sources' | 'terms'
 
 /** Open a page of the You tab from elsewhere (call before nav.go('profile')). */
 let wanted: Page | null = null
@@ -30,7 +31,7 @@ function MenuRow({ icon, title, value, onClick }: { icon: ReactNode; title: stri
 }
 
 export function Profile() {
-  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, cards, t } = useStore()
+  const { theme, setTheme, lang, setLang, addReceipt, receipts, allRetailers, myStores, toggleMyStore, watched, coupons, t } = useStore()
   const nav = useNav()
   const [page, setPage] = useState<Page | null>(() => { const p = wanted; wanted = null; return p })
   const [sheet, setSheet] = useState<{ receipt?: Receipt } | null>(null)
@@ -42,7 +43,8 @@ export function Profile() {
     .reduce((sum, r) => sum + (r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0)), 0)
   const titles: Record<Page, string> = {
     spending: t('spend.title'), receipts: t('you.groupReceipts'), stores: t('stores.title'), watched: t('watch.title'),
-    language: t('you.language'), appearance: t('you.appearance'), about: t('you.groupAbout'),
+    language: t('you.language'), appearance: t('you.appearance'), about: legalTitle('about', lang),
+    privacy: legalTitle('privacy', lang), sources: legalTitle('sources', lang), terms: legalTitle('terms', lang),
   }
 
   const sheets = (
@@ -134,16 +136,9 @@ export function Profile() {
           </div>
         )}
 
-        {page === 'about' && (
-          <div className="rows">
-            <div className="row">
-              <div className="grow">
-                <div className="title">{t('you.data')}</div>
-                <div className="sub" style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{t('you.dataNote')}</div>
-              </div>
-            </div>
-          </div>
-        )}
+        {(page === 'about' || page === 'privacy' || page === 'sources' || page === 'terms') && <LegalText page={page} lang={lang} />}
+        {page === 'about' && <p className="tiny muted" style={{ textAlign: 'center', marginTop: 24 }}>ZEVU · {t('you.version')} {__APP_VERSION__}</p>}
+        {page === 'privacy' && <DeleteData />}
         {sheets}
       </div>
     )
@@ -171,7 +166,7 @@ export function Profile() {
       <div className="section rows">
         <MenuRow icon={<Home size={18} />} title={t('stores.title')} value={myStores.length ? String(myStores.length) : t('you.allStores')} onClick={() => setPage('stores')} />
         <MenuRow icon={<Bell size={18} />} title={t('watch.title')} value={String(watched.length)} onClick={() => setPage('watched')} />
-        <MenuRow icon={<Ticket size={18} />} title={t('cp.title')} value={String(cards.length)} onClick={() => nav.go('coupons')} />
+        <MenuRow icon={<Ticket size={18} />} title={t('cp.title')} value={String(coupons.filter((c) => !c.used).length)} onClick={() => nav.go('coupons')} />
       </div>
 
       <div className="section rows">
@@ -180,7 +175,10 @@ export function Profile() {
       </div>
 
       <div className="section rows">
-        <MenuRow icon={<Info size={18} />} title={t('you.groupAbout')} onClick={() => setPage('about')} />
+        <MenuRow icon={<Info size={18} />} title={legalTitle('about', lang)} onClick={() => setPage('about')} />
+        <MenuRow icon={<span style={{ fontSize: 15 }}>🔒</span>} title={legalTitle('privacy', lang)} onClick={() => setPage('privacy')} />
+        <MenuRow icon={<span style={{ fontSize: 15 }}>🗂</span>} title={legalTitle('sources', lang)} onClick={() => setPage('sources')} />
+        <MenuRow icon={<span style={{ fontSize: 15 }}>📄</span>} title={legalTitle('terms', lang)} onClick={() => setPage('terms')} />
       </div>
       {sheets}
     </div>
@@ -217,6 +215,50 @@ function AccountCard() {
         {busy ? t('acc.signingIn') : t('acc.google')}
       </button>
       {error && <div className="error">{error}</div>}
+    </div>
+  )
+}
+
+/** Under Privacy: delete the account (and its synced data) or this phone's data. */
+function DeleteData() {
+  const { t } = useStore()
+  const [session, setSession] = useState<Session | null>(null)
+  const [ask, setAsk] = useState<'account' | 'local' | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  useEffect(() => onSession(setSession), [])
+  const wipeLocal = () => {
+    try { Object.keys(localStorage).filter((k) => k.startsWith('hintaopas:')).forEach((k) => localStorage.removeItem(k)) } catch { /* private mode */ }
+    location.reload()
+  }
+  const run = async () => {
+    setBusy(true); setMsg('')
+    try {
+      if (ask === 'account') {
+        const r = await deleteAccount()
+        setMsg(r === 'done' ? t('del.accountDone') : t('del.accountPartial'))
+      } else wipeLocal()
+    } catch {
+      setMsg(t('del.failed'))
+    } finally { setBusy(false); setAsk(null) }
+  }
+  return (
+    <div className="legal-actions">
+      {session && <button className="btn danger-text" onClick={() => setAsk('account')}>{t('del.account')}</button>}
+      <button className="btn danger-text" onClick={() => setAsk('local')}>{t('del.local')}</button>
+      {msg && <p className="small" style={{ textAlign: 'center' }}>{msg}</p>}
+      {ask && (
+        <div className="sheet-backdrop" onClick={() => setAsk(null)}>
+          <div className="sheet menu-sheet" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-grab" />
+            <p style={{ lineHeight: 1.5, margin: '4px 4px 16px' }}>{ask === 'account' ? t('del.accountAsk') : t('del.localAsk')}</p>
+            <div style={{ display: 'grid', gap: 8 }}>
+              <button className="btn primary danger-bg" disabled={busy} onClick={run}>{busy ? '…' : t('del.confirm')}</button>
+              <button className="btn" onClick={() => setAsk(null)}>{t('common.cancel')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
