@@ -1,0 +1,15 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
+          for site in www.biltema.fi www.clasohlson.com www.motonet.fi www.puuilo.fi www.bauhaus.fi www.byggmax.fi www.k-rauta.fi www.hongkong.fi www.proshop.fi www.datatronic.fi www.normal.fi www.lekmer.fi www.prisjakt.nu www.verkkokauppa.com www.foodie.fi www.kauppahalli24.fi www.ruokaboksi.fi www.citymarket.fi www.mathem.fi www.hertta.fi www.sale.fi www.tokmanni.fi www.xxl.fi www.intersport.fi www.stadium.fi www.lidl.fi www.prisma.fi www.alko.fi www.musti.fi www.apotek.fi www.adlibris.com www.ikea.com www.jysk.fi www.masku.fi www.sotka.fi www.hobbyhall.fi www.cdon.fi www.suomalainen.com www.akateeminen.com www.ellos.fi www.zalando.fi www.lindex.com www.halens.fi www.pentik.fi www.motocenter.fi www.mekonomen.fi www.k-auto.fi www.tamaris.fi www.instru.fi www.mustijamirri.fi; do
+            code=$(curl -s -o r.txt -w '%{http_code}' -A "$UA" --max-time 20 "https://$site/robots.txt")
+            dis=$(grep -ciE "^disallow: /\s*$" r.txt || true)
+            ua=$(grep -iE "^user-agent:" r.txt | head -3 | tr '\n' ' ')
+            sm=$(grep -iE "^sitemap:" r.txt | head -2 | tr '\n' ' ')
+            echo "SITE $site robots=$code disallowAll=$dis $sm"
+          done
