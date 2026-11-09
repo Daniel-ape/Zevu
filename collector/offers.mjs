@@ -3,7 +3,7 @@
 // membership card (Lidl Plus, club offers…). Every offer links back to its page
 // in the leaflet. Leaflets that are only pictures (no text in the PDF) are skipped.
 // Needs pdftotext (poppler-utils). Output: public/prices/offers.json
-import { readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { readFileSync, writeFileSync, rmSync, mkdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { offersOf } from './leafletParse.mjs'
 import { readPpm, refineCrop } from './cropRefine.mjs'
@@ -34,10 +34,95 @@ function pagePicture(n) {
     return readPpm(readFileSync('/tmp/page.ppm'))
   } catch { return null }
 }
+/**
+ * The product photos placed on each page: pdftohtml lists every embedded picture with
+ * its position. Page-sized backgrounds and tiny icons (logos, badges) are left out.
+ * → Map(page number → [[left, top, width, height] as parts of the page])
+ */
+function photosOf() {
+  const out = new Map()
+  try {
+    rmSync('/tmp/ph', { recursive: true, force: true }); mkdirSync('/tmp/ph')
+    execFileSync('pdftohtml', ['-xml', '-q', '-l', '40', '/tmp/leaflet.pdf', '/tmp/ph/out'], { maxBuffer: 200e6, timeout: 180000 })
+    const xml = readFileSync('/tmp/ph/out.xml', 'utf8')
+    for (const pm of xml.matchAll(/<page number="(\d+)"[^>]*height="([\d.]+)" width="([\d.]+)">([\s\S]*?)<\/page>/g)) {
+      const H = +pm[2], W = +pm[3], list = []
+      for (const im of pm[4].matchAll(/<image top="(-?[\d.]+)" left="(-?[\d.]+)" width="([\d.]+)" height="([\d.]+)"/g)) {
+        let [t, l, w, h] = [+im[1] / H, +im[2] / W, +im[3] / W, +im[4] / H]
+        // clip to the page
+        const x0 = Math.max(0, l), y0 = Math.max(0, t), x1 = Math.min(1, l + w), y1 = Math.min(1, t + h)
+        ;[l, t, w, h] = [x0, y0, x1 - x0, y1 - y0]
+        if (w <= 0 || h <= 0) continue
+        const area = w * h
+        if (area > 0.3 || area < 0.004 || w > 0.9 || h > 0.9) continue
+        list.push([l, t, w, h])
+      }
+      out.set(+pm[1], list)
+    }
+  } catch (e) { console.log('no photo positions', String(e).slice(0, 120)) }
+  rmSync('/tmp/ph', { recursive: true, force: true })
+  return out
+}
+
+/** Distance between two boxes (0 when they touch or overlap). */
+const gap = (a, b) => Math.hypot(Math.max(0, a[0] - (b[0] + b[2]), b[0] - (a[0] + a[2])), Math.max(0, a[1] - (b[1] + b[3]), b[1] - (a[1] + a[3])))
+const union = (a, b) => { const x0 = Math.min(a[0], b[0]), y0 = Math.min(a[1], b[1]); return [x0, y0, Math.max(a[0] + a[2], b[0] + b[2]) - x0, Math.max(a[1] + a[3], b[1] + b[3]) - y0] }
+const centre = (b) => [b[0] + b[2] / 2, b[1] + b[3] / 2]
+
+/**
+ * Each offer gets the product photo that belongs to it: a photo belongs to the offer
+ * whose price-and-name area is nearest to it, and of an offer's photos the biggest
+ * one close by is used. The cut-out is then photo + name + price together, which
+ * is far more exact than guessing the box from the page picture.
+ * Returns the offers that got a photo.
+ */
+function matchPhotos(offers, photos) {
+  const got = new Set()
+  const byPage = new Map()
+  for (const o of offers) if (o.seed) { if (!byPage.has(o.page)) byPage.set(o.page, []); byPage.get(o.page).push(o) }
+  for (const [page, list] of byPage) {
+    const ps = photos.get(page) || []
+    const mine = new Map(list.map((o) => [o, []]))
+    for (const ph of ps) {
+      let best = null, bd = Infinity, second = Infinity
+      for (const o of list) {
+        const d = gap(ph, o.seed)
+        if (d < bd) { second = bd; bd = d; best = o } else if (d < second) second = d
+      }
+      // close to its offer, and clearly closer to it than to any other
+      if (best && bd < 0.12 && (bd < second * 0.6 || bd === 0 && second > 0.02)) mine.get(best).push(ph)
+    }
+    for (const [o, phs] of mine) {
+      if (!phs.length) continue
+      // a photo may sit right on top of another offer's price: then it is not ours
+      const others = list.filter((x) => x !== o)
+      const clean = phs.filter((ph) => !others.some((x) => { const c = centre(x.seed); return c[0] > ph[0] && c[0] < ph[0] + ph[2] && c[1] > ph[1] && c[1] < ph[1] + ph[3] }))
+      if (!clean.length) continue
+      const photo = clean.sort((a, b) => b[2] * b[3] - a[2] * a[3])[0]
+      let box = union(photo, o.seed)
+      // more photos of the same product right next to the main one (a pack and a serving)
+      for (const ph of clean) if (ph !== photo && gap(ph, photo) < 0.02) box = union(box, ph)
+      const pad = 0.01
+      box = [Math.max(0, box[0] - pad), Math.max(0, box[1] - pad), 0, 0, box]
+      const b = box[4]
+      const x1 = Math.min(1, b[0] + b[2] + pad), y1 = Math.min(1, b[1] + b[3] + pad)
+      const r = (v) => Math.round(v * 1000) / 1000
+      const final = [r(box[0]), r(box[1]), r(x1 - box[0]), r(y1 - box[1])]
+      // the cut-out must not swallow another offer's price
+      if (others.some((x) => { const c = centre(x.seed); return c[0] > final[0] && c[0] < final[0] + final[2] && c[1] > final[1] && c[1] < final[1] + final[3] })) continue
+      if (final[2] * final[3] > 0.4 || final[2] < 0.08 || final[3] < 0.05) continue
+      o.crop = [...final, o.crop?.[4] ?? o.region?.[4] ?? null]
+      got.add(o)
+    }
+  }
+  return got
+}
+
 /** Each offer's whole box (photo, name and price) instead of the rough area around the price. */
-function refineAll(offers) {
+function refineAll(offers, skip = new Set()) {
   const pics = new Map()
   for (const o of offers) {
+    if (skip.has(o)) { delete o.region; delete o.seed; continue }
     if (!pics.has(o.page)) pics.set(o.page, pagePicture(o.page))
     const img = pics.get(o.page)
     if (img && o.region && o.seed) {
@@ -60,7 +145,9 @@ async function add(chain, l, src) {
     if (until && until < today) return
     const html = readPdf(await get(pdf, true))
     const offers = offersOf(html).filter((o) => o.name.length >= 4)
-    refineAll(offers)
+    const withPhoto = matchPhotos(offers, photosOf())
+    refineAll(offers, withPhoto)
+    console.log('  cut-outs from photo positions:', withPhoto.size, 'of', offers.length)
     rmSync('/tmp/leaflet.pdf', { force: true })
     console.log(chain, l.name, from, until, offers.length, 'offers')
     for (const o of offers) {
