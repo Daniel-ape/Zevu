@@ -7,7 +7,7 @@ import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
-import { Back, Bell, Chart, Check, Chevron, Contrast, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket } from '../ui/icons'
+import { Back, Bell, Chart, Check, Chevron, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket } from '../ui/icons'
 import { useNav, type Tab } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
@@ -191,7 +191,6 @@ export function Profile() {
       <div className="group-label">{t('you.groupSettings')}</div>
       <div className="rows group-rows">
         <MenuRow icon={<Globe size={18} />} title={t('you.language')} value={LANGS.find((l) => l.id === lang)?.label} onClick={() => setPage('language')} />
-        <MenuRow icon={<Contrast size={18} />} title={t('you.appearance')} value={t(`theme.${theme}`)} onClick={() => setPage('appearance')} />
         {notify !== 'na' && <MenuRow icon={<Bell size={18} />} title={t('nt.title')} value={t(notify === 'on' ? 'nt.on' : 'nt.off')} onClick={() => setPage('notify')} />}
         <MenuRow icon={<Info size={18} />} title={t('you.info')} onClick={() => setPage('info')} />
       </div>

@@ -222,8 +222,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     save('theme', theme)
     const root = document.documentElement
-    if (theme === 'system') root.removeAttribute('data-theme')
-    else root.setAttribute('data-theme', theme)
+    // The app is light only (the theme setting is kept but not used).
+    root.setAttribute('data-theme', 'light')
   }, [theme])
   const byProduct = useMemo(() => {
     const m = new Map<string, PriceObservation[]>()

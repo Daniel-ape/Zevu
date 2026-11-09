@@ -1738,3 +1738,31 @@ input, textarea, select { font-size: max(16px, 1em); }
 .ld-price b { font-size: 16px; font-variant-numeric: tabular-nums; }
 .ld-off { font-size: 12px; font-weight: 700; color: #b42318; background: color-mix(in srgb, #d92d20 11%, transparent); padding: 1px 7px; border-radius: 99px; }
 .alt-off { font-size: 12px; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 1px 7px; border-radius: 99px; white-space: nowrap; }
+/* Light only, with more colour in the background */
+.shell::before {
+  opacity: 1;
+  background:
+    radial-gradient(75% 40% at 8% 0%, rgba(22, 210, 124, 0.30), transparent 72%),
+    radial-gradient(65% 36% at 96% 10%, rgba(196, 248, 63, 0.32), transparent 72%),
+    radial-gradient(75% 36% at 0% 50%, rgba(196, 248, 63, 0.22), transparent 72%),
+    radial-gradient(75% 38% at 100% 62%, rgba(22, 210, 124, 0.24), transparent 72%),
+    radial-gradient(85% 38% at 30% 100%, rgba(22, 210, 124, 0.28), transparent 72%),
+    radial-gradient(65% 32% at 96% 98%, rgba(196, 248, 63, 0.26), transparent 72%),
+    linear-gradient(180deg, #EEF7EC 0%, #F3F8EF 50%, #ECF6EE 100%);
+}
+/* Home savings card, livelier: big saved amount, a ring of the saved share, small chips */
+.sc2 { position: relative; overflow: hidden; background: linear-gradient(150deg, #ffffff 0%, #F3FBEA 55%, #E4F6E3 100%); box-shadow: 0 8px 24px rgba(18, 90, 52, 0.10), 0 0 0 1px rgba(18, 160, 92, 0.08); padding: 16px 18px 16px; }
+.sc2-glow { position: absolute; right: -50px; top: -60px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(196, 248, 63, 0.45), transparent 68%); pointer-events: none; }
+.sc2 > * { position: relative; }
+.sc2-month { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 9px; border-radius: 99px; background: rgba(18, 160, 92, 0.10); color: #0F7A47; font-size: 13px; font-weight: 700; }
+.sc2-month i { width: 7px; height: 7px; border-radius: 50%; background: #12A05C; box-shadow: 0 0 0 3px rgba(18, 160, 92, 0.18); }
+.sc2-hero { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.sc2-main { display: flex; flex-direction: column; min-width: 0; }
+.sc2-label { font-size: 13px; font-weight: 600; color: var(--text-2); }
+.sc2-amount { font-size: 40px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.05; color: #0F8A50; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.sc2-sub { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+.sc2-ring { flex-shrink: 0; }
+.sc2-ring-text { font: 800 13.5px 'Plus Jakarta Sans', system-ui, sans-serif; fill: #0B2219; letter-spacing: -0.02em; }
+.sc2-chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.sc2-chips span { display: inline-flex; gap: 5px; align-items: baseline; padding: 6px 12px; border-radius: 99px; background: rgba(255, 255, 255, 0.85); box-shadow: 0 0 0 1px rgba(11, 34, 25, 0.06); font-size: 13px; color: var(--text-2); }
+.sc2-chips b { color: var(--text); font-weight: 750; font-variant-numeric: tabular-nums; }
