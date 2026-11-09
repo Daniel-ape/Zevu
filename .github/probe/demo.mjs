@@ -22,6 +22,13 @@ const tap = async (sel, n = 0) => {
 const swipe = (from, to, ms = 450) => execSync(`adb shell input swipe 160 ${Math.round(from * 0.27)} 160 ${Math.round(to * 0.27)} ${ms}`)
 const dock = (i) => tap('.dock .tab', i)
 
+// first start: the welcome page, then continue without an account, in Swedish
+await sleep(2500)
+await tap('.welcome button', await ev(`[...document.querySelectorAll('.welcome button')].findIndex((b) => /without|utan|ilman/i.test(b.textContent))`))
+await sleep(2500)
+await ev(`localStorage.setItem('hintaopas:lang','"sv"'); location.reload()`)
+await sleep(5000)
+await until(`!!document.querySelector('.dock')`)
 await sleep(1500)
 swipe(1700, 900); await sleep(1500); swipe(900, 1700); await sleep(1200)
 await dock(1); await sleep(1800)
