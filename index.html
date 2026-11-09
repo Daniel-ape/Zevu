@@ -17,32 +17,31 @@
       /* Start animation: on white the Z is drawn in green, then green fills the screen
          from the Z outward, the Z turns white and the name rises in. Only transform and
          opacity move, so the phone's graphics chip runs it smoothly while the app starts. */
-      #splash { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; overflow: hidden; background: #fff; transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+      #splash { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; overflow: hidden; background: #fff; transition: opacity 0.55s cubic-bezier(0.45, 0, 0.25, 1); }
       #splash.out { opacity: 0; pointer-events: none; }
-      #splash .fill { position: absolute; left: 50%; top: 50%; width: 260vmax; height: 260vmax; margin: -130vmax 0 0 -130vmax; border-radius: 50%;
-        background: #0e9a57; transform: scale(0); will-change: transform;
-        animation: sp-fill 0.75s cubic-bezier(0.32, 0.72, 0, 1) 0.82s forwards; }
-      @keyframes sp-fill { to { transform: scale(1); } }
-      #splash .sp { position: relative; display: flex; flex-direction: column; align-items: center; gap: 22px; transform: translateY(18px); animation: sp-lift 0.6s cubic-bezier(0.32, 0.72, 0, 1) 1.05s forwards; }
-      @keyframes sp-lift { to { transform: none; } }
-      #splash .zw { position: relative; width: 97px; height: 92px; }
-      #splash .zm { position: absolute; left: 0; top: 0; width: 460px; height: 440px; transform-origin: 0 0; transform: scale(0.21); }
-      #splash .zm i { position: absolute; display: block; height: 96px; transform-origin: 0 50%; will-change: transform; }
-      #splash .zg i { background: #0e9a57; }
-      #splash .zwh { opacity: 0; animation: sp-in 0.3s ease 0.86s forwards; }
-      #splash .zwh i { background: #fff; transform: none; }
-      #splash .zg .z1 { left: 0; top: 0; width: 460px; transform: scaleX(0); animation: sp-bar 0.26s cubic-bezier(0.5, 0, 0.3, 1) 0.15s forwards; }
-      #splash .zd { position: absolute; left: 412px; top: 0; width: 501px; height: 96px; transform-origin: 0 50%; transform: rotate(136.62deg); }
-      #splash .zd .z2 { left: 0; top: 0; width: 100%; }
-      #splash .zg .zd .z2 { transform: scaleX(0); animation: sp-bar 0.28s cubic-bezier(0.5, 0, 0.3, 1) 0.39s forwards; }
-      #splash .zwh .z1, #splash .zwh .z3 { left: 0; width: 460px; }
-      #splash .zwh .z1 { top: 0; } #splash .zwh .z3 { top: 344px; }
-      #splash .zg .z3 { left: 0; top: 344px; width: 460px; transform: scaleX(0); animation: sp-bar 0.26s cubic-bezier(0.5, 0, 0.3, 1) 0.65s forwards; }
-      @keyframes sp-bar { to { transform: scaleX(1); } }
+      #splash .fill { position: absolute; inset: 0; background: #0a7a44; opacity: 0; will-change: opacity;
+        animation: sp-in 0.9s cubic-bezier(0.45, 0, 0.25, 1) 1.0s forwards; }
+      #splash .sp { position: relative; display: flex; flex-direction: column; align-items: center; }
+      #splash .zw { position: relative; width: 72px; height: 69px; transform: scale(0.96); animation: sp-grow 1.6s cubic-bezier(0.32, 0.72, 0, 1) 0.9s forwards; }
+      @keyframes sp-grow { to { transform: scale(1.04); } }
+      /* The Z is the app icon's own shape cut in three strokes. Each stroke is a green
+         block sliding into its piece of the Z, so a pen seems to draw it in one go.
+         Only transform and opacity move: the graphics chip keeps it smooth while the
+         app is still starting. */
+      #splash .zs { position: absolute; inset: 0; }
+      #splash .s1 { clip-path: polygon(63.79% 23.03%, 116.26% 1.21%, 0% 0%, 0% 21.82%); }
+      #splash .s2 { clip-path: polygon(-15.80% 100%, 36.67% 78.18%, 115.80% 0%, 63.33% 21.82%); }
+      #splash .s3 { clip-path: polygon(100% 100%, 100% 78.18%, 36.21% 76.97%, -16.26% 98.79%); }
+      #splash .ink { position: absolute; background: #0a7a44; will-change: transform; }
+      #splash .s1 .ink { left: 0; top: -2px; width: 86px; height: 19px; transform: translateX(-100%); animation: sp-ink 0.3s cubic-bezier(0.6, 0, 0.85, 0.73) 0.15s forwards; }
+      #splash .s3 .ink { left: -13px; top: 52px; width: 86px; height: 19px; transform: translateX(-100%); animation: sp-ink 0.38s cubic-bezier(0.2, 0.45, 0.35, 1) 0.67s forwards; }
+      #splash .s2 .rot { position: absolute; left: 64.49px; top: -22.47px; width: 112px; height: 60px; transform-origin: 0 50%; transform: rotate(136.62deg); }
+      #splash .s2 .ink { left: -22px; top: 0; width: 134px; height: 60px; transform: translateX(-100%); animation: sp-ink 0.22s linear 0.45s forwards; }
+      @keyframes sp-ink { to { transform: translateX(0); } }
+      #splash .zw svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+      #splash .zw path { fill: none; stroke: #fff; stroke-width: 96; stroke-linecap: square; stroke-linejoin: miter; stroke-miterlimit: 10; }
+      #splash .zwh { opacity: 0; animation: sp-in 0.9s cubic-bezier(0.45, 0, 0.25, 1) 1.0s forwards; }
       @keyframes sp-in { to { opacity: 1; } }
-      #splash .wm { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 30px; font-weight: 800; letter-spacing: 0.22em; margin-right: -0.22em; color: #fff;
-        opacity: 0; transform: translateY(10px); animation: sp-name 0.6s cubic-bezier(0.32, 0.72, 0, 1) 1.12s forwards; }
-      @keyframes sp-name { to { opacity: 1; transform: none; } }
       @media (prefers-reduced-motion: reduce) { #splash *, #splash { animation-duration: 0.01s !important; animation-delay: 0s !important; } }
     </style>
   </head>
@@ -55,10 +54,9 @@
       <i class="fill"></i>
       <div class="sp">
         <div class="zw">
-          <div class="zm zg"><i class="z1"></i><b class="zd"><i class="z2"></i></b><i class="z3"></i></div>
-          <div class="zm zwh"><i class="z1"></i><b class="zd"><i class="z2"></i></b><i class="z3"></i></div>
+          <i class="zs s1"><i class="ink"></i></i><i class="zs s2"><i class="rot"><i class="ink"></i></i></i><i class="zs s3"><i class="ink"></i></i>
+          <svg class="zwh" viewBox="282 292 460 440"><path pathLength="1" d="M330 340 H694 L330 684 H694"/></svg>
         </div>
-        <div class="wm">ZEVU</div>
       </div>
     </div>
     <script>
@@ -67,13 +65,13 @@
         var t0 = Date.now(), ready = false, done = false
         function hide() {
           if (done || !ready) return
-          var wait = Math.max(0, 1950 - (Date.now() - t0))
+          var wait = Math.max(0, 2450 - (Date.now() - t0))
           done = true
           setTimeout(function () {
             var el = document.getElementById('splash')
             if (!el) return
             el.classList.add('out')
-            setTimeout(function () { el.remove() }, 480)
+            setTimeout(function () { el.remove() }, 600)
           }, wait)
         }
         window.__appReady = function () { ready = true; hide() }
