@@ -106,10 +106,13 @@ function Shell() {
   const [overlay, setOverlay] = useState(false)
   useEffect(() => {
     if (!nativeDock) return
-    const SEL = '.sheet-backdrop, .shop, .cardview, .camera, .welcome'
+    // #splash is the start animation (index.html): the dock waits until it fades out.
+    const SEL = '.sheet-backdrop, .shop, .cardview, .camera, .welcome, #splash:not(.out)'
     const check = () => setOverlay(!!document.querySelector(SEL))
     const mo = new MutationObserver(check)
     mo.observe(document.body, { childList: true, subtree: true })
+    const splash = document.getElementById('splash')
+    if (splash) mo.observe(splash, { attributes: true, attributeFilter: ['class'] })
     check()
     return () => mo.disconnect()
   }, [nativeDock])
