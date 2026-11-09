@@ -15,9 +15,9 @@ const dpr = await ev('devicePixelRatio')
 const tap = async (sel, n = 0) => {
   const r = await ev(`(() => { const e = document.querySelectorAll(${JSON.stringify(sel)})[${n}]; if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 } })()`)
   if (!r) { console.log('missing', sel); return }
-  await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: r.x, y: r.y }] })
-  await sleep(60)
-  await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: r.x, y: r.y, button: 'left', clickCount: 1 })
+  await sleep(70)
+  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: r.x, y: r.y, button: 'left', clickCount: 1 })
 }
 const swipe = (from, to, ms = 450) => execSync(`adb shell input swipe 540 ${from} 540 ${to} ${ms}`)
 const dock = (i) => tap('.dock .tab', i)

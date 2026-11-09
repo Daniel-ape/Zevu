@@ -12,7 +12,7 @@ adb forward tcp:9222 localabstract:$SOCK
 node -e "
 (async()=>{const l=await (await fetch('http://localhost:9222/json')).json();const ws=new WebSocket(l[0].webSocketDebuggerUrl);await new Promise(r=>ws.onopen=r);ws.send(JSON.stringify({id:1,method:'Runtime.evaluate',params:{expression:\"localStorage.setItem('hintaopas:welcomed','1');localStorage.setItem('hintaopas:lang','\\\"sv\\\"');localStorage.setItem('hintaopas:posAsked','denied')\"}}));await new Promise(r=>setTimeout(r,800));process.exit(0)})()"
 adb shell am force-stop fi.hintaopas.app
-adb shell screenrecord --bit-rate 8000000 --time-limit 120 /sdcard/demo.mp4 &
+adb shell screenrecord --size 1080x2400 --bit-rate 10000000 --time-limit 120 /sdcard/demo.mp4 &
 REC=$!
 sleep 1
 adb shell am start -n fi.hintaopas.app/.MainActivity
