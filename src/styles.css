@@ -1766,3 +1766,17 @@ input, textarea, select { font-size: max(16px, 1em); }
 .sc2-chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .sc2-chips span { display: inline-flex; gap: 5px; align-items: baseline; padding: 6px 12px; border-radius: 99px; background: rgba(255, 255, 255, 0.85); box-shadow: 0 0 0 1px rgba(11, 34, 25, 0.06); font-size: 13px; color: var(--text-2); }
 .sc2-chips b { color: var(--text); font-weight: 750; font-variant-numeric: tabular-nums; }
+/* Products: one card per product, like a shop app: big picture, whole name, big price */
+.sr-list { display: flex; flex-direction: column; gap: 10px; }
+.sr-card { position: relative; display: flex; align-items: stretch; background: var(--card); border-radius: 20px; box-shadow: var(--card-shadow); padding: 0; content-visibility: auto; contain-intrinsic-size: auto 150px; }
+.sr-open { flex: 1; min-width: 0; display: flex; gap: 14px; align-items: center; padding: 14px 64px 14px 12px; background: none; border: 0; text-align: left; font: inherit; color: inherit; }
+.sr-pic { width: 92px; height: 112px; flex-shrink: 0; display: grid; place-items: center; }
+.sr-pic .tile { width: 92px; height: 112px; border-radius: 12px; box-shadow: none; background: transparent; font-size: 34px; }
+.sr-pic .tile img { padding: 0; background: transparent; object-fit: contain; }
+.sr-body { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.sr-card .title { font-size: 15.5px; font-weight: 500; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; -webkit-line-clamp: 3; }
+.sr-card .sub { font-size: 12.5px; color: var(--text-2); }
+.sr-card .price { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.sr-meta { margin-top: 1px; }
+.sr-add { position: absolute; right: 12px; bottom: 14px; width: 44px !important; height: 44px !important; border-radius: 12px !important; background: var(--fill) !important; color: var(--text) !important; box-shadow: none !important; }
+.sr-add.in { background: var(--accent) !important; color: #fff !important; }

@@ -295,7 +295,7 @@ export function SearchScreen() {
         <div className="empty">{t('search.none', { q })}</div>
       ) : (
         <div>
-          <div className="rows" style={{ opacity: stale ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+          <div className="sr-list" style={{ opacity: stale ? 0.6 : 1, transition: 'opacity 0.15s' }}>
             {results.slice(0, limit).map(({ p, best, count }) => (
               <ResultRow key={p.id} p={p} best={best} count={count} sort={sort} qty={inList(p.id)?.quantity ?? 0}
                 justAdded={added === p.id} onOpen={openProduct} onAdd={quickAdd} noPrice={t('search.noPrice')} addLabel={t('search.addToList')} />
@@ -313,35 +313,34 @@ export function SearchScreen() {
 
 type Best = ReturnType<typeof cheapest>
 
-const ResultRow = memo(function ResultRow({ p, best, count, sort, qty, justAdded, onOpen, onAdd, noPrice, addLabel }: {
+const ResultRow = memo(function ResultRow({ p, best, count, qty, justAdded, onOpen, onAdd, noPrice, addLabel }: {
   p: Product; best: Best; count: number; sort: Sort; qty: number; justAdded: boolean
   onOpen: (id: string) => void; onAdd: (id: string) => void; noPrice: string; addLabel: string
 }) {
+  // One card per product: big picture, the whole name, the price large under it.
   return (
-    <div className="row search-row">
-      <button className="search-open" onClick={() => onOpen(p.id)}>
-        <Tile product={p} />
-        <div className="grow">
-          <div className="title">{p.name}</div>
-          <div className="sub">{[brandLabel(p.brand), sizeLabel(p)].filter(Boolean).join(' · ')}</div>
-        </div>
-        <div className="end">
+    <div className="search-row sr-card">
+      <button className="sr-open" onClick={() => onOpen(p.id)}>
+        <span className="sr-pic">
+          <Tile product={p} />
+        </span>
+        <span className="sr-body">
+          <span className="title">{p.name}</span>
+          <span className="sub">{[brandLabel(p.brand), sizeLabel(p)].filter(Boolean).join(' · ')}</span>
           {best ? (
             <>
-              <div className="price">{euro(best.current.priceCents)}</div>
-              <div className="sub">
-                {sort === 'unit' && best.unitPriceCents !== null
-                  ? `${euro(best.unitPriceCents)}${unitLabel(p)}`
-                  : `${best.retailer.name}${count > 1 ? ` +${count - 1}` : ''}`}
-              </div>
+              <span className="price">{euro(best.current.priceCents)}</span>
+              <span className="sub sr-meta">
+                {[best.unitPriceCents !== null ? `${euro(best.unitPriceCents)}${unitLabel(p)}` : '', `${best.retailer.name}${count > 1 ? ` +${count - 1}` : ''}`].filter(Boolean).join(' · ')}
+              </span>
             </>
           ) : (
-            <div className="sub">{noPrice}</div>
+            <span className="sub sr-meta">{noPrice}</span>
           )}
-        </div>
+        </span>
       </button>
-      <button className={'quick-add' + (qty ? ' in' : '')} onClick={() => onAdd(p.id)} aria-label={addLabel}>
-        {justAdded ? <Check size={18} /> : qty ? <span>{qty}</span> : <Plus size={18} />}
+      <button className={'quick-add sr-add' + (qty ? ' in' : '')} onClick={() => onAdd(p.id)} aria-label={addLabel}>
+        {justAdded ? <Check size={20} /> : qty ? <span>{qty}</span> : <Plus size={20} />}
       </button>
     </div>
   )
