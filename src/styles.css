@@ -1809,3 +1809,113 @@ input, textarea, select { font-size: max(16px, 1em); }
 .pd-hero .tile img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
 .fav-dot { color: #e5384f; font-size: 18px; }
 .fav-heart { top: 7px; right: 7px; bottom: auto; }
+/* Motion again, kept light: pages slide a little in the direction you go
+   (tabs sideways, products in from the right, back to the left), and
+   everything you can tap gives a short press. Only transform and opacity
+   move, with "backwards" fill, so taps are never held up after the motion. */
+.shell[data-motion='right'] > .screen { animation: m-right 0.3s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
+.shell[data-motion='left'] > .screen { animation: m-left 0.3s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
+.shell[data-motion='push'] > .screen, .screen.push { animation: m-push 0.32s cubic-bezier(0.2, 0.9, 0.2, 1) backwards; }
+.shell[data-motion='pop'] > .screen { animation: m-left 0.28s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
+.shell[data-motion='enter'] > .screen { animation: m-up 0.32s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
+@keyframes m-right { from { opacity: 0; transform: translate3d(22px, 0, 0); } }
+@keyframes m-left { from { opacity: 0; transform: translate3d(-22px, 0, 0); } }
+@keyframes m-push { from { opacity: 0.3; transform: translate3d(48px, 0, 0); } }
+@keyframes m-up { from { opacity: 0; transform: translate3d(0, 10px, 0); } }
+
+/* press feedback */
+.btn, .row, .sr-card, .cover, .sc, .see-more, .icon-btn, .quick-add, .chip, .cat-btn, .sort-chip,
+.cat-item, .lf-row, .pd-add, .pd-act, .fav-heart, .tab, .list-card, .wh-row, .sr-add, .link {
+  transition: transform 0.14s cubic-bezier(0.3, 0.7, 0.4, 1), opacity 0.14s ease, background-color 0.18s ease;
+}
+.btn:active, .sc:active, .see-more:active, .chip:active, .cat-btn:active, .sort-chip:active, .list-card:active { transform: scale(0.97); }
+.row:active, .sr-card:active, .cat-item:active, .lf-row:active, .wh-row:active { transform: scale(0.985); }
+.cover:active { transform: scale(0.96); }
+.icon-btn:active, .quick-add:active, .sr-add:active, .pd-add:active, .pd-act:active, .fav-heart:active { transform: scale(0.88); }
+.link:active { opacity: 0.6; }
+
+/* a small pop when something is added or liked */
+.quick-add.in, .sr-add.in, .pd-add.in { animation: m-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+.fav-heart.on svg, .pd-act.on svg { animation: m-pop 0.34s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+@keyframes m-pop { from { transform: scale(0.6); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .shell[data-motion] > .screen, .screen.push { animation: none; }
+  .quick-add.in, .sr-add.in, .pd-add.in, .fav-heart.on svg, .pd-act.on svg { animation: none; }
+}
+
+/* ===== Modern page transitions (view transitions) =====
+   Pages blend with a soft spring: a little slide, scale and blur out and in.
+   A product's picture flies from its card into the product page. */
+.vt-on .shell[data-motion] > .screen, .vt-on .screen.push { animation: none; }
+::view-transition-group(*) { animation-duration: 0.42s; animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.36s; animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+html[data-vt='right']::view-transition-old(root) { animation-name: vt-out-left; }
+html[data-vt='right']::view-transition-new(root) { animation-name: vt-in-right; }
+html[data-vt='left']::view-transition-old(root) { animation-name: vt-out-right; }
+html[data-vt='left']::view-transition-new(root) { animation-name: vt-in-left; }
+html[data-vt='push']::view-transition-old(root) { animation-name: vt-back; }
+html[data-vt='push']::view-transition-new(root) { animation-name: vt-in-right-far; }
+html[data-vt='pop']::view-transition-old(root) { animation-name: vt-out-right-far; }
+html[data-vt='pop']::view-transition-new(root) { animation-name: vt-front; }
+html[data-vt='fade']::view-transition-old(root) { animation-name: vt-fade-out; }
+html[data-vt='fade']::view-transition-new(root) { animation-name: vt-fade-in; }
+@keyframes vt-out-left { to { opacity: 0; transform: translateX(-28px) scale(0.985); filter: blur(3px); } }
+@keyframes vt-in-right { from { opacity: 0; transform: translateX(28px) scale(0.985); filter: blur(3px); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(28px) scale(0.985); filter: blur(3px); } }
+@keyframes vt-in-left { from { opacity: 0; transform: translateX(-28px) scale(0.985); filter: blur(3px); } }
+@keyframes vt-back { to { opacity: 0.4; transform: scale(0.94); filter: blur(2px); } }
+@keyframes vt-in-right-far { from { opacity: 0; transform: translateX(60px); } }
+@keyframes vt-out-right-far { to { opacity: 0; transform: translateX(60px); } }
+@keyframes vt-front { from { opacity: 0.4; transform: scale(0.94); filter: blur(2px); } }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+/* the flying picture */
+
+/* sheets rise with a spring, and their backdrop fades */
+.sheet { animation: m-sheet 0.42s cubic-bezier(0.32, 0.72, 0, 1) backwards; }
+@keyframes m-sheet { from { transform: translate3d(0, 100%, 0); } }
+.sheet-backdrop { animation: m-fade 0.3s ease backwards; }
+@keyframes m-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sheet, .sheet-backdrop { animation: none; } }
+/* kept pages: only the current one is shown */
+.tab-pane { display: contents; }
+.tab-pane[hidden] { display: none !important; }
+/* without view transitions (older iPhones) the light CSS motion still runs */
+html:not(.vt-on) .shell[data-motion='right'] > .tab-pane:not([hidden]) > .screen { animation: m-right 0.26s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
+html:not(.vt-on) .shell[data-motion='left'] > .tab-pane:not([hidden]) > .screen { animation: m-left 0.26s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
+/* lighter view transitions: no blur, shorter */
+@keyframes vt-out-left { to { opacity: 0; transform: translateX(-24px) scale(0.99); } }
+@keyframes vt-in-right { from { opacity: 0; transform: translateX(24px) scale(0.99); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(24px) scale(0.99); } }
+@keyframes vt-in-left { from { opacity: 0; transform: translateX(-24px) scale(0.99); } }
+@keyframes vt-back { to { opacity: 0.5; transform: scale(0.95); } }
+@keyframes vt-front { from { opacity: 0.5; transform: scale(0.95); } }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.3s; }
+
+/* ---- Page motion, tuned to feel like iPhone ----
+   One curve everywhere (the iOS sheet / navigation spring), unhurried timing.
+   Tabs cross-fade in place like an iPhone tab bar; a product page slides in
+   from the right over the page below, which drifts back a little; going back
+   is the same in reverse. The dock never moves. */
+.vt-on .dock { view-transition-name: dock; }
+::view-transition-group(dock), ::view-transition-old(dock), ::view-transition-new(dock) { animation: none; }
+::view-transition-group(root) { animation: none; }
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 0.36s; animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  animation-fill-mode: both; mix-blend-mode: normal;
+}
+html[data-vt='right']::view-transition-old(root), html[data-vt='left']::view-transition-old(root), html[data-vt='fade']::view-transition-old(root) { animation: vt2-fade-out 0.18s cubic-bezier(0.4, 0, 0.2, 1) both; }
+html[data-vt='right']::view-transition-new(root), html[data-vt='left']::view-transition-new(root), html[data-vt='fade']::view-transition-new(root) { animation: vt2-fade-in 0.22s cubic-bezier(0.4, 0, 0.2, 1) both; }
+html[data-vt='push']::view-transition-old(root) { animation-name: vt2-under; z-index: 0; }
+html[data-vt='push']::view-transition-new(root) { animation-name: vt2-slide-in; z-index: 1; box-shadow: -12px 0 32px rgba(0, 0, 0, 0.1); }
+html[data-vt='pop']::view-transition-old(root) { animation-name: vt2-slide-out; z-index: 1; box-shadow: -12px 0 32px rgba(0, 0, 0, 0.1); }
+html[data-vt='pop']::view-transition-new(root) { animation-name: vt2-over; z-index: 0; }
+@keyframes vt2-fade-out { to { opacity: 0; } }
+@keyframes vt2-fade-in { from { opacity: 0; } }
+@keyframes vt2-slide-in { from { transform: translate3d(100%, 0, 0); } }
+@keyframes vt2-slide-out { to { transform: translate3d(100%, 0, 0); } }
+@keyframes vt2-under { to { transform: translate3d(-28%, 0, 0); opacity: 0.85; } }
+@keyframes vt2-over { from { transform: translate3d(-28%, 0, 0); opacity: 0.85; } }
+/* the page behind needs a solid back so the sliding page never shows through */
+::view-transition-image-pair(root) { isolation: auto; }

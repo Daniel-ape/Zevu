@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { transition } from './viewTransition'
 import { Welcome } from './screens/Welcome'
 import { onSession, startAutoSync } from './data/account'
 import { StoreProvider, useStore } from './data/store'
@@ -66,6 +67,10 @@ function Shell() {
   // iPhone app: Apple's own Liquid Glass tab bar (native). Falls back to the web dock if it fails.
   const [nativeDock, setNativeDock] = useState(wantsNativeDock)
   const [stack, setStack] = useState<string[]>([]) // product ids opened on top of the tab
+  const scrolls = useRef(new Map<string, number>())
+  const keyRef = useRef<string>('home')
+  const stackLen = useRef(0)
+  const remember = () => scrolls.current.set(keyRef.current, window.scrollY)
   const [searchCategory, setSearchCategory] = useState<CategoryId | 'all'>('all')
   const [searchFocus, setSearchFocus] = useState(false)
 
@@ -79,14 +84,19 @@ function Shell() {
     () => ({
       tab,
       go: (t, opts) => {
-        setStack([])
-        setSearchFocus(!!opts?.focus)
-        if (t === 'search') setSearchCategory(opts?.category ?? 'all')
-        setTab(t)
+        const order: Tab[] = ['home', 'search', 'lists', 'leaflets', 'profile', 'coupons', 'scan']
+        const kind = t === tab ? 'fade' : order.indexOf(t) >= order.indexOf(tab) ? 'right' : 'left'
+        remember()
+        transition(kind, () => {
+          setStack([])
+          setSearchFocus(!!opts?.focus)
+          if (t === 'search') setSearchCategory(opts?.category ?? 'all')
+          setTab(t)
+        })
         try { history.replaceState(null, '', '#' + t) } catch { /* sandboxed */ }
       },
-      openProduct: (id) => setStack((s) => [...s, id]),
-      back: () => setStack((s) => s.slice(0, -1)),
+      openProduct: (id) => { remember(); scrolls.current.delete('p' + (stackLen.current + 1)); transition('push', () => setStack((s) => [...s, id])) },
+      back: () => { scrolls.current.delete(keyRef.current); transition('pop', () => setStack((s) => s.slice(0, -1))) },
       searchCategory,
       searchFocus,
     }),
@@ -130,16 +140,15 @@ function Shell() {
       scanLabel: t('tab.scan'),
     }).catch(() => setNativeDock(false))
   }, [nativeDock, tab, top, newLeaflets, t, overlay, welcomed])
-  // New page: start at the top. Coming back from a product the page below
-  // restores its own place (Products keeps its search and scroll).
-  const depth = useRef(stack.length)
-  useEffect(() => {
-    const back = stack.length < depth.current
-    depth.current = stack.length
-    if (back) return
-    window.scrollTo(0, 0)
-    document.querySelector('.screen')?.scrollTo(0, 0)
-  }, [top, tab, stack.length])
+  // Each page keeps its scroll place: a new product page starts at the top,
+  // going back or returning to a tab puts you where you were.
+  const pageKey = top ? 'p' + stack.length : tab
+  keyRef.current = pageKey
+  stackLen.current = stack.length
+  useLayoutEffect(() => {
+    const y = scrolls.current.get(pageKey) ?? 0
+    window.scrollTo(0, y)
+  }, [pageKey])
   // Which way the page moves in: along the tab bar order for tabs, forward for
   // a product opened on top, back when it closes. Kept in a ref so re-renders
   // that are not navigation don't restart the animation.
@@ -152,15 +161,28 @@ function Shell() {
       : order.indexOf(tab) >= order.indexOf(seen.current.tab) ? 'right' : 'left'
     seen.current = { tab, depth: stack.length }
   }
-  const screen = top ? (
-    <ProductScreen key={top + stack.length} id={top} />
-  ) : tab === 'home' ? <Home key="home" />
-    : tab === 'search' ? <SearchScreen key="search" />
-    : tab === 'scan' ? <Scan key="scan" />
-    : tab === 'lists' ? <Lists key="lists" />
-    : tab === 'leaflets' ? <Leaflets key="leaflets" />
-    : tab === 'coupons' ? <Coupons key="coupons" />
-    : <Profile key="profile" />
+  // Pages you have visited stay mounted (hidden), so going back to one is
+  // instant and keeps its scroll, search and filters instead of being rebuilt.
+  const visited = useRef(new Set<Tab>())
+  visited.current.add(tab)
+  const pageFor = (t: Tab) => t === 'home' ? <Home />
+    : t === 'search' ? <SearchScreen />
+    : t === 'scan' ? <Scan />
+    : t === 'lists' ? <Lists />
+    : t === 'leaflets' ? <Leaflets />
+    : t === 'coupons' ? <Coupons />
+    : <Profile />
+  const KEEP: Tab[] = ['home', 'search', 'lists', 'leaflets']
+  const screen = (
+    <>
+      {[...visited.current].filter((t) => KEEP.includes(t) || t === tab).map((t) => (
+        <div key={t} className="tab-pane" hidden={t !== tab || !!top}>{pageFor(t)}</div>
+      ))}
+      {top && <ProductScreen key={top + stack.length} id={top} />}
+    </>
+  )
+  // pages that are not kept (scan, profile, coupons) are forgotten when you leave them
+  for (const t of [...visited.current]) if (!KEEP.includes(t) && t !== tab) visited.current.delete(t)
 
   return (
     <NavCtx.Provider value={nav}>

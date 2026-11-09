@@ -8,6 +8,7 @@ const config: CapacitorConfig = {
   appId: 'fi.hintaopas.app',
   appName: 'ZEVU',
   webDir: 'dist',
+  backgroundColor: '#ffffff', // behind the web view until the start animation draws
   plugins: {
     BackgroundRunner: {
       label: 'fi.hintaopas.app.pricecheck',
