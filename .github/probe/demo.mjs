@@ -19,7 +19,7 @@ const tap = async (sel, n = 0) => {
   await sleep(70)
   await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: r.x, y: r.y, button: 'left', clickCount: 1 })
 }
-const swipe = (from, to, ms = 450) => execSync(`adb shell input swipe 540 ${from} 540 ${to} ${ms}`)
+const swipe = (from, to, ms = 450) => execSync(`adb shell input swipe 360 ${Math.round(from * 0.65)} 360 ${Math.round(to * 0.65)} ${ms}`)
 const dock = (i) => tap('.dock .tab', i)
 
 await sleep(1500)
