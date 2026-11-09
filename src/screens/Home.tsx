@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
 import { useNav } from '../nav'
@@ -11,6 +11,7 @@ import { SaveCard } from '../ui/SaveCard'
 import { ProfileButton } from '../ui/ProfileButton'
 import { WatchBell } from '../ui/WatchBell'
 import { WatchAlert } from '../ui/WatchAlert'
+import { useListDeals } from '../data/listDeals'
 import type { Key } from '../i18n'
 
 function greeting(): Key {
@@ -85,6 +86,8 @@ export function Home() {
           {best ? <span className="price">{euro(best.totalCents)}</span> : <ArrowRight size={16} />}
         </button>
       )}
+
+      <ListDeals />
 
       <HomeMemberOffers />
 
@@ -181,3 +184,38 @@ export function Home() {
     </div>
   )
 }
+
+/** "On offer this week" for the products on the shopping list. */
+function ListDeals() {
+  const deals = useListDeals()
+  const { t } = useStore()
+  const nav = useNav()
+  const [all, setAll] = useState(false)
+  if (!deals.length) return null
+  const shown = all ? deals : deals.slice(0, 3)
+  return (
+    <div className="section">
+      <div className="section-head">
+        <h2>{t('ld.title')}</h2>
+        <span className="small muted">{t(deals.length === 1 ? 'ld.count1' : 'ld.count', { n: deals.length })}</span>
+      </div>
+      <div className="rows group-rows ld-rows">
+        {shown.map((d) => (
+          <button key={d.product.id} className="row" onClick={() => nav.openProduct(d.product.id)}>
+            <Tile product={d.product} />
+            <div className="grow">
+              <div className="title">{d.product.name}</div>
+              <div className="sub">{d.store}{d.leaflet ? ' · ' + t('ld.leaflet') : ''}</div>
+            </div>
+            <div className="ld-price">
+              <b>{euro(d.priceCents)}</b>
+              {d.wasCents && d.wasCents > d.priceCents && <span className="ld-off">−{Math.round((1 - d.priceCents / d.wasCents) * 100)} %</span>}
+            </div>
+          </button>
+        ))}
+      </div>
+      {deals.length > 3 && <button className="link small see-more" onClick={() => setAll(!all)}>{all ? t('gap.less') : t('home.seeAllN', { n: deals.length })}</button>}
+    </div>
+  )
+}
+

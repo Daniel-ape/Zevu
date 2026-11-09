@@ -1733,3 +1733,8 @@ html, body { overscroll-behavior-x: none; }
 /* No zoom from double taps or from focusing a small text field (iOS) */
 html, body { touch-action: manipulation; }
 input, textarea, select { font-size: max(16px, 1em); }
+/* Home: offers on the shopping list */
+.ld-price { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.ld-price b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.ld-off { font-size: 12px; font-weight: 700; color: #b42318; background: color-mix(in srgb, #d92d20 11%, transparent); padding: 1px 7px; border-radius: 99px; }
+.alt-off { font-size: 12px; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 1px 7px; border-radius: 99px; white-space: nowrap; }

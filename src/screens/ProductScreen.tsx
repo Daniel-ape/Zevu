@@ -10,6 +10,7 @@ import { PriceChart } from '../ui/PriceChart'
 import { StoreChart } from '../ui/StoreChart'
 import { inAppLink } from '../data/openLink'
 import { PriceSheet } from './PriceSheet'
+import { cheaperAlternatives } from '../domain/alternatives'
 import { useState } from 'react'
 
 export function ProductScreen({ id }: { id: string }) {
@@ -33,6 +34,15 @@ export function ProductScreen({ id }: { id: string }) {
   if (!product) return <div className="screen empty">{t('product.notFound')}</div>
 
   const best = cheapest(rows)
+  // The same kind of product from another brand, clearly cheaper per kg / l / piece.
+  const alternatives = useMemo(() => {
+    if (!product) return []
+    const same = products.filter((p) => p.category === product.category)
+    return cheaperAlternatives(product, same, (p) => {
+      const b = cheapest(compare(p, pricesOf(p.id), retailers))
+      return b ? { cents: b.current.priceCents, store: b.retailer.name } : null
+    })
+  }, [product, products, pricesOf, retailers])
   // Grocery chains the user shops at that have no price for this product yet:
   // listed so the price can be added from a shelf label (S and K groups don't publish theirs).
   const GROCERY = ['prisma', 's-market', 'sale', 'alepa', 'k-citymarket', 'k-supermarket', 'k-market', 'lidl', 'tokmanni', 'halpahalli']
@@ -93,6 +103,27 @@ export function ProductScreen({ id }: { id: string }) {
               fresh.length > 1 ? t('product.comparedN', { n: fresh.length }) : t('product.onlyOne'),
               spread > 0 ? t('product.saveVs', { amount: euro(spread) }) : '',
             ].filter(Boolean).join(' · ')}
+          </div>
+        </div>
+      )}
+
+      {alternatives.length > 0 && (
+        <div className="section">
+          <div className="section-head"><h2>{t('alt.title')}</h2></div>
+          <div className="rows group-rows">
+            {alternatives.map((a) => (
+              <button key={a.product.id} className="row" onClick={() => nav.openProduct(a.product.id)}>
+                <Tile product={a.product} />
+                <div className="grow">
+                  <div className="title">{a.product.name}</div>
+                  <div className="sub">{[a.store, sizeLabel(a.product), `${euro(a.unitCents)}${unitLabel(a.product)}`].filter(Boolean).join(' · ')}</div>
+                </div>
+                <div className="ld-price">
+                  <b>{euro(a.cents)}</b>
+                  <span className="alt-off">−{a.cheaperBy} %{unitLabel(a.product)}</span>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       )}
