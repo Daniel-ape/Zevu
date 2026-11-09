@@ -22,7 +22,7 @@ jobs:
           arch: x86_64
           target: google_apis
           disk-size: 4096M
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -skin 720x1560
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: bash android-demo.sh
       - if: always()
         run: |

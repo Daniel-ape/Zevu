@@ -1,7 +1,6 @@
 #!/bin/bash
 set -x
 mkdir -p out
-adb shell wm density 300
 adb shell wm size
 adb install -r hintaopas.apk
 for p in ACCESS_FINE_LOCATION ACCESS_COARSE_LOCATION CAMERA POST_NOTIFICATIONS; do adb shell pm grant fi.hintaopas.app android.permission.$p || true; done
