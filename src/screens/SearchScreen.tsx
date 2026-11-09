@@ -19,6 +19,9 @@ const hayCache = new WeakMap<object, Map<string, ReturnType<typeof haystack>>>()
 const rankCache = new WeakMap<object, Map<string, number>>()
 const countCache = new WeakMap<object, { pricesOf: unknown; c: Map<string, number> }>()
 let lastResults: { key: unknown[]; value: unknown } | null = null
+// Typo-forgiving matches per product list and "category|search", worked out in
+// the background in small pieces (they need every product checked letter by letter).
+const fuzzyCache = new WeakMap<object, Map<string, Map<string, number>>>()
 const sameKey = (a: unknown[], b: unknown[]) => a.length === b.length && a.every((x, i) => x === b[i])
 
 let kept: { q: string; cat: CategoryId | 'all'; sort: Sort; navCat: CategoryId | 'all'; scroll: number } | null = null
@@ -74,11 +77,31 @@ export function SearchScreen() {
     return () => { live = false; clearTimeout(timer) }
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Search text per product, made when first needed and kept. After the
+  // product list grows it is prepared in small pieces between frames, so the
+  // first search after that never has to do it all at once.
   const hay = useMemo(() => {
     let h = hayCache.get(products)
-    if (!h) { h = new Map(products.map((p) => [p.id, haystack(p)])); hayCache.set(products, h) }
-    return h
+    if (!h) { h = new Map(); hayCache.set(products, h) }
+    const m = h
+    return { get: (p: Product) => { let v = m.get(p.id); if (!v) { v = haystack(p); m.set(p.id, v) } return v }, m }
   }, [products])
+  useEffect(() => {
+    let i = 0, id = 0
+    const step = () => {
+      const end = Math.min(products.length, i + 1500)
+      for (; i < end; i++) hay.get(products[i])
+      if (i < products.length) id = window.setTimeout(step, 16)
+    }
+    id = window.setTimeout(step, 50)
+    return () => clearTimeout(id)
+  }, [products, hay])
+  // Fetch the rest of the shops' ranges soon after the page opens (not on the
+  // first key press), so typing never waits for it.
+  useEffect(() => {
+    const id = window.setTimeout(loadMore, 700)
+    return () => clearTimeout(id)
+  }, [loadMore])
   // Catalogue order is popularity order; shop-only products come after it.
   const rank = useMemo(() => {
     let r = rankCache.get(products)
@@ -87,12 +110,21 @@ export function SearchScreen() {
   }, [products])
   // Typing updates the field at once; the list follows a moment later, so
   // keys never wait for thousands of products to be scored.
-  const dq = useDeferredValue(q)
+  // While keys come quickly, wait for a short pause before searching again.
+  const [typed, setTyped] = useState(q)
+  useEffect(() => {
+    if (q === typed) return
+    const id = setTimeout(() => setTyped(q), q.trim() === '' ? 0 : 140)
+    return () => clearTimeout(id)
+  }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
+  const dq = useDeferredValue(typed)
   // A new category or order closes the picker at once; the list follows.
   const dcat = useDeferredValue(cat)
   const dsort = useDeferredValue(sort)
+  const [fuzzyTick, setFuzzyTick] = useState(0)
+  const fuzzyKey = `${dcat}|${dq.trim()}`
   const results = useMemo(() => {
-    const key = [dq, dcat, dsort, products, pricesOf, retailers, online]
+    const key = [dq, dcat, dsort, products, pricesOf, retailers, online, fuzzyTick]
     if (lastResults && sameKey(lastResults.key, key)) return lastResults.value as ReturnType<typeof compute>
     const value = compute()
     lastResults = { key, value }
@@ -110,14 +142,24 @@ export function SearchScreen() {
         const priced = pricesOf(p.id).length > 0
         // Browsing without a query lists only products that have prices.
         if (!needle) { if (priced) out.push({ p, score: 1, priced }); continue }
-        const score = matchScore(query, hay.get(p.id)!, fuzzy) || (onlineIds?.has(p.id) ? 2 : 0)
+        const score = matchScore(query, hay.get(p), fuzzy) || (onlineIds?.has(p.id) ? 2 : 0)
         if (score > 0) out.push({ p, score, priced })
       }
       return out
     }
     let found = scoreAll(false)
-    // Forgive typos only when the exact pass finds little.
-    if (needle.length >= 4 && found.length < 24) found = scoreAll(true)
+    // Forgive typos only when the exact pass finds little. Those matches come
+    // from the background pass below; until it is done the exact ones show.
+    if (needle.length >= 4 && found.length < 24) {
+      const fz = fuzzyCache.get(products)?.get(fuzzyKey)
+      if (fz) {
+        const have = new Set(found.map((f) => f.p.id))
+        for (const p of inCat) {
+          const s = fz.get(p.id)
+          if (s && !have.has(p.id)) found.push({ p, score: s, priced: pricesOf(p.id).length > 0 })
+        }
+      }
+    }
     // Cheap first cut (match strength, has a price, popularity), then the
     // price comparison only for the products that can make the list.
     found.sort((a, b) =>
@@ -142,8 +184,41 @@ export function SearchScreen() {
       })
       .slice(0, 80)
     }
-  }, [dq, dcat, dsort, products, pricesOf, retailers, online, hay, rank])
+  }, [dq, dcat, dsort, products, pricesOf, retailers, online, hay, rank, fuzzyTick, fuzzyKey])
+
+  // The background typo pass: a few thousand products per slice, then the list updates.
+  useEffect(() => {
+    const needle = dq.trim()
+    if (needle.length < 4) return
+    let byKey = fuzzyCache.get(products)
+    if (!byKey) { byKey = new Map(); fuzzyCache.set(products, byKey) }
+    if (byKey.has(fuzzyKey)) return
+    const query = compileQuery(needle)
+    const inCat = dcat === 'all' ? products : products.filter((p) => p.category === dcat)
+    // Only needed when the exact pass finds little.
+    let exact = 0
+    for (const p of inCat) if (matchScore(query, hay.get(p), false) && ++exact >= 24) return
+    const out = new Map<string, number>()
+    let i = 0, id = 0
+    const step = () => {
+      const end = Math.min(inCat.length, i + 700)
+      for (; i < end; i++) { const s = matchScore(query, hay.get(inCat[i]), true); if (s) out.set(inCat[i].id, s) }
+      if (i < inCat.length) { id = window.setTimeout(step, 0); return }
+      byKey!.set(fuzzyKey, out)
+      if (byKey!.size > 40) byKey!.delete(byKey!.keys().next().value!)
+      setFuzzyTick((n) => n + 1)
+    }
+    id = window.setTimeout(step, 60)
+    return () => clearTimeout(id)
+  }, [fuzzyKey, products, hay, dq, dcat])
   const stale = dq !== q || dcat !== cat || dsort !== sort
+  // Draw the first rows at once and the rest a moment later.
+  const [limit, setLimit] = useState(24)
+  useEffect(() => {
+    setLimit(24)
+    const id = setTimeout(() => setLimit(80), 180)
+    return () => clearTimeout(id)
+  }, [results])
   // Back from a product: scroll to where the list was, once the rows are there.
   useEffect(() => {
     const y = restoreScroll.current
@@ -233,7 +308,7 @@ export function SearchScreen() {
       ) : (
         <div>
           <div className="rows" style={{ opacity: stale ? 0.6 : 1, transition: 'opacity 0.15s' }}>
-            {results.map(({ p, best, count }) => (
+            {results.slice(0, limit).map(({ p, best, count }) => (
               <ResultRow key={p.id} p={p} best={best} count={count} sort={sort} qty={inList(p.id)?.quantity ?? 0}
                 justAdded={added === p.id} onOpen={openProduct} onAdd={quickAdd} noPrice={t('search.noPrice')} addLabel={t('search.addToList')} />
             ))}

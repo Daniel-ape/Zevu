@@ -2,7 +2,7 @@ import { Back } from '../ui/icons'
 import { Portal } from '../ui/Portal'
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../data/store'
-import { decodeCanvas, decodeCard } from '../data/barcode'
+import { decodeCanvas, decodeCard, preloadDecoder } from '../data/barcode'
 
 /**
  * Full-screen live camera that reads a barcode and closes.
@@ -20,6 +20,7 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
   const { t } = useStore()
   const video = useRef<HTMLVideoElement>(null)
   const [ready, setReady] = useState(false)
+  const [shown, setShown] = useState(false)
   const [torch, setTorch] = useState<null | { on: boolean; set: (on: boolean) => void }>(null)
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
     // Each frame tries one view in turn: the band behind the guide box, the
     // whole frame, and the band turned 90° (barcodes printed vertically).
     let n = 0
+    if (!card) preloadDecoder()
     const tick = async () => {
       const v = video.current
       if (stopped || !v || v.readyState < 2) { timer = window.setTimeout(tick, 200); return }
@@ -38,17 +40,17 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
       const ctx = canvas.getContext('2d', { willReadFrequently: true })!
       const mode = n++ % 3
       if (mode === 0) {
-        const cw = Math.min(w, 1000), ch = Math.round((cw / w) * h * 0.5)
+        const cw = Math.min(w, 800), ch = Math.round((cw / w) * h * 0.5)
         canvas.width = cw; canvas.height = ch
         ctx.drawImage(v, 0, h * 0.25, w, h * 0.5, 0, 0, cw, ch)
       } else if (mode === 1) {
-        const scale = Math.min(1, 1000 / Math.max(w, h))
+        const scale = Math.min(1, 800 / Math.max(w, h))
         canvas.width = Math.round(w * scale); canvas.height = Math.round(h * scale)
         ctx.drawImage(v, 0, 0, canvas.width, canvas.height)
       } else {
         // centre column of the frame, rotated so its bars become horizontal
         const sw = w * 0.5, sh = h
-        const scale = Math.min(1, 1000 / sh)
+        const scale = Math.min(1, 800 / sh)
         canvas.width = Math.round(sh * scale); canvas.height = Math.round(sw * scale)
         ctx.save()
         ctx.translate(canvas.width / 2, canvas.height / 2)
@@ -64,7 +66,7 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
         navigator.vibrate?.(40)
         if (card) onCode(hit.text, hit.format)
         else onCode(hit.text)
-      } else timer = window.setTimeout(tick, 80)
+      } else timer = window.setTimeout(tick, 120)
     }
 
     ;(async () => {
@@ -78,6 +80,12 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
         v.srcObject = stream
         await v.play()
         setReady(true)
+        // Show the picture only once real frames arrive (the first ones are black or
+        // still adjusting), and let focus and exposure settle before decoding.
+        const reveal = () => { if (!stopped) setShown(true) }
+        const rvfc = (v as HTMLVideoElement & { requestVideoFrameCallback?: (cb: () => void) => number }).requestVideoFrameCallback
+        if (rvfc) rvfc.call(v, () => window.setTimeout(reveal, 120))
+        else window.setTimeout(reveal, 250)
         // Keep focusing, and offer the light where the phone allows it.
         const track = stream.getVideoTracks()[0]
         const caps = (track.getCapabilities?.() ?? {}) as MediaTrackCapabilities & { torch?: boolean; focusMode?: string[] }
@@ -91,7 +99,7 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
           }
           setTorch({ on: false, set })
         }
-        tick()
+        timer = window.setTimeout(tick, 350)
       } catch {
         if (!stopped) onFallback()
       }
@@ -106,7 +114,7 @@ export function CameraScanner({ onCode, onClose, onFallback, card }: {
 
   return (
     <Portal><div className="camera" role="dialog" aria-label={t('scan.camera')}>
-      <video ref={video} playsInline muted />
+      <video ref={video} playsInline muted autoPlay className={shown ? 'shown' : ''} />
       <button className="camera-back glass" onClick={onClose} aria-label={t('rc.close')}><Back size={22} /></button>
       <div className="camera-guide" />
       <div className="camera-hint">{ready ? t('scan.aim') : t('scan.starting')}</div>

@@ -66,7 +66,7 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
       }
     } catch (e) {
       console.error(e)
-      setError(t(isPhoto ? 'rc.ocrError' : 'rc.pdfError'))
+      setError(`${t(isPhoto ? 'rc.ocrError' : 'rc.pdfError')} (${String((e as Error)?.message ?? e).slice(0, 140)})`)
     } finally {
       setBusy('')
       if (file.current) file.current.value = ''
@@ -101,7 +101,7 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
           <>
             <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onFile(e.target.files?.[0])} />
             <input ref={file} type="file" accept="application/pdf,.pdf,text/plain,.txt,image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-            <button className="btn primary" disabled={!!busy} onClick={() => openCamera(camera.current, onFile)}>
+            <button className="btn primary" disabled={!!busy} onClick={() => openCamera(camera.current, onFile, (m) => setError(`(${m})`))}>
               {busy || t('rc.photo')}
             </button>
             <button className="btn ghost" style={{ marginTop: 10 }} disabled={!!busy} onClick={() => file.current?.click()}>

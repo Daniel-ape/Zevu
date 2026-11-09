@@ -34,6 +34,9 @@ function zxing() {
   return zx
 }
 
+/** Start loading the decoder early (when the camera opens), so the first frames don't stutter. */
+export function preloadDecoder() { void nativeDetector(); void zxing() }
+
 /** Check digit test, so a misread never opens the wrong product. */
 export function isValidEan(code: string): boolean {
   if (!/^\d{8}$|^\d{12,13}$/.test(code)) return false

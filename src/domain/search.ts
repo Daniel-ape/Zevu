@@ -93,6 +93,9 @@ export function matchScore(query: string | Query, h: Haystack, fuzzy = true): nu
   const terms = typeof query === 'string' ? compileQuery(query) : query
   if (!terms.length) return 1
   let total = 0
+  // Without typos every match is a piece of the product's text, so one quick
+  // substring test rules out almost all products before the word-by-word scoring.
+  if (!fuzzy) for (const { term, alts } of terms) if (!h.joined.includes(term) && !alts.some((a) => h.joined.includes(a))) return 0
   for (const { term, alts } of terms) {
     let s = wordScore(term, h.words, h.joined, h.named, fuzzy)
     for (const a of alts) {

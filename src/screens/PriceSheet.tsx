@@ -35,7 +35,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
   const photo = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (startWithPhoto) openCamera(photo.current, fromPhoto)
+    if (startWithPhoto) openCamera(photo.current, fromPhoto, (m) => setNote(`(${m})`))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const matches = useMemo(() => {
@@ -48,10 +48,11 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
     if (!f) return
     setNote('')
     setBusy(t('ap.reading'))
+    let ocrFail = ''
     try {
       const [decoded, words] = await Promise.all([
         decodeImage(f).catch(() => null),
-        import('../data/ocr').then((m) => m.photoToWords(f)).catch(() => []),
+        import('../data/ocr').then((m) => m.photoToWords(f)).catch((e) => { ocrFail = String(e?.message ?? e).slice(0, 140); return [] }),
       ])
       // The digits printed under the barcode work too when the bars can't be read.
       const code = decoded ?? eanFromWords(words)
@@ -65,6 +66,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
       } else if (!product) notes.push(t('ap.noBarcode'))
       if (!cents) notes.push(t('ap.noPrice'))
       notes.push(t('ap.check'))
+      if (ocrFail) notes.push(`(${ocrFail})`)
       setFromShelf(true)
       setNote(notes.join(' '))
     } finally {
@@ -84,7 +86,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
 
   const again = () => {
     setSaved(null); setProduct(undefined); setPrice(''); setQuery(''); setNote(''); setFromShelf(false)
-    openCamera(photo.current, fromPhoto)
+    openCamera(photo.current, fromPhoto, (m) => setNote(`(${m})`))
   }
 
   return (
@@ -108,7 +110,7 @@ export function PriceSheet({ product: initial, startWithPhoto, store: initialSto
           <>
             {!product && (
               <>
-                <button className="btn primary" disabled={!!busy} onClick={() => openCamera(photo.current, fromPhoto)}>{busy || t('ap.shelf')}</button>
+                <button className="btn primary" disabled={!!busy} onClick={() => openCamera(photo.current, fromPhoto, (m) => setNote(`(${m})`))}>{busy || t('ap.shelf')}</button>
                 <p className="tiny muted" style={{ lineHeight: 1.5 }}>{t('ap.tip')}</p>
                 <div className="small muted" style={{ margin: '14px 0 8px' }}>{t('ap.or')}</div>
                 <label className="search"><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('ap.search')} /></label>
