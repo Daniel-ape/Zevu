@@ -5,6 +5,7 @@ import { useNav } from '../nav'
 import { ArrowRight, List } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
 import { Cover, useShelf } from './Leaflets'
+import { favFirst, useFavLeaflets } from '../data/favLeaflets'
 import { HomeMemberOffers } from './Coupons'
 import { openProfilePage } from './Profile'
 import { SaveCard } from '../ui/SaveCard'
@@ -51,7 +52,8 @@ export function Home() {
     [products, pricesOf],
   )
 
-  const leaflets = shelf.flatMap((c) => c.leaflets.map((l) => ({ chain: c.chain, l })))
+  const favs = useFavLeaflets()
+  const leaflets = favFirst(shelf, (c) => c.chain, favs).flatMap((c) => c.leaflets.map((l) => ({ chain: c.chain, l })))
     .sort((a, b) => (a.l.status === 'now' ? 0 : 1) - (b.l.status === 'now' ? 0 : 1))
     .slice(0, 8)
 

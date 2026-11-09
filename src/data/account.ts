@@ -109,7 +109,9 @@ export function onSession(cb: (s: Session | null) => void): () => void {
 const SYNCED = ['lists', 'activeList', 'myStores', 'watched', 'cards', 'coupons', 'receipts', 'userPrices', 'lastStore', 'theme', 'lang', 'receiptLinks',
   // products found by barcode or added by hand (so lists and watches show them on every phone),
   // recently viewed products, and which price alerts were already shown
-  'remoteProducts', 'recent', 'alerted', 'alertedOffers']
+  'remoteProducts', 'recent', 'alerted', 'alertedOffers',
+  // favourite leaflet shops
+  'favLeaflets']
 /** Kept from both phones instead of the newer one winning. */
 const MERGED = new Set(['remoteProducts', 'alerted', 'alertedOffers'])
 

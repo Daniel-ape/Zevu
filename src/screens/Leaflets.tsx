@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { favFirst, toggleFavLeaflet, useFavLeaflets } from '../data/favLeaflets'
 import { ChainMark } from '../ui/ChainMark'
 import { useStore } from '../data/store'
 import { inAppLink } from '../data/openLink'
@@ -190,7 +191,17 @@ export function useShelf(): { shelf: Chain[]; updated?: string } {
 const CHAIN_ID: Record<string, string> = { Kärkkäinen: 'karkkainen', Lidl: 'lidl', Tokmanni: 'tokmanni', Minimani: 'minimani', Rusta: 'rusta', 'Halpa-Halli': 'halpahalli', 'K-Ruoka': 'k' }
 
 /** showStore: the store's name under the cover; compact: store + one line of title; logo: the store's logo in the corner instead of its name underneath (home page). */
-export function Cover({ chain, l, showStore = true, compact, logo }: { chain: string; l: Leaflet; showStore?: boolean; compact?: boolean; logo?: boolean }) {
+function FavHeart({ chain, on }: { chain: string; on: boolean }) {
+  const { t } = useStore()
+  return (
+    <button className={'fav-heart' + (on ? ' on' : '')} aria-pressed={on} aria-label={t(on ? 'fav.remove' : 'fav.add', { chain })}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavLeaflet(chain) }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z" fill={on ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" /></svg>
+    </button>
+  )
+}
+
+export function Cover({ chain, l, showStore = true, compact, logo, fav }: { chain: string; l: Leaflet; showStore?: boolean; compact?: boolean; logo?: boolean; fav?: boolean }) {
   if (logo) showStore = false
   const { t } = useStore()
   const [broken, setBroken] = useState(false)
@@ -200,6 +211,7 @@ export function Cover({ chain, l, showStore = true, compact, logo }: { chain: st
       <div className="cover-img">
         {/* only the exception that needs action today gets a badge */}
         {l.status === 'last' && <span className="cover-badge last">{t('offers.last')}</span>}
+        {fav !== undefined && <FavHeart chain={chain} on={fav} />}
         {logo && <ChainMark chain={CHAIN_ID[chain] ?? chain.toLowerCase()} label={l.name.startsWith('K-') ? l.name.split(' ')[0] : chain} />}
         {l.image && !broken ? (
           <img
@@ -234,7 +246,9 @@ export function Cover({ chain, l, showStore = true, compact, logo }: { chain: st
 
 export function Leaflets() {
   const { t, lang } = useStore()
-  const { shelf, updated } = useShelf()
+  const { shelf: all, updated } = useShelf()
+  const favs = useFavLeaflets()
+  const shelf = favFirst(all, (c) => c.chain, favs)
   useEffect(() => { markLeafletsSeen() }, [])
   const when = updated && !Number.isNaN(+new Date(updated))
     ? new Date(updated).toLocaleString(lang === 'sv' ? 'sv-FI' : lang === 'fi' ? 'fi-FI' : 'en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
@@ -247,9 +261,9 @@ export function Leaflets() {
       </div>
       {shelf.map((c) => (
         <div key={c.chain} className="lf-group">
-          <h2 className="lf-head"><ChainMark chain={CHAIN_ID[c.chain] ?? c.chain.toLowerCase()} inline /><span className="chain-name">{c.chain}</span></h2>
+          <h2 className="lf-head"><ChainMark chain={CHAIN_ID[c.chain] ?? c.chain.toLowerCase()} inline /><span className="chain-name">{c.chain}</span>{favs.includes(c.chain) && <span className="fav-tag">{t('fav.tag')}</span>}</h2>
           <div className="shelf lf-shelf">
-            {c.leaflets.map((l) => <Cover key={l.url} chain={c.chain} l={l} showStore={c.chain === 'K-Ruoka'} />)}
+            {c.leaflets.map((l) => <Cover key={l.url} chain={c.chain} l={l} showStore={c.chain === 'K-Ruoka'} fav={favs.includes(c.chain)} />)}
           </div>
         </div>
       ))}
