@@ -96,12 +96,7 @@ export function SearchScreen() {
     id = window.setTimeout(step, 50)
     return () => clearTimeout(id)
   }, [products, hay])
-  // Fetch the rest of the shops' ranges soon after the page opens (not on the
-  // first key press), so typing never waits for it.
-  useEffect(() => {
-    const id = window.setTimeout(loadMore, 700)
-    return () => clearTimeout(id)
-  }, [loadMore])
+
   // Catalogue order is popularity order; shop-only products come after it.
   const rank = useMemo(() => {
     let r = rankCache.get(products)
@@ -110,14 +105,7 @@ export function SearchScreen() {
   }, [products])
   // Typing updates the field at once; the list follows a moment later, so
   // keys never wait for thousands of products to be scored.
-  // While keys come quickly, wait for a short pause before searching again.
-  const [typed, setTyped] = useState(q)
-  useEffect(() => {
-    if (q === typed) return
-    const id = setTimeout(() => setTyped(q), q.trim() === '' ? 0 : 140)
-    return () => clearTimeout(id)
-  }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
-  const dq = useDeferredValue(typed)
+  const dq = useDeferredValue(q)
   // A new category or order closes the picker at once; the list follows.
   const dcat = useDeferredValue(cat)
   const dsort = useDeferredValue(sort)
