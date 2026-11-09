@@ -1,0 +1,108 @@
+--------- beginning of main
+11-09 19:10:42.728  3290  3290 D Capacitor: Starting BridgeActivity
+11-09 19:10:42.818  3290  3290 D Capacitor: Registering plugin instance: CapacitorCookies
+11-09 19:10:42.828  3290  3290 D Capacitor: Registering plugin instance: WebView
+11-09 19:10:42.835  3290  3290 D Capacitor: Registering plugin instance: CapacitorHttp
+11-09 19:10:42.842  3290  3290 D Capacitor: Registering plugin instance: SystemBars
+11-09 19:10:42.856  3290  3290 D Capacitor: Registering plugin instance: App
+11-09 19:10:42.866  3290  3290 D Capacitor: Registering plugin instance: CapacitorBackgroundRunner
+11-09 19:10:42.896  3290  3290 D Capacitor: Registering plugin instance: Browser
+11-09 19:10:42.907  3290  3290 D Capacitor: Registering plugin instance: Camera
+11-09 19:10:43.071  3290  3290 W Capacitor: Unable to read file at path public/plugins
+11-09 19:10:43.090  3290  3290 D Capacitor: Loading app at https://localhost
+11-09 19:10:43.137  3290  3290 D Capacitor: App started
+11-09 19:10:43.289  3290  3290 D Capacitor: App resumed
+11-09 19:10:43.324  3290  3591 D Capacitor: Handling local request: https://localhost/
+11-09 19:10:43.560  3290  3578 D Capacitor: Handling local request: https://localhost/assets/index-KleLidje.js
+11-09 19:10:43.571  3290  3592 D Capacitor: Handling local request: https://localhost/assets/index-CQsd2xNR.css
+11-09 19:10:44.853  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:10:44.867  3290  3578 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-800-normal-CusIZhrK.woff2
+11-09 19:10:44.869  3290  3576 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-600-normal-DLTa1BUW.woff2
+11-09 19:10:44.874  3290  3592 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-700-normal-CfpNZvy6.woff2
+11-09 19:10:44.875  3290  3578 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-400-normal-Dhut76fR.woff2
+11-09 19:10:44.885  3290  3592 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-500-normal-Bf-nb4oT.woff2
+11-09 19:10:44.923  3290  3578 D Capacitor: Handling local request: https://localhost/logos/index.json
+11-09 19:10:44.930  3290  3290 D Capacitor: onGeolocationPermissionsShowPrompt: DOING IT HERE FOR ORIGIN: https://localhost/
+11-09 19:10:44.931  3290  3576 D Capacitor: Handling local request: https://localhost/products/fi.json
+11-09 19:10:44.952  3290  3708 D Capacitor: Handling local request: https://localhost/assets/dist-N-wO03gy.js
+11-09 19:10:44.953  3290  3290 D Capacitor: onGeolocationPermissionsShowPrompt: has required permission
+11-09 19:10:44.954  3290  3290 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-09 19:10:44.957  3290  3290 V Capacitor: callback: 30124224, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent, methodData: {"label":"fi.hintaopas.app.pricecheck","event":"syncWatch","details":{"items":[],"lang":"en"}}
+11-09 19:10:44.965  3290  3591 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:10:44.988  3290  3760 D Capacitor: Handling local request: https://localhost/logos/lidl.svg
+11-09 19:10:44.991  3290  3760 D Capacitor: Handling local request: https://localhost/logos/halpahalli.png
+11-09 19:10:44.994  3290  3760 D Capacitor: Handling local request: https://localhost/logos/tokmanni-icon.png
+11-09 19:10:45.012  3290  3591 D Capacitor: Handling local request: https://localhost/logos/tokmanni.svg
+11-09 19:10:52.244  3290  3290 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-09 19:10:52.250  3290  3290 V Capacitor: callback: 30124225, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent, methodData: {"label":"fi.hintaopas.app.pricecheck","event":"syncWatch","details":{"items":[],"lang":"en"}}
+11-09 19:10:52.379  3290  3290 I Capacitor/Console: File:  - Line 333 - Msg: undefined
+11-09 19:10:52.584  3290  3576 D Capacitor: Handling local request: https://localhost/logos/rusta.png
+11-09 19:10:52.592  3290  3576 D Capacitor: Handling local request: https://localhost/logos/minimani.png
+11-09 19:10:55.864  3290  3290 I Capacitor/Console: File:  - Line 333 - Msg: undefined
+11-09 19:11:04.907  3290  3576 D Capacitor: Handling local request: https://localhost/
+11-09 19:11:04.929  3290  3290 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-09 19:11:04.935  3290  3290 V Capacitor: callback: 30124226, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent, methodData: {"label":"fi.hintaopas.app.pricecheck","event":"checkPrices","details":{}}
+11-09 19:11:04.966  3290  3592 D Capacitor: Handling local request: https://localhost/assets/index-CQsd2xNR.css
+11-09 19:11:04.975  3290  3578 D Capacitor: Handling local request: https://localhost/assets/index-KleLidje.js
+11-09 19:11:05.080  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:05.094  3290  3576 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-800-normal-CusIZhrK.woff2
+11-09 19:11:05.105  3290  3576 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-600-normal-DLTa1BUW.woff2
+11-09 19:11:05.117  3290  3576 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-700-normal-CfpNZvy6.woff2
+11-09 19:11:05.121  3290  3576 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-400-normal-Dhut76fR.woff2
+11-09 19:11:05.126  3290  3576 D Capacitor: Handling local request: https://localhost/assets/plus-jakarta-sans-latin-500-normal-Bf-nb4oT.woff2
+11-09 19:11:05.202  3290  3576 D Capacitor: Handling local request: https://localhost/logos/index.json
+11-09 19:11:05.231  3290  3290 D Capacitor: onGeolocationPermissionsShowPrompt: DOING IT HERE FOR ORIGIN: https://localhost/
+11-09 19:11:05.233  3290  3576 D Capacitor: Handling local request: https://localhost/products/fi.json
+11-09 19:11:05.241  3290  3576 D Capacitor: Handling local request: https://localhost/assets/dist-N-wO03gy.js
+11-09 19:11:05.248  3290  3290 D Capacitor: onGeolocationPermissionsShowPrompt: has required permission
+11-09 19:11:05.308  3290  3290 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-09 19:11:05.314  3290  3290 V Capacitor: callback: 61718571, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent, methodData: {"label":"fi.hintaopas.app.pricecheck","event":"syncWatch","details":{"items":[],"lang":"sv"}}
+11-09 19:11:05.525  3290  3290 I Capacitor/Console: File:  - Line 333 - Msg: undefined
+11-09 19:11:07.371  3290  3576 D Capacitor: Handling local request: https://localhost/logos/tokmanni.svg
+11-09 19:11:09.229  3290  3290 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-09 19:11:09.230  3290  3290 V Capacitor: callback: 61718572, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent, methodData: {"label":"fi.hintaopas.app.pricecheck","event":"syncWatch","details":{"items":[],"lang":"sv"}}
+11-09 19:11:09.289  3290  3290 I Capacitor/Console: File:  - Line 333 - Msg: undefined
+11-09 19:11:09.292  3290  3576 D Capacitor: Handling local request: https://localhost/logos/rusta.png
+11-09 19:11:09.293  3290  3592 D Capacitor: Handling local request: https://localhost/logos/halpahalli.png
+11-09 19:11:09.299  3290  3591 D Capacitor: Handling local request: https://localhost/logos/minimani.png
+11-09 19:11:09.341  3290  3578 D Capacitor: Handling local request: https://localhost/logos/lidl.svg
+11-09 19:11:11.464  3290  3592 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:11.920  3290  3576 D Capacitor: Handling local request: https://localhost/products/img-62.json
+11-09 19:11:11.923  3290  3576 D Capacitor: Handling local request: https://localhost/products/img-1.json
+11-09 19:11:12.806  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:13.774  3290  3576 D Capacitor: Handling local request: https://localhost/logos/karkkainen.png
+11-09 19:11:13.832  3290  3592 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:15.244  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:16.180  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:19.687  3290  3576 D Capacitor: Handling local request: https://localhost/logos/tokmanni-icon.png
+11-09 19:11:19.958  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:19.960  3290  3592 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:22.417  3290  3290 E Capacitor/Console: File: https://localhost/#search - Line 0 - Msg: Access to fetch at 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=kahvi&search_simple=1&json=1&page_size=20&tagtype_0=countries&tag_contains_0=contains&tag_0=finland&fields=code%2Cproduct_name%2Cproduct_name_fi%2Cproduct_name_sv%2Cproduct_name_en%2Cbrands%2Cquantity%2Ccategories_tags%2Cimage_front_small_url' from origin 'https://localhost' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+11-09 19:11:27.406  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:29.099  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:35.099  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:35.566  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:35.779  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:35.986  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:36.267  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:36.629  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:36.766  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:37.030  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:37.390  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:37.468  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:37.705  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:37.963  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:38.415  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:39.123  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:39.332  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:39.542  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:39.873  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:40.139  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:40.360  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:40.619  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:40.783  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:41.046  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:41.231  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:41.388  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:43.653  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-09 19:11:46.570  3290  3576 D Capacitor: Handling local request: https://localhost/icons/icon-192.png

@@ -1,0 +1,24 @@
+target https://localhost/
+OK   start 5 ms
+OK   welcome 6015 ms
+OK   tab produkter 1041 ms
+OK   tab lista 1362 ms
+OK   tab blad 1029 ms
+OK   tab hem 1414 ms
+     results after 378 ms
+OK   search 1368 ms
+OK   open product 1393 ms
+OK   add to list 1677 ms
+     alt cards 3
+OK   alternatives row 883 ms
+OK   back 4226 ms
+OK   list 1529 ms
+OK   leaflets 40 ms
+OK   open leaflet 3011 ms
+     after back: #leaflets dock=true
+OK   android back 1611 ms
+     dock still there: true
+OK   stress tabs 8520 ms
+OK   scan 2621 ms
+     heap MB 386
+OK   memory 6 ms
