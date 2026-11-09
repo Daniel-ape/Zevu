@@ -96,27 +96,6 @@ export function ProductScreen({ id }: { id: string }) {
       ) : (
         <>
 
-      {alternatives.length > 0 && (
-        <div className="section">
-          <div className="section-head"><h2>{t('alt.title')}</h2></div>
-          <div className="rows group-rows">
-            {alternatives.map((a) => (
-              <button key={a.product.id} className="row" onClick={() => nav.openProduct(a.product.id)}>
-                <Tile product={a.product} />
-                <div className="grow">
-                  <div className="title">{a.product.name}</div>
-                  <div className="sub">{[a.store, sizeLabel(a.product), `${euro(a.unitCents)}${unitLabel(a.product)}`].filter(Boolean).join(' · ')}</div>
-                </div>
-                <div className="ld-price">
-                  <b>{euro(a.cents)}</b>
-                  <span className="alt-off">−{a.cheaperBy} %{unitLabel(a.product)}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="section">
         <div className="section-head">
           <h2>{t('product.byStore')}</h2>
@@ -173,6 +152,33 @@ export function ProductScreen({ id }: { id: string }) {
       </div>}
 
         </>
+      )}
+
+      {alternatives.length > 0 && (
+        <div className="section alt-sec">
+          <div className="section-head"><h2>{t('alt.title')}</h2></div>
+          <div className="alt-strip">
+            {alternatives.map((a) => {
+              const liked = watched.some((w) => w.productId === a.product.id)
+              return (
+                <div key={a.product.id} className="alt-card">
+                  <button className="alt-open" onClick={() => nav.openProduct(a.product.id)} aria-label={a.product.name}>
+                    <span className="alt-img"><Tile product={a.product} large /></span>
+                    <span className="alt-name">{a.product.name}</span>
+                    <span className="alt-foot">
+                      <b>{euro(a.cents)}</b>
+                      <small>{euro(a.unitCents)}{unitLabel(a.product)}{a.store ? ' · ' + a.store : ''}</small>
+                    </span>
+                  </button>
+                  <span className="alt-off">−{a.cheaperBy} %</span>
+                  <button className={'alt-heart' + (liked ? ' on' : '')} onClick={() => toggleWatch(a.product.id, a.cents)} aria-label={t(liked ? 'watch.on' : 'watch.off')} aria-pressed={liked}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" /></svg>
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       )}
 
       {missing.length > 0 && (
