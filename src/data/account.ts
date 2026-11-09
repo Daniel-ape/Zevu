@@ -106,7 +106,35 @@ export function onSession(cb: (s: Session | null) => void): () => void {
 // ---- Sync ----------------------------------------------------------------------------
 
 /** The user's own things. Product data, prices and caches are not synced. */
-const SYNCED = ['lists', 'activeList', 'myStores', 'watched', 'cards', 'coupons', 'receipts', 'userPrices', 'lastStore', 'theme', 'lang', 'receiptLinks']
+const SYNCED = ['lists', 'activeList', 'myStores', 'watched', 'cards', 'coupons', 'receipts', 'userPrices', 'lastStore', 'theme', 'lang', 'receiptLinks',
+  // products found by barcode or added by hand (so lists and watches show them on every phone),
+  // recently viewed products, and which price alerts were already shown
+  'remoteProducts', 'recent', 'alerted', 'alertedOffers']
+/** Kept from both phones instead of the newer one winning. */
+const MERGED = new Set(['remoteProducts', 'alerted', 'alertedOffers'])
+
+/** Product ids the user's own things refer to. */
+function referencedIds(): Set<string> {
+  const ids = new Set<string>()
+  const get = (k: string) => { try { return JSON.parse(localStorage.getItem('hintaopas:' + k) || 'null') } catch { return null } }
+  for (const l of get('lists') ?? []) for (const i of l.items ?? []) ids.add(i.productId)
+  for (const w of get('watched') ?? []) ids.add(w.productId)
+  for (const r of get('receipts') ?? []) for (const i of r.items ?? []) if (i.productId) ids.add(i.productId)
+  for (const p of get('userPrices') ?? []) ids.add(p.productId)
+  for (const id of get('recent') ?? []) ids.add(id)
+  return ids
+}
+
+/** Both sides together: lists of products by id, other lists as sets, objects key by key. */
+function merge(local: unknown, remote: unknown): unknown {
+  if (Array.isArray(local) && Array.isArray(remote)) {
+    const key = (x: unknown) => (x && typeof x === 'object' && 'id' in x ? String((x as { id: unknown }).id) : JSON.stringify(x))
+    const seen = new Set(local.map(key))
+    return [...local, ...remote.filter((x) => !seen.has(key(x)))].slice(-500)
+  }
+  if (local && remote && typeof local === 'object' && typeof remote === 'object') return { ...(remote as object), ...(local as object) }
+  return local ?? remote
+}
 const META = 'hintaopas:sync-meta'
 type Meta = Record<string, { t: number; h: string }>
 type Remote = Record<string, { t: number; v: unknown }>
@@ -116,6 +144,10 @@ const readMeta = (): Meta => { try { return JSON.parse(localStorage.getItem(META
 /** What is synced for a key: coupons go without their photos (too big; the coupon itself stays). */
 function localValue(key: string): string | null {
   const raw = localStorage.getItem('hintaopas:' + key)
+  if (raw !== null && key === 'remoteProducts') {
+    // only the products something refers to, not everything ever looked up
+    try { const ids = referencedIds(); return JSON.stringify((JSON.parse(raw) as Array<{ id: string }>).filter((p) => ids.has(p.id))) } catch { return raw }
+  }
   if (raw === null || key !== 'coupons') return raw
   try { return JSON.stringify((JSON.parse(raw) as Array<Record<string, unknown>>).map(({ image, ...c }) => c)) } catch { return raw }
 }
@@ -147,6 +179,19 @@ export async function syncNow(): Promise<boolean> {
   const out: Remote = { ...remote }
   for (const k of SYNCED) {
     const r = remote[k], l = meta[k]
+    if (r && MERGED.has(k)) {
+      // union of both phones; send it back when this phone added something
+      let local: unknown = null
+      try { local = JSON.parse(localStorage.getItem('hintaopas:' + k) || 'null') } catch { /* unreadable: take remote */ }
+      const merged = merge(local, r.v)
+      const s = JSON.stringify(merged)
+      if (localStorage.getItem('hintaopas:' + k) !== s) { localStorage.setItem('hintaopas:' + k, s); changedLocal = true }
+      const v = localValue(k)
+      const same = v !== null && v === JSON.stringify(r.v)
+      meta[k] = { t: same ? r.t : Date.now(), h: hash(v ?? s) }
+      if (!same && v !== null) out[k] = { t: meta[k].t, v: JSON.parse(v) }
+      continue
+    }
     if (r && (!l || r.t > l.t)) {
       // newer elsewhere: take it (coupons keep this phone's photos where the ids match)
       let v = r.v
@@ -183,5 +228,9 @@ export function startAutoSync(onPulled: () => void): () => void {
   const iv = setInterval(run, 60_000)
   const vis = () => { if (document.visibilityState === 'hidden') run() }
   document.addEventListener('visibilitychange', vis)
-  return () => { clearTimeout(t0); clearInterval(iv); document.removeEventListener('visibilitychange', vis) }
+  // a change (list, watch, coupon…) is sent a couple of seconds later
+  let soon = 0
+  const changed = () => { clearTimeout(soon); soon = window.setTimeout(run, 2500) }
+  window.addEventListener('hintaopas:changed', changed)
+  return () => { clearTimeout(t0); clearTimeout(soon); clearInterval(iv); document.removeEventListener('visibilitychange', vis); window.removeEventListener('hintaopas:changed', changed) }
 }

@@ -20,7 +20,11 @@ function load<T>(key: string, fallback: T): T {
 }
 function save(key: string, value: unknown) {
   try {
-    localStorage.setItem('hintaopas:' + key, JSON.stringify(value))
+    const s = JSON.stringify(value)
+    if (localStorage.getItem('hintaopas:' + key) === s) return
+    localStorage.setItem('hintaopas:' + key, s)
+    // lets the account sync send the change soon (data/account.ts)
+    window.dispatchEvent(new Event('hintaopas:changed'))
   } catch {
     /* storage unavailable: keep state in memory only */
   }
