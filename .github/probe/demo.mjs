@@ -24,7 +24,10 @@ const dock = (i) => tap('.dock .tab', i)
 
 // first start: the welcome page, then continue without an account, in Swedish
 await sleep(2500)
-await tap('.welcome button', await ev(`[...document.querySelectorAll('.welcome button')].findIndex((b) => /without|utan|ilman/i.test(b.textContent))`))
+await ev(`[...document.querySelectorAll('.welcome button')].find((b) => /without|utan|ilman/i.test(b.textContent))?.click()`)
+await sleep(1500)
+await ev(`[...document.querySelectorAll('.welcome button')].find((b) => /without|utan|ilman|start|börja|kom igång|aloita/i.test(b.textContent))?.click()`)
+console.log('welcome left', await ev(`!document.querySelector('.welcome')`))
 await sleep(2500)
 await ev(`localStorage.setItem('hintaopas:lang','"sv"'); location.reload()`)
 await sleep(5000)
