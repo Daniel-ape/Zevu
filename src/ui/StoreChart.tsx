@@ -37,12 +37,22 @@ export function StoreChart({ dates, series }: { dates: Date[]; series: StoreSeri
   const left = (i: number) => padX + (i / n) * (W - padX * 2)
   const x = (i: number) => (left(i) + left(i + 1)) / 2
   const y = (c: number) => padTop + (1 - (c - lo) / span) * (H - padTop - padBottom)
-  const path = (values: (number | null)[]) => {
+  // Shops with the same price on a day would draw one line over the other: on
+  // those days their lines sit side by side, a few pixels apart, so each shows.
+  const GAP = 3.2
+  const shift = filled.map(() => new Array<number>(n).fill(0))
+  for (let i = 0; i < n; i++) {
+    const groups = new Map<number, number[]>()
+    filled.forEach((f, k) => { const v = f.solid[i] ?? f.lead[i]; if (v !== null) groups.set(v, [...(groups.get(v) ?? []), k]) })
+    for (const ks of groups.values()) if (ks.length > 1) ks.forEach((k, j) => { shift[k][i] = (j - (ks.length - 1) / 2) * GAP })
+  }
+  const path = (values: (number | null)[], off: number[]) => {
     let d = ''
     let prev: number | null = null
     values.forEach((v, i) => {
       if (v === null) { prev = null; return }
-      d += prev === null ? ` M${left(i).toFixed(1)},${y(v).toFixed(1)}` : ` V${y(v).toFixed(1)}`
+      const yy = (y(v) + off[i]).toFixed(1)
+      d += prev === null ? ` M${left(i).toFixed(1)},${yy}` : ` V${yy}`
       d += ` H${left(i + 1).toFixed(1)}`
       prev = v
     })
@@ -69,13 +79,13 @@ export function StoreChart({ dates, series }: { dates: Date[]; series: StoreSeri
       <svg ref={ref} viewBox={`0 0 ${W} ${H}`} width="100%" onPointerDown={pick} onPointerMove={(e) => e.buttons && pick(e)} style={{ touchAction: 'pan-y', cursor: 'crosshair' }}>
         <line x1={x(s)} x2={x(s)} y1={padTop - 6} y2={H - padBottom} stroke="var(--text-3)" strokeWidth="1" strokeDasharray="3 3" />
         {filled.map(({ ser, lead }, k) => lead.some((v) => v !== null) && (
-          <path key={'l' + ser.retailer.id} d={path(lead)} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={1.6} strokeDasharray="2 4" strokeLinecap="round" opacity={0.5} />
+          <path key={'l' + ser.retailer.id} d={path(lead, shift[k])} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={1.6} strokeDasharray="2 4" strokeLinecap="round" opacity={0.5} />
         ))}
         {filled.map(({ ser, solid }, k) => (
-          <path key={ser.retailer.id} d={path(solid)} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={k === 0 ? 2.6 : 2} strokeLinejoin="round" strokeLinecap="round" opacity={k === 0 ? 1 : 0.85} />
+          <path key={ser.retailer.id} d={path(solid, shift[k])} fill="none" stroke={COLORS[k % COLORS.length]} strokeWidth={k === 0 ? 2.6 : 2} strokeLinejoin="round" strokeLinecap="round" opacity={k === 0 ? 1 : 0.85} />
         ))}
         {filled.map(({ ser, solid }, k) => solid[s] !== null && (
-          <circle key={ser.retailer.id} cx={x(s)} cy={y(solid[s]!)} r="4" fill={COLORS[k % COLORS.length]} stroke="var(--card)" strokeWidth="1.5" />
+          <circle key={ser.retailer.id} cx={x(s)} cy={y(solid[s]!) + shift[k][s]} r="4" fill={COLORS[k % COLORS.length]} stroke="var(--card)" strokeWidth="1.5" />
         ))}
         {ticks.map((i) => (
           <text key={i} x={x(i)} y={H - 8} fontSize="11" fill="var(--text-2)" textAnchor="middle">{fmt(dates[i])}</text>
