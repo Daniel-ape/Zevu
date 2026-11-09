@@ -1,6 +1,6 @@
 # Builds an installable Android app (debug APK) on every push to main.
-# Download it from the "Android app" release on the repository page.
-name: Android app (APK)
+# Download it from the "ZEVU för Android (beta)" release on the repository page.
+name: ZEVU Android app (APK)
 on:
   push:
     branches: [main]
@@ -31,15 +31,15 @@ jobs:
       - run: npx vite build && npx cap sync android
       - run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
         working-directory: android
-      - run: cp android/app/build/outputs/apk/debug/app-debug.apk hintaopas.apk
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk ZEVU.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: hintaopas-apk
-          path: hintaopas.apk
+          name: zevu-apk
+          path: ZEVU.apk
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: android-latest
-          name: Android app (latest build)
-          body: Install hintaopas.apk on an Android phone (allow installing from this source when asked).
-          files: hintaopas.apk
+          name: ZEVU för Android (beta)
+          body: Betaversion av ZEVU för Android. Ladda ner ZEVU.apk på telefonen och tillåt installation från den här källan när telefonen frågar.
+          files: ZEVU.apk
           make_latest: true

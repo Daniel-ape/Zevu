@@ -1,4 +1,6 @@
-# Hintaopas
+# ZEVU
+
+Compare More. Spend Less. (formerly Hintaopas)
 
 Grocery price comparison for Finland (React + TypeScript, Vite). Runs as a web app
 and as an Android/iPhone app through Capacitor.

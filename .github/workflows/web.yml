@@ -1,6 +1,6 @@
 # Publishes the web app to GitHub Pages on every push to main.
 # The website is the ZEVU homepage (site/) plus the apps' daily data.
-name: Web app (GitHub Pages)
+name: ZEVU homepage (GitHub Pages)
 on:
   push:
     branches: [main]
