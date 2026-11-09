@@ -1807,3 +1807,5 @@ input, textarea, select { font-size: max(16px, 1em); }
 .pd-price { font-size: 38px; }
 .pd-actions { border-bottom: 0; padding-bottom: 4px; }
 .pd-hero .tile img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+.fav-dot { color: #e5384f; font-size: 18px; }
+.fav-heart { top: 7px; right: 7px; bottom: auto; }

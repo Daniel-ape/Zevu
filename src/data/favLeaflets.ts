@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-// Favourite leaflet shops (by chain name, e.g. "Lidl"): their leaflets come
-// first. Kept on the phone and synced to the account (data/account.ts).
+// Favourite leaflets (by the leaflet's address): shown first, in a row of their
+// own. Kept on the phone and synced to the account (data/account.ts).
 const KEY = 'hintaopas:favLeaflets'
 const EVENT = 'hintaopas:favLeaflets'
 
@@ -9,9 +9,9 @@ function read(): string[] {
   try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : [] } catch { return [] }
 }
 
-export function toggleFavLeaflet(chain: string) {
+export function toggleFavLeaflet(url: string) {
   const now = read()
-  const next = now.includes(chain) ? now.filter((c) => c !== chain) : [...now, chain]
+  const next = now.includes(url) ? now.filter((c) => c !== url) : [...now, url]
   try { localStorage.setItem(KEY, JSON.stringify(next)) } catch { /* private mode */ }
   window.dispatchEvent(new Event(EVENT))
   window.dispatchEvent(new Event('hintaopas:changed'))

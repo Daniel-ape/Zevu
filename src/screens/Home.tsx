@@ -53,7 +53,7 @@ export function Home() {
   )
 
   const favs = useFavLeaflets()
-  const leaflets = favFirst(shelf, (c) => c.chain, favs).flatMap((c) => c.leaflets.map((l) => ({ chain: c.chain, l })))
+  const leaflets = favFirst(shelf.flatMap((c) => c.leaflets.map((l) => ({ chain: c.chain, l }))), (x) => x.l.url, favs)
     .sort((a, b) => (a.l.status === 'now' ? 0 : 1) - (b.l.status === 'now' ? 0 : 1))
     .slice(0, 8)
 
