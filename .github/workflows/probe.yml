@@ -1,36 +1,19 @@
 name: probe
 on: workflow_dispatch
-permissions: { contents: write }
 jobs:
   p:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get install -y -q imagemagick >/dev/null
       - run: |
-          mkdir -p dbg && cd dbg
-          node -e '
-            const d=require("../public/prices/offers.json").offers.filter(o=>o.crop&&o.pageImage)
-            const pick=[]; for (const c of ["lidl","minimani","rusta","halpahalli"]) pick.push(...d.filter(o=>o.chain===c).slice(0,c==="lidl"?24:16))
-            require("fs").writeFileSync("pick.json", JSON.stringify(pick))'
-          i=0
-          node -e 'for (const o of require("./pick.json")) console.log([o.pageImage,o.crop.slice(0,4).join(","),o.chain,(o.name+" "+(o.priceCents/100).toFixed(2)).replace(/[^\p{L}\d .,-]/gu,"")].join("\t"))' | while IFS=$'\t' read url box chain name; do
-            i=$((i+1)); f=$(printf "%03d" $i)
-            curl -sL -A "HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)" "$url" -o p$f.img || continue
-            IFS=, read x y w h <<< "$box"
-            dims=$(identify -format "%w %h" p$f.img[0] 2>/dev/null) || continue
-            read W H <<< "$dims"
-            cx=$(python3 -c "print(int($x*$W),int($y*$H),int($w*$W),int($h*$H))")
-            read X Y CW CH <<< "$cx"
-            convert p$f.img[0] -crop ${CW}x${CH}+${X}+${Y} +repage -resize 260x260 -background white -gravity center -extent 260x260 c$f.png
-            convert p$f.img[0] -resize 260x -fill none -stroke red -strokewidth 3 -draw "rectangle $((X*260/W)),$((Y*260/W)) $(((X+CW)*260/W)),$(((Y+CH)*260/W))" -gravity north -background white -extent 260x360 s$f.png
-            convert s$f.png c$f.png +append -gravity south -background "#eee" -splice 0x28 -pointsize 15 -annotate +0+5 "$f $chain: ${name:0:50}" t$f.png
-          done
-          ls t*.png | head -80 > list
-          montage $(cat list) -tile 4x -geometry +6+6 sheet.png || true
-          convert sheet.png -resize 50% sheet-small.png || true
-          ls -la sheet*.png
-      - run: |
-          cd dbg && git init -q && git checkout -q -b debug-crops && cp sheet.png sheet-small.png pick.json /tmp/ && rm -rf * && cp /tmp/sheet.png /tmp/sheet-small.png /tmp/pick.json . 
-          git -c user.name=bot -c user.email=bot@users.noreply.github.com add . && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm dbg
-          git push -f -q https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git debug-crops
+          UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
+          curl -s -A "$UA" "https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=koko-suomen-tarjoukset-to-5-11-su-8-11&region_id=0&region_code=0" > f.json
+          python3 - <<'PY'
+          import json
+          f=json.load(open('f.json'))['flyer']
+          print('flyer keys', list(f.keys()))
+          p=f['pages'][1]; print('page keys', list(p.keys()))
+          for k,v in p.items():
+              s=json.dumps(v)[:600]; print('PAGE', k, s)
+          for k in f:
+              if k!='pages': print('FLY', k, json.dumps(f[k])[:300])
+          PY
