@@ -19,7 +19,20 @@ import { EVERYDAY, categoryFor } from '../src/domain/categories'
 interface Price { ean: string; priceCents: number; checkedAt?: string; name?: string; brand?: string; image?: string; url?: string }
 interface ShopFile { retailerId: string; fetchedAt: string; prices: Price[] }
 type Item = [string, number, string, string, string, string, string]
-interface Shop { r: string; at: string; o: string; i: Item[] }
+// o: the shop's site, links are stored without it; p: the start most picture
+// addresses share, stored without it (a picture not starting with "http" gets p in front)
+interface Shop { r: string; at: string; o: string; p?: string; i: Item[] }
+
+/** The start shared by most of the shop's picture addresses (they are a large part of the files). */
+function imagePrefix(urls: string[]): string {
+  const groups = new Map<string, string[]>()
+  for (const u of urls) { const k = u.slice(0, 30); groups.set(k, [...(groups.get(k) ?? []), u]) }
+  const big = [...groups.values()].sort((a, b) => b.length - a.length)[0] ?? []
+  if (big.length < 20) return ''
+  let pre = big[0]
+  for (const u of big) { let i = 0; while (i < pre.length && pre[i] === u[i]) i++; pre = pre.slice(0, i) }
+  return pre.slice(0, pre.lastIndexOf('/') + 1)
+}
 
 // Names as shops print them: HTML entities decoded, odd spaces removed, and
 // ALL-CAPS names (pharmacies) written in normal case.
@@ -94,13 +107,14 @@ for (const s of shops) {
   const origins = new Map<string, number>()
   for (const p of s.prices) if (p.url?.startsWith('https://')) { const o = new URL(p.url).origin; origins.set(o, (origins.get(o) ?? 0) + 1) }
   const o = [...origins.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? ''
+  const ip = imagePrefix(s.prices.map((p) => p.image ?? '').filter((u) => u.startsWith('https://')))
   const pack = (p: Price): Item => [
-    p.ean, p.priceCents, cleanName(p.name ?? ''), cleanName(p.brand ?? ''), p.image?.startsWith('https://') ? p.image : '',
+    p.ean, p.priceCents, cleanName(p.name ?? ''), cleanName(p.brand ?? ''), p.image?.startsWith('https://') ? (ip && p.image.startsWith(ip) ? p.image.slice(ip.length) : p.image) : '',
     p.url?.startsWith('https://') ? (o && p.url.startsWith(o + '/') ? p.url.slice(o.length) : p.url) : '',
     (p.checkedAt ?? s.fetchedAt).slice(0, 16),
   ]
-  const c: Shop = { r: s.retailerId, at: s.fetchedAt, o, i: [] }
-  const r: Shop = { r: s.retailerId, at: s.fetchedAt, o, i: [] }
+  const c: Shop = { r: s.retailerId, at: s.fetchedAt, o, ...(ip ? { p: ip } : {}), i: [] }
+  const r: Shop = { r: s.retailerId, at: s.fetchedAt, o, ...(ip ? { p: ip } : {}), i: [] }
   const mine = new Set<string>()
   for (const p of s.prices) {
     if (isCore(p, s.retailerId)) { c.i.push(pack(p)); mine.add(p.ean) } else r.i.push(pack(p))

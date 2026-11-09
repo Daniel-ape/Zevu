@@ -10,7 +10,7 @@ import { parseQuantity } from './openFoodFacts'
 
 // [ean, priceCents, name, brand, image, path-or-url, checkedAt]
 type Item = [string, number, string, string, string, string, string]
-interface Bundle { builtAt: string; shops: { r: string; at: string; o: string; i: Item[] }[] }
+interface Bundle { builtAt: string; shops: { r: string; at: string; o: string; p?: string; i: Item[] }[] }
 type History = Record<string, Record<string, [string, number][]>>
 
 export interface ShopData { products: Product[]; observations: PriceObservation[]; images: [string, string][] }
@@ -23,7 +23,9 @@ export async function loadShopData(part: 'core' | 'rest'): Promise<ShopData> {
   const out: ShopData = { products: [], observations: [], images: [] }
   for (const s of bundle?.shops ?? []) {
     const source: PriceSource = s.r === 'tokmanni' ? 'tokmanni' : 'shop'
-    for (const [ean, cents, name, brand, image, link, checked] of s.i) {
+    for (const [ean, cents, name, brand, pic, link, checked] of s.i) {
+      // pictures are stored without the start the shop's pictures share (s.p)
+      const image = pic && !pic.startsWith('http') ? (s.p ?? '') + pic : pic
       const id = `off:${ean}`
       const url = link ? (link.startsWith('/') ? s.o + link : link) : undefined
       out.observations.push({ productId: id, retailerId: s.r, priceCents: cents, observedAt: checked.length === 16 ? checked + ':00.000Z' : checked, source, url })
