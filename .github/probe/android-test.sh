@@ -5,6 +5,10 @@ set -x
 mkdir -p out
 adb install -r hintaopas.apk
 adb logcat -c
+adb shell pm grant fi.hintaopas.app android.permission.ACCESS_FINE_LOCATION || true
+adb shell pm grant fi.hintaopas.app android.permission.ACCESS_COARSE_LOCATION || true
+adb shell pm grant fi.hintaopas.app android.permission.CAMERA || true
+adb shell pm grant fi.hintaopas.app android.permission.POST_NOTIFICATIONS || true
 adb shell am start -W -n fi.hintaopas.app/.MainActivity
 sleep 20
 adb exec-out screencap -p > out/01-start.png
