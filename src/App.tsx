@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Welcome } from './screens/Welcome'
 import { onSession, startAutoSync } from './data/account'
 import { StoreProvider, useStore } from './data/store'
@@ -6,10 +6,17 @@ import type { CategoryId } from './domain/types'
 import { NavCtx, type Nav, type Tab } from './nav'
 import { Bag, Home as HomeIcon, List, Paper, Scan as ScanIcon } from './ui/icons'
 import { Home } from './screens/Home'
-import { SearchScreen } from './screens/SearchScreen'
-import { ProductScreen } from './screens/ProductScreen'
-import { Lists } from './screens/Lists'
-import { Scan } from './screens/Scan'
+// Pages not on Home load separately, so the app starts with less code to read;
+// they are fetched right after the start so switching pages stays instant.
+const loadSearch = () => import('./screens/SearchScreen')
+const loadProduct = () => import('./screens/ProductScreen')
+const loadLists = () => import('./screens/Lists')
+const loadScan = () => import('./screens/Scan')
+const SearchScreen = lazy(() => loadSearch().then((m) => ({ default: m.SearchScreen })))
+const ProductScreen = lazy(() => loadProduct().then((m) => ({ default: m.ProductScreen })))
+const Lists = lazy(() => loadLists().then((m) => ({ default: m.Lists })))
+const Scan = lazy(() => loadScan().then((m) => ({ default: m.Scan })))
+if (typeof window !== 'undefined') window.setTimeout(() => { loadSearch(); loadProduct(); loadLists(); loadScan() }, 1800)
 import { Profile } from './screens/Profile'
 import { Leaflets } from './screens/Leaflets'
 import { Coupons } from './screens/Coupons'
@@ -166,7 +173,7 @@ function Shell() {
     <NavCtx.Provider value={nav}>
       <div className="shell" data-motion={motion.current}>
         {!welcomed && <Welcome onDone={finishWelcome} />}
-        {screen}
+        <Suspense fallback={<div className="screen" />}>{screen}</Suspense>
         <WatchToast />
         {!nativeDock && <nav className="dock" aria-label="Main">
           {barGlass.svg}{scanGlass.svg}
