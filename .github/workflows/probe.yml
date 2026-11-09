@@ -7,23 +7,22 @@ jobs:
       - run: |
           set +e
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
-          for site in www.hongkong.fi www.proshop.fi www.datatronic.fi www.normal.fi www.foodie.fi www.kauppahalli24.fi www.ruokaboksi.fi www.xxl.fi www.intersport.fi www.stadium.fi www.alko.fi www.musti.fi www.adlibris.com www.ikea.com www.jysk.fi www.sotka.fi www.hobbyhall.fi www.cdon.fi www.suomalainen.com www.mekonomen.fi www.instru.fi www.tokmanni.fi www.alibaba.com www.lidl.fi www.k-ruoka.fi www.s-kaupat.fi www.gigantti.fi www.prisma.fi; do
-            code=$(curl -s -o r.txt -w '%{http_code}' -A "$UA" --max-time 20 "https://$site/robots.txt")
-            dis=$(grep -ciE "^disallow: /\s*$" r.txt)
-            sm=$(grep -iE "^sitemap:" r.txt | head -2 | tr '\n' ' ')
-            echo "SITE $site robots=$code disallowAll=$dis $sm"
-          done
-          prod() { # site sitemap-url product-url-regex
+          one() { # name sitemap grep-regex
             echo "== $1"
-            curl -sL -A "$UA" --max-time 30 "$2" -o s.xml; echo "sitemap $(wc -c < s.xml) bytes, locs $(grep -o '<loc>' s.xml | wc -l)"; grep -o '<loc>[^<]*</loc>' s.xml | head -4
-            U=$(grep -o '<loc>[^<]*</loc>' s.xml | sed 's/<[^>]*>//g' | grep -E "$3" | head -1)
-            if [ -z "$U" ]; then sub=$(grep -o '<loc>[^<]*</loc>' s.xml | sed 's/<[^>]*>//g' | grep -iE 'product|tuote' | head -1); echo "sub $sub"; [ -n "$sub" ] && curl -sL -A "$UA" --max-time 30 "$sub" | gunzip -f 2>/dev/null > s2.xml || curl -sL -A "$UA" --max-time 30 "$sub" > s2.xml; echo "sub locs $(grep -o '<loc>' s2.xml | wc -l)"; U=$(grep -o '<loc>[^<]*</loc>' s2.xml | sed 's/<[^>]*>//g' | grep -E "$3" | head -1); fi
+            curl -sL -A "$UA" --max-time 60 "$2" -o s.xml; file s.xml | grep -q gzip && { mv s.xml s.gz; gunzip -c s.gz > s.xml; }
+            echo "locs $(grep -o '<loc>' s.xml | wc -l)"; grep -o '<loc>[^<]*</loc>' s.xml | sed 's/<[^>]*>//g' > locs.txt; head -3 locs.txt
+            U=$(grep -E "$3" locs.txt | sed -n '50p'); [ -z "$U" ] && U=$(grep -E "$3" locs.txt | head -1)
             echo "product $U"
-            [ -n "$U" ] && curl -sL -A "$UA" --max-time 30 "$U" -o p.html && echo "page $(wc -c < p.html) ld=$(grep -c 'application/ld+json' p.html)" && grep -o -E '"(gtin13|gtin|gtin8|ean|sku|price|priceCurrency)" *: *"?[^,"}]{1,20}' p.html | head -8
+            [ -n "$U" ] && curl -sL -A "$UA" --max-time 30 "$U" -o p.html && echo "page $(wc -c < p.html) ld=$(grep -c 'application/ld+json' p.html)" && grep -o -E '"(gtin13|gtin|gtin8|gtin14|ean|sku|price)" *: *"?[^,"}]{1,20}' p.html | sort -u | head -8; grep -o -iE 'itemprop="gtin13"[^>]{0,60}|ean[^a-z][^<]{0,30}[0-9]{13}' p.html | head -3
           }
-          prod biltema https://www.biltema.fi/globalassets/sitemaps/sitemapindex-fi.xml '/[0-9]{6,}$|-2000[0-9]+'
-          prod clasohlson https://www.clasohlson.com/sitemap.xml '/fi/.*/p/'
-          prod motonet https://www.motonet.fi/sitemap.xml '/tuote/'
-          prod puuilo https://www.puuilo.fi/media/sitemap/fi_sitemap.xml '\.html$'
-          prod byggmax https://www.byggmax.fi/pub/media/Sitemap_fi_fi_product.xml 'byggmax.fi/'
+          one biltema https://www.biltema.se/globalassets/sitemaps/sitemap-fi-1.xml 'biltema'
+          one clasohlson https://www.clasohlson.com/sitemap/sitemap_product_fi.xml '/fi/'
+          one motonet https://www.motonet.fi/sitemap-0.xml 'tuote|/fi/'
+          one puuilo https://www.puuilo.fi/media/sitemap/fi_sitemap.xml 'puuilo.fi/[a-z]'
+          one byggmax https://www.byggmax.fi/pub/media/Sitemap_fi_fi_product.xml '/[0-9]{5,}-|byggmax.fi/[a-z0-9-]+$'
+          one intersport https://www.intersport.fi/fi/sitemap.xml 'intersport'
+          one sotka https://www.sotka.fi/sitemap/index.xml 'sotka'
+          one mekonomen https://www.mekonomen.fi/sitemap_index.xml 'mekonomen'
+          one suomalainen https://www.suomalainen.com/sitemap.xml 'suomalainen'
+          curl -s -A "$UA" https://www.xxl.fi/robots.txt | head -30
           true
