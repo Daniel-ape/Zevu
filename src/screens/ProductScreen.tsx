@@ -188,7 +188,7 @@ export function ProductScreen({ id }: { id: string }) {
           <a href={`https://world.openfoodfacts.org/product/${product.ean}`} target="_blank" rel="noreferrer" onClick={inAppLink(`https://world.openfoodfacts.org/product/${product.ean}`)} style={{ color: 'var(--text-3)' }}>{t('product.info')}</a>
         </p>
       )}
-      {adding && <PriceSheet product={product} store={adding.store} startWithPhoto={!!adding.store} onClose={() => setAdding(false)} />}
+      {adding && <PriceSheet product={product} store={adding.store} onClose={() => setAdding(false)} />}
     </div>
   )
 }

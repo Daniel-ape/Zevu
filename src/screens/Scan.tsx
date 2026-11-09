@@ -128,7 +128,7 @@ export function Scan() {
         />
       )}
       {receipt && <ReceiptSheet onClose={() => setReceipt(false)} />}
-      {shelf && <PriceSheet startWithPhoto onClose={() => setShelf(false)} />}
+      {shelf && <PriceSheet onClose={() => setShelf(false)} />}
     </div>
   )
 }

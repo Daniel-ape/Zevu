@@ -1730,3 +1730,6 @@ html, body { overscroll-behavior-x: none; }
 .camera video.shown { opacity: 1; }
 /* Products: rows below the screen are not laid out or painted until scrolled to */
 .search-row { content-visibility: auto; contain-intrinsic-size: auto 74px; }
+/* No zoom from double taps or from focusing a small text field (iOS) */
+html, body { touch-action: manipulation; }
+input, textarea, select { font-size: max(16px, 1em); }
