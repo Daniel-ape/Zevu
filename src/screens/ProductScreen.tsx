@@ -4,7 +4,7 @@ import { cheapest, compare, dailyByStore, dailyLowest, euro, priceFacts, sizeLab
 import { LOCALE } from '../i18n'
 import { EVERYDAY } from '../domain/categories'
 import { useNav } from '../nav'
-import { Back, Bell, Check, Plus } from '../ui/icons'
+import { Back, Check, Plus } from '../ui/icons'
 import { PriceMeta, RankBadge, RetailerMark, Tile, TrendTag } from '../ui/bits'
 import { PriceChart } from '../ui/PriceChart'
 import { StoreChart } from '../ui/StoreChart'
@@ -50,7 +50,6 @@ export function ProductScreen({ id }: { id: string }) {
     ? retailers.filter((r) => GROCERY.includes(r.id) && !rows.some((x) => x.retailer.id === r.id))
     : []
   const fresh = rows.filter((r) => r.freshness === 'fresh')
-  const spread = best && fresh.length > 1 ? fresh[fresh.length - 1].current.priceCents - best.current.priceCents : 0
   const inList = list.items.find((i) => i.productId === product.id)
   const isWatched = watched.some((w) => w.productId === product.id)
 
@@ -58,25 +57,35 @@ export function ProductScreen({ id }: { id: string }) {
     <div className="screen push">
       <div className="topbar center sticky">
         <button className="icon-btn" onClick={nav.back} aria-label={t('product.back')}><Back /></button>
-        <span style={{ flex: 1 }} />
-        <button
-          className={'icon-btn' + (isWatched ? ' on' : '')}
-          onClick={() => toggleWatch(product.id, best?.current.priceCents ?? null)}
-          aria-label={t(isWatched ? 'watch.on' : 'watch.off')}
-          aria-pressed={isWatched}
-          title={t(isWatched ? 'watch.on' : 'watch.off')}
-        >
-          <Bell />
-        </button>
       </div>
 
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-        <Tile product={product} large />
-        <div style={{ minWidth: 0 }}>
-          <div className="muted small">{brandLabel(product.brand)}</div>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginTop: 2 }}>{product.name}</div>
-          <div className="muted small" style={{ marginTop: 4 }}>{sizeLabel(product)}</div>
+      {/* Big picture, the name, the best price large, and the actions under it */}
+      <div className="pd-hero"><Tile product={product} large /></div>
+      <h1 className="pd-name">{product.name}</h1>
+      <div className="pd-brand">{[brandLabel(product.brand), sizeLabel(product)].filter(Boolean).join(' · ')}</div>
+      {best && (
+        <div className="pd-price-block">
+          <div className="pd-price">{euro(best.current.priceCents)}</div>
+          <div className="pd-meta">
+            {[best.retailer.name, best.unitPriceCents != null ? `${euro(best.unitPriceCents)}${unitLabel(product)}` : ''].filter(Boolean).join(' · ')}
+          </div>
+          {facts?.droppedFrom && facts.now === best.current.priceCents && (
+            <div className="price-flags"><span className="flag down">{t('price.droppedFrom', { amount: euro(facts.droppedFrom) })}</span></div>
+          )}
         </div>
+      )}
+      <div className="pd-actions">
+        {inList ? (
+          <button className="pd-add in" onClick={() => nav.go('lists')} aria-label={t('product.inList', { n: inList.quantity })}>
+            <Check size={22} /><span>{inList.quantity}</span>
+          </button>
+        ) : (
+          <button className="pd-add" onClick={() => setQuantity(product.id, 1)} aria-label={t('product.add')}><Plus size={26} /></button>
+        )}
+        <button className={'pd-act' + (isWatched ? ' on' : '')} onClick={() => toggleWatch(product.id, best?.current.priceCents ?? null)}
+          aria-label={t(isWatched ? 'watch.on' : 'watch.off')} aria-pressed={isWatched} title={t(isWatched ? 'watch.on' : 'watch.off')}>
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z" fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" /></svg>
+        </button>
       </div>
 
       {rows.length === 0 ? (
@@ -86,26 +95,6 @@ export function ProductScreen({ id }: { id: string }) {
         </div>
       ) : (
         <>
-      {best && (
-        <div className="best-card section" style={{ marginTop: 20 }}>
-          <div className="best-label">{t('product.cheapestAt')}</div>
-          <div className="best-store">{best.retailer.name}</div>
-          <div className="best-price">{euro(best.current.priceCents)}</div>
-          {facts && facts.now === best.current.priceCents && (facts.droppedFrom || facts.lowest) && (
-            <div className="price-flags">
-              {facts.droppedFrom && <span className="flag down">{t('price.droppedFrom', { amount: euro(facts.droppedFrom) })}</span>}
-              {facts.lowest && <span className="flag">{t('price.lowestDays', { n: facts.days })}</span>}
-            </div>
-          )}
-          <div className="best-meta">
-            {[
-              best.unitPriceCents != null ? `${euro(best.unitPriceCents)}${unitLabel(product)}` : '',
-              fresh.length > 1 ? t('product.comparedN', { n: fresh.length }) : t('product.onlyOne'),
-              spread > 0 ? t('product.saveVs', { amount: euro(spread) }) : '',
-            ].filter(Boolean).join(' · ')}
-          </div>
-        </div>
-      )}
 
       {alternatives.length > 0 && (
         <div className="section">
@@ -200,19 +189,6 @@ export function ProductScreen({ id }: { id: string }) {
         </div>
       )}
 
-
-      <div className="section actions-row">
-        {inList ? (
-          <button className="btn ghost" onClick={() => nav.go('lists')}>
-            <Check /> {t('product.inList', { n: inList.quantity })}
-          </button>
-        ) : (
-          <button className="btn primary" onClick={() => setQuantity(product.id, 1)}>
-            <Plus /> {t('product.add')}
-          </button>
-        )}
-        <button className="btn ghost" onClick={() => setAdding({})}>{t('product.addPrice')}</button>
-      </div>
 
       {product.infoSource === 'open-food-facts' && (
         <p className="tiny" style={{ marginTop: 20, textAlign: 'center' }}>
