@@ -66,7 +66,7 @@ const en = {
   'rc.check': 'Check the items. Text read from photos can have mistakes.', 'rc.needStore': 'Choose the store to save.',
 
   // tabs
-  'tab.home': 'Home', 'tab.search': 'Products', 'tab.list': 'List', 'tab.you': 'You', 'tab.scan': 'Scan barcode',
+  'tab.home': 'Home', 'tab.search': 'Products', 'tab.list': 'List', 'tab.you': 'You', 'tab.scan': 'Scan barcode', 'tab.scanShort': 'Scan',
   sample: 'Sample prices',
   // home
   'home.cheapestAt': '{list} is cheapest at', 'home.saveUpTo': 'Save up to {amount}',
@@ -158,7 +158,7 @@ const fi: Dict = {
   'rc.ocrError': 'Kuvaa ei voitu lukea. Yritä paremmassa valossa tai liitä teksti.',
   'rc.check': 'Tarkista tuotteet. Kuvasta luetussa tekstissä voi olla virheitä.', 'rc.needStore': 'Valitse kauppa tallentaaksesi.',
 
-  'tab.home': 'Koti', 'tab.search': 'Tuotteet', 'tab.list': 'Lista', 'tab.you': 'Sinä', 'tab.scan': 'Skannaa viivakoodi',
+  'tab.home': 'Koti', 'tab.search': 'Tuotteet', 'tab.list': 'Lista', 'tab.you': 'Sinä', 'tab.scan': 'Skannaa viivakoodi', 'tab.scanShort': 'Skannaa',
   sample: 'Esimerkkihinnat',
   'home.cheapestAt': '{list} on halvin kaupassa', 'home.saveUpTo': 'Säästä jopa {amount}',
   'home.drops': 'Hinnanlaskut', 'home.last4w': '4 viikkoa', 'home.recent': 'Viimeksi katsotut',
@@ -239,7 +239,7 @@ const sv: Dict = {
   'rc.ocrError': 'Kunde inte läsa fotot. Försök igen i bättre ljus, eller klistra in texten.',
   'rc.check': 'Kontrollera varorna. Text som läses från foton kan innehålla fel.', 'rc.needStore': 'Välj butik för att spara.',
 
-  'tab.home': 'Hem', 'tab.search': 'Produkter', 'tab.list': 'Lista', 'tab.you': 'Du', 'tab.scan': 'Skanna streckkod',
+  'tab.home': 'Hem', 'tab.search': 'Produkter', 'tab.list': 'Lista', 'tab.you': 'Du', 'tab.scan': 'Skanna streckkod', 'tab.scanShort': 'Skanna',
   sample: 'Exempelpriser',
   'home.cheapestAt': '{list} är billigast hos', 'home.saveUpTo': 'Spara upp till {amount}',
   'home.drops': 'Prissänkningar', 'home.last4w': 'senaste 4 veckorna', 'home.recent': 'Senast visade',

@@ -1,5 +1,5 @@
 # Publishes the web app to GitHub Pages on every push to main.
-# The front page is the ZEVU homepage (site/); the web app is at /app/.
+# The website is the ZEVU homepage (site/) plus the apps' daily data.
 name: Web app (GitHub Pages)
 on:
   push:
@@ -19,10 +19,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Google sign-in (Supabase); without these secrets the app simply has no sign-in
-    env:
-      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,17 +28,14 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx tsx scripts/build-price-bundles.ts
-      # The web app goes to /app/; the ZEVU homepage (site/) is the front page.
-      # The daily data stays at the top so the installed app's live address keeps working.
-      - run: npx vite build --outDir dist-app
-        env:
-          VITE_DATA_BASE: ../
-      - name: Put the homepage, the app and the data together
+      # The website is the ZEVU homepage (site/). There is no web version of the
+      # app; the daily data stays at the top because the installed apps read
+      # their live prices from there.
+      - name: Put the homepage and the data together
         run: |
           mkdir out
           cp -r site/. out/
-          mv dist-app out/app
-          for d in prices products logos; do mv out/app/$d out/$d; done
+          cp -r public/prices public/products public/logos out/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

@@ -66,6 +66,8 @@ function Shell() {
   const scanGlass = useLiquidGlass('lg-scan', scanRef, { bezel: 14, scale: 22 })
   // iPhone app: Apple's own Liquid Glass tab bar (native). Falls back to the web dock if it fails.
   const [nativeDock, setNativeDock] = useState(wantsNativeDock)
+  // Android: a plain menu bar along the bottom instead of the floating glass dock.
+  const basicDock = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
   const [stack, setStack] = useState<string[]>([]) // product ids opened on top of the tab
   const scrolls = useRef(new Map<string, number>())
   const keyRef = useRef<string>('home')
@@ -190,7 +192,14 @@ function Shell() {
         {!welcomed && <Welcome onDone={finishWelcome} />}
         {screen}
         <WatchToast />
-        {!nativeDock && <nav className="dock" aria-label="Main">
+        {!nativeDock && basicDock && <nav className="dock basic" aria-label="Main">
+          {tabBtn('home', t('tab.home'), <HomeIcon />)}
+          {tabBtn('search', t('tab.search'), <Bag />)}
+          {tabBtn('scan', t('tab.scanShort'), <ScanIcon />)}
+          {tabBtn('lists', t('tab.list'), <List />)}
+          {tabBtn('leaflets', t('tab.leaflets'), <Paper />, newLeaflets && tab !== 'leaflets')}
+        </nav>}
+        {!nativeDock && !basicDock && <nav className="dock" aria-label="Main">
           {barGlass.svg}{scanGlass.svg}
           <div ref={barRef} className={'dock-bar glass' + (barGlass.active ? ' refract' : '')} style={barGlass.style}>
             {tabBtn('home', t('tab.home'), <HomeIcon />)}
