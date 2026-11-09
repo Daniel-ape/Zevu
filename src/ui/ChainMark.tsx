@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { CARD_CHAINS } from '../data/cards'
+import { dataUrl } from '../data/dataUrl'
 
 let logoIndex: Promise<Record<string, string>> | null = null
 const loadLogos = () =>
-  (logoIndex ??= fetch(new URL('logos/index.json', location.href).href).then((r) => (r.ok ? r.json() : {})).catch(() => ({})) as Promise<Record<string, string>>)
+  (logoIndex ??= fetch(dataUrl('logos/index.json')).then((r) => (r.ok ? r.json() : {})).catch(() => ({})) as Promise<Record<string, string>>)
 
 /** URL of a chain's logo, or null while unknown / when there is none. */
 export function useLogo(chain: string): string | null {
   const [logo, setLogo] = useState<string | null>(null)
-  useEffect(() => { loadLogos().then((i) => setLogo(i[chain] ? new URL('logos/' + i[chain], location.href).href : null)) }, [chain])
+  useEffect(() => { loadLogos().then((i) => setLogo(i[chain] ? dataUrl('logos/' + i[chain]) : null)) }, [chain])
   return logo
 }
 
@@ -18,7 +19,7 @@ export function ChainMark({ chain, label, inline }: { chain: string; label?: str
   const [logo, setLogo] = useState<string | null>(null)
   const [bad, setBad] = useState(false)
   const [wide, setWide] = useState(false)
-  useEffect(() => { loadLogos().then((i) => setLogo(i[chain] ? new URL('logos/' + i[chain], location.href).href : null)) }, [chain])
+  useEffect(() => { loadLogos().then((i) => setLogo(i[chain] ? dataUrl('logos/' + i[chain]) : null)) }, [chain])
   const name = label || (c?.name || chain).replace(/ Plus$/, '')
   if (logo && !bad)
     return (

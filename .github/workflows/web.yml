@@ -1,5 +1,5 @@
 # Publishes the web app to GitHub Pages on every push to main.
-# On iPhone: open the address in Safari → Share → Add to Home Screen.
+# The front page is the ZEVU homepage (site/); the web app is at /app/.
 name: Web app (GitHub Pages)
 on:
   push:
@@ -32,10 +32,20 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx tsx scripts/build-price-bundles.ts
-      - run: npx vite build
+      # The web app goes to /app/; the ZEVU homepage (site/) is the front page.
+      # The daily data stays at the top so the installed app's live address keeps working.
+      - run: npx vite build --outDir dist-app
+        env:
+          VITE_DATA_BASE: ../
+      - name: Put the homepage, the app and the data together
+        run: |
+          mkdir out
+          cp -r site/. out/
+          mv dist-app out/app
+          for d in prices products logos; do mv out/app/$d out/$d; done
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: out
   deploy:
     needs: build
     runs-on: ubuntu-latest

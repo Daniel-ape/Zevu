@@ -2,8 +2,10 @@
 // App files, product data and the text-recognition engine are cached after
 // first use; pages and prices are fetched fresh when online.
 // Bump when caching rules change: the old cache is then deleted.
-const CACHE = 'hintaopas-v2'
-const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './products/fi.json']
+const CACHE = 'hintaopas-v3'
+// On the website the app lives in /app/ and the shared data one folder up.
+const DATA = self.location.pathname.includes('/app/') ? '../' : './'
+const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', DATA + 'products/fi.json']
 
 // On install, save the app shell and the files index.html loads, so the app
 // opens offline even if the first visit happened before this worker took over.

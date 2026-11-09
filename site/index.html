@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ZEVU – Compare More. Spend Less.</title>
+<meta name="description" content="ZEVU jämför matpriser i Finland: S-gruppen, K-gruppen, Lidl, Tokmanni och fler. Veckans reklamblad, medlemserbjudanden och prisbevakning i en app." />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" href="img/icon.png" />
+<link rel="apple-touch-icon" href="img/icon.png" />
+<meta property="og:title" content="ZEVU – Compare More. Spend Less." />
+<meta property="og:description" content="Jämför matpriser i Finland och spara på varje köp." />
+<meta property="og:image" content="img/home.webp" />
+<script>
+  // Old links to the app (#search, #lists …) and home-screen shortcuts made
+  // before the homepage existed go straight to the app.
+  (function () {
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone
+    if (standalone || /^#(home|search|lists|leaflets|profile|coupons|scan)\b/.test(location.hash) || /[?#&](code|access_token)=/.test(location.href)) location.replace('app/' + location.search + location.hash)
+  })()
+</script>
+<style>
+  :root { --g: #0a7a44; --g2: #0e9a57; --ink: #0b1a13; --ink2: #4b5a52; --ink3: #8a978f; --line: rgba(10, 40, 25, 0.08); --bg: #f6f8f5; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; color: var(--ink); background: #fff; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* top bar */
+  .nav { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.78); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--line); }
+  .nav .wrap { display: flex; align-items: center; height: 60px; gap: 18px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.12em; font-size: 17px; }
+  .brand svg { width: 28px; height: 28px; border-radius: 8px; background: var(--g); padding: 6px; }
+  .nav .sp { flex: 1; }
+  .lang { display: flex; gap: 2px; background: #f1f3f0; border-radius: 999px; padding: 3px; }
+  .lang button { border: 0; background: none; font: inherit; font-size: 13px; font-weight: 700; color: var(--ink3); padding: 5px 10px; border-radius: 999px; cursor: pointer; }
+  .lang button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 22px; border-radius: 999px; font-weight: 700; font-size: 16px; transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s; }
+  .btn:active { transform: scale(0.97); }
+  .btn.pri { background: var(--g); color: #fff; }
+  .btn.pri:hover { background: #086638; }
+  .btn.sec { background: #eef3ee; color: var(--ink); }
+  .btn.sm { height: 38px; padding: 0 16px; font-size: 14px; }
+
+  /* hero */
+  .hero { position: relative; overflow: hidden; background: radial-gradient(80% 60% at 15% 0%, #e3f6e6 0%, transparent 60%), radial-gradient(70% 60% at 100% 20%, #effae0 0%, transparent 60%), #fff; }
+  .hero .top { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; padding-top: 72px; padding-bottom: 40px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--g); background: #e6f4ea; padding: 6px 12px; border-radius: 999px; }
+  h1 { font-size: clamp(42px, 6.4vw, 76px); line-height: 1.02; letter-spacing: -0.035em; margin: 18px 0 18px; font-weight: 800; }
+  h1 em { font-style: normal; color: var(--g); }
+  .lead { font-size: clamp(18px, 2vw, 21px); line-height: 1.5; color: var(--ink2); max-width: 520px; margin: 0 0 30px; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .note { margin-top: 14px; font-size: 13.5px; color: var(--ink3); }
+  .phones { position: relative; height: 600px; }
+  .phone { position: absolute; width: 270px; aspect-ratio: 540 / 1170; border-radius: 42px; background: #0b0f0d; padding: 9px; box-shadow: 0 40px 80px -30px rgba(10, 60, 30, 0.35), 0 10px 30px -10px rgba(0, 0, 0, 0.18); }
+  .phone img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 34px; }
+  .phone.a { right: 120px; top: 20px; z-index: 2; }
+  .phone.b { right: -20px; top: 90px; transform: rotate(5deg) scale(0.92); opacity: 0.96; }
+
+  /* logos strip */
+  .chains { padding: 30px 0 10px; text-align: center; color: var(--ink3); font-size: 14px; font-weight: 600; }
+  .chains .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-top: 12px; font-size: 17px; font-weight: 800; color: #9aa59f; letter-spacing: -0.01em; }
+
+  /* features */
+  section { padding: 90px 0; }
+  .sec-title { text-align: center; max-width: 720px; margin: 0 auto 56px; }
+  .sec-title h2 { font-size: clamp(32px, 4.4vw, 52px); line-height: 1.06; letter-spacing: -0.03em; margin: 0 0 14px; }
+  .sec-title p { font-size: 19px; color: var(--ink2); line-height: 1.5; margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { background: var(--bg); border-radius: 28px; padding: 30px 28px; }
+  .ico { width: 48px; height: 48px; border-radius: 14px; background: #fff; display: grid; place-items: center; color: var(--g); margin-bottom: 18px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); }
+  .card h3 { font-size: 20px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .card p { margin: 0; color: var(--ink2); line-height: 1.55; font-size: 15.5px; }
+
+  /* showcase rows */
+  .show { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; padding: 50px 0; }
+  .show.rev .txt { order: 2; }
+  .show .txt h2 { font-size: clamp(30px, 3.6vw, 44px); letter-spacing: -0.03em; line-height: 1.08; margin: 0 0 16px; }
+  .show .txt p { font-size: 18px; color: var(--ink2); line-height: 1.6; margin: 0 0 14px; }
+  .show .pic { display: flex; justify-content: center; background: linear-gradient(160deg, #eaf7ec, #f4f9ec); border-radius: 36px; padding: 48px 0; }
+  .show .pic .phone { position: relative; width: 250px; }
+  .check { list-style: none; padding: 0; margin: 8px 0 0; }
+  .check li { position: relative; padding-left: 30px; margin: 10px 0; font-size: 16.5px; color: var(--ink); }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--g) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
+
+  /* closing */
+  .final { background: var(--g); color: #fff; border-radius: 40px; padding: 70px 30px; text-align: center; margin: 40px 0 90px; position: relative; overflow: hidden; }
+  .final h2 { font-size: clamp(32px, 4.6vw, 54px); letter-spacing: -0.03em; margin: 0 0 14px; }
+  .final p { font-size: 19px; opacity: 0.85; margin: 0 0 28px; }
+  .final .btn.pri { background: #fff; color: var(--g); }
+  .final .btn.sec { background: rgba(255, 255, 255, 0.14); color: #fff; }
+  .final .ctas { justify-content: center; }
+  footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--ink3); font-size: 13.5px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; }
+  footer .sp { flex: 1; }
+
+  /* reveal on scroll */
+  .rv { opacity: 0; transform: translateY(24px); transition: opacity 0.8s cubic-bezier(0.32, 0.72, 0, 1), transform 0.8s cubic-bezier(0.32, 0.72, 0, 1); }
+  .rv.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
+
+  @media (max-width: 860px) {
+    .hero .top { grid-template-columns: 1fr; padding-top: 44px; text-align: center; }
+    .lead { margin-left: auto; margin-right: auto; }
+    .ctas { justify-content: center; }
+    .phones { height: 520px; }
+    .phone.a { left: 50%; right: auto; margin-left: -150px; width: 230px; }
+    .phone.b { left: 50%; right: auto; margin-left: 10px; width: 210px; top: 60px; }
+    .grid { grid-template-columns: 1fr; }
+    .show, .show.rev { grid-template-columns: 1fr; gap: 30px; }
+    .show.rev .txt { order: 0; }
+    section { padding: 60px 0; }
+    .nav .hide-m { display: none; }
+  }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#"><svg viewBox="282 292 460 440" aria-hidden="true"><path d="M330 340 H694 L330 684 H694" fill="none" stroke="#fff" stroke-width="96" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="10"/></svg>ZEVU</a>
+    <span class="sp"></span>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-l="sv">SV</button><button data-l="fi">FI</button><button data-l="en">EN</button>
+    </div>
+    <a class="btn pri sm hide-m" href="app/" data-t="open">Öppna appen</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap top">
+    <div>
+      <span class="eyebrow rv" data-t="eyebrow">Gratis · Gjord för Finland</span>
+      <h1 class="rv" data-t="h1" data-html>Jämför mer.<br><em>Betala mindre.</em></h1>
+      <p class="lead rv" data-t="lead">ZEVU jämför matpriserna i S-gruppen, K-gruppen, Lidl, Tokmanni och fler, så du ser direkt var din handling blir billigast.</p>
+      <div class="ctas rv">
+        <a class="btn pri" href="app/" data-t="try">Prova webbversionen</a>
+        <a class="btn sec" href="#features" data-t="more">Se vad den kan</a>
+      </div>
+      <div class="note rv" data-t="soon">iPhone-appen kommer snart till App Store.</div>
+    </div>
+    <div class="phones rv">
+      <div class="phone a"><img src="img/home.webp" alt="" /></div>
+      <div class="phone b"><img src="img/search.webp" alt="" /></div>
+    </div>
+  </div>
+  <div class="chains wrap rv">
+    <span data-t="chains">Priser från</span>
+    <div class="row"><span>Prisma</span><span>S-market</span><span>K-Citymarket</span><span>K-Supermarket</span><span>Lidl</span><span>Tokmanni</span><span>Halpa-Halli</span><span>Minimani</span></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-title rv">
+      <h2 data-t="f.title">Allt för en billigare handling</h2>
+      <p data-t="f.lead">Ett ställe för priser, erbjudanden och reklamblad, i stället för fem olika appar.</p>
+    </div>
+    <div class="grid">
+      <div class="card rv"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></div><h3 data-t="c1.t">Jämför priser</h3><p data-t="c1.p">Se samma vara i alla butiker sida vid sida, med kilo- och literpris.</p></div>
+      <div class="card rv"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><path d="M9 11h6M9 15h6"/></svg></div><h3 data-t="c2.t">Veckans reklamblad</h3><p data-t="c2.p">Bläddra i alla butikers blad på ett ställe och spara dina favoriter.</p></div>
+      <div class="card rv"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 12l9-9 9 9-9 9z"/><circle cx="12" cy="12" r="2"/></svg></div><h3 data-t="c3.t">Medlemserbjudanden</h3><p data-t="c3.p">Butikernas medlemspriser samlade, så du inte missar en rabatt.</p></div>
+      <div class="card rv"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z"/></svg></div><h3 data-t="c4.t">Prisbevakning</h3><p data-t="c4.p">Få en notis när en vara du gillar blir billigare.</p></div>
+      <div class="card rv"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 8v8M11 8v8M14 8v8M17 8v8"/></svg></div><h3 data-t="c5.t">Skanna och spara</h3><p data-t="c5.p">Skanna streckkoder, hyllkanter och kvitton och se hur mycket du sparat.</p></div>
+      <div class="card rv"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg></div><h3 data-t="c6.t">Smart inköpslista</h3><p data-t="c6.p">ZEVU räknar ut i vilken butik hela listan blir billigast.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="show rv">
+    <div class="txt">
+      <h2 data-t="s1.t">Hitta det billigaste på sekunder</h2>
+      <p data-t="s1.p">Sök bland tusentals varor och se direkt vilken butik som har bästa priset just nu.</p>
+      <ul class="check"><li data-t="s1.a">Priser från flera kedjor på en gång</li><li data-t="s1.b">Billigare alternativ från andra märken</li><li data-t="s1.c">Prishistorik för varje vara</li></ul>
+    </div>
+    <div class="pic"><div class="phone"><img src="img/product.webp" alt="" loading="lazy" /></div></div>
+  </div>
+  <div class="show rev rv">
+    <div class="txt">
+      <h2 data-t="s2.t">Alla reklamblad på ett ställe</h2>
+      <p data-t="s2.p">Veckans blad från Lidl, Tokmanni, K- och S-butikerna och fler. Gilla de du vill följa.</p>
+    </div>
+    <div class="pic"><div class="phone"><img src="img/leaflets.webp" alt="" loading="lazy" /></div></div>
+  </div>
+  <div class="show rv">
+    <div class="txt">
+      <h2 data-t="s3.t">Se hur mycket du sparar</h2>
+      <p data-t="s3.p">Skanna kvittot efter handlingen, så räknar ZEVU ut vad du sparat jämfört med andra butiker.</p>
+    </div>
+    <div class="pic"><div class="phone"><img src="img/savings.webp" alt="" loading="lazy" /></div></div>
+  </div>
+
+  <div class="final rv">
+    <h2 data-t="end.t">Börja spara redan i dag</h2>
+    <p data-t="end.p">Gratis, utan reklam och utan konto.</p>
+    <div class="ctas">
+      <a class="btn pri" href="app/" data-t="try">Prova webbversionen</a>
+      <a class="btn sec" href="#" data-t="ios">App Store · snart</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 ZEVU</span>
+    <span class="sp"></span>
+    <a href="app/" data-t="web">Webbversion</a>
+    <a href="https://github.com/Daniel-ape/hintaopas">GitHub</a>
+  </div>
+</footer>
+
+<script>
+  var T = {
+    fi: { open: 'Avaa sovellus', eyebrow: 'Ilmainen · Tehty Suomeen', h1: 'Vertaa enemmän.<br><em>Maksa vähemmän.</em>', lead: 'ZEVU vertaa ruokahintoja S-ryhmän, K-ryhmän, Lidlin, Tokmannin ja muiden kaupoissa, joten näet heti, missä ostoksesi ovat halvimmat.', try: 'Kokeile verkkoversiota', more: 'Katso mitä se osaa', soon: 'iPhone-sovellus tulossa pian App Storeen.', chains: 'Hinnat kaupoista', 'f.title': 'Kaikki edullisempaan ostokseen', 'f.lead': 'Hinnat, tarjoukset ja mainoslehdet yhdessä paikassa viiden eri sovelluksen sijaan.', 'c1.t': 'Vertaa hintoja', 'c1.p': 'Näe sama tuote kaikissa kaupoissa rinnakkain kilo- ja litrahintoineen.', 'c2.t': 'Viikon mainoslehdet', 'c2.p': 'Selaa kaikkien kauppojen lehtiä yhdessä paikassa ja tallenna suosikkisi.', 'c3.t': 'Jäsenedut', 'c3.p': 'Kauppojen jäsenhinnat yhdessä paikassa, ettet missaa yhtään alennusta.', 'c4.t': 'Hintavahti', 'c4.p': 'Saat ilmoituksen, kun suosikkituotteesi halpenee.', 'c5.t': 'Skannaa ja säästä', 'c5.p': 'Skannaa viivakoodit, hyllyhinnat ja kuitit ja näe paljonko säästit.', 'c6.t': 'Älykäs ostoslista', 'c6.p': 'ZEVU laskee, missä kaupassa koko lista on halvin.', 's1.t': 'Löydä halvin sekunneissa', 's1.p': 'Hae tuhansista tuotteista ja näe heti, missä kaupassa on paras hinta juuri nyt.', 's1.a': 'Hinnat useista ketjuista kerralla', 's1.b': 'Edullisemmat vaihtoehdot muilta merkeiltä', 's1.c': 'Hintahistoria jokaiselle tuotteelle', 's2.t': 'Kaikki mainoslehdet yhdessä paikassa', 's2.p': 'Viikon lehdet Lidliltä, Tokmannilta, K- ja S-kaupoista ja muilta. Tykkää niistä, joita haluat seurata.', 's3.t': 'Näe paljonko säästät', 's3.p': 'Skannaa kuitti ostosten jälkeen, niin ZEVU laskee säästösi muihin kauppoihin verrattuna.', 'end.t': 'Aloita säästäminen jo tänään', 'end.p': 'Ilmainen, ilman mainoksia ja ilman tiliä.', ios: 'App Store · pian', web: 'Verkkoversio' },
+    en: { open: 'Open the app', eyebrow: 'Free · Made for Finland', h1: 'Compare more.<br><em>Spend less.</em>', lead: 'ZEVU compares grocery prices across S Group, K Group, Lidl, Tokmanni and more, so you instantly see where your shopping is cheapest.', try: 'Try the web version', more: 'See what it does', soon: 'The iPhone app is coming soon to the App Store.', chains: 'Prices from', 'f.title': 'Everything for cheaper shopping', 'f.lead': 'Prices, offers and leaflets in one place instead of five different apps.', 'c1.t': 'Compare prices', 'c1.p': 'See the same product in every shop side by side, with price per kilo and litre.', 'c2.t': 'Weekly leaflets', 'c2.p': 'Browse every shop’s leaflet in one place and save your favourites.', 'c3.t': 'Member offers', 'c3.p': 'Every shop’s member prices together, so you never miss a discount.', 'c4.t': 'Price alerts', 'c4.p': 'Get a notification when something you like gets cheaper.', 'c5.t': 'Scan and save', 'c5.p': 'Scan barcodes, shelf labels and receipts and see how much you saved.', 'c6.t': 'Smart shopping list', 'c6.p': 'ZEVU works out which shop makes your whole list cheapest.', 's1.t': 'Find the cheapest in seconds', 's1.p': 'Search thousands of products and instantly see which shop has the best price right now.', 's1.a': 'Prices from several chains at once', 's1.b': 'Cheaper alternatives from other brands', 's1.c': 'Price history for every product', 's2.t': 'Every leaflet in one place', 's2.p': 'This week’s leaflets from Lidl, Tokmanni, K and S shops and more. Like the ones you want to follow.', 's3.t': 'See how much you save', 's3.p': 'Scan your receipt after shopping and ZEVU works out what you saved compared with other shops.', 'end.t': 'Start saving today', 'end.p': 'Free, no ads and no account needed.', ios: 'App Store · soon', web: 'Web version' }
+  }
+  var SV = {}
+  document.querySelectorAll('[data-t]').forEach(function (el) { SV[el.dataset.t] = el.innerHTML })
+  T.sv = SV
+  function setLang(l) {
+    var d = T[l] || SV
+    document.querySelectorAll('[data-t]').forEach(function (el) { var v = d[el.dataset.t]; if (v != null) el.innerHTML = v })
+    document.querySelectorAll('.lang button').forEach(function (b) { b.classList.toggle('on', b.dataset.l === l) })
+    document.documentElement.lang = l
+    try { localStorage.setItem('zevu:site-lang', l) } catch (e) {}
+  }
+  document.querySelectorAll('.lang button').forEach(function (b) { b.onclick = function () { setLang(b.dataset.l) } })
+  var start = 'sv'
+  try { start = localStorage.getItem('zevu:site-lang') || ((navigator.language || '').slice(0, 2) === 'fi' ? 'fi' : (navigator.language || '').slice(0, 2) === 'sv' ? 'sv' : 'en') } catch (e) {}
+  setLang(start)
+  // fade sections in as they come into view
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }) }, { rootMargin: '0px 0px -8% 0px' }) : null
+  document.querySelectorAll('.rv').forEach(function (el, i) { if (io) { el.style.transitionDelay = (el.closest('.hero') ? i * 60 : 0) + 'ms'; io.observe(el) } else el.classList.add('in') })
+</script>
+</body>
+</html>

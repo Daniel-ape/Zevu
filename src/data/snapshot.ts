@@ -8,6 +8,7 @@ import type { Lang } from '../i18n'
 import { parseQuantity } from './openFoodFacts'
 import { refineCategory } from '../domain/categories'
 import { brandLabel } from '../domain/pricing'
+import { dataUrl } from './dataUrl'
 
 // [ean, nameFi, nameSv, brand, quantity, category, emoji, imageChunk(-1 = none)]
 type Row = [string, string, string, string, string, CategoryId, string, number]
@@ -15,7 +16,7 @@ type Row = [string, string, string, string, string, CategoryId, string, number]
 let rows: Promise<Row[]> | null = null
 
 export function loadSnapshot(): Promise<Row[]> {
-  rows ??= fetch(new URL('products/fi.json', location.href).href)
+  rows ??= fetch(dataUrl('products/fi.json'))
     .then((r) => (r.ok ? r.json() : []))
     .then((d: { rows?: Row[] }) => d.rows ?? [])
     .catch(() => [])
@@ -62,7 +63,7 @@ export function snapshotImage(chunk: number, ean: string): Promise<string | unde
   if (!chunks.has(chunk)) {
     chunks.set(
       chunk,
-      fetch(new URL(`products/img-${chunk}.json`, location.href).href)
+      fetch(dataUrl(`products/img-${chunk}.json`))
         .then((r) => (r.ok ? r.json() : {}))
         .catch(() => ({})),
     )
