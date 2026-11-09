@@ -12,6 +12,14 @@ const LABEL = 'fi.hintaopas.app.pricecheck'
 
 export function usePriceAlerts() {
   const { watched, products, lang } = useStore()
+  // Also check when the app is put away, so a drop is told even if the system waits long.
+  useEffect(() => {
+    if (!isNativeApp) return
+    let last = 0
+    const vis = () => { if (document.visibilityState === 'hidden' && Date.now() - last > 30 * 60_000) { last = Date.now(); checkNow() } }
+    document.addEventListener('visibilitychange', vis)
+    return () => document.removeEventListener('visibilitychange', vis)
+  }, [])
   const key = watched.map((w) => `${w.productId}:${w.baselineCents}:${w.targetCents ?? ''}`).join(',')
   useEffect(() => {
     if (!isNativeApp) return
@@ -40,4 +48,24 @@ export function usePriceAlerts() {
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, lang, products.length > 0])
+}
+
+/** Whether price notifications may be shown ('na' outside the installed app). */
+export async function notifyStatus(): Promise<'on' | 'off' | 'na'> {
+  if (!isNativeApp) return 'na'
+  try { return (await BackgroundRunner.checkPermissions()).notifications === 'granted' ? 'on' : 'off' } catch { return 'na' }
+}
+export async function allowNotify(): Promise<'on' | 'off' | 'na'> {
+  if (!isNativeApp) return 'na'
+  try { await BackgroundRunner.requestPermissions({ apis: ['notifications'] }) } catch { /* shown as off */ }
+  return notifyStatus()
+}
+/** A notification right away, to show the user that they arrive. */
+export async function testNotify(title: string, body: string): Promise<boolean> {
+  try { await BackgroundRunner.dispatchEvent({ label: LABEL, event: 'testNotify', details: { title, body } }); return true } catch { return false }
+}
+/** Runs the price check now (when the app goes to the background), besides the system's own schedule. */
+export function checkNow() {
+  if (!isNativeApp) return
+  BackgroundRunner.dispatchEvent({ label: LABEL, event: 'checkPrices', details: {} }).catch(() => {})
 }

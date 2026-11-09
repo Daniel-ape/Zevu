@@ -12,8 +12,9 @@ import { useNav, type Tab } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 import { WatchList } from '../ui/WatchList'
+import { allowNotify, notifyStatus, testNotify } from '../data/priceAlerts'
 
-type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'about' | 'privacy' | 'sources' | 'terms' | 'info'
+type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'notify' | 'about' | 'privacy' | 'sources' | 'terms' | 'info'
 
 /** Open a page of the You tab from elsewhere (call before nav.go('profile')). */
 let wanted: { page: Page; from: Tab } | null = null
@@ -38,6 +39,8 @@ export function Profile() {
   // Opened from another tab (bell, savings card…): back on that page goes back there.
   const [entry] = useState(() => { const w = wanted; wanted = null; return w })
   const [page, setPage] = useState<Page | null>(entry?.page ?? null)
+  const [notify, setNotify] = useState<'on' | 'off' | 'na'>('na')
+  useEffect(() => { notifyStatus().then(setNotify) }, [page])
   const back = () => {
     if (page === 'about' || page === 'privacy' || page === 'sources' || page === 'terms') return setPage('info')
     if (entry && page === entry.page && entry.from !== 'profile') return nav.go(entry.from)
@@ -52,7 +55,7 @@ export function Profile() {
     .reduce((sum, r) => sum + (r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0)), 0)
   const titles: Record<Page, string> = {
     spending: t('spend.title'), receipts: t('you.groupReceipts'), stores: t('stores.title'), watched: t('watch.title'),
-    language: t('you.language'), appearance: t('you.appearance'), about: legalTitle('about', lang),
+    language: t('you.language'), appearance: t('you.appearance'), notify: t('nt.title'), about: legalTitle('about', lang),
     privacy: legalTitle('privacy', lang), sources: legalTitle('sources', lang), terms: legalTitle('terms', lang), info: t('you.info'),
   }
 
@@ -145,6 +148,8 @@ export function Profile() {
           </div>
         )}
 
+        {page === 'notify' && <NotifyPage />}
+
         {page === 'info' && (
           <div className="rows group-rows">
             <MenuRow icon={<Info size={18} />} title={legalTitle('about', lang)} onClick={() => setPage('about')} />
@@ -187,6 +192,7 @@ export function Profile() {
       <div className="rows group-rows">
         <MenuRow icon={<Globe size={18} />} title={t('you.language')} value={LANGS.find((l) => l.id === lang)?.label} onClick={() => setPage('language')} />
         <MenuRow icon={<Contrast size={18} />} title={t('you.appearance')} value={t(`theme.${theme}`)} onClick={() => setPage('appearance')} />
+        {notify !== 'na' && <MenuRow icon={<Bell size={18} />} title={t('nt.title')} value={t(notify === 'on' ? 'nt.on' : 'nt.off')} onClick={() => setPage('notify')} />}
         <MenuRow icon={<Info size={18} />} title={t('you.info')} onClick={() => setPage('info')} />
       </div>
       {sheets}
@@ -271,3 +277,27 @@ function DeleteData() {
     </div>
   )
 }
+
+/** Price notifications: whether they are on, turning them on, and a test. */
+function NotifyPage() {
+  const { t } = useStore()
+  const [status, setStatus] = useState<'on' | 'off' | 'na' | null>(null)
+  const [sent, setSent] = useState(false)
+  useEffect(() => { notifyStatus().then(setStatus) }, [])
+  return (
+    <div>
+      <p className="small muted" style={{ lineHeight: 1.5, margin: '0 4px 14px' }}>{t('nt.about')}</p>
+      <div className="rows group-rows">
+        <div className="row"><span className="grow title">{t('nt.status')}</span><span className={status === 'on' ? 'good' : 'muted'} style={{ fontWeight: 600 }}>{status ? t(status === 'on' ? 'nt.on' : 'nt.off') : '…'}</span></div>
+      </div>
+      {status === 'off' && <button className="btn primary" style={{ marginTop: 14 }} onClick={async () => setStatus(await allowNotify())}>{t('nt.allow')}</button>}
+      {status === 'off' && <p className="tiny muted" style={{ margin: '10px 4px 0', lineHeight: 1.5 }}>{t('nt.denied')}</p>}
+      {status === 'on' && (
+        <button className="btn ghost" style={{ marginTop: 14 }} onClick={async () => { setSent(await testNotify(t('nt.testTitle'), t('nt.testBody'))) }}>
+          {sent ? t('nt.sent') : t('nt.test')}
+        </button>
+      )}
+    </div>
+  )
+}
+

@@ -54,10 +54,6 @@ const shops: ShopFile[] = readdirSync(DIR)
   .filter((d) => d.retailerId && Array.isArray(d.prices))
 
 const catalogue = new Set<string>(JSON.parse(readFileSync('public/products/fi.json', 'utf8')).rows.map((r: string[]) => r[0]))
-// Distinct chains per product (Prisma can come both from prisma.fi and from Open Prices).
-const chainsPerEan = new Map<string, Set<string>>()
-for (const s of shops) for (const p of s.prices) { const c = chainsPerEan.get(p.ean) ?? new Set(); c.add(s.retailerId); chainsPerEan.set(p.ean, c) }
-const shopsPerEan = new Map([...chainsPerEan].map(([e, c]) => [e, c.size]))
 
 // Same barcode, very different price: usually one shop sells a multipack under
 // the single item's barcode ("24 rullaa" vs "1 kpl"). Leave the bigger pack out
@@ -79,8 +75,17 @@ for (const list of offers.values()) {
 for (const s of shops) s.prices = s.prices.filter((p) => !dropped.has(p))
 console.log(`left out ${dropped.size} multipack prices sold under a single item's barcode`)
 
-const isCore = (p: Price, shop: string) =>
-  catalogue.has(p.ean) || (shopsPerEan.get(p.ean) ?? 0) >= 2 || !p.name || EVERYDAY.has(categoryFor(cleanName(p.name), shop))
+// What the app needs the moment it opens: groceries. Everything else (pharmacies,
+// department stores, electronics…) is in rest.json, which the app fetches when the
+// Products page opens or a list/watched product isn't in core.
+const FOOD = new Set(['dairy', 'bread', 'produce', 'meat', 'pantry', 'drinks', 'snacks'])
+const GROCER = /^(tokmanni|halpahalli|minimani|lidl|prisma|s-market|alepa|sale|k-|tokmanni)/
+const isCore = (p: Price, shop: string) => {
+  if (catalogue.has(p.ean)) return true
+  if (!p.name) return false
+  const c = categoryFor(cleanName(p.name), shop)
+  return FOOD.has(c) || (GROCER.test(shop) && EVERYDAY.has(c))
+}
 
 const core: Shop[] = []
 const rest: Shop[] = []
@@ -120,6 +125,15 @@ const builtAt = new Date().toISOString()
 writeFileSync(`${OUT}/core.json`, JSON.stringify({ builtAt, shops: core }))
 writeFileSync(`${OUT}/rest.json`, JSON.stringify({ builtAt, shops: rest }))
 writeFileSync(`${OUT}/history.json`, JSON.stringify(history))
+// Cheapest price per barcode, split by the barcode's last two digits, for the
+// installed app's background price check (public/runners/background.js): it
+// fetches only the few small files its watched products are in.
+const best = new Map<string, [number, string]>()
+for (const s of shops) for (const p of s.prices) { const b = best.get(p.ean); if (!b || p.priceCents < b[0]) best.set(p.ean, [p.priceCents, s.retailerId]) }
+mkdirSync(`${OUT}/best`, { recursive: true })
+const shards = new Map<string, Record<string, [number, string]>>()
+for (const [ean, v] of best) { const k = ean.slice(-2).padStart(2, '0'); if (!shards.has(k)) shards.set(k, {}); shards.get(k)![ean] = v }
+for (let i = 0; i < 100; i++) { const k = String(i).padStart(2, '0'); writeFileSync(`${OUT}/best/${k}.json`, JSON.stringify(shards.get(k) ?? {})) }
 const n = (x: Shop[]) => x.reduce((a, s) => a + s.i.length, 0)
 const kb = (f: string) => Math.round(readFileSync(`${OUT}/${f}`).length / 1024)
 console.log(`core ${n(core)} products (${kb('core.json')} kB), rest ${n(rest)} (${kb('rest.json')} kB), history ${kb('history.json')} kB`)

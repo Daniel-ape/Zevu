@@ -48,6 +48,16 @@ function offerIsFor(item, offerName) {
 }
 const CHAINS = { lidl: 'Lidl', tokmanni: 'Tokmanni', minimani: 'Minimani', rusta: 'Rusta', halpahalli: 'Halpa-Halli', karkkainen: 'Kärkkäinen', k: 'K-Ruoka' }
 
+// A test from the app's settings, so the user can see that notifications arrive.
+addEventListener('testNotify', (resolve, reject, args) => {
+  try {
+    CapacitorNotifications.schedule([{ id: 9000 + (Date.now() % 1000), title: (args && args.title) || 'ZEVU', body: (args && args.body) || '', scheduleAt: new Date(Date.now() + 1500) }])
+    resolve()
+  } catch (e) {
+    reject(e)
+  }
+})
+
 // The app sends the watch list here whenever it changes.
 addEventListener('syncWatch', (resolve, reject, args) => {
   try {
@@ -69,6 +79,22 @@ addEventListener('checkPrices', async (resolve, reject) => {
     const want = {}
     for (const w of watch) want[w.ean] = true
     let missing = Object.keys(want).length
+    // Small files with the cheapest price per barcode (scripts/build-price-bundles.ts):
+    // only the ones the watched products are in, so the check is quick.
+    const shards = {}
+    for (const ean of Object.keys(want)) shards[ean.slice(-2).padStart(2, '0')] = true
+    for (const k of Object.keys(shards)) {
+      try {
+        const r = await fetch(LIVE + 'app/best/' + k + '.json')
+        if (!r.ok) continue
+        const d = await r.json()
+        for (const ean of Object.keys(d)) {
+          if (!want[ean] || best[ean] !== undefined) continue
+          best[ean] = { cents: d[ean][0], store: d[ean][1] }
+          missing--
+        }
+      } catch (e) { /* fall back to the full price files below */ }
+    }
     for (const file of FILES) {
       if (!missing) break
       let d
