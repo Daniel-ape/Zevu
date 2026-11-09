@@ -6,7 +6,7 @@ jobs:
     steps:
       - run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)"
-          curl -s -A "$UA" "https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=koko-suomen-tarjoukset-to-5-11-su-8-11&region_id=0&region_code=0" > f.json
+          curl -s -A "$UA" "https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=koko-suomen-tarjoukset-ma-9-11-ke-11-11&region_id=0&region_code=0" > f.json
           python3 - <<'PY'
           import json
           f=json.load(open('f.json'))['flyer']
