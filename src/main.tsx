@@ -37,3 +37,6 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// Let the start animation (index.html) fade out once the first screen is drawn.
+requestAnimationFrame(() => requestAnimationFrame(() => (window as unknown as { __appReady?: () => void }).__appReady?.()))

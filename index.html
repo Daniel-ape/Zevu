@@ -12,8 +12,48 @@
     <meta name="apple-mobile-web-app-title" content="ZEVU" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>ZEVU – Compare More. Spend Less.</title>
+    <style>
+      /* Start animation: the Z is drawn, then it fades into the app. */
+      #splash { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; background: #F4F7F2; color: #0B2219; transition: opacity 0.4s ease, transform 0.4s ease; }
+      :root[data-theme='dark'] #splash { background: #0E1311; color: #F4F7F2; }
+      @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) #splash { background: #0E1311; color: #F4F7F2; } }
+      #splash.out { opacity: 0; transform: scale(1.04); pointer-events: none; }
+      #splash .sp { display: flex; flex-direction: column; align-items: center; gap: 18px; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+      #splash svg { width: 96px; height: 96px; overflow: visible; }
+      #splash path { fill: none; stroke: currentColor; stroke-width: 96; stroke-linecap: square; stroke-linejoin: miter; stroke-dasharray: 1; stroke-dashoffset: 1; animation: sp-draw 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
+      @keyframes sp-draw { to { stroke-dashoffset: 0; } }
+      @media (prefers-reduced-motion: reduce) { #splash path { animation-duration: 0.01s; animation-delay: 0s; } }
+    </style>
   </head>
   <body>
+    <script>
+      // The chosen light/dark look before anything is drawn (the start animation follows it).
+      try { var th = JSON.parse(localStorage.getItem('hintaopas:theme') || '"system"'); if (th === 'light' || th === 'dark') document.documentElement.setAttribute('data-theme', th) } catch (e) {}
+    </script>
+    <div id="splash" aria-hidden="true">
+      <div class="sp">
+        <svg viewBox="282 292 460 440"><path pathLength="1" d="M330 340 H694 L330 684 H694" /></svg>
+      </div>
+    </div>
+    <script>
+      // Fade the start animation out once it has played and the app is drawn.
+      (function () {
+        var t0 = Date.now(), ready = false, done = false
+        function hide() {
+          if (done || !ready) return
+          var wait = Math.max(0, 1100 - (Date.now() - t0))
+          done = true
+          setTimeout(function () {
+            var el = document.getElementById('splash')
+            if (!el) return
+            el.classList.add('out')
+            setTimeout(function () { el.remove() }, 450)
+          }, wait)
+        }
+        window.__appReady = function () { ready = true; hide() }
+        setTimeout(function () { ready = true; hide() }, 5000) // never stay longer than this
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
