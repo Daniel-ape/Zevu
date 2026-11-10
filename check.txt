@@ -1,0 +1,14 @@
+console.error: Error injecting safe area CSS: TypeError: Cannot read properties of null (reading 'style')
+    at <anonymous>:2:28
+PASS welcome shown first
+PASS no location question over welcome (posAsked unset)
+PASS light page in dark mode
+  theme media dark: false
+  keyboard open -> dock hidden: true inner 381
+PASS back: product page -> search
+PASS back: closes sheet (opened=false)
+PASS back: other tab -> home
+console.error: Object
+PASS back on home: app goes to background (topResumedActivity=ActivityRecord{ee4f734 u0 com.google.android.apps.nexuslauncher/.NexusL)
+  after reopen: #home
+  heap MB 239

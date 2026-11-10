@@ -1,0 +1,200 @@
+11-10 21:12:27.491  3379  3379 V Capacitor: callback: 106180507, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent, methodData: {"label":"fi.hintaopas.app.pricecheck","event":"syncWatch","details":{"items":[],"lang":"en"}}
+11-10 21:12:27.523  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: undefined
+11-10 21:12:28.758  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: undefined
+11-10 21:12:28.871  3379  3558 D Capacitor: Handling local request: https://localhost/logos/rusta.png
+11-10 21:12:31.990   522  1661 D OomAdjuster: Not killing cached processes
+11-10 21:12:32.305   522   606 D ActivityManager: freezing 3642 com.google.android.webview:webview_apk
+11-10 21:12:32.306   522   606 D ActivityManager: freezing 2969 com.google.android.webview:webview_service
+11-10 21:12:33.323  1500  3117 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:33.334  1579  2037 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:33.343  2995  3343 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:33.497  1500  1762 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:35.074  1679  2114 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:35.121  4042  4283 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:35.128  1500  3117 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:35.439   522   572 I ActivityManager: Killing 4305:com.google.android.settings.intelligence/u0a118 (adj 0): change com.google.android.settings.intelligence
+11-10 21:12:35.455   522   572 I ActivityManager: Killing 0:com.google.android.settings.intelligence/u0a118 (adj -10000): change com.google.android.settings.intelligence
+11-10 21:12:36.354  3379  3379 D Capacitor: onGeolocationPermissionsShowPrompt: DOING IT HERE FOR ORIGIN: https://localhost/
+11-10 21:12:36.355  3379  3379 D Capacitor: onGeolocationPermissionsShowPrompt: has required permission
+11-10 21:12:36.363  1040  1067 D PrefCtrlListHelper: Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+11-10 21:12:36.997   522  2496 D OomAdjuster: Not killing cached processes
+11-10 21:12:39.088  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.241  1500  1762 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.281  1679  3077 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.283  4413  4519 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.285  4413  4519 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.302  4413  4532 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.310  4413  4532 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.330  4413  4532 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.569  1500  3117 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.583  4413  4490 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.659  1679  3077 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:39.780  1679  2114 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:40.098  3379  3563 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:12:40.250  3379  3558 D Capacitor: Handling local request: https://localhost/products/img-62.json
+11-10 21:12:40.251  3379  3560 D Capacitor: Handling local request: https://localhost/products/img-1.json
+11-10 21:12:40.273  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:40.505  2995  3207 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:41.334  3379  3379 D InputMethodManager: showSoftInput() view=com.getcapacitor.CapacitorWebView{2b83848 VFEDHVC.. .F...... 0,0-320,616 #7f080213 app:id/webview aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+11-10 21:12:41.868  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:41.988  2995  3207 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:41.999   522  1764 D OomAdjuster: Not killing cached processes
+11-10 21:12:42.096  1679  3077 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:42.443  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:42.678  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:42.947  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:43.025   522   550 I ActivityManager: Start proc 4799:com.google.android.webview/u0a133 for broadcast {com.google.android.webview/com.google.android.libraries.phenotype.client.stable.PhenotypeUpdateBackgroundBroadcastReceiver}
+11-10 21:12:43.039  4799  4799 I android.webview: Using CollectorTypeCC GC.
+11-10 21:12:43.040  4799  4799 W android.webview: Unexpected CPU variant for x86: x86_64.
+11-10 21:12:43.040  4799  4799 W android.webview: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+11-10 21:12:43.093  4799  4799 E android.webview: Not starting debugger since process cannot load the jdwp agent.
+11-10 21:12:43.299  4799  4799 W android.webview: Entry not found
+11-10 21:12:43.306  4799  4799 D nativeloader: Configuring clns-6 for other apk /data/app/~~DR-XRdtl0TzRlDJb_t_ebg==/com.google.android.trichromelibrary_567263637-WI5vmyhdM82woTzRYyRgaA==/TrichromeLibrary.apk. target_sdk_version=34, uses_libraries=ALL, library_path=/data/app/~~jINjuWUEkMZjQUaTk7tWhg==/com.google.android.webview-2C6sYv7NK1p0u5bp01c5VQ==/lib/x86_64:/data/app/~~jINjuWUEkMZjQUaTk7tWhg==/com.google.android.webview-2C6sYv7NK1p0u5bp01c5VQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~DR-XRdtl0TzRlDJb_t_ebg==/com.google.android.trichromelibrary_567263637-WI5vmyhdM82woTzRYyRgaA==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-10 21:12:43.331  4799  4799 D nativeloader: Configuring clns-7 for other apk /data/app/~~jINjuWUEkMZjQUaTk7tWhg==/com.google.android.webview-2C6sYv7NK1p0u5bp01c5VQ==/WebViewGoogle.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~jINjuWUEkMZjQUaTk7tWhg==/com.google.android.webview-2C6sYv7NK1p0u5bp01c5VQ==/lib/x86_64:/data/app/~~jINjuWUEkMZjQUaTk7tWhg==/com.google.android.webview-2C6sYv7NK1p0u5bp01c5VQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~DR-XRdtl0TzRlDJb_t_ebg==/com.google.android.trichromelibrary_567263637-WI5vmyhdM82woTzRYyRgaA==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-10 21:12:43.381  4799  4799 V GraphicsEnvironment: ANGLE GameManagerService for com.google.android.webview: false
+11-10 21:12:43.381  4799  4799 V GraphicsEnvironment: com.google.android.webview is not listed in per-application setting
+11-10 21:12:43.383  4799  4799 I cr_WebViewApkApp: Launched version=113.0.5672.136 minSdkVersion=29 isBundle=false processName=com.google.android.webview
+11-10 21:12:43.551  3379  3587 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:12:43.657  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:44.579  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:44.930  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:45.041  1500  2152 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:45.579  4042  4283 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:45.599  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:45.796  1500  2152 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:46.007  1500  1762 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:46.147  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:46.292  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:47.003   522  1001 D OomAdjuster: Not killing cached processes
+11-10 21:12:47.362  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:47.362  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:47.710  2995  3207 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:47.778  4042  4282 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:47.805  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:48.309  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:48.595  1579  2055 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:48.784  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:48.788  1579  2037 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:49.520  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:49.659  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:49.843  4413  4502 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:49.963  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:50.067  4413  4502 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:50.094  4413  4489 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:50.460   522   572 I ActivityManager: Killing 2397:com.google.android.gm/u0a141 (adj 0): change com.google.android.gm
+11-10 21:12:50.542  2995  3207 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:50.717  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:51.006  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:51.021  3379  3558 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:12:51.177  2995  3343 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:51.299  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:51.353  1579  2055 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:51.447  1679  3077 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:52.006   522  1121 D OomAdjuster: Not killing cached processes
+11-10 21:12:53.350  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event backButton
+11-10 21:12:53.368  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: {"canGoBack":false}
+11-10 21:12:53.480   522   606 D ActivityManager: freezing 4799 com.google.android.webview
+11-10 21:12:53.690  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:53.869  1679  2724 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:54.331  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:54.725  3379  3558 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:12:55.083  1679  3077 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:55.378  4413  5172 I cr_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@cd1e29b
+11-10 21:12:55.782  1500  1762 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:55.962  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.097  1500  2152 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.120  1500  1762 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.238  3379  3379 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-10 21:12:56.242  3379  3379 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 106180508, pluginId: CapacitorBackgroundRunner, methodName: checkPermissions
+11-10 21:12:56.242  3379  3379 V Capacitor: callback: 106180508, pluginId: CapacitorBackgroundRunner, methodName: checkPermissions, methodData: {}
+11-10 21:12:56.248  4413  5078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.253  3379  3558 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:12:56.272  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: {"notifications":"granted","geolocation":"granted"}
+11-10 21:12:56.274  4413  5078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.297  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.349  4413  5078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.371  4042  4283 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.382  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.445  1679  3077 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.470  4413  4489 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.485  1679  2725 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.554  2995  3343 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.623  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.706  4685  4727 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.715  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.716  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.722  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.779  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.828  1579  2775 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:56.871  1579  2775 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:12:57.010   522  2477 D OomAdjuster: Not killing cached processes
+11-10 21:12:57.067   132   132 I lowmemorykiller: lmkd data connection established
+11-10 21:12:57.101   132   132 I lowmemorykiller: Using psi monitors for memory pressure detection
+11-10 21:12:57.101   132   132 I lowmemorykiller: Properties reinitilized
+11-10 21:12:57.102  5272  5272 I lowmemorykiller: lmkd updated properties successfully
+11-10 21:12:57.102   132   132 I lowmemorykiller: lmkd data connection dropped
+11-10 21:12:57.102   132   132 I lowmemorykiller: closing lmkd data connection
+11-10 21:12:57.517  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event backButton
+11-10 21:12:57.519  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: {"canGoBack":false}
+11-10 21:12:57.524  3379  3558 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:12:58.824  3379  3558 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:13:00.053  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event backButton
+11-10 21:13:00.055  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: {"canGoBack":false}
+11-10 21:13:00.059  3379  3558 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:13:01.308  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event backButton
+11-10 21:13:01.309  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: {"canGoBack":false}
+11-10 21:13:01.310  3379  3379 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-10 21:13:01.310  3379  3379 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 106180509, pluginId: App, methodName: minimizeApp
+11-10 21:13:01.310  3379  3379 V Capacitor: callback: 106180509, pluginId: App, methodName: minimizeApp, methodData: {}
+11-10 21:13:01.329  3379  3379 I Capacitor/Console: File:  - Line 333 - Msg: undefined
+11-10 21:13:01.334  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event pause
+11-10 21:13:01.356  3379  3379 D Capacitor/AppPlugin: No listeners found for event pause
+11-10 21:13:01.381  3379  3379 D Capacitor: App paused
+11-10 21:13:02.011   522   535 D OomAdjuster: Not killing cached processes
+11-10 21:13:02.234  3379  3379 D Capacitor/AppPlugin: Firing change: false
+11-10 21:13:02.234  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event appStateChange
+11-10 21:13:02.234  3379  3379 D Capacitor/AppPlugin: No listeners found for event appStateChange
+11-10 21:13:02.237  3379  3379 D Capacitor: App stopped
+11-10 21:13:02.238  3379  3379 D Capacitor: Saving instance state!
+11-10 21:13:02.331  3379  3379 I Capacitor/Console: File:  - Line 349 - Msg: [object Object]
+11-10 21:13:02.332  3379  3379 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 106180510, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent
+11-10 21:13:02.333  3379  3379 V Capacitor: callback: 106180510, pluginId: CapacitorBackgroundRunner, methodName: dispatchEvent, methodData: {"label":"fi.hintaopas.app.pricecheck","event":"checkPrices","details":{}}
+11-10 21:13:02.335  3379  3879 D Capacitor: Sending plugin error: {"save":false,"callbackId":"106180510","pluginId":"CapacitorBackgroundRunner","methodName":"dispatchEvent","success":false,"error":{"message":"runner is not started"}}
+11-10 21:13:02.338  3379  3379 E Capacitor/Console: File:  - Line 330 - Msg: [object Object]
+11-10 21:13:04.110  3379  3379 D Capacitor: App restarted
+11-10 21:13:04.110  3379  3379 D Capacitor: App started
+11-10 21:13:04.111  3379  3379 D Capacitor/AppPlugin: Firing change: true
+11-10 21:13:04.111  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event appStateChange
+11-10 21:13:04.111  3379  3379 D Capacitor/AppPlugin: No listeners found for event appStateChange
+11-10 21:13:04.111  3379  3379 V Capacitor/AppPlugin: Notifying listeners for event resume
+11-10 21:13:04.112  3379  3379 D Capacitor/AppPlugin: No listeners found for event resume
+11-10 21:13:04.117  3379  3379 D Capacitor: App resumed
+11-10 21:13:04.249  3379  3379 D Capacitor: onGeolocationPermissionsShowPrompt: DOING IT HERE FOR ORIGIN: https://localhost/
+11-10 21:13:04.256  3379  3379 D Capacitor: onGeolocationPermissionsShowPrompt: has required permission
+11-10 21:13:07.386   522  2498 D OomAdjuster: Not killing cached processes
+11-10 21:13:08.783  1500  2152 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:08.791  1500  1762 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.502  4413  4489 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.527  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.548  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.549  4413  4490 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.559  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.646  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.697  2995  3207 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.721  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:10.866  2995  3343 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:11.045  1579  2055 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:12.388   522  2423 D OomAdjuster: Not killing cached processes
+11-10 21:13:13.323  1500  2152 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.350  4413  4508 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.528  4413  4502 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.582  2995  3343 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.582  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.636  3379  3558 D Capacitor: Handling local request: https://localhost/icons/icon-192.png
+11-10 21:13:13.705  1679  3077 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.753  2995  3348 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.772  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.814  1679  3078 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.822  1679  2718 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:13.895  2995  3207 W TimedProcessReaper: Scheduling killing of process to refresh configuration
+11-10 21:13:17.452   522   886 D OomAdjuster: Not killing cached processes

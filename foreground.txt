@@ -1,0 +1,1 @@
+    topResumedActivity=ActivityRecord{41007bb u0 fi.hintaopas.app/.MainActivity t8}
