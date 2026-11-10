@@ -173,7 +173,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (document.visibilityState !== 'visible' || Date.now() - loadedAt.current < 3 * 3_600_000) return
       loadedAt.current = Date.now()
       const parts: ('core' | 'rest')[] = restNow.current === 'done' ? ['core', 'rest'] : ['core']
-      const got = await Promise.all(parts.map((p) => loadShopData(p).catch(() => null)))
+      // one part at a time: two big price files read at once could use more
+      // memory than the phone allows while the old prices are still shown
+      const got: (Awaited<ReturnType<typeof loadShopData>> | null)[] = []
+      for (const p of parts) got.push(await loadShopData(p).catch(() => null))
       if (got.some((d) => !d || !d.observations.length)) return
       setShopProducts(got.flatMap((d) => d!.products))
       setShopPics(new Map(got.flatMap((d) => d!.images)))

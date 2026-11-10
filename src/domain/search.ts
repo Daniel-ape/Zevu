@@ -53,12 +53,15 @@ function distance(a: string, b: string, max: number) {
 }
 
 // How well one query word matches the product's words (0 = no match).
-function wordScore(q: string, words: string[], joined: string, named?: Set<string>, fuzzy = true) {
+// The first `named` words come from the product's names, the rest from the
+// brand and barcode.
+function wordScore(q: string, words: string[], joined: string, named: number, fuzzy = true) {
   if (/^\d{4,}$/.test(q)) return joined.includes(q) ? 3 : 0
   let best = 0
-  for (const w of words) {
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i]
     // A word found only in the brand is a weaker match than one in the name.
-    if (w === q) { if (!named || named.has(w)) return 4; best = Math.max(best, 2.5); continue }
+    if (w === q) { if (i < named) return 4; best = Math.max(best, 2.5); continue }
     if (w.startsWith(q)) best = Math.max(best, 3)
     else if (q.length >= 3 && w.includes(q)) best = Math.max(best, 2)
     else if (fuzzy && q.length >= 4) {
@@ -72,10 +75,26 @@ function wordScore(q: string, words: string[], joined: string, named?: Set<strin
   return best
 }
 
-export type Haystack = { words: string[]; joined: string; named: Set<string> }
+// Kept small on purpose: one string and a count per product. With 200 000
+// products, a list of words and a set per product used well over 100 MB,
+// enough for the phone to close the app; the words are split out only for
+// products that pass the quick text test.
+export type Haystack = { joined: string; named: number }
 export const haystack = (p: Product): Haystack => {
-  const joined = fold(`${p.name} ${p.altName ?? ''} ${p.brand} ${p.ean}`)
-  return { words: joined.split(' '), joined, named: new Set(fold(`${p.name} ${p.altName ?? ''}`).split(' ')) }
+  const name = fold(`${p.name} ${p.altName ?? ''}`)
+  const rest = fold(`${p.brand} ${p.ean}`)
+  let named = name ? 1 : 0
+  for (let i = 0; i < name.length; i++) if (name.charCodeAt(i) === 32) named++
+  return { joined: name && rest ? name + ' ' + rest : name || rest, named }
+}
+
+// One shared set of search texts per product list, made as products are first searched.
+const hayCache = new WeakMap<object, Map<string, Haystack>>()
+export function hayFor(products: readonly Product[]) {
+  let m = hayCache.get(products)
+  if (!m) { m = new Map(); hayCache.set(products, m) }
+  const map = m
+  return { get: (p: Product) => { let v = map.get(p.id); if (!v) { v = haystack(p); map.set(p.id, v) } return v }, m: map }
 }
 
 /** A query prepared once, so scoring thousands of products stays cheap while typing. */
@@ -96,11 +115,12 @@ export function matchScore(query: string | Query, h: Haystack, fuzzy = true): nu
   // Without typos every match is a piece of the product's text, so one quick
   // substring test rules out almost all products before the word-by-word scoring.
   if (!fuzzy) for (const { term, alts } of terms) if (!h.joined.includes(term) && !alts.some((a) => h.joined.includes(a))) return 0
+  const words = h.joined.split(' ')
   for (const { term, alts } of terms) {
-    let s = wordScore(term, h.words, h.joined, h.named, fuzzy)
+    let s = wordScore(term, words, h.joined, h.named, fuzzy)
     for (const a of alts) {
       if (s >= 3.5) break
-      s = Math.max(s, a.includes(' ') ? (h.joined.includes(a) ? 3 : 0) : Math.min(3.5, wordScore(a, h.words, h.joined, h.named, fuzzy)))
+      s = Math.max(s, a.includes(' ') ? (h.joined.includes(a) ? 3 : 0) : Math.min(3.5, wordScore(a, words, h.joined, h.named, fuzzy)))
     }
     if (!s) return 0
     total += s

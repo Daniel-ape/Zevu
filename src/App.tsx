@@ -187,7 +187,9 @@ function Shell() {
     : t === 'leaflets' ? <Leaflets />
     : t === 'coupons' ? <Coupons />
     : <Profile />
-  const KEEP: Tab[] = ['home', 'search', 'lists', 'leaflets']
+  // Kept in memory between visits (fast to come back to); the rest is rebuilt.
+  // Leaflets are left out: their big pictures take a lot of the phone's memory.
+  const KEEP: Tab[] = ['home', 'search', 'lists']
   const screen = (
     <>
       {[...visited.current].filter((t) => KEEP.includes(t) || t === tab).map((t) => (

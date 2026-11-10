@@ -4,7 +4,7 @@ import { cheapest, compare, euro, sizeLabel, unitLabel, brandLabel } from '../do
 import type { CategoryId, Product } from '../domain/types'
 import { useNav } from '../nav'
 import { Check, Plus, Search } from '../ui/icons'
-import { compileQuery, haystack, matchScore } from '../domain/search'
+import { compileQuery, hayFor, matchScore } from '../domain/search'
 import { CATEGORIES, Tile } from '../ui/bits'
 import { EVERYDAY } from '../domain/categories'
 import { Sheet } from '../ui/Sheet'
@@ -15,7 +15,6 @@ type Sort = 'top' | 'price' | 'unit' | 'name'
 // coming back shows the same search, category, order and scroll position.
 // Work that only depends on the product list is kept between visits, so
 // coming back to Products (e.g. from a product) is instant.
-const hayCache = new WeakMap<object, Map<string, ReturnType<typeof haystack>>>()
 const rankCache = new WeakMap<object, Map<string, number>>()
 const countCache = new WeakMap<object, { pricesOf: unknown; c: Map<string, number> }>()
 let lastResults: { key: unknown[]; value: unknown } | null = null
@@ -80,12 +79,7 @@ export function SearchScreen() {
   // Search text per product, made when first needed and kept. After the
   // product list grows it is prepared in small pieces between frames, so the
   // first search after that never has to do it all at once.
-  const hay = useMemo(() => {
-    let h = hayCache.get(products)
-    if (!h) { h = new Map(); hayCache.set(products, h) }
-    const m = h
-    return { get: (p: Product) => { let v = m.get(p.id); if (!v) { v = haystack(p); m.set(p.id, v) } return v }, m }
-  }, [products])
+  const hay = useMemo(() => hayFor(products), [products])
   useEffect(() => {
     let i = 0, id = 0
     const step = () => {

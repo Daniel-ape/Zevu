@@ -21,16 +21,25 @@ export async function loadShopData(part: 'core' | 'rest'): Promise<ShopData> {
     part === 'core' ? fetchData<History>('app/history.json') : Promise.resolve(null),
   ])
   const out: ShopData = { products: [], observations: [], images: [] }
+  // Memory matters on phones (the system closes an app that uses too much):
+  // one product per barcode even when several shops sell it, and each
+  // check time stored once and shared.
+  const seen = new Set<string>()
+  const times = new Map<string, string>()
+  const ids = new Map<string, string>()
+  const idOf = (ean: string) => { let v = ids.get(ean); if (v === undefined) { v = `off:${ean}`; ids.set(ean, v) } return v }
+  const time = (t: string) => { let v = times.get(t); if (v === undefined) { v = t.length === 16 ? t + ':00.000Z' : t; times.set(t, v) } return v }
   for (const s of bundle?.shops ?? []) {
     const source: PriceSource = s.r === 'tokmanni' ? 'tokmanni' : 'shop'
     for (const [ean, cents, name, brand, pic, link, checked] of s.i) {
       // pictures are stored without the start the shop's pictures share (s.p)
       const image = pic && !pic.startsWith('http') ? (s.p ?? '') + pic : pic
-      const id = `off:${ean}`
+      const id = idOf(ean)
       const url = link ? (link.startsWith('/') ? s.o + link : link) : undefined
-      out.observations.push({ productId: id, retailerId: s.r, priceCents: cents, observedAt: checked.length === 16 ? checked + ':00.000Z' : checked, source, url })
+      out.observations.push({ productId: id, retailerId: s.r, priceCents: cents, observedAt: time(checked), source, url })
       if (image) out.images.push([ean, image])
-      if (name) {
+      if (name && !seen.has(ean)) {
+        seen.add(ean)
         const category = categoryFor(name, s.r)
         out.products.push({
           id, ean, name, brand, category, emoji: EMOJI[category],
@@ -43,7 +52,7 @@ export async function loadShopData(part: 'core' | 'rest'): Promise<ShopData> {
     const day = s.at.slice(0, 10)
     for (const [ean, points] of Object.entries(history?.[s.r] ?? {})) {
       for (const [d, cents] of points) {
-        if (d < day) out.observations.push({ productId: `off:${ean}`, retailerId: s.r, priceCents: cents, observedAt: `${d}T06:00:00.000Z`, source })
+        if (d < day) out.observations.push({ productId: idOf(ean), retailerId: s.r, priceCents: cents, observedAt: time(`${d}T06:00`), source })
       }
     }
   }

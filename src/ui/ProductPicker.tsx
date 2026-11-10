@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Portal } from './Portal'
 import { useStore } from '../data/store'
-import { haystack, matchScore } from '../domain/search'
+import { hayFor, matchScore } from '../domain/search'
 import { sizeLabel, brandLabel } from '../domain/pricing'
 import { Tile } from './bits'
 import { Search } from './icons'
@@ -10,12 +10,12 @@ import { Search } from './icons'
 export function ProductPicker({ initial, onPick, onClose }: { initial: string; onPick: (id: string | undefined) => void; onClose: () => void }) {
   const { products, addOwnProduct, t } = useStore()
   const [q, setQ] = useState(initial)
-  const hay = useMemo(() => new Map(products.map((p) => [p.id, haystack(p)])), [products])
+  const hay = useMemo(() => hayFor(products), [products])
   const results = useMemo(() => {
     const term = q.trim()
     if (term.length < 2) return []
     return products
-      .map((p) => ({ p, s: matchScore(term, hay.get(p.id)!) }))
+      .map((p) => ({ p, s: matchScore(term, hay.get(p)) }))
       .filter((r) => r.s > 0)
       .sort((a, b) => b.s - a.s)
       .slice(0, 30)
