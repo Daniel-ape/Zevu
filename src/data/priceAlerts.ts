@@ -35,9 +35,15 @@ export function usePriceAlerts() {
           targetCents: w.targetCents ?? null,
         }
       })
+    // On Android the price checker only runs while the app is on screen, so a
+    // change made just before leaving the app is sent again when it comes back.
+    const send = () => BackgroundRunner.dispatchEvent({ label: LABEL, event: 'syncWatch', details: { items, lang } })
     ;(async () => {
       try {
-        await BackgroundRunner.dispatchEvent({ label: LABEL, event: 'syncWatch', details: { items, lang } })
+        await send().catch(() => new Promise<void>((resolve, reject) => {
+          const again = () => { if (document.visibilityState !== 'visible') return; document.removeEventListener('visibilitychange', again); setTimeout(() => send().then(() => resolve(), reject), 800) }
+          document.addEventListener('visibilitychange', again)
+        }))
         if (items.length) {
           const p = await BackgroundRunner.checkPermissions()
           if (p.notifications !== 'granted') await BackgroundRunner.requestPermissions({ apis: ['notifications'] })
