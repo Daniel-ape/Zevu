@@ -1950,3 +1950,4 @@ html[data-vt='pop']::view-transition-new(root) { animation-name: vt2-over; z-ind
 .dock.basic .tab svg { border-radius: 999px; padding: 3px 16px; box-sizing: content-box; transition: background 0.2s; }
 .dock.basic .tab.on svg { background: var(--accent-soft); }
 .dock.basic .tab-dot { right: calc(50% - 22px); top: 6px; }
+.kb-open .dock.basic { display: none; }

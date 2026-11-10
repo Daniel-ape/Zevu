@@ -7,8 +7,10 @@ import type { Lang } from '../i18n'
 
 const BASE = 'https://world.openfoodfacts.org'
 const FIELDS = 'code,product_name,product_name_fi,product_name_sv,product_name_en,brands,quantity,categories_tags,image_front_small_url'
-// OFF asks apps to identify themselves.
-const HEADERS = { 'User-Agent': 'ZEVU/0.1 (grocery price comparison, Finland)' }
+// OFF asks apps to identify themselves; a web view can't set the User-Agent
+// header (asking for it makes the request fail its cross-site check), so the
+// app name goes in the address instead, as OFF suggests for browser apps.
+const APP = 'app_name=ZEVU&app_version=0.1'
 
 export interface OffProduct {
   code?: string
@@ -29,7 +31,7 @@ async function getJson(url: string, timeoutMs = 8000) {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), timeoutMs)
   try {
-    const res = await fetch(url, { headers: HEADERS, signal: ctrl.signal })
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + APP, { signal: ctrl.signal })
     if (!res.ok && res.status !== 404) throw new OffUnavailable(`HTTP ${res.status}`)
     return res.status === 404 ? null : await res.json()
   } catch (e) {

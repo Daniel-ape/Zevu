@@ -10,6 +10,8 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   backgroundColor: '#ffffff', // behind the web view until the start animation draws
   plugins: {
+    // light app: dark status bar icons, also when the phone is in dark mode
+    SystemBars: { style: 'LIGHT' },
     BackgroundRunner: {
       label: 'fi.hintaopas.app.pricecheck',
       src: 'runners/background.js',

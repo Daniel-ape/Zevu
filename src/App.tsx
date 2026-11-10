@@ -17,6 +17,7 @@ import { Coupons } from './screens/Coupons'
 import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
+import { setupAndroidBack, setupAndroidKeyboard } from './native/androidBack'
 import { useLiquidGlass } from './ui/LiquidGlass'
 import { WatchToast } from './ui/WatchBell'
 import { DOCK_ICONS, NativeDock, wantsNativeDock } from './native/nativeDock'
@@ -40,15 +41,18 @@ function Shell() {
   const newLeaflets = useNewLeaflets()
   usePriceAlerts()
   // Follow the user's area: nearest stores' leaflets update when the app opens.
+  const [tab, setTab] = useState<Tab>(fromHash)
+  // First start: a welcome page with Google sign-in (shown once per device).
+  const [welcomed, setWelcomed] = useState(() => { try { return localStorage.getItem('hintaopas:welcomed') === '1' } catch { return true } })
+  // Asked only after the welcome page, so the permission question doesn't
+  // cover it on the very first start.
   useEffect(() => {
+    if (!welcomed) return
     autoLocate()
     const onShow = () => { if (document.visibilityState === 'visible') autoLocate() }
     document.addEventListener('visibilitychange', onShow)
     return () => document.removeEventListener('visibilitychange', onShow)
-  }, [])
-  const [tab, setTab] = useState<Tab>(fromHash)
-  // First start: a welcome page with Google sign-in (shown once per device).
-  const [welcomed, setWelcomed] = useState(() => { try { return localStorage.getItem('hintaopas:welcomed') === '1' } catch { return true } })
+  }, [welcomed])
   const finishWelcome = () => { try { localStorage.setItem('hintaopas:welcomed', '1') } catch { /* private mode */ } setWelcomed(true) }
   // Signed in: keep lists, cards, coupons… in sync; reload when newer data arrived from another device.
   useEffect(() => {
@@ -106,6 +110,15 @@ function Shell() {
   )
 
   const top = stack[stack.length - 1]
+  const backState = useRef({ stack, tab, nav })
+  backState.current = { stack, tab, nav }
+  useEffect(() => setupAndroidKeyboard(), [])
+  useEffect(() => setupAndroidBack({
+    hasStack: () => backState.current.stack.length > 0,
+    back: () => backState.current.nav.back(),
+    onHome: () => backState.current.tab === 'home',
+    goHome: () => backState.current.nav.go('home'),
+  }), [])
   const goRef = useRef(nav.go)
   goRef.current = nav.go
   useEffect(() => {
