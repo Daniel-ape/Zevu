@@ -57,3 +57,8 @@ jobs:
           body: Betaversion av ZEVU för Android. Ladda ner ZEVU.apk på telefonen och tillåt installation från den här källan när telefonen frågar.
           files: ZEVU.apk
           make_latest: true
+      # the file from before the app was renamed
+      - name: Remove the old APK name from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete-asset android-latest hintaopas.apk -y -R ${{ github.repository }} || true
