@@ -1884,6 +1884,11 @@ html[data-vt='fade']::view-transition-new(root) { animation-name: vt-fade-in; }
 /* without view transitions (older iPhones) the light CSS motion still runs */
 html:not(.vt-on) .shell[data-motion='right'] > .tab-pane:not([hidden]) > .screen { animation: m-right 0.26s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
 html:not(.vt-on) .shell[data-motion='left'] > .tab-pane:not([hidden]) > .screen { animation: m-left 0.26s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; }
+/* tab switches: no picture of the page, just a quick fade of the page that appears */
+html.vt-on:not(.lite) .shell[data-motion='right'] > .tab-pane:not([hidden]) > .screen,
+html.vt-on:not(.lite) .shell[data-motion='left'] > .tab-pane:not([hidden]) > .screen { animation: tab-in 0.2s cubic-bezier(0.4, 0, 0.2, 1) both; }
+@keyframes tab-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { html.vt-on .shell > .tab-pane > .screen { animation: none; } }
 /* lighter view transitions: no blur, shorter */
 @keyframes vt-out-left { to { opacity: 0; transform: translateX(-24px) scale(0.99); } }
 @keyframes vt-in-right { from { opacity: 0; transform: translateX(24px) scale(0.99); } }

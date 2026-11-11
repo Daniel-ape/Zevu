@@ -1,10 +1,11 @@
 import { flushSync } from 'react-dom'
 
-// Page changes with the system's own view transitions (Safari 18 / iOS 18 and
-// newer, Chrome). The system takes a picture of the old and the new page and
-// moves the pictures on the graphics chip, so the motion stays smooth even while
-// the new page is being built. The dock stays still, like a tab bar on iPhone.
-// Without support, or with "reduce motion" on, the page just changes.
+// Page changes. A product page opening or closing slides with the system's own
+// view transitions (Safari 18 / iOS 18 and newer, Chrome): the system takes a
+// picture of the old and the new page and moves the pictures on the graphics chip.
+// Tab switches don't take pictures at all: the page changes at once and the new
+// one fades in with plain CSS, like an iPhone tab bar, so a tap answers right away.
+// Without support, with "reduce motion" on, or on cheaper phones the page just changes.
 
 type VT = { finished: Promise<void>; skipTransition?: () => void }
 type Doc = Document & { startViewTransition?: (cb: () => void) => VT }
@@ -15,21 +16,43 @@ if (viewTransitions) document.documentElement.classList.add('vt-on')
 const reduced = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 let running: VT | null = null
+// taps that came while a slide was still moving: applied, in order, without
+// a second animation, as soon as the first one is done. Starting a new view
+// transition on top of one still running is what made fast tapping crash on iPhone.
+let queued: (() => void)[] = []
+
+function flushQueued() {
+  const q = queued
+  queued = []
+  if (!q.length) return
+  try { flushSync(() => q.forEach((f) => f())) } catch { q.forEach((f) => f()) }
+}
 
 export function transition(kind: 'right' | 'left' | 'push' | 'pop' | 'fade', update: () => void) {
+  if (running) {
+    queued.push(update)
+    try { running.skipTransition?.() } catch { /* already done */ }
+    return
+  }
   const d = document as Doc
-  // cheaper phones change pages instantly: no picture of the page to take and move
-  if (!d.startViewTransition || reduced() || document.documentElement.classList.contains('lite')) { update(); return }
-  // a second tap while a change is still moving: finish the first at once
-  // instead of stacking animations
-  if (running) { try { running.skipTransition?.() } catch { /* already done */ } }
+  const slide = kind === 'push' || kind === 'pop'
+  if (!slide || !d.startViewTransition || reduced() || document.documentElement.classList.contains('lite')) { update(); return }
   const root = document.documentElement
   root.dataset.vt = kind
   try {
     const t = d.startViewTransition(() => flushSync(update))
     running = t
-    t.finished.finally(() => { if (running === t) { running = null; delete root.dataset.vt } })
+    const done = () => {
+      if (running !== t) return
+      running = null
+      delete root.dataset.vt
+      flushQueued()
+    }
+    t.finished.then(done, done)
+    // never wait forever for a slide the system lost track of
+    setTimeout(done, 1500)
   } catch {
+    running = null
     delete root.dataset.vt
     update()
   }

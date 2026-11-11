@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { transition } from './viewTransition'
 import { Welcome } from './screens/Welcome'
 import { onSession, startAutoSync } from './data/account'
@@ -24,6 +24,17 @@ import { WatchToast } from './ui/WatchBell'
 import { DOCK_ICONS, NativeDock, wantsNativeDock } from './native/nativeDock'
 
 const TABS: Tab[] = ['home', 'search', 'scan', 'lists', 'leaflets', 'profile', 'coupons']
+// One page. Memoised: switching tabs only shows and hides the kept pages
+// instead of re-rendering every one of them (that made tab taps lag).
+const Page = memo(function Page({ t }: { t: Tab }) {
+  return t === 'home' ? <Home />
+    : t === 'search' ? <SearchScreen />
+    : t === 'scan' ? <Scan />
+    : t === 'lists' ? <Lists />
+    : t === 'leaflets' ? <Leaflets />
+    : t === 'coupons' ? <Coupons />
+    : <Profile />
+})
 const fromHash = (): Tab => {
   const h = location.hash.slice(1) as Tab
   return TABS.includes(h) ? h : 'home'
@@ -87,12 +98,17 @@ function Shell() {
     return () => removeEventListener('hashchange', onHash)
   }, [])
 
+  // The current tab is read through a ref, so the nav object (and every page
+  // using it) does not change on each tab switch.
+  const tabRef = useRef(tab)
+  tabRef.current = tab
   const nav = useMemo<Nav>(
     () => ({
-      tab,
+      get tab() { return tabRef.current },
       go: (t, opts) => {
+        const cur = tabRef.current
         const order: Tab[] = ['home', 'search', 'lists', 'leaflets', 'profile', 'coupons', 'scan']
-        const kind = t === tab ? 'fade' : order.indexOf(t) >= order.indexOf(tab) ? 'right' : 'left'
+        const kind = t === cur ? 'fade' : order.indexOf(t) >= order.indexOf(cur) ? 'right' : 'left'
         remember()
         transition(kind, () => {
           setStack([])
@@ -107,7 +123,8 @@ function Shell() {
       searchCategory,
       searchFocus,
     }),
-    [tab, searchCategory, searchFocus],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchCategory, searchFocus],
   )
 
   const top = stack[stack.length - 1]
@@ -181,13 +198,6 @@ function Shell() {
   // instant and keeps its scroll, search and filters instead of being rebuilt.
   const visited = useRef(new Set<Tab>())
   visited.current.add(tab)
-  const pageFor = (t: Tab) => t === 'home' ? <Home />
-    : t === 'search' ? <SearchScreen />
-    : t === 'scan' ? <Scan />
-    : t === 'lists' ? <Lists />
-    : t === 'leaflets' ? <Leaflets />
-    : t === 'coupons' ? <Coupons />
-    : <Profile />
   // Kept in memory between visits (fast to come back to); the rest is rebuilt.
   // Leaflets are left out: their big pictures take a lot of the phone's memory.
   // (cheaper phones keep only Products, the slowest to rebuild)
@@ -195,7 +205,7 @@ function Shell() {
   const screen = (
     <>
       {[...visited.current].filter((t) => KEEP.includes(t) || t === tab).map((t) => (
-        <div key={t} className="tab-pane" hidden={t !== tab || !!top}>{pageFor(t)}</div>
+        <div key={t} className="tab-pane" hidden={t !== tab || !!top}><Page t={t} /></div>
       ))}
       {top && <ProductScreen key={top + stack.length} id={top} />}
     </>
