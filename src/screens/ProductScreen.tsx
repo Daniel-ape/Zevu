@@ -14,7 +14,8 @@ import { cheaperAlternatives } from '../domain/alternatives'
 import { useState } from 'react'
 
 export function ProductScreen({ id }: { id: string }) {
-  const { products, pricesOf, retailers, list, setQuantity, markViewed, watched, toggleWatch, t, lang } = useStore()
+  const { products, pricesOf, retailers, allRetailers, list, setQuantity, markViewed, watched, toggleWatch, t, lang } = useStore()
+  const [picFrom, setPicFrom] = useState<string>()
   const nav = useNav()
   const [adding, setAdding] = useState<false | { store?: string }>(false)
   const product = products.find((p) => p.id === id)
@@ -60,7 +61,8 @@ export function ProductScreen({ id }: { id: string }) {
       </div>
 
       {/* Big picture, the name, the best price large, and the actions under it */}
-      <div className="pd-hero"><Tile product={product} large /></div>
+      <div className="pd-hero"><Tile product={product} large onSource={setPicFrom} /></div>
+      {picFrom && <div className="pd-credit">{t('pd.picFrom', { from: picFrom === 'off' ? 'Open Food Facts' : (allRetailers.find((r) => r.id === picFrom)?.name ?? picFrom) })}</div>}
       <h1 className="pd-name">{product.name}</h1>
       <div className="pd-brand">{[brandLabel(product.brand), sizeLabel(product)].filter(Boolean).join(' · ')}</div>
       {best && (

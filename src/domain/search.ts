@@ -62,7 +62,11 @@ function wordScore(q: string, words: string[], joined: string, named: number, fu
     const w = words[i]
     // A word found only in the brand is a weaker match than one in the name.
     if (w === q) { if (i < named) return 4; best = Math.max(best, 2.5); continue }
-    if (w.startsWith(q)) best = Math.max(best, 3)
+    // Finnish compounds name the thing last: "kevytmaito" is milk, "maitosuklaa"
+    // is chocolate. A query at the end of a word is a strong match, a whole
+    // word at the start of a longer compound a weaker one.
+    if (q.length >= 4 && w.endsWith(q)) best = Math.max(best, i < named ? 3.6 : 2.5)
+    else if (w.startsWith(q)) best = Math.max(best, q.length >= 4 && w.length - q.length >= 4 ? 2.6 : 3)
     else if (q.length >= 3 && w.includes(q)) best = Math.max(best, 2)
     else if (fuzzy && q.length >= 4) {
       // Typos rarely hit both of the first two letters: skip the rest early.

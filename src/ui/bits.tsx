@@ -7,12 +7,13 @@ import { ageDays } from '../domain/pricing'
 import { Arrow } from './icons'
 import { useStore } from '../data/store'
 import type { Key } from '../i18n'
+import { imageSource } from '../domain/imageSource'
 
 export const CATEGORIES: { id: CategoryId | 'all'; key: Key }[] = (
   ['all', 'dairy', 'produce', 'bread', 'meat', 'pantry', 'drinks', 'snacks', 'household', 'health', 'pets', 'home', 'electronics', 'toys', 'clothing', 'office'] as const
 ).map((id) => ({ id, key: `cat.${id}` as Key }))
 
-export function Tile({ product, large }: { product: Product; large?: boolean }) {
+export function Tile({ product, large, onSource }: { product: Product; large?: boolean; onSource?: (from: string | undefined) => void }) {
   // The shop's own picture (imageUrl) first; the catalogue picture packed with
   // the app (imageChunk) only when there is none or it fails to load.
   const [broken, setBroken] = useState(false)
@@ -25,6 +26,9 @@ export function Tile({ product, large }: { product: Product; large?: boolean }) 
     return () => { live = false }
   }, [useShop, product.imageChunk, product.ean])
   const src = useShop ? product.imageUrl : packed
+  // the catalogue pictures packed with the app come from Open Food Facts
+  const from = !src ? undefined : useShop ? imageSource(product.imageUrl) : 'off'
+  useEffect(() => { onSource?.(from) }, [from, onSource])
   return (
     <div className={'tile' + (large ? ' lg' : '')} aria-hidden>
       {src ? <img key={src} src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => (useShop ? setBroken(true) : setPacked(undefined))} /> : product.emoji}

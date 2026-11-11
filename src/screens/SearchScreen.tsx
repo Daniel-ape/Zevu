@@ -5,6 +5,7 @@ import type { CategoryId, Product } from '../domain/types'
 import { useNav } from '../nav'
 import { Check, Plus, Search } from '../ui/icons'
 import { compileQuery, hayFor, matchScore } from '../domain/search'
+import { guess as guessCategory } from '../domain/categories'
 import { CATEGORIES, Tile } from '../ui/bits'
 import { EVERYDAY } from '../domain/categories'
 import { Sheet } from '../ui/Sheet'
@@ -117,6 +118,10 @@ export function SearchScreen() {
     const onlineIds = Array.isArray(online) ? new Set(online) : null
     // Strong matches (exact or start of a word) first, typo matches last.
     const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
+    // What the search is for ("banaani" is fruit, "kana" meat): products of
+    // that kind come before ones that only taste of it or mention it.
+    const want = needle ? guessCategory(needle, '') : undefined
+    const off = (p: Product) => (want && p.category !== want ? 1 : 0)
     const inCat = dcat === 'all' ? products : products.filter((p) => p.category === dcat)
     const scoreAll = (fuzzy: boolean) => {
       const out: { p: (typeof products)[number]; score: number; priced: boolean }[] = []
@@ -145,7 +150,7 @@ export function SearchScreen() {
     // Cheap first cut (match strength, has a price, popularity), then the
     // price comparison only for the products that can make the list.
     found.sort((a, b) =>
-      (needle ? tier(a.score) - tier(b.score) : 0) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
+      (needle ? tier(a.score) - tier(b.score) : 0) || off(a.p) - off(b.p) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
     const pool = dsort === 'top' ? found.slice(0, 160) : found.slice(0, 600)
     return pool
       .map(({ p, score }) => {
@@ -158,6 +163,7 @@ export function SearchScreen() {
         if (needle && (tier(a.score) === 3) !== (tier(b.score) === 3)) return tier(a.score) === 3 ? 1 : -1
         if (!!a.best !== !!b.best) return a.best ? -1 : 1
         if (needle && tier(a.score) !== tier(b.score)) return tier(a.score) - tier(b.score)
+        if (needle && off(a.p) !== off(b.p)) return off(a.p) - off(b.p)
         if (dsort === 'top') return rank.get(a.p.id)! - rank.get(b.p.id)!
         if (dsort === 'name') return a.p.name.localeCompare(b.p.name)
         const av = dsort === 'unit' ? a.best?.unitPriceCents : a.best?.current.priceCents
