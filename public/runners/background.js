@@ -3,7 +3,7 @@
 // notifies when a watched product has become cheaper than when it was watched
 // (or than the last price we told the user about).
 // the website (repository renamed from hintaopas to zevu); the old address as a fallback
-const LIVES = ['https://daniel-ape.github.io/zevu/prices/', 'https://daniel-ape.github.io/hintaopas/prices/']
+const LIVES = ['https://daniel-ape.github.io/Zevu/prices/', 'https://daniel-ape.github.io/hintaopas/prices/']
 async function live(path) {
   let last
   for (const base of LIVES) {

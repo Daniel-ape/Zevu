@@ -7,7 +7,7 @@ import { dataUrl } from './dataUrl'
 // built-in one when offline.
 // The website's address (the repository was renamed from hintaopas to zevu;
 // the old address is tried too, in case this app is older than the rename).
-const LIVE = ['https://daniel-ape.github.io/zevu/prices/', 'https://daniel-ape.github.io/hintaopas/prices/']
+const LIVE = ['https://daniel-ape.github.io/Zevu/prices/', 'https://daniel-ape.github.io/hintaopas/prices/']
 
 export async function fetchData<T>(file: string): Promise<T | null> {
   const urls = isNativeApp ? [...LIVE.map((u) => u + file), dataUrl(`prices/${file}`)] : [dataUrl(`prices/${file}`)]
