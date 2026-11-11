@@ -1962,3 +1962,13 @@ html[data-vt='pop']::view-transition-new(root) { animation-name: vt2-over; z-ind
 .op-body { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 .op-input { min-height: 0; height: 46px; resize: none; padding: 0 14px; }
 .pd-credit { text-align: center; font-size: 11px; color: var(--text-3); margin: -4px 0 8px; letter-spacing: 0.01em; }
+
+/* Cheaper phones (html.lite, see device.ts): no blurred glass, which costs a
+   lot of graphics work on every frame while scrolling; solid colours instead,
+   and lighter shadows and animations. */
+.lite *, .lite *::before, .lite *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.lite .dock, .lite .topbar.sticky, .lite .topbar.sticky .icon-btn, .lite .sheet { background-color: var(--surface) !important; }
+.lite .sheet-backdrop { background: rgba(0, 0, 0, 0.35) !important; }
+.lite .shell::before { display: none; }
+.lite .sr-card, .lite .row, .lite .card, .lite .cover { box-shadow: none !important; }
+.lite .sheet { animation-duration: 0.25s !important; }

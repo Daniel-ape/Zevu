@@ -18,7 +18,8 @@ let running: VT | null = null
 
 export function transition(kind: 'right' | 'left' | 'push' | 'pop' | 'fade', update: () => void) {
   const d = document as Doc
-  if (!d.startViewTransition || reduced()) { update(); return }
+  // cheaper phones change pages instantly: no picture of the page to take and move
+  if (!d.startViewTransition || reduced() || document.documentElement.classList.contains('lite')) { update(); return }
   // a second tap while a change is still moving: finish the first at once
   // instead of stacking animations
   if (running) { try { running.skipTransition?.() } catch { /* already done */ } }

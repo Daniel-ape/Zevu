@@ -31,7 +31,7 @@ export function Tile({ product, large, onSource }: { product: Product; large?: b
   useEffect(() => { onSource?.(from) }, [from, onSource])
   return (
     <div className={'tile' + (large ? ' lg' : '')} aria-hidden>
-      {src ? <img key={src} src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => (useShop ? setBroken(true) : setPacked(undefined))} /> : product.emoji}
+      {src ? <img key={src} src={src} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => (useShop ? setBroken(true) : setPacked(undefined))} /> : product.emoji}
     </div>
   )
 }

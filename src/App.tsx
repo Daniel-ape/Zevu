@@ -18,6 +18,7 @@ import { useNewLeaflets } from './data/leafletFeed'
 import { usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
 import { setupAndroidBack, setupAndroidKeyboard } from './native/androidBack'
+import { lite } from './device'
 import { useLiquidGlass } from './ui/LiquidGlass'
 import { WatchToast } from './ui/WatchBell'
 import { DOCK_ICONS, NativeDock, wantsNativeDock } from './native/nativeDock'
@@ -189,7 +190,8 @@ function Shell() {
     : <Profile />
   // Kept in memory between visits (fast to come back to); the rest is rebuilt.
   // Leaflets are left out: their big pictures take a lot of the phone's memory.
-  const KEEP: Tab[] = ['home', 'search', 'lists']
+  // (cheaper phones keep only Products, the slowest to rebuild)
+  const KEEP: Tab[] = lite ? ['search'] : ['home', 'search', 'lists']
   const screen = (
     <>
       {[...visited.current].filter((t) => KEEP.includes(t) || t === tab).map((t) => (

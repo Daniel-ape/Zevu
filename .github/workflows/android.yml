@@ -1,4 +1,4 @@
-# Builds an installable Android app (debug APK) on every push to main.
+# Builds an installable Android app (APK) on every push to main.
 # Download it from the "ZEVU för Android (beta)" release on the repository page.
 name: ZEVU Android app (APK)
 on:
@@ -28,10 +28,24 @@ jobs:
       # The runner image already includes the Android SDK (ANDROID_HOME).
       - run: npm ci
       - run: npx tsx scripts/build-price-bundles.ts
-      - run: npx vite build && npx cap sync android
-      - run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
-        working-directory: android
-      - run: cp android/app/build/outputs/apk/debug/app-debug.apk ZEVU.apk
+      - run: npx vite build && node scripts/slim-dist.mjs && npx cap sync android
+      # With the ANDROID_KEY_SECRET secret: a release build (faster, not
+      # debuggable) signed with the same key every time, so updates install
+      # over the app. Without it: a debug build with a throw-away key.
+      - name: Build the app
+        env:
+          ANDROID_KEY_SECRET: ${{ secrets.ANDROID_KEY_SECRET }}
+        run: |
+          chmod +x android/gradlew
+          if [ -n "$ANDROID_KEY_SECRET" ]; then
+            node scripts/android-key.mjs
+            (cd android && ./gradlew assembleRelease --no-daemon)
+            cp android/app/build/outputs/apk/release/app-release.apk ZEVU.apk
+          else
+            echo "::warning::No ANDROID_KEY_SECRET: debug build with a new key (updates need a fresh install)"
+            (cd android && ./gradlew assembleDebug --no-daemon)
+            cp android/app/build/outputs/apk/debug/app-debug.apk ZEVU.apk
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: zevu-apk

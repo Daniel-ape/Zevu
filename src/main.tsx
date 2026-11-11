@@ -8,6 +8,8 @@ import '@fontsource/plus-jakarta-sans/latin-700.css'
 import '@fontsource/plus-jakarta-sans/latin-800.css'
 import './styles.css'
 import App from './App'
+import './device'
+import { ErrorBoundary } from './ui/ErrorBoundary'
 import { isNativeApp } from './data/openLink'
 
 // The phone app's dock is drawn natively above the page: styles leave room for it.
@@ -34,7 +36,9 @@ if ('serviceWorker' in navigator && !isNativeApp && (location.protocol === 'http
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 )
 

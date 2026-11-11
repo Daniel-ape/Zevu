@@ -7,7 +7,8 @@ android {
         applicationId "fi.hintaopas.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        // a higher number for every build, so Android accepts it as an update
+        versionCode((System.getenv("GITHUB_RUN_NUMBER") ?: "1") as Integer)
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -16,8 +17,23 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // The release key is made by scripts/android-key.mjs from the
+    // ANDROID_KEY_SECRET secret; the same secret is its password.
+    signingConfigs {
+        release {
+            def keyFile = rootProject.file('zevu-release.p12')
+            if (keyFile.exists() && System.getenv("ANDROID_KEY_SECRET")) {
+                storeFile keyFile
+                storeType 'pkcs12'
+                storePassword System.getenv("ANDROID_KEY_SECRET")
+                keyAlias 'zevu'
+                keyPassword System.getenv("ANDROID_KEY_SECRET")
+            }
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
