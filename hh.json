@@ -1,0 +1,53 @@
+{
+ "total": 18311,
+ "byRank": {
+  "0": {
+   "ok": 1048,
+   "out-of-stock": 413,
+   "no-ean": 1
+  },
+  "1": {
+   "ok": 229,
+   "out-of-stock": 85
+  },
+  "2": {
+   "no-ean": 2101,
+   "ok": 10494,
+   "out-of-stock": 3940
+  }
+ },
+ "examples": {
+  "0": {
+   "noEan": [
+    "https://www.halpahalli.fi/softshell-housut-kerman.html"
+   ],
+   "out": [
+    "https://www.halpahalli.fi/valio-viola-e200-g-maustamaton-tuorejuusto-laktoositon-500251001.html Valio Viola® maustamaton tuorejuusto laktoositon e200 g",
+    "https://www.halpahalli.fi/valio-viola-kevyt-e200-g-kylm-savulohi-tuorejuusto-laktoositon-500457007.html Valio Viola® kylmäsavulohi tuorejuusto laktoositon e200 g",
+    "https://www.halpahalli.fi/valio-viola-e200-g-sitruuna-tuorejuusto-laktoositon-500459003.html Valio Viola® sitruuna tuorejuusto laktoositon e200 g",
+    "https://www.halpahalli.fi/valio-viola-e200-g-vanilja-tuorejuusto-laktoositon-500465008.html Valio Viola® vanilja tuorejuusto laktoositon e200 g",
+    "https://www.halpahalli.fi/valio-kerrosviili-1-200-g-ruusunmarja-laktoositon-470280016.html Valio kerrosviili ruusunmarja 1 % laktoositon  200 g",
+    "https://www.halpahalli.fi/valio-kerrosviili-1-200-g-persikka-mango-laktoositon-470310016.html Valio kerrosviili  persikka-mango 1 % laktoositon 200 g",
+    "https://www.halpahalli.fi/fazer-limonadij-puikko-ss-mix-90g-0-87dl-580575017.html Fazer limonadijääpuikko Ässä Mix 90g/0.87dl",
+    "https://www.halpahalli.fi/pingviini-puikko-laktoositon-kermaj-tel-puikko-monipakkaus-vanilja-15x32g-580684041.html Puikko laktoositon kermajäätelöpuikko monipakkaus Vanilja 15",
+    "https://www.halpahalli.fi/pingviini-laktoositon-j-tel-pikari-vanilja-62g-1-2dl-580687002.html Vanilja Laktoositon jäätelöpikari 62g/120ml",
+    "https://www.halpahalli.fi/valio-kevytmaito-1-l-hyla-uht-470040201.html Valio kevytmaito 1 l laktoositon UHT"
+   ]
+  },
+  "1": {
+   "noEan": [],
+   "out": [
+    "https://www.halpahalli.fi/puffy-100-g-ruskea-235904069.html Puffy 100 g, ruskea",
+    "https://www.halpahalli.fi/hmt-d-ner-pitakebab-195-g-510474030.html Döner Pitakebab 195 g",
+    "https://www.halpahalli.fi/fresh-hetki-talvisalaatti-130-g-450006153.html Fresh Hetki Talvisalaatti 130 g",
+    "https://www.halpahalli.fi/luminarc-tivoli-kaadin-2-3-l.html Luminarc Tivoli lasikaadin 2,3 l",
+    "https://www.halpahalli.fi/terasmitta-0-25-l.html Teräsmitta 0,25 l",
+    "https://www.halpahalli.fi/amme-50-l-tulpalla.html Amme 50 L tulpalla",
+    "https://www.halpahalli.fi/complete-fuel-system-cleaner-bensiini-400-ml.html Complete Fuel System Cleaner Bensiini 400 ml",
+    "https://www.halpahalli.fi/masinol-100-1-l.html Masinol 100 1 l",
+    "https://www.halpahalli.fi/monitoimiaine-200-ml.html Monitoimiaine 200 ml",
+    "https://www.halpahalli.fi/smart-straw-monitoimiaine-450-ml.html Smart Straw monitoimiaine 450 ml"
+   ]
+  }
+ }
+}
