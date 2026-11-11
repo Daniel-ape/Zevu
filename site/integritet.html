@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Integritet – ZEVU</title>
+<link rel="icon" href="img/icon.png" />
+<style>
+  body { margin: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: #0b1a13; background: #fff; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 24px 80px; }
+  a { color: #0a7a44; }
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .top a.home { text-decoration: none; font-weight: 800; letter-spacing: 0.12em; color: #0b1a13; }
+  .lang { margin-left: auto; display: flex; gap: 4px; }
+  .lang button { border: 0; background: #f1f3f0; border-radius: 999px; padding: 6px 12px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; color: #6b776f; }
+  .lang button.on { background: #0b1a13; color: #fff; }
+  h1 { font-size: 40px; letter-spacing: -0.03em; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; }
+  p, li { line-height: 1.65; color: #34433b; font-size: 16.5px; }
+  .muted { color: #8a978f; font-size: 14px; }
+  [data-l] { display: none; } [data-l].on { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a class="home" href="./">← ZEVU</a><div class="lang"><button data-s="sv">SV</button><button data-s="fi">FI</button><button data-s="en">EN</button></div></div>
+
+  <section data-l="sv">
+    <h1>Integritet</h1>
+    <p class="muted">Gäller ZEVU-appen för iPhone och Android (beta). Senast uppdaterad 11.11.2026.</p>
+    <p>ZEVU jämför matpriser. Appen är byggd för att samla så lite om dig som möjligt: det mesta stannar på din telefon.</p>
+    <h2>Det som stannar på telefonen</h2>
+    <ul><li>Inköpslistor, bevakade varor, sparade erbjudanden och inställningar.</li><li>Kvitton du skannar. Bilden läses av på telefonen och skickas inte någonstans, om du inte själv väljer att dela priserna (se nedan).</li><li>Din plats. Den används för att hitta butiker nära dig och sparas bara på telefonen.</li></ul>
+    <h2>Det som skickas iväg, och varför</h2>
+    <ul>
+      <li><b>Butiker nära dig:</b> när du tillåter platsen skickas din position till OpenStreetMaps tjänst Overpass för att hitta butikerna runt dig.</li>
+      <li><b>Produktinformation:</b> när du skannar eller söker efter en streckkod frågar appen Open Food Facts om produkten. Bara streckkoden eller sökordet skickas.</li>
+      <li><b>Priser och reklamblad</b> hämtas från ZEVU:s egen sida och från butikernas bladtjänster. Inga uppgifter om dig skickas med.</li>
+      <li><b>Konto (frivilligt):</b> loggar du in med Google sparas dina listor, bevakningar och inställningar på ditt konto (tjänsten Supabase) så att de finns kvar på en ny telefon. Du kan radera kontot i appen under Profil.</li>
+      <li><b>Dela kvittopriser (frivilligt):</b> om du kryssar i "Dela priser" laddas kvittobilden och priserna upp till Open Prices med ditt Open Food Facts-konto. De blir då offentliga under licensen CC BY-SA. Ditt lösenord går direkt till Open Food Facts och sparas aldrig i ZEVU.</li>
+    </ul>
+    <h2>Det vi inte gör</h2>
+    <ul><li>Ingen reklam, ingen spårning och inga analysverktyg.</li><li>Vi säljer eller delar inte dina uppgifter med någon.</li><li>Vi ber aldrig om lösenord till butikernas konton.</li></ul>
+    <h2>Dina rättigheter</h2>
+    <p>Du kan när som helst ta bort appen, och då försvinner allt som bara finns på telefonen. Kontot raderar du i appen under Profil. Frågor kan ställas på <a href="https://github.com/Daniel-ape/hintaopas/issues">GitHub</a>.</p>
+  </section>
+
+  <section data-l="fi">
+    <h1>Tietosuoja</h1>
+    <p class="muted">Koskee ZEVU-sovellusta iPhonelle ja Androidille (beta). Päivitetty 11.11.2026.</p>
+    <p>ZEVU vertailee ruokahintoja. Sovellus on tehty keräämään sinusta mahdollisimman vähän: suurin osa jää puhelimeesi.</p>
+    <h2>Mikä jää puhelimeen</h2>
+    <ul><li>Ostoslistat, seuratut tuotteet, tallennetut tarjoukset ja asetukset.</li><li>Skannaamasi kuitit. Kuva luetaan puhelimessa eikä sitä lähetetä minnekään, ellet itse päätä jakaa hintoja (ks. alla).</li><li>Sijaintisi. Sitä käytetään lähikauppojen löytämiseen, ja se tallennetaan vain puhelimeen.</li></ul>
+    <h2>Mitä lähetetään ja miksi</h2>
+    <ul>
+      <li><b>Lähikaupat:</b> kun sallit sijainnin, sijaintisi lähetetään OpenStreetMapin Overpass-palveluun lähikauppojen hakemiseksi.</li>
+      <li><b>Tuotetiedot:</b> kun skannaat tai haet viivakoodia, sovellus kysyy tuotteesta Open Food Factsilta. Vain viivakoodi tai hakusana lähetetään.</li>
+      <li><b>Hinnat ja mainoslehdet</b> haetaan ZEVUn omalta sivulta ja kauppojen lehtipalveluista. Sinusta ei lähetetä tietoja.</li>
+      <li><b>Tili (vapaaehtoinen):</b> jos kirjaudut Googlella, listasi, seurantasi ja asetuksesi tallennetaan tilillesi (Supabase-palvelu), jotta ne säilyvät uudessa puhelimessa. Voit poistaa tilin sovelluksessa kohdassa Profiili.</li>
+      <li><b>Kuittihintojen jakaminen (vapaaehtoinen):</b> jos valitset "Jaa hinnat", kuittikuva ja hinnat ladataan Open Pricesiin Open Food Facts -tililläsi. Ne julkaistaan CC BY-SA -lisenssillä. Salasanasi menee suoraan Open Food Factsille eikä sitä tallenneta ZEVUun.</li>
+    </ul>
+    <h2>Mitä emme tee</h2>
+    <ul><li>Ei mainoksia, seurantaa eikä analytiikkatyökaluja.</li><li>Emme myy tai jaa tietojasi kenellekään.</li><li>Emme koskaan pyydä kauppojen tilien salasanoja.</li></ul>
+    <h2>Oikeutesi</h2>
+    <p>Voit poistaa sovelluksen milloin tahansa, jolloin kaikki vain puhelimessa oleva katoaa. Tilin poistat sovelluksessa kohdassa Profiili. Kysymyksiä voi esittää <a href="https://github.com/Daniel-ape/hintaopas/issues">GitHubissa</a>.</p>
+  </section>
+
+  <section data-l="en">
+    <h1>Privacy</h1>
+    <p class="muted">Applies to the ZEVU app for iPhone and Android (beta). Last updated 11 Nov 2026.</p>
+    <p>ZEVU compares grocery prices. It is built to collect as little about you as possible: most things stay on your phone.</p>
+    <h2>What stays on your phone</h2>
+    <ul><li>Shopping lists, watched products, saved offers and settings.</li><li>Receipts you scan. The photo is read on the phone and not sent anywhere unless you choose to share the prices (see below).</li><li>Your location. It is used to find shops near you and is only stored on the phone.</li></ul>
+    <h2>What is sent, and why</h2>
+    <ul>
+      <li><b>Shops near you:</b> when you allow location, your position is sent to OpenStreetMap’s Overpass service to find the shops around you.</li>
+      <li><b>Product information:</b> when you scan or search for a barcode, the app asks Open Food Facts about the product. Only the barcode or search word is sent.</li>
+      <li><b>Prices and leaflets</b> are fetched from ZEVU’s own site and the shops’ leaflet services. Nothing about you is sent.</li>
+      <li><b>Account (optional):</b> if you sign in with Google, your lists, alerts and settings are stored with your account (the Supabase service) so they follow you to a new phone. You can delete the account in the app under Profile.</li>
+      <li><b>Sharing receipt prices (optional):</b> if you tick “Share prices”, the receipt photo and prices are uploaded to Open Prices with your Open Food Facts account and published under CC BY-SA. Your password goes straight to Open Food Facts and is never stored in ZEVU.</li>
+    </ul>
+    <h2>What we don’t do</h2>
+    <ul><li>No ads, no tracking and no analytics tools.</li><li>We don’t sell or share your data with anyone.</li><li>We never ask for passwords to shop accounts.</li></ul>
+    <h2>Your rights</h2>
+    <p>You can remove the app at any time, which removes everything kept only on the phone. Delete your account in the app under Profile. Questions can be asked on <a href="https://github.com/Daniel-ape/hintaopas/issues">GitHub</a>.</p>
+  </section>
+</div>
+<script>
+  function setL(l) { document.querySelectorAll('[data-l]').forEach(function (s) { s.classList.toggle('on', s.dataset.l === l) }); document.querySelectorAll('[data-s]').forEach(function (b) { b.classList.toggle('on', b.dataset.s === l) }); document.documentElement.lang = l; try { localStorage.setItem('zevu:site-lang', l) } catch (e) {} }
+  document.querySelectorAll('[data-s]').forEach(function (b) { b.onclick = function () { setL(b.dataset.s) } })
+  var l = 'sv'; try { l = localStorage.getItem('zevu:site-lang') || ((navigator.language || '').slice(0, 2) === 'fi' ? 'fi' : (navigator.language || '').slice(0, 2) === 'sv' ? 'sv' : 'en') } catch (e) {}
+  setL(l)
+</script>
+</body>
+</html>
