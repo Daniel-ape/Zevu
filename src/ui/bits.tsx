@@ -93,6 +93,7 @@ export function PriceMeta({ row }: { row: RetailerPrice }) {
       )}
       {fresh && row.current.isMemberPrice && <span className="tag member" style={{ marginLeft: 6 }}>{t('price.member')}</span>}
       {fresh && !row.current.isMemberPrice && row.current.isPromotion && <span className="tag promo" style={{ marginLeft: 6 }}>{t('price.offer')}</span>}
+      {row.current.inStoreOnly && <span className="tag" style={{ marginLeft: 6 }}>{t('price.inStore')}</span>}
     </>
   )
 }

@@ -22,7 +22,10 @@ const validEan = (g) => {
 }
 
 const STORES = {
-  halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all', foodFirst: true },
+  halpahalli: { retailerId: 'halpahalli', base: 'https://www.halpahalli.fi', sitemaps: ['https://www.halpahalli.fi/media/sitemap/sitemap_product.xml', 'https://www.halpahalli.fi/media/sitemap/sitemap_product_002.xml'], product: /\.html$/, keep: 'all', foodFirst: true,
+    // Most of Halpa-Halli's food can't be ordered online ("out of stock" in the
+    // web shop) but is sold in the shops at the price shown: keep it, marked.
+    storeOnlyFood: true },
   verkkokauppa: { retailerId: 'verkkokauppa', base: 'https://www.verkkokauppa.com', sitemaps: ['https://www.verkkokauppa.com/gsitemaps1/sitemap.xml'], product: /\/fi\/product\/\d+/, keep: 'all' },
   prisma: { retailerId: 'prisma', base: 'https://www.prisma.fi', sitemaps: ['https://www.prisma.fi/sitemap.xml'], product: /\/tuotteet\/\d+\//, keep: 'all' },
   karkkainen: { retailerId: 'karkkainen', base: 'https://www.karkkainen.com', sitemaps: ['https://www.karkkainen.com/files/sitemap/sitemap.xml'], maps: /products_/, product: /karkkainen\.com\/verkkokauppa\//, keep: 'all' },
@@ -250,10 +253,14 @@ for (const f of ['tokmanni', 'halpahalli']) {
 const since = new Date(Date.now() - 14 * 86_400_000).toISOString()
 const byEan = new Map()
 for (const [url, s] of Object.entries(state)) {
-  if (!s.ean || s.at < since || !s.inStock) continue
+  // out of stock online: kept only for shops whose food is sold in the shops instead
+  const storeOnly = !s.inStock && cfg.storeOnlyFood && foodRank(url) < 2
+  if (!s.ean || s.at < since || (!s.inStock && !storeOnly)) continue
   if (cfg.keep === 'match' && !known.has(s.ean)) continue
   const prev = byEan.get(s.ean)
-  if (!prev || s.priceCents < prev.priceCents) byEan.set(s.ean, { ean: s.ean, priceCents: s.priceCents, name: s.name, brand: s.brand, image: s.image, url, checkedAt: s.at })
+  // an orderable page beats a shop-only one; otherwise the lower price wins
+  const better = !prev || (prev.store && !storeOnly) || (!!prev.store === storeOnly && s.priceCents < prev.priceCents)
+  if (better) byEan.set(s.ean, { ean: s.ean, priceCents: s.priceCents, name: s.name, brand: s.brand, image: s.image, url, checkedAt: s.at, ...(storeOnly ? { store: true } : {}) })
 }
 const prices = [...byEan.values()]
 mkdirSync('public/prices', { recursive: true })

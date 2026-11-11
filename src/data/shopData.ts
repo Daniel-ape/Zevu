@@ -8,8 +8,8 @@ import { EMOJI, categoryFor } from '../domain/categories'
 import { fetchData } from './dataFile'
 import { parseQuantity } from './openFoodFacts'
 
-// [ean, priceCents, name, brand, image, path-or-url, checkedAt]
-type Item = [string, number, string, string, string, string, string]
+// [ean, priceCents, name, brand, image, path-or-url, checkedAt, 1 = in the shops only?]
+type Item = [string, number, string, string, string, string, string, 1?]
 interface Bundle { builtAt: string; shops: { r: string; at: string; o: string; p?: string; i: Item[] }[] }
 type History = Record<string, Record<string, [string, number][]>>
 
@@ -31,12 +31,12 @@ export async function loadShopData(part: 'core' | 'rest'): Promise<ShopData> {
   const time = (t: string) => { let v = times.get(t); if (v === undefined) { v = t.length === 16 ? t + ':00.000Z' : t; times.set(t, v) } return v }
   for (const s of bundle?.shops ?? []) {
     const source: PriceSource = s.r === 'tokmanni' ? 'tokmanni' : 'shop'
-    for (const [ean, cents, name, brand, pic, link, checked] of s.i) {
+    for (const [ean, cents, name, brand, pic, link, checked, storeOnly] of s.i) {
       // pictures are stored without the start the shop's pictures share (s.p)
       const image = pic && !pic.startsWith('http') ? (s.p ?? '') + pic : pic
       const id = idOf(ean)
       const url = link ? (link.startsWith('/') ? s.o + link : link) : undefined
-      out.observations.push({ productId: id, retailerId: s.r, priceCents: cents, observedAt: time(checked), source, url })
+      out.observations.push({ productId: id, retailerId: s.r, priceCents: cents, observedAt: time(checked), source, url, ...(storeOnly ? { inStoreOnly: true } : {}) })
       if (image) out.images.push([ean, image])
       if (name && !seen.has(ean)) {
         seen.add(ean)

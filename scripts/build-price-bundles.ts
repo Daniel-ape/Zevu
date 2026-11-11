@@ -16,9 +16,10 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { EVERYDAY, categoryFor } from '../src/domain/categories'
 
-interface Price { ean: string; priceCents: number; checkedAt?: string; name?: string; brand?: string; image?: string; url?: string }
+interface Price { ean: string; priceCents: number; checkedAt?: string; name?: string; brand?: string; image?: string; url?: string; store?: boolean }
 interface ShopFile { retailerId: string; fetchedAt: string; prices: Price[] }
-type Item = [string, number, string, string, string, string, string]
+// (an 8th field 1 = not orderable online, sold in the shops only)
+type Item = [string, number, string, string, string, string, string] | [string, number, string, string, string, string, string, 1]
 // o: the shop's site, links are stored without it; p: the start most picture
 // addresses share, stored without it (a picture not starting with "http" gets p in front)
 interface Shop { r: string; at: string; o: string; p?: string; i: Item[] }
@@ -107,7 +108,8 @@ for (const s of shops) {
     p.ean, p.priceCents, cleanName(p.name ?? ''), cleanName(p.brand ?? ''), p.image?.startsWith('https://') ? (ip && p.image.startsWith(ip) ? p.image.slice(ip.length) : p.image) : '',
     p.url?.startsWith('https://') ? (o && p.url.startsWith(o + '/') ? p.url.slice(o.length) : p.url) : '',
     (p.checkedAt ?? s.fetchedAt).slice(0, 16),
-  ]
+    ...(p.store ? [1 as const] : []),
+  ] as Item
   const c: Shop = { r: s.retailerId, at: s.fetchedAt, o, ...(ip ? { p: ip } : {}), i: [] }
   const r: Shop = { r: s.retailerId, at: s.fetchedAt, o, ...(ip ? { p: ip } : {}), i: [] }
   const mine = new Set<string>()

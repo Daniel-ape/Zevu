@@ -6,6 +6,8 @@ import { euro } from '../domain/pricing'
 import { lineKey, matchLine, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
 import { ProductPicker } from '../ui/ProductPicker'
 import { LOCALE } from '../i18n'
+import { ShareReceipt, type ShareChoice } from '../ui/ShareReceipt'
+import { openPricesLogin, shareReceipt } from '../data/openPrices'
 
 type Draft = Omit<Receipt, 'id' | 'importedAt'>
 
@@ -28,6 +30,10 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
   // Lines whose link is a guess (shown for checking), and the line being re-linked.
   const [guess, setGuess] = useState<Set<number>>(new Set())
   const [picking, setPicking] = useState<number | null>(null)
+  // the receipt photo, kept for sharing the prices (Open Prices wants it as proof)
+  const [photo, setPhoto] = useState<Blob | null>(null)
+  const [share, setShare] = useState<ShareChoice>({ on: false, place: null })
+  const [sharing, setSharing] = useState('')
 
   const read = (raw: string) => {
     const parsed = parseReceipt(raw)
@@ -57,6 +63,7 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
         const judge = (text: string) => { const r = parseReceipt(text); const sum = r.items.reduce((a, i) => a + i.priceCents, 0); return r.items.length + (r.totalCents !== null && r.totalCents === sum ? 3 : 0) + (r.retailerId ? 1 : 0) }
         const text = await photoToText(f, (p) => setBusy(t('rc.scanning', { p: Math.round(p * 100) })), judge)
         setFromPhoto(true)
+        setPhoto(f)
         read(text)
       } else if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
         const { pdfToText } = await import('../data/pdfText')
@@ -74,14 +81,33 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
     }
   }
 
-  const save = () => {
+  // products with a barcode, one price per item (weighed goods are left out);
+  // links the app only guessed are shared once the user has checked them
+  const shareable = draft ? draft.items.filter((i, k) => !guess.has(k) && i.productId?.startsWith('off:') && Number.isInteger(i.quantity) && i.quantity > 0 && i.priceCents > 0) : []
+  const save = async () => {
     if (!draft) return
     if (!draft.retailerId) return setError(t('rc.needStore'))
+    if (share.on && photo && shareable.length && !(openPricesLogin() && share.place)) return setError(t('op.notReady'))
     addReceipt({ ...draft, id: crypto.randomUUID?.() ?? String(Date.now()), importedAt: new Date().toISOString() })
     // Remember the links, so the same lines are recognised next time.
     const learned = readLearned()
     for (const it of draft.items) if (it.productId) learned[lineKey(it.name)] = it.productId
     writeLearned(learned)
+    if (share.on && photo && share.place && shareable.length) {
+      setSharing(t('op.sending'))
+      try {
+        const n = await shareReceipt({
+          photo, date: draft.date, place: share.place, totalCents: draft.totalCents,
+          items: shareable.map((i) => ({ ean: i.productId!.slice(4), unitCents: i.priceCents / i.quantity, quantity: i.quantity, name: i.name })),
+        })
+        setSharing(t('op.done', { n }))
+        setTimeout(onClose, 1600)
+      } catch (e) {
+        setSharing('')
+        setError(t((e as Error).message === 'signin' ? 'op.signinAgain' : 'op.failed'))
+      }
+      return
+    }
     onClose()
   }
 
@@ -176,7 +202,10 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
                 {t('rc.delete')}
               </button>
             ) : (
-              <button className="btn primary" style={{ marginTop: 16 }} onClick={save}>{t('rc.save')}</button>
+              <>
+                {photo && <ShareReceipt retailerId={draft.retailerId} count={shareable.length} value={share} onChange={setShare} />}
+                <button className="btn primary" style={{ marginTop: 16 }} disabled={!!sharing} onClick={save}>{sharing || t('rc.save')}</button>
+              </>
             )}
           </>
         )}

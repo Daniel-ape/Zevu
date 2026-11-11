@@ -1951,3 +1951,13 @@ html[data-vt='pop']::view-transition-new(root) { animation-name: vt2-over; z-ind
 .dock.basic .tab.on svg { background: var(--accent-soft); }
 .dock.basic .tab-dot { right: calc(50% - 22px); top: 6px; }
 .kb-open .dock.basic { display: none; }
+
+/* Sharing a receipt's prices with Open Prices */
+.op-box { margin-top: 16px; border-radius: 20px; background: var(--surface); padding: 16px; }
+.op-head { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+.op-head input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--accent); flex: none; }
+.op-head span { display: flex; flex-direction: column; gap: 3px; }
+.op-head b { font-size: 15px; }
+.op-head small { font-size: 12.5px; color: var(--text-3); line-height: 1.4; }
+.op-body { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.op-input { min-height: 0; height: 46px; resize: none; padding: 0 14px; }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 // button, kept on the device) and the grocery stores around it from
 // OpenStreetMap (Overpass API). Only the coordinates are sent to OpenStreetMap.
 export type Chain = 'lidl' | 'tokmanni' | 'prisma' | 's-market' | 'sale' | 'k-citymarket' | 'k-supermarket' | 'k-market'
-export type NearStore = { chain: Chain; name: string; lat: number; lon: number; km: number; url?: string; kSlug?: string }
+export type NearStore = { chain: Chain; name: string; lat: number; lon: number; km: number; url?: string; kSlug?: string; osm?: { type: 'NODE' | 'WAY' | 'RELATION'; id: number } }
 type Pos = { lat: number; lon: number; at: string }
 
 const POS = 'hintaopas:pos'
@@ -40,7 +40,7 @@ function chainOf(tags: Record<string, string>): Chain | null {
 
 const title = (slug: string) => slug.split('-').filter(Boolean).map((w) => (w.length <= 2 && w !== 'k' ? w : w[0].toUpperCase() + w.slice(1))).join(' ').replace(/^K /, 'K-').replace(/^S Market/, 'S-market')
 
-type OsmEl = { lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }
+type OsmEl = { type?: 'node' | 'way' | 'relation'; id?: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }
 async function fetchStores(p: { lat: number; lon: number }): Promise<Omit<NearStore, 'km'>[]> {
   const q = `[out:json][timeout:25];nwr["shop"]["brand"~"Lidl|Tokmanni|Prisma|S-market|Sale|K-Citymarket|K-Supermarket|K-Market",i](around:40000,${p.lat.toFixed(4)},${p.lon.toFixed(4)});out center tags;`
   for (const ep of ENDPOINTS) {
@@ -62,7 +62,9 @@ async function fetchStores(p: { lat: number; lon: number }): Promise<Omit<NearSt
         const name = kSlug ? title(kSlug) : sSlug ? title(sSlug) : tSlug ? title(tSlug.startsWith('tokmanni') ? tSlug : `tokmanni-${tSlug}`)
           : [CHAIN_LABEL[chain], tags.name && tags.name !== tags.brand ? tags.name.replace(new RegExp(`^${CHAIN_LABEL[chain]}\\s*`, 'i'), '') : city].filter(Boolean).join(' ')
         const url = /^https:\/\/(www\.)?(k-ruoka|s-kaupat|tokmanni|lidl)\.fi\//.test(site) && !/lidl\.fi\/?$/.test(site) ? site : undefined
-        return [{ chain, name, lat, lon, url, kSlug }]
+        // the OpenStreetMap place, which is how Open Prices names a shop
+        const osm = e.type && e.id ? { type: e.type.toUpperCase() as 'NODE' | 'WAY' | 'RELATION', id: e.id } : undefined
+        return [{ chain, name, lat, lon, url, kSlug, osm }]
       })
     } catch {
       /* try the next server */
@@ -116,7 +118,8 @@ export function useNearby() {
       const pos = read<Pos>(POS)
       if (!pos) return setState({ stores: null, status: 'off' })
       const cache = read<{ lat: number; lon: number; at: string; stores: Omit<NearStore, 'km'>[] }>(STORES)
-      const fresh = cache && km(cache, pos) < 3 && Date.now() - +new Date(cache.at) < 14 * 86_400_000
+      // (lists saved before shops carried their OpenStreetMap place are read again)
+      const fresh = cache && km(cache, pos) < 3 && Date.now() - +new Date(cache.at) < 14 * 86_400_000 && (!cache.stores.length || !!cache.stores[0].osm)
       if (fresh) {
         const stores = cache.stores.map((s) => ({ ...s, km: km(pos, s) })).sort((a, b) => a.km - b.km)
         return setState({ stores, status: 'ready' })

@@ -68,6 +68,8 @@ export interface PriceObservation {
   isMemberPrice?: boolean
   /** The product's page in the shop, when the price was read from it. */
   url?: string
+  /** The web shop can't deliver it, but it is sold in the shops at this price. */
+  inStoreOnly?: boolean
 }
 
 
