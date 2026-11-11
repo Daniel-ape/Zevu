@@ -1,0 +1,26 @@
+name: probe
+on: workflow_dispatch
+permissions: { contents: write }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/cache/restore@v4
+        with:
+          path: collector/state
+          key: state-halpahalli-none
+          restore-keys: state-halpahalli-
+      - run: |
+          mkdir -p out
+          node .github/probe/hh.mjs
+          # sample a few food pages that gave no barcode, to see why
+          for u in $(node -e "const j=require('./out/hh.json');console.log([...j.examples[0].noEan.slice(0,3)].join(' '))"); do
+            curl -s -A 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)' "$u" -o "out/$(basename $u)"; sleep 3
+          done
+          ls -la out
+      - run: |
+          cd out && git init -q && git checkout -q -b debug-hh && git -c user.name=bot -c user.email=bot@users.noreply.github.com add . && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm hh
+          git push -f -q https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git debug-hh
