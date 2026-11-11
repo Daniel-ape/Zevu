@@ -45,7 +45,7 @@ const name = process.argv[2]
 const cfg = STORES[name]
 if (!cfg) throw new Error(`unknown store ${name}`)
 
-const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)'
+const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; price comparison)'
 const BUDGET = Number(process.env.BUDGET_MIN ?? 270) * 60_000
 const START = Date.now()
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))

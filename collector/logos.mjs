@@ -4,7 +4,7 @@
 // S and K are left out: their sites ask bots to stay away.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
-const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)'
+const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; price comparison)'
 const SITES = {
   lidl: 'https://www.lidl.fi/',
   rusta: 'https://www.rusta.com/',

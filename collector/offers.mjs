@@ -9,7 +9,7 @@ import { offersOf } from './leafletParse.mjs'
 import { readPpm, refineCrop } from './cropRefine.mjs'
 import { datesFrom } from './leafletDates.mjs'
 
-const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)'
+const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; price comparison)'
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 async function get(u, bin) {
   await sleep(1200)

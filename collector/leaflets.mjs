@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { datesFrom } from './leafletDates.mjs'
 
-const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
+const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; grocery price comparison)'
 const get = async (url) => {
   const r = await fetch(url, { headers: { 'User-Agent': UA } })
   if (!r.ok) throw new Error(`${r.status} ${url}`)

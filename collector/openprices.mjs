@@ -5,7 +5,7 @@
 // locations in FI) and written per chain: public/prices/op-<retailer>.json.
 import { mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs'
 
-const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; price comparison)'
+const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; price comparison)'
 const API = 'https://prices.openfoodfacts.org/api/v1/prices'
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 

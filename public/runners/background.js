@@ -2,7 +2,16 @@
 // Every few hours: reads the collected store prices from the website and
 // notifies when a watched product has become cheaper than when it was watched
 // (or than the last price we told the user about).
-const LIVE = 'https://daniel-ape.github.io/hintaopas/prices/'
+// the website (repository renamed from hintaopas to zevu); the old address as a fallback
+const LIVES = ['https://daniel-ape.github.io/zevu/prices/', 'https://daniel-ape.github.io/hintaopas/prices/']
+async function live(path) {
+  let last
+  for (const base of LIVES) {
+    try { const r = await fetch(base + path); if (r.ok) return r; last = r } catch (e) { last = e }
+  }
+  if (last && typeof last.ok === 'boolean') return last
+  throw last
+}
 // Packed shop prices (scripts/build-price-bundles.ts): core first, the rest
 // only when a watched product wasn't in it.
 const FILES = ['app/core.json', 'app/rest.json']
@@ -85,7 +94,7 @@ addEventListener('checkPrices', async (resolve, reject) => {
     for (const ean of Object.keys(want)) shards[ean.slice(-2).padStart(2, '0')] = true
     for (const k of Object.keys(shards)) {
       try {
-        const r = await fetch(LIVE + 'app/best/' + k + '.json')
+        const r = await live('app/best/' + k + '.json')
         if (!r.ok) continue
         const d = await r.json()
         for (const ean of Object.keys(d)) {
@@ -99,7 +108,7 @@ addEventListener('checkPrices', async (resolve, reject) => {
       if (!missing) break
       let d
       try {
-        const r = await fetch(LIVE + file)
+        const r = await live(file)
         if (!r.ok) continue
         d = await r.json()
       } catch (e) {
@@ -131,7 +140,7 @@ addEventListener('checkPrices', async (resolve, reject) => {
     }
     // Leaflet offers on watched products, each told once.
     try {
-      const r = await fetch(LIVE + 'offers.json')
+      const r = await live('offers.json')
       if (r.ok) {
         const d = await r.json()
         const toldOffers = readJson('toldOffers', [])

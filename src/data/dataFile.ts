@@ -5,10 +5,12 @@ import { dataUrl } from './dataUrl'
 // it next to itself; the installed app would otherwise only see the copy built
 // into it, so it reads the live copy from the website and falls back to the
 // built-in one when offline.
-const LIVE = 'https://daniel-ape.github.io/hintaopas/prices/'
+// The website's address (the repository was renamed from hintaopas to zevu;
+// the old address is tried too, in case this app is older than the rename).
+const LIVE = ['https://daniel-ape.github.io/zevu/prices/', 'https://daniel-ape.github.io/hintaopas/prices/']
 
 export async function fetchData<T>(file: string): Promise<T | null> {
-  const urls = isNativeApp ? [LIVE + file, dataUrl(`prices/${file}`)] : [dataUrl(`prices/${file}`)]
+  const urls = isNativeApp ? [...LIVE.map((u) => u + file), dataUrl(`prices/${file}`)] : [dataUrl(`prices/${file}`)]
   for (const url of urls) {
     try {
       const r = await fetch(url, { cache: 'no-cache' })

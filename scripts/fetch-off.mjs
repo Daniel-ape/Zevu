@@ -4,7 +4,7 @@
 // split by category, which only serves the first 10 pages of each query.
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 
-const UA = 'Hintaopas/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
+const UA = 'Hintaopas/0.1 (+https://github.com/Daniel-ape/zevu; grocery price comparison)'
 const FIELDS = 'code,product_name,product_name_fi,product_name_sv,product_name_en,brands,quantity,categories_tags,image_front_small_url,unique_scans_n'
 const MAX = Number(process.argv[2] ?? 8000)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))

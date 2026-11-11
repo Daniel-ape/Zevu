@@ -7,7 +7,7 @@ import { inAppLink } from '../data/openLink'
 
 export type LegalPage = 'about' | 'privacy' | 'sources' | 'terms'
 
-const CONTACT = 'https://github.com/Daniel-ape/hintaopas/issues'
+const CONTACT = 'https://github.com/Daniel-ape/zevu/issues'
 const UPDATED = '2026-11-08'
 
 type Block = { h?: string; p?: string; list?: string[] }

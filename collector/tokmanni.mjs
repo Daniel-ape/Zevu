@@ -6,7 +6,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { foodRank } from './foodGuess.mjs'
 
-const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/hintaopas; grocery price comparison)'
+const UA = 'HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; grocery price comparison)'
 const DELAY = 10_000 // Crawl-delay: 10
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const get = async (url) => {

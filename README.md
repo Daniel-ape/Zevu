@@ -30,7 +30,7 @@ Android needs Android Studio; iPhone needs a Mac with Xcode.
 ### iPhone without a Mac (Windows + Sideloadly)
 
 GitHub builds an unsigned `Hintaopas.ipa` on every change and puts it on the
-[`iphone` release](https://github.com/Daniel-ape/hintaopas/releases/tag/iphone).
+[`iphone` release](https://github.com/Daniel-ape/zevu/releases/tag/iphone).
 
 1. On the Windows PC install **iTunes** and **iCloud** from apple.com (not the
    Microsoft Store versions), then **Sideloadly** from sideloadly.io.
