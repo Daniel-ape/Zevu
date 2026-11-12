@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useEffect, useMemo, useState } from 'react'
 import { loadOffers, type LeafletOffer } from '../screens/Coupons'
 import { offerIsFor } from '../domain/watch'
@@ -22,7 +23,7 @@ export function useWatchOffers(): Map<string, LeafletOffer[]> {
     const now = today()
     const valid = offers.filter((o) => !o.validUntil || o.validUntil >= now)
     for (const w of watched) {
-      const p = products.find((x) => x.id === w.productId)
+      const p = productById(products, w.productId)
       if (!p) continue
       const hits = valid.filter((o) => offerIsFor(p, o.name))
       // one per chain and price: leaflets repeat the same offer on several pages

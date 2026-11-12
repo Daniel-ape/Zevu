@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
@@ -143,7 +144,7 @@ export function Home() {
           <div className="rows">
             {watched
               .map((w) => {
-                const p = products.find((x) => x.id === w.productId)
+                const p = productById(products, w.productId)
                 const c = p ? cheapest(compare(p, pricesOf(p.id), retailers)) : undefined
                 const now = c?.current.priceCents ?? null
                 const diff = now !== null && w.baselineCents !== null ? now - w.baselineCents : null

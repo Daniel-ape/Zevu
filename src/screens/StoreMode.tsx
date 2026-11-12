@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useEffect } from 'react'
 import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
@@ -24,7 +25,7 @@ export function StoreMode({ onClose }: { onClose: () => void }) {
   }, [])
 
   const rows = list.items
-    .map((i) => ({ item: i, p: products.find((x) => x.id === i.productId) }))
+    .map((i) => ({ item: i, p: productById(products, i.productId) }))
     .filter((r): r is { item: typeof r.item; p: NonNullable<typeof r.p> } => !!r.p)
   const todo = rows.filter((r) => !r.item.checked)
   const done = rows.filter((r) => r.item.checked)

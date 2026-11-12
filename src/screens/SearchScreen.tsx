@@ -1,3 +1,4 @@
+import { getPendingQty, usePendingQty } from '../data/pendingQty'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../data/store'
 import { cheapest, compare, euro, sizeLabel, unitLabel, brandLabel } from '../domain/pricing'
@@ -245,7 +246,7 @@ export function SearchScreen() {
   const quickAdd = useCallback((id: string) => {
     const { list, setQuantity } = latest.current
     const item = list.items.find((i) => i.productId === id)
-    setQuantity(id, (item?.quantity ?? 0) + 1)
+    setQuantity(id, (getPendingQty(id) ?? item?.quantity ?? 0) + 1)
     setAdded(id)
     setTimeout(() => setAdded((a) => (a === id ? null : a)), 1600)
   }, [])
@@ -318,6 +319,8 @@ const ResultRow = memo(function ResultRow({ p, best, count, qty, justAdded, onOp
   onOpen: (id: string) => void; onAdd: (id: string) => void; noPrice: string; addLabel: string
 }) {
   // One card per product: big picture, the whole name, the price large under it.
+  const pending = usePendingQty(p.id)
+  const q = pending ?? qty
   return (
     <div className="search-row sr-card">
       <button className="sr-open" onClick={() => onOpen(p.id)}>
@@ -339,8 +342,8 @@ const ResultRow = memo(function ResultRow({ p, best, count, qty, justAdded, onOp
           )}
         </span>
       </button>
-      <button className={'quick-add sr-add' + (qty ? ' in' : '')} onClick={() => onAdd(p.id)} aria-label={addLabel}>
-        {justAdded ? <Check size={20} /> : qty ? <span>{qty}</span> : <Plus size={20} />}
+      <button className={'quick-add sr-add' + (q ? ' in' : '')} onClick={() => onAdd(p.id)} aria-label={addLabel}>
+        {justAdded ? <Check size={20} /> : q ? <span>{q}</span> : <Plus size={20} />}
       </button>
     </div>
   )

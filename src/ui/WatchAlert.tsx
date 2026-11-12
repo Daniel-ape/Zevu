@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { offerChainName, offerKey, useWatchOffers } from '../data/watchOffers'
@@ -24,7 +25,7 @@ export function WatchAlert() {
   const alert = useMemo(() => {
     if (loading) return null
     for (const w of watched) {
-      const p = products.find((x) => x.id === w.productId)
+      const p = productById(products, w.productId)
       if (!p) continue
       const c = cheapest(compare(p, pricesOf(p.id), retailers))
       const now = c?.current.priceCents
@@ -39,7 +40,7 @@ export function WatchAlert() {
       }
     }
     for (const w of watched) {
-      const p = products.find((x) => x.id === w.productId)
+      const p = productById(products, w.productId)
       const o = p && offers.get(p.id)?.find((x) => !seenOffers.includes(offerKey(p.id, x)))
       if (!p || !o) continue
       return {

@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useEffect } from 'react'
 import { BackgroundRunner } from '@capacitor/background-runner'
 import { isNativeApp } from './openLink'
@@ -26,7 +27,7 @@ export function usePriceAlerts() {
     const items = watched
       .filter((w) => w.productId.startsWith('off:'))
       .map((w) => {
-        const p = products.find((x) => x.id === w.productId)
+        const p = productById(products, w.productId)
         return {
           ean: w.productId.slice(4),
           name: p?.name ?? w.productId.slice(4),

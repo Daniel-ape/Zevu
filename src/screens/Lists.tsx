@@ -1,3 +1,6 @@
+import { getPendingQty, usePendingQty } from '../data/pendingQty'
+import type { ReactNode } from 'react'
+import { productById } from '../domain/productIndex'
 import { useMemo, useState } from 'react'
 import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
@@ -41,7 +44,7 @@ export function Lists() {
 
   const share = async () => {
     const lines = list.items.map((i) => {
-      const p = products.find((x) => x.id === i.productId)
+      const p = productById(products, i.productId)
       return `${i.checked ? '✓' : '•'} ${i.quantity > 1 ? `${i.quantity} × ` : ''}${p?.name ?? i.productId}`
     })
     const text = `${display(list.name)}\n${lines.join('\n')}`
@@ -161,11 +164,11 @@ export function Lists() {
         <>
           <div className="rows section" style={{ marginTop: 12 }}>
             {items.map((item) => {
-              const p = products.find((x) => x.id === item.productId)
+              const p = productById(products, item.productId)
               if (!p) return null
               const c = cheapest(compare(p, pricesOf(p.id), retailers))
               return (
-                <div key={p.id} className="row" style={{ opacity: item.checked ? 0.45 : 1 }}>
+                <ListRow key={p.id} id={p.id} checked={!!item.checked}>
                   <button className={'tick' + (item.checked ? ' on' : '')} onClick={() => toggleChecked(p.id)} aria-label={t('list.tick')} aria-pressed={!!item.checked}>
                     {item.checked && <Check size={16} />}
                   </button>
@@ -176,12 +179,8 @@ export function Lists() {
                       <div className="sub">{[sizeLabel(p), c && t('list.from', { price: euro(c.current.priceCents) })].filter(Boolean).join(' · ')}</div>
                     </div>
                   </button>
-                  <div className="stepper">
-                    <button onClick={() => setQuantity(p.id, item.quantity - 1)} aria-label={t('list.less')}><Minus size={16} /></button>
-                    <span>{item.quantity}</span>
-                    <button onClick={() => setQuantity(p.id, item.quantity + 1)} aria-label={t('list.more')}><Plus size={16} /></button>
-                  </div>
-                </div>
+                  <QtyStepper id={p.id} qty={item.quantity} setQuantity={setQuantity} less={t('list.less')} more={t('list.more')} />
+                </ListRow>
               )
             })}
           </div>
@@ -264,7 +263,7 @@ export function Lists() {
                       </div>
                       <div className="rows">
                         {picks.map((pk) => {
-                          const p = products.find((x) => x.id === pk.productId)
+                          const p = productById(products, pk.productId)
                           if (!p) return null
                           return (
                             <button key={pk.productId} className="row" onClick={() => nav.openProduct(p.id)}>
@@ -313,6 +312,27 @@ export function Lists() {
           <button onClick={() => { restoreList(undo); setUndo(null) }}>{t('undo.undo')}</button>
         </div>
       )}
+    </div>
+  )
+}
+
+// A list row. Hidden at once when its quantity is tapped down to zero, before
+// the list itself has caught up.
+function ListRow({ id, checked, children }: { id: string; checked: boolean; children: ReactNode }) {
+  const pending = usePendingQty(id)
+  if (pending === 0) return null
+  return <div className="row" style={{ opacity: checked ? 0.45 : 1 }}>{children}</div>
+}
+
+// − n + : the number changes the moment a button is pressed.
+function QtyStepper({ id, qty, setQuantity, less, more }: { id: string; qty: number; setQuantity: (id: string, q: number) => void; less: string; more: string }) {
+  const pending = usePendingQty(id)
+  const q = pending ?? qty
+  return (
+    <div className="stepper">
+      <button onClick={() => setQuantity(id, (getPendingQty(id) ?? qty) - 1)} aria-label={less}><Minus size={16} /></button>
+      <span>{q}</span>
+      <button onClick={() => setQuantity(id, (getPendingQty(id) ?? qty) + 1)} aria-label={more}><Plus size={16} /></button>
     </div>
   )
 }

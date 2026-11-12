@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { setPendingQty, settlePendingQty } from './pendingQty'
 import type { CategoryId, PriceObservation, Product, Retailer, ShoppingList, Watch } from '../domain/types'
 import { RETAILERS } from './retailers'
 import { detectLang, translate, type Key, type Lang } from '../i18n'
@@ -105,6 +106,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const list = lists.find((l) => l.id === activeId) ?? lists[0]
   const updateActive = (fn: (l: ShoppingList) => ShoppingList) =>
     setLists((all) => all.map((l) => (l.id === list.id ? fn(l) : l)))
+  useEffect(() => {
+    settlePendingQty((id) => list.items.find((i) => i.productId === id)?.quantity ?? 0)
+  }, [list])
   const [myStores, setMyStores] = useState<string[]>(() => load('myStores', []))
   const [watched, setWatched] = useState<Watch[]>(() => load('watched', []))
   const [cards, setCards] = useState<LoyaltyCard[]>(() => load('cards', []))
@@ -317,8 +321,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ),
       setWatchTarget: (productId, targetCents) =>
         setWatched((w) => w.map((x) => (x.productId === productId ? { ...x, targetCents } : x))),
-      setQuantity: (productId, qty) =>
-        updateActive((l) => {
+      setQuantity: (productId, qty) => {
+        // the pressed button shows the new number now; the list and every
+        // screen that depends on it follow without holding up the tap
+        setPendingQty(productId, Math.max(0, qty))
+        startTransition(() => updateActive((l) => {
           const items = l.items.filter((i) => i.productId !== productId)
           if (qty > 0) {
             const idx = l.items.findIndex((i) => i.productId === productId)
@@ -327,7 +334,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             else items.splice(idx, 0, { ...l.items[idx], ...next })
           }
           return { ...l, items }
-        }),
+        }))
+      },
       addPrice: ({ productId, retailerId, priceCents, origin }) => {
         setUserPrices((all) => [...all, { productId, retailerId, priceCents, origin, source: 'user-report', observedAt: new Date().toISOString() }])
         setLastStore(retailerId)

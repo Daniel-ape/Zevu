@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
@@ -36,7 +37,7 @@ export function Spending() {
       const d = new Date(r.date)
       if (d.getFullYear() !== month.getFullYear() || d.getMonth() !== month.getMonth()) continue
       for (const it of r.items) {
-        const cat = products.find((p) => p.id === it.productId)?.category
+        const cat = productById(products, it.productId)?.category
         const key = cat ? `cat.${cat}` : 'spend.other'
         byCat.set(key, (byCat.get(key) ?? 0) + it.priceCents)
       }
@@ -46,7 +47,7 @@ export function Spending() {
 
   const best = [...report.lines].filter((l) => l.savedCents > 0).sort((a, b) => b.savedCents - a.savedCents).slice(0, 5)
   const missed = [...report.lines].filter((l) => l.missedCents > 0).sort((a, b) => b.missedCents - a.missedCents).slice(0, 5)
-  const productName = (id: string, fallback: string) => products.find((p) => p.id === id)?.name ?? fallback
+  const productName = (id: string, fallback: string) => productById(products, id)?.name ?? fallback
 
   const shift = (n: number) => setMonth((m) => first(m, n))
   const isCurrent = month.getFullYear() === now.getFullYear() && month.getMonth() === now.getMonth()

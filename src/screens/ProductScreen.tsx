@@ -1,3 +1,5 @@
+import { usePendingQty } from '../data/pendingQty'
+import { productById } from '../domain/productIndex'
 import { useEffect, useMemo } from 'react'
 import { useStore } from '../data/store'
 import { cheapest, compare, dailyByStore, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel, brandLabel } from '../domain/pricing'
@@ -18,7 +20,8 @@ export function ProductScreen({ id }: { id: string }) {
   const [picFrom, setPicFrom] = useState<string>()
   const nav = useNav()
   const [adding, setAdding] = useState<false | { store?: string }>(false)
-  const product = products.find((p) => p.id === id)
+  const product = productById(products, id)
+  const pendingQty = usePendingQty(id)
 
   useEffect(() => markViewed(id), [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -52,6 +55,7 @@ export function ProductScreen({ id }: { id: string }) {
     : []
   const fresh = rows.filter((r) => r.freshness === 'fresh')
   const inList = list.items.find((i) => i.productId === product.id)
+  const listQty = pendingQty ?? inList?.quantity ?? 0
   const isWatched = watched.some((w) => w.productId === product.id)
 
   return (
@@ -77,9 +81,9 @@ export function ProductScreen({ id }: { id: string }) {
         </div>
       )}
       <div className="pd-actions">
-        {inList ? (
-          <button className="pd-add in" onClick={() => nav.go('lists')} aria-label={t('product.inList', { n: inList.quantity })}>
-            <Check size={22} /><span>{inList.quantity}</span>
+        {listQty ? (
+          <button className="pd-add in" onClick={() => nav.go('lists')} aria-label={t('product.inList', { n: listQty })}>
+            <Check size={22} /><span>{listQty}</span>
           </button>
         ) : (
           <button className="pd-add" onClick={() => setQuantity(product.id, 1)} aria-label={t('product.add')}><Plus size={26} /></button>

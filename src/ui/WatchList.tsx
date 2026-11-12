@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useState } from 'react'
 import { useStore } from '../data/store'
 import { offerChainName, useWatchOffers } from '../data/watchOffers'
@@ -23,7 +24,7 @@ export function WatchList() {
       <p className="group-note" style={{ marginTop: 0 }}>{t('watch.how')}</p>
       <div className="rows">
         {watched.map((w) => {
-          const p = products.find((x) => x.id === w.productId)
+          const p = productById(products, w.productId)
           if (!p) return null
           const c = cheapest(compare(p, pricesOf(p.id), retailers))
           const now = c?.current.priceCents ?? null
@@ -62,7 +63,7 @@ function WatchSheet({ w, offers, onClose }: { w: Watch; offers: LeafletOffer[]; 
   const nav = useNav()
   const [offer, setOffer] = useState<LeafletOffer | null>(null)
   const [own, setOwn] = useState('')
-  const p = products.find((x) => x.id === w.productId)
+  const p = productById(products, w.productId)
   if (!p) return null
   const c = cheapest(compare(p, pricesOf(p.id), retailers))
   const now = c?.current.priceCents ?? w.baselineCents

@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useRef, useState } from 'react'
 import { Portal } from '../ui/Portal'
 import { openCamera } from '../data/takePhoto'
@@ -182,10 +183,10 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
                     {!viewing ? (
                       <button className={'link-product' + (guess.has(i) ? ' guess' : '') + (it.productId ? '' : ' none')} onClick={() => setPicking(i)}>
                         {guess.has(i) && <span className="guess-tag">{t('rc.guess')}</span>}
-                        <span>{products.find((p) => p.id === it.productId)?.name ?? t('rc.notLinked')}</span>
+                        <span>{productById(products, it.productId)?.name ?? t('rc.notLinked')}</span>
                       </button>
                     ) : (
-                      <div className="sub">{products.find((p) => p.id === it.productId)?.name ?? t('rc.notLinked')}</div>
+                      <div className="sub">{productById(products, it.productId)?.name ?? t('rc.notLinked')}</div>
                     )}
                   </div>
                   <div className="price receipt-price">{euro(it.priceCents)}</div>

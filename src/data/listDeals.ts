@@ -1,3 +1,4 @@
+import { productById } from '../domain/productIndex'
 import { useEffect, useMemo, useState } from 'react'
 import { loadOffers, type LeafletOffer } from '../screens/Coupons'
 import { offerIsFor } from '../domain/watch'
@@ -41,7 +42,7 @@ export function useListDeals(): ListDeal[] {
     const since = Date.now() - 14 * 86_400_000
     for (const item of list.items) {
       if (item.checked) continue
-      const p = products.find((x) => x.id === item.productId)
+      const p = productById(products, item.productId)
       if (!p) continue
       const deals: ListDeal[] = []
       for (const o of valid) {

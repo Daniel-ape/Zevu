@@ -1,3 +1,4 @@
+import { productById } from './productIndex'
 import type { PriceObservation, Product, Retailer, ShoppingList } from './types'
 
 /**
@@ -123,7 +124,7 @@ export function basketTotals(
     let totalCents = 0
     let missing = 0
     for (const item of list.items) {
-      const product = products.find((p) => p.id === item.productId)
+      const product = productById(products, item.productId)
       if (!product) continue
       const row = compare(product, observations, [retailer], now)[0]
       if (!row || row.freshness !== 'fresh') missing++
@@ -162,7 +163,7 @@ export function splitPlan(
 ): SplitPlan | null {
   const items = list.items
     .map((item) => {
-      const product = products.find((p) => p.id === item.productId)
+      const product = productById(products, item.productId)
       if (!product) return null
       const prices = new Map<string, number>()
       for (const r of compare(product, pricesOf(product.id), retailers, now)) if (r.freshness === 'fresh') prices.set(r.retailer.id, r.current.priceCents)
