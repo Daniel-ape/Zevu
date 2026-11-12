@@ -2,307 +2,416 @@
 <html lang="sv">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ZEVU – Compare More. Spend Less.</title>
 <meta name="description" content="ZEVU jämför matpriser i Finland, så du ser var din handling blir billigast. Gratis beta för iPhone och Android." />
-<meta name="theme-color" content="#ffffff" />
+<meta name="theme-color" content="#06331d" />
 <link rel="icon" href="img/icon.png" />
 <link rel="apple-touch-icon" href="img/icon.png" />
+<link rel="canonical" href="https://daniel-ape.github.io/Zevu/" />
 <meta property="og:title" content="ZEVU – Compare More. Spend Less." />
 <meta property="og:description" content="Jämför matpriser i Finland och spara på varje köp." />
 <meta property="og:image" content="https://daniel-ape.github.io/Zevu/img/og.png" />
+<meta property="og:url" content="https://daniel-ape.github.io/Zevu/" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MobileApplication","name":"ZEVU","operatingSystem":"iOS, Android","applicationCategory":"ShoppingApplication","description":"Jämför matpriser i Finland och se var din handling blir billigast.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"url":"https://daniel-ape.github.io/Zevu/"}
+</script>
 <link rel="preload" href="fonts/jakarta-800.woff2" as="font" type="font/woff2" crossorigin />
 <style>
-  /* The app's own typeface, so the page and the app read as one product */
   @font-face { font-family: 'Jakarta'; src: url(fonts/jakarta-400.woff2) format('woff2'); font-weight: 400; font-display: swap; }
   @font-face { font-family: 'Jakarta'; src: url(fonts/jakarta-500.woff2) format('woff2'); font-weight: 500; font-display: swap; }
   @font-face { font-family: 'Jakarta'; src: url(fonts/jakarta-700.woff2) format('woff2'); font-weight: 700; font-display: swap; }
   @font-face { font-family: 'Jakarta'; src: url(fonts/jakarta-800.woff2) format('woff2'); font-weight: 800; font-display: swap; }
 
-  /* Palette: the ZEVU green of the logo, a forest ink, the yellow of a shelf
-     price label (the one loud colour: savings and prices), paper and a mint wash. */
+  /* ZEVU green, a deep forest for the big dark areas, shelf-label yellow for
+     savings and the beta tags, and soft mint for light panels. */
   :root {
-    --green: #0a7a44; --green-d: #075e34; --ink: #12261c; --ink-2: #4e5f55; --ink-3: #7d8b83;
-    --tag: #f6da4a; --paper: #ffffff; --mint: #eef6f0; --line: #dfe9e2;
-    --r-lg: 32px;
+    --green: #0a7a44; --green-d: #075e34; --green-b: #19b56a; --forest: #06331d; --forest-2: #0b4528;
+    --ink: #10221a; --ink-2: #4c5d54; --ink-3: #74837b;
+    --tag: #f6da4a; --paper: #ffffff; --soft: #f3f7f4; --mint: #e6f3ea; --line: #e2eae5;
+    --r: 28px;
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
-  body { margin: 0; font-family: 'Jakarta', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; font-size: 17px; line-height: 1.55; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: 'Jakarta', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; font-size: 17px; line-height: 1.55; overflow-x: hidden; }
   a { color: inherit; }
-  img { max-width: 100%; }
-  :focus-visible { outline: 3px solid var(--green); outline-offset: 3px; border-radius: 6px; }
-  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
-  h1, h2, h3 { margin: 0; letter-spacing: -0.025em; line-height: 1.08; }
-  h2 { font-size: clamp(32px, 4.2vw, 48px); font-weight: 800; }
-  h3 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  img { max-width: 100%; display: block; }
+  :focus-visible { outline: 3px solid var(--green-b); outline-offset: 3px; border-radius: 8px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+  h1, h2, h3 { margin: 0; letter-spacing: -0.03em; line-height: 1.05; }
+  h2 { font-size: clamp(34px, 4.6vw, 56px); font-weight: 800; }
+  h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
   p { margin: 0; }
-  .lead { font-size: 19px; color: var(--ink-2); max-width: 34em; }
+  .lead { font-size: 19px; color: var(--ink-2); max-width: 36em; }
+  .center { text-align: center; }
+  .center .lead { margin-left: auto; margin-right: auto; }
+  .skip { position: absolute; left: -999px; top: 8px; z-index: 50; background: #fff; padding: 8px 14px; border-radius: 8px; }
+  .skip:focus { left: 8px; }
 
-  /* top bar */
-  .nav { position: sticky; top: 0; z-index: 20; background: rgba(255, 255, 255, 0.86); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); border-bottom: 1px solid var(--line); }
-  .nav .wrap { display: flex; align-items: center; height: 64px; gap: 28px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.12em; font-size: 17px; text-decoration: none; }
-  .brand svg { width: 30px; height: 30px; border-radius: 8px; background: var(--green); padding: 6px; }
-  .links { display: flex; gap: 24px; font-size: 15px; font-weight: 500; color: var(--ink-2); }
-  .links a { text-decoration: none; } .links a:hover { color: var(--ink); }
+  /* top bar: see-through over the dark hero, white once you scroll */
+  .nav { position: fixed; inset: 0 0 auto; z-index: 30; color: #fff; transition: background 0.35s, color 0.35s, box-shadow 0.35s; }
+  .nav.scrolled { background: rgba(255, 255, 255, 0.88); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); color: var(--ink); box-shadow: 0 1px 0 var(--line); }
+  .nav .wrap { display: flex; align-items: center; height: 72px; gap: 32px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.14em; font-size: 18px; text-decoration: none; }
+  .brand svg { width: 32px; height: 32px; border-radius: 9px; background: var(--green); padding: 7px; }
+  .links { display: flex; gap: 28px; font-size: 15px; font-weight: 500; }
+  .links a { text-decoration: none; opacity: 0.78; transition: opacity 0.2s; } .links a:hover { opacity: 1; }
   .sp { flex: 1; }
-  .lang { display: flex; gap: 2px; background: var(--mint); border-radius: 999px; padding: 3px; }
-  .lang button { border: 0; background: none; font: inherit; font-size: 13px; font-weight: 700; color: var(--ink-3); padding: 5px 10px; border-radius: 999px; cursor: pointer; }
-  .lang button.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(18, 38, 28, 0.12); }
-  .btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 20px; border-radius: 999px; font-weight: 700; font-size: 15px; text-decoration: none; background: var(--green); color: #fff; transition: background 0.2s; }
-  .btn:hover { background: var(--green-d); }
+  .lang { display: flex; gap: 2px; border-radius: 999px; padding: 3px; background: rgba(255, 255, 255, 0.12); }
+  .nav.scrolled .lang { background: var(--soft); }
+  .lang button { border: 0; background: none; font: inherit; font-size: 13px; font-weight: 700; color: inherit; opacity: 0.7; padding: 5px 10px; border-radius: 999px; cursor: pointer; }
+  .lang button.on { opacity: 1; background: rgba(255, 255, 255, 0.2); }
+  .nav.scrolled .lang button.on { background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 22px; border-radius: 999px; font-weight: 700; font-size: 15px; text-decoration: none; background: #fff; color: var(--forest); transition: background 0.2s, color 0.2s, transform 0.2s; }
+  .nav.scrolled .btn { background: var(--green); color: #fff; }
+  .btn:active { transform: scale(0.97); }
 
   /* download buttons */
-  .get { display: flex; flex-wrap: wrap; gap: 12px; }
-  .dl { position: relative; display: inline-flex; align-items: center; gap: 12px; height: 60px; padding: 0 22px 0 18px; border-radius: 16px; background: var(--ink); color: #fff; text-decoration: none; transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1); }
+  .get { display: flex; flex-wrap: wrap; gap: 14px; }
+  .center .get { justify-content: center; }
+  .dl { position: relative; display: inline-flex; align-items: center; gap: 12px; height: 62px; padding: 0 24px 0 20px; border-radius: 18px; background: #fff; color: var(--ink); text-decoration: none; box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.45); transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1); }
   .dl:hover { transform: translateY(-2px); }
-  .dl span { display: flex; flex-direction: column; line-height: 1.15; }
-  .dl small { font-size: 12px; opacity: 0.72; font-weight: 500; }
+  .dl:active { transform: scale(0.97); }
+  .dl span { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+  .dl small { font-size: 12px; color: var(--ink-3); font-weight: 500; }
   .dl b { font-size: 19px; }
   .dl .beta { position: absolute; top: -9px; right: -9px; font-style: normal; font-size: 11px; font-weight: 800; background: var(--tag); color: var(--ink); padding: 3px 8px; border-radius: 6px; transform: rotate(4deg); }
 
-  /* hero: the app next to the receipt it saves you money on */
-  .hero { padding: 72px 0 56px; overflow: hidden; }
-  .hero .wrap { display: grid; grid-template-columns: 1.12fr 0.88fr; gap: 48px; align-items: center; }
-  .hero h1 { font-size: clamp(46px, 6vw, 76px); font-weight: 800; letter-spacing: -0.045em; line-height: 0.98; margin-bottom: 24px; }
-  .hero .lead { margin-bottom: 32px; }
-  .hero .facts { margin-top: 22px; font-size: 15px; color: var(--ink-3); max-width: 32em; }
-  .hero .facts a { color: var(--green); font-weight: 700; }
-  .stage { position: relative; height: 620px; }
+  /* hero */
+  .hero { position: relative; color: #fff; background:
+      radial-gradient(900px 520px at 50% 108%, rgba(25, 181, 106, 0.55), transparent 70%),
+      radial-gradient(700px 400px at 85% 10%, rgba(25, 181, 106, 0.18), transparent 70%),
+      linear-gradient(180deg, #04271a 0%, var(--forest) 55%, var(--forest-2) 100%);
+    padding: 150px 0 0; overflow: hidden; }
+  .hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 56px 56px; -webkit-mask: radial-gradient(ellipse 70% 60% at 50% 30%, #000, transparent 75%); mask: radial-gradient(ellipse 70% 60% at 50% 30%, #000, transparent 75%); }
+  .hero .wrap { position: relative; z-index: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 7px 14px 7px 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.16); margin-bottom: 28px; }
+  .pill b { background: var(--tag); color: var(--ink); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; }
+  .hero h1 { font-size: clamp(48px, 8vw, 104px); font-weight: 800; letter-spacing: -0.05em; line-height: 0.95; }
+  .hero .lead { color: rgba(255, 255, 255, 0.78); font-size: clamp(18px, 1.6vw, 21px); margin: 26px auto 38px; max-width: 32em; }
+  .hero .note { margin-top: 18px; font-size: 14px; color: rgba(255, 255, 255, 0.6); }
+  .hero .note a { color: #fff; font-weight: 700; }
+
+  /* three phones fanned out, the middle one rising over the edge */
+  .fan { position: relative; height: 560px; margin-top: 72px; }
+  .fan .phone { position: absolute; left: 50%; bottom: -150px; animation: rise 1.1s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .fan .p1 { width: 300px; margin-left: -150px; z-index: 3; bottom: -110px; }
+  .fan .p2 { width: 250px; margin-left: -390px; transform: rotate(-7deg); z-index: 2; animation-delay: 0.15s; }
+  .fan .p3 { width: 250px; margin-left: 140px; transform: rotate(7deg); z-index: 2; animation-delay: 0.15s; }
+  @keyframes rise { from { translate: 0 80px; opacity: 0; } }
 
   /* An iPhone Pro Max: titanium edge, black border, Dynamic Island, side buttons */
-  .phone { position: absolute; width: 290px; aspect-ratio: 1 / 2.0977; border-radius: 14.9% / 7.1%;
+  .phone { position: relative; aspect-ratio: 1 / 2.0977; border-radius: 14.9% / 7.1%;
     background: linear-gradient(145deg, #c9ccd0, #8e9297 22%, #e3e5e8 48%, #7d8186 76%, #b9bcc0);
-    box-shadow: 0 50px 90px -40px rgba(18, 38, 28, 0.55); }
+    box-shadow: 0 60px 100px -40px rgba(0, 0, 0, 0.6); }
   .phone::before { content: ''; position: absolute; inset: 0.52% 1.1%; border-radius: 13.9% / 6.6%; background: #050505; }
-  /* the screen is exactly 440 × 956, the screenshot's own size, so it fits edge to edge */
-  .phone img { position: absolute; left: 3.2%; right: 3.2%; top: 1.525%; bottom: 1.525%; width: 93.6%; height: 96.95%; display: block; border-radius: 12.5% / 5.75%; }
+  .phone img { position: absolute; left: 3.2%; top: 1.525%; width: 93.6%; height: 96.95%; border-radius: 12.5% / 5.75%; }
+  .phone .scr { transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; }
+  .phone .scr.on { opacity: 1; }
   .phone .island { position: absolute; z-index: 2; left: 50%; top: 2.64%; width: 26.8%; height: 3.75%; margin-left: -13.4%; border-radius: 999px; background: #000; }
   .phone .sb { position: absolute; width: 1.3%; border-radius: 2px; background: linear-gradient(90deg, #6e7277, #b5b8bc); }
   .phone .sb.r { right: -1.1%; top: 27%; height: 11%; } .phone .sb.cam { right: -1.1%; top: 52%; height: 6%; }
   .phone .sb.l1 { left: -1.1%; top: 18%; height: 4%; } .phone .sb.l2 { left: -1.1%; top: 25%; height: 7%; } .phone .sb.l3 { left: -1.1%; top: 33.5%; height: 7%; }
-  .stage .phone { right: 150px; top: 0; }
 
-  /* the receipt: the page's one signature element, printed once on load */
-  .receipt { position: absolute; right: 0; top: 150px; width: 250px; z-index: 3; filter: drop-shadow(0 30px 40px rgba(18, 38, 28, 0.22)); }
-  .receipt .paper { background: #fff; padding: 22px 20px 26px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; line-height: 1.7; color: #26332c;
-    -webkit-mask: radial-gradient(circle at 6px 100%, transparent 5px, #000 5.5px) 0 0 / 12px 100% repeat-x;
-            mask: radial-gradient(circle at 6px 100%, transparent 5px, #000 5.5px) 0 0 / 12px 100% repeat-x; }
-  .receipt .head { text-align: center; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 10px; }
-  .receipt .row { display: flex; justify-content: space-between; gap: 10px; }
-  .receipt .row span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .receipt .rule { border-top: 1.5px dashed #b9c4bd; margin: 10px 0; }
-  .receipt .sum { font-weight: 700; }
-  .receipt .save { margin-top: 12px; background: var(--tag); color: var(--ink); font-family: 'Jakarta', system-ui, sans-serif; font-weight: 800; font-size: 17px; padding: 10px 12px; border-radius: 8px; display: flex; justify-content: space-between; transform: rotate(-2deg); }
-  .receipt .print { animation: print 1.6s cubic-bezier(0.32, 0.72, 0, 1) 0.4s both; }
-  @keyframes print { from { clip-path: inset(0 0 100% 0); transform: translateY(-24px); } to { clip-path: inset(0 0 -40px 0); transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .receipt .print { animation: none; } }
+  /* numbers */
+  .nums { position: relative; z-index: 2; background: #fff; border-bottom: 1px solid var(--line); }
+  .nums .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .num { padding: 40px 28px; text-align: center; }
+  .num + .num { border-left: 1px solid var(--line); }
+  .num b { display: block; font-size: clamp(30px, 3.4vw, 44px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; }
+  .num span { color: var(--ink-2); font-size: 15px; }
 
-  /* sections */
-  section { padding: 104px 0; }
-  .intro { max-width: 640px; margin-bottom: 56px; }
-  .intro .lead { margin-top: 16px; }
+  section { padding: 120px 0; }
+  .head { max-width: 720px; margin-bottom: 64px; }
+  .head .lead { margin-top: 18px; }
+  .head.center { margin-left: auto; margin-right: auto; }
 
-  /* how it works: a real sequence, so it is numbered */
-  .how { background: var(--mint); }
-  .steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; counter-reset: s; padding: 0; margin: 0; }
-  .steps3 li { list-style: none; counter-increment: s; border-top: 2px solid var(--ink); padding-top: 22px; }
-  .steps3 li::before { content: counter(s); display: block; font-size: 56px; font-weight: 800; letter-spacing: -0.04em; color: var(--green); line-height: 1; margin-bottom: 18px; }
-  .steps3 p { color: var(--ink-2); margin-top: 8px; }
+  /* features as a bento grid: each tile shows the real screen it talks about */
+  .bento { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 300px; gap: 20px; }
+  .tile { position: relative; overflow: hidden; border-radius: var(--r); background: var(--soft); padding: 34px; display: flex; flex-direction: column; isolation: isolate; }
+  .tile p { color: var(--ink-2); margin-top: 10px; max-width: 26em; }
+  .tile .ico { width: 48px; height: 48px; border-radius: 14px; background: #fff; color: var(--green); display: grid; place-items: center; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(16, 34, 26, 0.08); }
+  .t-big { grid-column: span 4; grid-row: span 2; background: radial-gradient(600px 400px at 85% 100%, rgba(25, 181, 106, 0.22), transparent 70%), var(--mint); }
+  .t-big p { max-width: 20em; }
+  .t-tall { grid-column: span 2; grid-row: span 2; }
+  .t-third { grid-column: span 2; }
+  .t-half { grid-column: span 3; }
+  .t-half p { max-width: 15em; }
+  .tile .shot { position: absolute; width: 270px; right: 48px; bottom: -190px; z-index: -1; transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1); }
+  .t-big .shot { width: 330px; right: 64px; bottom: -110px; }
+  .t-tall .shot { width: 250px; left: 50%; margin-left: -125px; right: auto; bottom: -230px; }
+  .t-half .shot { width: 210px; right: 32px; bottom: -270px; }
+  .tile:hover .shot { transform: translateY(-10px); }
+  .t-dark { background: var(--forest); color: #fff; }
+  .t-dark p { color: rgba(255, 255, 255, 0.72); }
+  .t-dark .ico { background: rgba(255, 255, 255, 0.1); color: var(--tag); box-shadow: none; }
+  .t-yellow { background: var(--tag); }
+  .t-yellow p { color: rgba(16, 34, 26, 0.72); }
 
-  /* features: a plain two-column list, not boxes */
-  .feats { display: grid; grid-template-columns: 1fr 1fr; column-gap: 72px; }
-  .feat { display: grid; grid-template-columns: 44px 1fr; gap: 18px; padding: 26px 0; border-bottom: 1px solid var(--line); }
-  .feat .ico { width: 44px; height: 44px; border-radius: 12px; background: var(--mint); color: var(--green); display: grid; place-items: center; }
-  .feat p { color: var(--ink-2); margin-top: 6px; }
+  /* how it works */
+  .how { background: var(--soft); }
+  .steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: s; padding: 0; margin: 0; }
+  .steps3 li { list-style: none; counter-increment: s; background: #fff; border-radius: var(--r); padding: 34px; }
+  .steps3 li::before { content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--green); color: #fff; font-weight: 800; font-size: 18px; margin-bottom: 26px; }
+  .steps3 p { color: var(--ink-2); margin-top: 10px; }
 
-  /* the app up close */
-  .up-close { padding-top: 0; }
-  .show { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; padding: 40px 0; }
-  .show + .show { border-top: 1px solid var(--line); }
-  .show.rev .txt { order: 2; }
-  .show .txt .lead { margin-top: 16px; }
-  .show .pic { display: flex; justify-content: center; padding: 28px 0; }
-  .show .pic .phone { position: relative; width: 270px; }
-  .check { list-style: none; padding: 0; margin: 20px 0 0; }
-  .check li { position: relative; padding-left: 32px; margin: 10px 0; }
-  .check li::before { content: ''; position: absolute; left: 0; top: 4px; width: 20px; height: 20px; border-radius: 50%; background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
+  /* the app up close: one phone stays put while the text scrolls past it */
+  .tour-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+  .tstep { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; opacity: 0.25; transition: opacity 0.5s; }
+  .tstep.on { opacity: 1; }
+  .tstep .lead { margin-top: 18px; }
+  .tstep .pic { display: none; }
+  .tour-phone { position: relative; }
+  .tour-stick { position: sticky; top: calc(50vh - 300px); height: 600px; display: grid; place-items: center; }
+  .tour-stick::before { content: ''; position: absolute; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(25, 181, 106, 0.25), transparent 65%); }
+  .tour-stick .phone { width: 282px; }
+  .check { list-style: none; padding: 0; margin: 24px 0 0; }
+  .check li { position: relative; padding-left: 34px; margin: 12px 0; font-weight: 500; }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
 
   /* install */
-  .install { background: var(--ink); color: #fff; }
+  .install { background: var(--forest); color: #fff; position: relative; overflow: hidden; }
+  .install::before { content: ''; position: absolute; width: 900px; height: 600px; right: -300px; top: -300px; background: radial-gradient(closest-side, rgba(25, 181, 106, 0.35), transparent); }
+  .install .wrap { position: relative; }
   .install .lead { color: rgba(255, 255, 255, 0.72); }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  .how-to { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--r-lg); padding: 32px; }
-  .how-to ol { margin: 18px 0 16px; padding-left: 22px; color: rgba(255, 255, 255, 0.88); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .how-to { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--r); padding: 36px; }
+  .how-to ol { margin: 20px 0 18px; padding-left: 22px; color: rgba(255, 255, 255, 0.88); }
   .how-to li { margin: 10px 0; padding-left: 4px; }
   .how-to a { color: var(--tag); font-weight: 700; }
   .how-to .note { font-size: 14px; color: rgba(255, 255, 255, 0.6); }
 
   /* questions */
-  .faq-list { max-width: 760px; }
-  .faq details { border-bottom: 1px solid var(--line); }
-  .faq summary { cursor: pointer; list-style: none; font-size: 19px; font-weight: 700; padding: 22px 40px 22px 0; position: relative; }
-  .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::after { content: ''; position: absolute; right: 6px; top: 50%; width: 10px; height: 10px; margin-top: -8px; border-right: 2.5px solid var(--green); border-bottom: 2.5px solid var(--green); transform: rotate(45deg); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
-  .faq details[open] summary::after { transform: rotate(225deg); margin-top: -2px; }
-  .faq details p { color: var(--ink-2); padding-bottom: 22px; max-width: 36em; }
-  .faq details a { color: var(--green); font-weight: 700; }
+  .faq-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 80px; }
+  .faq-grid .lead { margin-top: 18px; }
+  .faq-list details { border-bottom: 1px solid var(--line); }
+  .faq-list details:first-child { border-top: 1px solid var(--line); }
+  .faq-list summary { cursor: pointer; list-style: none; font-size: 19px; font-weight: 700; padding: 24px 48px 24px 0; position: relative; }
+  .faq-list summary::-webkit-details-marker { display: none; }
+  .faq-list summary::after { content: '+'; position: absolute; right: 0; top: 50%; width: 32px; height: 32px; margin-top: -16px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; font-size: 22px; font-weight: 500; color: var(--green); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s; }
+  .faq-list details[open] summary::after { transform: rotate(45deg); background: var(--mint); }
+  .faq-list details p { color: var(--ink-2); padding-bottom: 24px; max-width: 38em; }
+  .faq-list details a { color: var(--green); font-weight: 700; }
 
   /* closing */
-  .final { background: var(--green); color: #fff; border-radius: var(--r-lg); padding: 72px 56px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; margin-bottom: 96px; }
-  .final h2 { font-size: clamp(34px, 4.6vw, 56px); }
-  .final p { margin-top: 14px; color: rgba(255, 255, 255, 0.82); font-size: 18px; }
-  .final .get { justify-content: flex-end; }
-  .final .dl { background: #fff; color: var(--ink); }
+  .final { position: relative; overflow: hidden; border-radius: 36px; color: #fff; padding: 80px 64px; margin-bottom: 100px;
+    background: radial-gradient(600px 400px at 90% 110%, rgba(246, 218, 74, 0.28), transparent 70%), linear-gradient(135deg, var(--green) 0%, var(--forest) 100%);
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center; }
+  .final h2 { font-size: clamp(36px, 5vw, 60px); }
+  .final p { margin-top: 16px; color: rgba(255, 255, 255, 0.82); font-size: 19px; }
+  .final .get { margin-top: 32px; }
+  .final .phone { width: 250px; justify-self: center; margin-bottom: -260px; transform: rotate(6deg); }
 
-  footer { border-top: 1px solid var(--line); padding: 48px 0 64px; font-size: 15px; color: var(--ink-2); }
+  footer { border-top: 1px solid var(--line); padding: 56px 0 64px; font-size: 15px; color: var(--ink-2); }
   footer .wrap { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; }
-  footer h4 { margin: 0 0 12px; font-size: 14px; color: var(--ink); }
+  footer h4 { margin: 0 0 14px; font-size: 14px; color: var(--ink); }
   footer ul { list-style: none; margin: 0; padding: 0; }
-  footer li { margin: 6px 0; }
+  footer li { margin: 8px 0; }
   footer a { text-decoration: none; } footer a:hover { color: var(--green); }
-  footer .brand { margin-bottom: 12px; color: var(--ink); }
+  footer .brand { margin-bottom: 14px; color: var(--ink); }
 
-  @media (max-width: 920px) {
+  /* fade up once, as each part comes into view */
+  .rv { opacity: 0; transform: translateY(24px); transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+  .rv.in { opacity: 1; transform: none; }
+  .no-js .rv { opacity: 1; transform: none; }
+
+  @media (max-width: 1000px) {
     .links { display: none; }
-    .hero { padding-top: 40px; }
-    .hero .wrap, .show, .feats, .two, .final, footer .wrap { grid-template-columns: 1fr; }
-    .stage { height: 520px; max-width: 420px; width: 100%; margin: 0 auto; }
-    .stage .phone { width: 240px; right: auto; left: 0; }
-    .receipt { width: 210px; top: 170px; }
-    .steps3 { grid-template-columns: 1fr; gap: 28px; }
-    .show { gap: 24px; } .show.rev .txt { order: 0; }
-    .final { padding: 48px 28px; } .final .get { justify-content: flex-start; }
-    section { padding: 72px 0; } .up-close { padding-top: 0; }
+    .bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: auto; }
+    .t-big, .t-tall, .t-half { grid-column: span 2; grid-row: auto; min-height: 480px; }
+    .t-third { grid-column: span 1; grid-row: auto; min-height: 260px; }
+    .tile .shot, .t-big .shot, .t-half .shot, .t-tall .shot { width: 230px; left: 50%; right: auto; margin-left: -115px; bottom: -250px; }
+    .tour-grid, .two, .faq-grid, .final, footer .wrap { grid-template-columns: 1fr; }
+    .faq-grid { gap: 40px; }
+    .tour-phone { display: none; }
+    .tstep { min-height: 0; opacity: 1; padding: 40px 0; }
+    .tstep + .tstep { border-top: 1px solid var(--line); }
+    .tstep .pic { display: flex; justify-content: center; padding: 40px 0 8px; }
+    .tstep .pic .phone { width: 250px; }
+    .steps3 { grid-template-columns: 1fr; }
+    .final { padding: 56px 32px 0; } .final .phone { margin: 10px auto -200px; width: 220px; }
   }
-  @media (max-width: 520px) { .nav .btn { display: none; } .dl { flex: 1 1 100%; } }
+  @media (max-width: 760px) {
+    .hero { padding-top: 120px; }
+    .fan { height: 440px; margin-top: 56px; }
+    .fan .p1 { width: 230px; margin-left: -115px; bottom: -90px; }
+    .fan .p2 { width: 180px; margin-left: -250px; bottom: -120px; }
+    .fan .p3 { width: 180px; margin-left: 70px; bottom: -120px; }
+    .nums .wrap { grid-template-columns: 1fr 1fr; }
+    .num { padding: 28px 12px; }
+    .num:nth-child(3) { border-left: 0; }
+    .num:nth-child(n + 3) { border-top: 1px solid var(--line); }
+    section { padding: 80px 0; }
+    .head { margin-bottom: 44px; }
+    .t-third { grid-column: span 2; }
+    .tile { padding: 28px; }
+  }
+  @media (max-width: 520px) { .nav .btn { display: none; } .dl { flex: 1 1 100%; justify-content: center; } .wrap { padding: 0 20px; } }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .fan .phone { animation: none; }
+    .rv { opacity: 1; transform: none; transition: none; }
+    .phone .scr, .tstep, .tile .shot { transition: none; }
+  }
 </style>
 </head>
-<body>
-<header class="nav">
+<body class="no-js">
+<a class="skip" href="#main" data-t="skip">Hoppa till innehållet</a>
+<header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="ZEVU"><svg viewBox="282 292 460 440" aria-hidden="true"><path d="M330 340 H694 L330 684 H694" fill="none" stroke="#fff" stroke-width="96" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="10"/></svg>ZEVU</a>
     <nav class="links">
-      <a href="#how" data-t="n.how">Så fungerar det</a>
       <a href="#features" data-t="n.feat">Funktioner</a>
+      <a href="#how" data-t="n.how">Så fungerar det</a>
       <a href="#install" data-t="n.install">Installera</a>
       <a href="#faq" data-t="n.faq">Frågor</a>
     </nav>
     <span class="sp"></span>
     <div class="lang" role="group" aria-label="Språk / Kieli / Language"><button data-l="sv">SV</button><button data-l="fi">FI</button><button data-l="en">EN</button></div>
-    <a class="btn" href="#get" data-t="get">Ladda ner beta</a>
+    <a class="btn" href="#get" data-t="get">Ladda ner</a>
   </div>
 </header>
 
-<main id="top">
-<div class="hero">
-  <div class="wrap">
-    <div>
-      <h1 data-t="h1">Jämför mer.<br>Betala mindre.</h1>
-      <p class="lead" data-t="lead">ZEVU jämför matpriserna i de stora matbutikerna i Finland, så du ser direkt var din handling blir billigast.</p>
-      <div class="get" id="get">
-        <a class="dl" href="https://github.com/Daniel-ape/zevu/releases/download/iphone/ZEVU.ipa" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2.1-3.7 2.2-3.8-1.2-1.7-3-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.2zM13.9 5.2c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3-1.5z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>iPhone</b></span><em class="beta">BETA</em></a>
-        <a class="dl" href="https://github.com/Daniel-ape/zevu/releases/download/android-latest/ZEVU.apk" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M17.6 9.5l1.7-3a.4.4 0 0 0-.7-.4l-1.8 3.1A10.6 10.6 0 0 0 12 8.2c-1.7 0-3.3.4-4.8 1L5.4 6.1a.4.4 0 0 0-.7.4l1.7 3A9.9 9.9 0 0 0 1.5 17.5h21a9.9 9.9 0 0 0-4.9-8zM7 14.8a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1zm10 0a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>Android</b></span><em class="beta">BETA</em></a>
-      </div>
-      <p class="facts" data-t="facts">Över 200 000 produkter från 18 butiker, nya priser varje dag. Gratis och utan reklam. <a href="#install">Så installerar du betan</a></p>
+<main id="main">
+<div class="hero" id="top">
+  <div class="wrap center">
+    <span class="pill"><b>BETA</b><span data-t="pill">Nu för iPhone och Android</span></span>
+    <h1 data-t="h1">Jämför mer.<br>Betala mindre.</h1>
+    <p class="lead" data-t="lead">ZEVU jämför matpriserna i de stora matbutikerna i Finland, så du ser direkt var din handling blir billigast.</p>
+    <div class="get" id="get">
+      <a class="dl" href="https://github.com/Daniel-ape/Zevu/releases/download/iphone/ZEVU.ipa" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2.1-3.7 2.2-3.8-1.2-1.7-3-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.2zM13.9 5.2c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3-1.5z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>iPhone</b></span></a>
+      <a class="dl" href="https://github.com/Daniel-ape/Zevu/releases/download/android-latest/ZEVU.apk" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M17.6 9.5l1.7-3a.4.4 0 0 0-.7-.4l-1.8 3.1A10.6 10.6 0 0 0 12 8.2c-1.7 0-3.3.4-4.8 1L5.4 6.1a.4.4 0 0 0-.7.4l1.7 3A9.9 9.9 0 0 0 1.5 17.5h21a9.9 9.9 0 0 0-4.9-8zM7 14.8a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1zm10 0a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>Android</b></span></a>
     </div>
-    <div class="stage" aria-hidden="true">
-      <div class="phone"><img src="img/home.webp" alt="" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
-      <div class="receipt"><div class="print"><div class="paper">
-        <div class="head" data-t="r.head">VECKOHANDLING</div>
-        <div class="row"><span data-t="r.1">Mjölk 1 l</span><span>0,99</span></div>
-        <div class="row"><span data-t="r.2">Kaffe 500 g</span><span>4,49</span></div>
-        <div class="row"><span data-t="r.3">Rågbröd</span><span>1,79</span></div>
-        <div class="row"><span data-t="r.4">Ost 1 kg</span><span>7,90</span></div>
-        <div class="row"><span data-t="r.5">Bananer 1 kg</span><span>1,49</span></div>
-        <div class="row"><span data-t="r.6">Havregryn</span><span>0,85</span></div>
-        <div class="rule"></div>
-        <div class="row sum"><span data-t="r.sum">Summa</span><span>17,51</span></div>
-        <div class="save"><span data-t="r.save">Du sparar</span><span>6,85 €</span></div>
-      </div></div></div>
-    </div>
+    <p class="note"><span data-t="free">Gratis, utan reklam och utan konto.</span> <a href="#install" data-t="howlink">Så installerar du betan</a></p>
+  </div>
+  <div class="fan" aria-hidden="true">
+    <div class="phone p2"><img src="img/search.webp" alt="" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
+    <div class="phone p3"><img src="img/lists.webp" alt="" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
+    <div class="phone p1"><img src="img/home.webp" alt="" fetchpriority="high" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
   </div>
 </div>
 
+<div class="nums">
+  <div class="wrap">
+    <div class="num"><b id="nProducts">225 000+</b><span data-t="u.products">produkter</span></div>
+    <div class="num"><b id="nShops">18</b><span data-t="u.shops">butiker jämförda</span></div>
+    <div class="num"><b data-t="u.dailyB">Varje dag</b><span data-t="u.daily">nya priser</span></div>
+    <div class="num"><b>0 €</b><span data-t="u.free">gratis, utan reklam</span></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="head center rv">
+      <h2 data-t="f.title">Allt för en billigare handling</h2>
+      <p class="lead" data-t="f.lead">Priser, erbjudanden och reklamblad på ett ställe, i stället för fem olika appar.</p>
+    </div>
+    <div class="bento">
+      <div class="tile t-big rv">
+        <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></div>
+        <h3 data-t="c1.t">Jämför priser</h3>
+        <p data-t="c1.p">Se samma vara i alla butiker sida vid sida, med kilo- och literpris och billigare alternativ från andra märken.</p>
+        <div class="phone shot"><img src="img/product.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
+      </div>
+      <div class="tile t-tall t-dark rv">
+        <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z"/></svg></div>
+        <h3 data-t="c4.t">Prisbevakning</h3>
+        <p data-t="c4.p">Få en notis när en vara du gillar blir billigare.</p>
+        <div class="phone shot"><img src="img/watched.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
+      </div>
+      <div class="tile t-third rv">
+        <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><path d="M9 11h6M9 15h6"/></svg></div>
+        <h3 data-t="c2.t">Veckans reklamblad</h3>
+        <p data-t="c2.p">Alla butikers blad på ett ställe. Spara dina favoriter.</p>
+      </div>
+      <div class="tile t-third t-yellow rv">
+        <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 12l9-9 9 9-9 9z"/><circle cx="12" cy="12" r="2"/></svg></div>
+        <h3 data-t="c3.t">Medlemserbjudanden</h3>
+        <p data-t="c3.p">Butikernas medlemspriser samlade, så du inte missar en rabatt.</p>
+      </div>
+      <div class="tile t-third rv">
+        <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 8v8M11 8v8M14 8v8M17 8v8"/></svg></div>
+        <h3 data-t="c5.t">Skanna</h3>
+        <p data-t="c5.p">Streckkoder, hyllkanter och kvitton. Kameran gör jobbet.</p>
+      </div>
+      <div class="tile t-half rv">
+        <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg></div>
+        <h3 data-t="c6.t">Smart inköpslista</h3>
+        <p data-t="c6.p">ZEVU räknar ut i vilken butik hela listan blir billigast.</p>
+        <div class="phone shot"><img src="img/lists.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
+      </div>
+      <div class="tile t-half rv">
+        <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.6-5 3.5S9.2 10 12 10s5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5"/></svg></div>
+        <h3 data-t="c7.t">Se vad du sparat</h3>
+        <p data-t="c7.p">Skanna kvittot, så ser du hur mycket du sparat varje månad.</p>
+        <div class="phone shot"><img src="img/savings.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="how" id="how">
   <div class="wrap">
-    <div class="intro"><h2 data-t="h.title">Så fungerar det</h2></div>
+    <div class="head center rv"><h2 data-t="h.title">Så fungerar det</h2></div>
     <ol class="steps3">
-      <li><h3 data-t="h1t">Sök eller skanna</h3><p data-t="h1p">Skriv vad du behöver eller skanna streckkoden i butiken.</p></li>
-      <li><h3 data-t="h2t">Jämför</h3><p data-t="h2p">Se priset i alla butiker sida vid sida, med kilopris och erbjudanden.</p></li>
-      <li><h3 data-t="h3t">Spara</h3><p data-t="h3p">Handla där det är billigast och se hur mycket du sparat varje månad.</p></li>
+      <li class="rv"><h3 data-t="h1t">Sök eller skanna</h3><p data-t="h1p">Skriv vad du behöver eller skanna streckkoden i butiken.</p></li>
+      <li class="rv"><h3 data-t="h2t">Jämför</h3><p data-t="h2p">Se priset i alla butiker sida vid sida, med kilopris och erbjudanden.</p></li>
+      <li class="rv"><h3 data-t="h3t">Spara</h3><p data-t="h3p">Handla där det är billigast och se hur mycket du sparat varje månad.</p></li>
     </ol>
   </div>
 </section>
 
-<section id="features">
-  <div class="wrap">
-    <div class="intro">
-      <h2 data-t="f.title">Allt för en billigare handling</h2>
-      <p class="lead" data-t="f.lead">Priser, erbjudanden och reklamblad på ett ställe, i stället för fem olika appar.</p>
-    </div>
-    <div class="feats">
-      <div class="feat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></div><div><h3 data-t="c1.t">Jämför priser</h3><p data-t="c1.p">Se samma vara i alla butiker sida vid sida, med kilo- och literpris.</p></div></div>
-      <div class="feat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><path d="M9 11h6M9 15h6"/></svg></div><div><h3 data-t="c2.t">Veckans reklamblad</h3><p data-t="c2.p">Bläddra i alla butikers blad på ett ställe och spara dina favoriter.</p></div></div>
-      <div class="feat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 12l9-9 9 9-9 9z"/><circle cx="12" cy="12" r="2"/></svg></div><div><h3 data-t="c3.t">Medlemserbjudanden</h3><p data-t="c3.p">Butikernas medlemspriser samlade, så du inte missar en rabatt.</p></div></div>
-      <div class="feat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z"/></svg></div><div><h3 data-t="c4.t">Prisbevakning</h3><p data-t="c4.p">Få en notis när en vara du gillar blir billigare.</p></div></div>
-      <div class="feat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 8v8M11 8v8M14 8v8M17 8v8"/></svg></div><div><h3 data-t="c5.t">Skanna och spara</h3><p data-t="c5.p">Skanna streckkoder, hyllkanter och kvitton och se hur mycket du sparat.</p></div></div>
-      <div class="feat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg></div><div><h3 data-t="c6.t">Smart inköpslista</h3><p data-t="c6.p">ZEVU räknar ut i vilken butik hela listan blir billigast.</p></div></div>
-    </div>
-  </div>
-</section>
-
-<section class="up-close">
-  <div class="wrap">
-    <div class="show">
-      <div class="txt">
+<section class="tour">
+  <div class="wrap tour-grid">
+    <div>
+      <div class="tstep on" data-s="0">
         <h2 data-t="s1.t">Hitta det billigaste på sekunder</h2>
         <p class="lead" data-t="s1.p">Sök bland tusentals varor och se direkt vilken butik som har bästa priset just nu.</p>
         <ul class="check"><li data-t="s1.a">Priser från flera kedjor på en gång</li><li data-t="s1.b">Billigare alternativ från andra märken</li><li data-t="s1.c">Prishistorik för varje vara</li></ul>
+        <div class="pic"><div class="phone"><img src="img/search.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
       </div>
-      <div class="pic"><div class="phone"><img src="img/product.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
-    </div>
-    <div class="show rev">
-      <div class="txt">
+      <div class="tstep" data-s="1">
         <h2 data-t="s2.t">Hela listan, billigast</h2>
         <p class="lead" data-t="s2.p">Skriv din inköpslista, så räknar ZEVU ut i vilken butik hela handlingen blir billigast och hur mycket du sparar.</p>
+        <div class="pic"><div class="phone"><img src="img/lists.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
       </div>
-      <div class="pic"><div class="phone"><img src="img/lists.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
-    </div>
-    <div class="show">
-      <div class="txt">
+      <div class="tstep" data-s="2">
         <h2 data-t="s3.t">Se hur mycket du sparar</h2>
         <p class="lead" data-t="s3.p">Skanna kvittot efter handlingen, så räknar ZEVU ut vad du sparat jämfört med andra butiker.</p>
+        <div class="pic"><div class="phone"><img src="img/savings.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
       </div>
-      <div class="pic"><div class="phone"><img src="img/savings.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
+    </div>
+    <div class="tour-phone" aria-hidden="true">
+      <div class="tour-stick"><div class="phone"><img class="scr on" src="img/search.webp" alt="" loading="lazy" /><img class="scr" src="img/lists.webp" alt="" loading="lazy" /><img class="scr" src="img/savings.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
     </div>
   </div>
 </section>
 
 <section class="install" id="install">
   <div class="wrap">
-    <div class="intro">
+    <div class="head rv">
       <h2 data-t="in.title">Så installerar du betan</h2>
       <p class="lead" data-t="in.lead">Det tar ett par minuter. Appen är gratis och du behöver inget konto.</p>
     </div>
     <div class="two">
-      <div class="how-to">
+      <div class="how-to rv">
         <h3>iPhone</h3>
         <ol>
-          <li data-t="in.i1">Ladda ner <a href="https://github.com/Daniel-ape/zevu/releases/download/iphone/ZEVU.ipa">ZEVU.ipa</a> till din dator.</li>
+          <li data-t="in.i1">Ladda ner <a href="https://github.com/Daniel-ape/Zevu/releases/download/iphone/ZEVU.ipa">ZEVU.ipa</a> till din dator.</li>
           <li data-t="in.i2">Öppna Sideloadly (Windows/Mac) eller AltStore och koppla in iPhonen.</li>
           <li data-t="in.i3">Välj filen och logga in med ditt Apple-ID, så installeras appen.</li>
           <li data-t="in.i4">På iPhonen: Inställningar → Allmänt → VPN och enhetshantering → lita på ditt Apple-ID.</li>
         </ol>
         <p class="note" data-t="in.inote">Med ett gratis Apple-ID behöver appen installeras om var 7:e dag (AltStore kan göra det automatiskt).</p>
       </div>
-      <div class="how-to">
+      <div class="how-to rv">
         <h3>Android</h3>
         <ol>
-          <li data-t="in.a1">Öppna den här sidan på telefonen och ladda ner <a href="https://github.com/Daniel-ape/zevu/releases/download/android-latest/ZEVU.apk">ZEVU.apk</a>.</li>
+          <li data-t="in.a1">Öppna den här sidan på telefonen och ladda ner <a href="https://github.com/Daniel-ape/Zevu/releases/download/android-latest/ZEVU.apk">ZEVU.apk</a>.</li>
           <li data-t="in.a2">Öppna filen. Tillåt installation från webbläsaren när telefonen frågar.</li>
           <li data-t="in.a3">Tryck på Installera. Nya versioner installeras sedan direkt över den gamla.</li>
         </ol>
@@ -312,29 +421,34 @@
   </div>
 </section>
 
-<section class="faq" id="faq">
-  <div class="wrap">
-    <div class="intro"><h2 data-t="q.title">Vanliga frågor</h2></div>
-    <div class="faq-list">
+<section id="faq">
+  <div class="wrap faq-grid">
+    <div class="rv">
+      <h2 data-t="q.title">Vanliga frågor</h2>
+      <p class="lead" data-t="q.lead">Hittar du inte svaret? Skriv till oss på GitHub.</p>
+    </div>
+    <div class="faq-list rv">
       <details><summary data-t="q1">Vad kostar ZEVU?</summary><p data-t="a1">Ingenting. Appen är gratis, utan reklam och utan köp i appen.</p></details>
       <details><summary data-t="q2">Var kommer priserna ifrån?</summary><p data-t="a2">Från butikernas egna webbsidor och reklamblad, och från Open Prices, en öppen prisdatabas där användare delar priser från sina kvitton. Priserna uppdateras varje dag.</p></details>
       <details><summary data-t="q3">Behöver jag ett konto?</summary><p data-t="a3">Nej. Med ett konto sparas dina listor och bevakningar så att de finns kvar på en ny telefon, men allt fungerar utan.</p></details>
       <details><summary data-t="q4">Vad händer med mina uppgifter?</summary><p data-t="a4">Det mesta stannar på din telefon. Kvitton läses på telefonen och delas bara om du själv väljer det. Läs mer i <a href="integritet.html">integritetspolicyn</a>.</p></details>
       <details><summary data-t="q5">Varför finns inte appen i App Store eller Google Play än?</summary><p data-t="a5">Appen är i beta. Den kommer till butikerna när den är färdigtestad. Tills dess kan du installera den direkt härifrån.</p></details>
+      <details><summary data-t="q6">Fungerar den på min telefon?</summary><p data-t="a6">Ja, på iPhone med iOS 15 eller nyare och på Android 7 eller nyare. Appen är byggd för att gå smidigt även på enklare telefoner.</p></details>
     </div>
   </div>
 </section>
 
 <div class="wrap">
-  <div class="final">
+  <div class="final rv">
     <div>
       <h2 data-t="end.t">Börja spara redan i dag</h2>
       <p data-t="end.p">Gratis, utan reklam. Betan finns nu för iPhone och Android.</p>
+      <div class="get">
+        <a class="dl" href="https://github.com/Daniel-ape/Zevu/releases/download/iphone/ZEVU.ipa" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2.1-3.7 2.2-3.8-1.2-1.7-3-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.2zM13.9 5.2c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3-1.5z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>iPhone</b></span><em class="beta">BETA</em></a>
+        <a class="dl" href="https://github.com/Daniel-ape/Zevu/releases/download/android-latest/ZEVU.apk" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M17.6 9.5l1.7-3a.4.4 0 0 0-.7-.4l-1.8 3.1A10.6 10.6 0 0 0 12 8.2c-1.7 0-3.3.4-4.8 1L5.4 6.1a.4.4 0 0 0-.7.4l1.7 3A9.9 9.9 0 0 0 1.5 17.5h21a9.9 9.9 0 0 0-4.9-8zM7 14.8a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1zm10 0a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>Android</b></span><em class="beta">BETA</em></a>
+      </div>
     </div>
-    <div class="get">
-      <a class="dl" href="https://github.com/Daniel-ape/zevu/releases/download/iphone/ZEVU.ipa" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2.1-3.7 2.2-3.8-1.2-1.7-3-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.2zM13.9 5.2c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3-1.5z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>iPhone</b></span><em class="beta">BETA</em></a>
-      <a class="dl" href="https://github.com/Daniel-ape/zevu/releases/download/android-latest/ZEVU.apk" download><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M17.6 9.5l1.7-3a.4.4 0 0 0-.7-.4l-1.8 3.1A10.6 10.6 0 0 0 12 8.2c-1.7 0-3.3.4-4.8 1L5.4 6.1a.4.4 0 0 0-.7.4l1.7 3A9.9 9.9 0 0 0 1.5 17.5h21a9.9 9.9 0 0 0-4.9-8zM7 14.8a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1zm10 0a1 1 0 1 1 0-2.1 1 1 0 0 1 0 2.1z"/></svg><span><small data-t="dl.small">Ladda ner för</small><b>Android</b></span><em class="beta">BETA</em></a>
-    </div>
+    <div class="phone" aria-hidden="true"><img src="img/home.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
   </div>
 </div>
 </main>
@@ -348,50 +462,52 @@
     </div>
     <div>
       <h4 data-t="ft.app">Appen</h4>
-      <ul><li><a href="#features" data-t="n.feat">Funktioner</a></li><li><a href="#install" data-t="n.install">Installera</a></li><li><a href="#faq" data-t="n.faq">Frågor</a></li></ul>
+      <ul><li><a href="#features" data-t="n.feat">Funktioner</a></li><li><a href="#how" data-t="n.how">Så fungerar det</a></li><li><a href="#install" data-t="n.install">Installera</a></li><li><a href="#faq" data-t="n.faq">Frågor</a></li></ul>
     </div>
     <div>
       <h4 data-t="ft.more">Mer</h4>
-      <ul><li><a href="integritet.html" data-t="f.privacy">Integritet</a></li><li><a href="https://github.com/Daniel-ape/zevu">GitHub</a></li></ul>
+      <ul><li><a href="integritet.html" data-t="f.privacy">Integritet</a></li><li><a href="https://github.com/Daniel-ape/Zevu">GitHub</a></li></ul>
     </div>
   </div>
 </footer>
 
 <script>
-  var IPA = 'https://github.com/Daniel-ape/zevu/releases/download/iphone/ZEVU.ipa'
-  var APK = 'https://github.com/Daniel-ape/zevu/releases/download/android-latest/ZEVU.apk'
+  document.body.classList.remove('no-js')
+  var IPA = 'https://github.com/Daniel-ape/Zevu/releases/download/iphone/ZEVU.ipa'
+  var APK = 'https://github.com/Daniel-ape/Zevu/releases/download/android-latest/ZEVU.apk'
+  var LOC = { sv: 'sv-FI', fi: 'fi-FI', en: 'en-GB' }
   var T = {
     fi: {
-      'n.how': 'Näin se toimii', 'n.feat': 'Ominaisuudet', 'n.install': 'Asenna', 'n.faq': 'Kysymykset', get: 'Lataa beta',
-      h1: 'Vertaa enemmän.<br>Maksa vähemmän.', lead: 'ZEVU vertaa ruokahintoja Suomen suurimmissa ruokakaupoissa, joten näet heti, missä ostoksesi ovat halvimmat.',
-      'dl.small': 'Lataa', facts: 'Yli 200 000 tuotetta 18 kaupasta, uudet hinnat joka päivä. Ilmainen ja ilman mainoksia. <a href="#install">Näin asennat betan</a>',
-      'r.head': 'VIIKKO-OSTOKSET', 'r.1': 'Maito 1 l', 'r.2': 'Kahvi 500 g', 'r.3': 'Ruisleipä', 'r.4': 'Juusto 1 kg', 'r.5': 'Banaanit 1 kg', 'r.6': 'Kaurahiutaleet', 'r.sum': 'Yhteensä', 'r.save': 'Säästät',
-      'h.title': 'Näin se toimii', h1t: 'Hae tai skannaa', h1p: 'Kirjoita mitä tarvitset tai skannaa viivakoodi kaupassa.', h2t: 'Vertaa', h2p: 'Näe hinta kaikissa kaupoissa rinnakkain, kilohintoineen ja tarjouksineen.', h3t: 'Säästä', h3p: 'Osta sieltä, missä on halvinta, ja näe paljonko säästit joka kuukausi.',
+      skip: 'Siirry sisältöön', 'n.feat': 'Ominaisuudet', 'n.how': 'Näin se toimii', 'n.install': 'Asenna', 'n.faq': 'Kysymykset', get: 'Lataa',
+      pill: 'Nyt iPhonelle ja Androidille', h1: 'Vertaa enemmän.<br>Maksa vähemmän.', lead: 'ZEVU vertaa ruokahintoja Suomen suurimmissa ruokakaupoissa, joten näet heti, missä ostoksesi ovat halvimmat.',
+      'dl.small': 'Lataa', free: 'Ilmainen, ilman mainoksia ja ilman tiliä.', howlink: 'Näin asennat betan',
+      'u.products': 'tuotetta', 'u.shops': 'kauppaa vertailussa', 'u.dailyB': 'Joka päivä', 'u.daily': 'uudet hinnat', 'u.free': 'ilmainen, ilman mainoksia',
       'f.title': 'Kaikki edullisempaan ostokseen', 'f.lead': 'Hinnat, tarjoukset ja mainoslehdet yhdessä paikassa viiden eri sovelluksen sijaan.',
-      'c1.t': 'Vertaa hintoja', 'c1.p': 'Näe sama tuote kaikissa kaupoissa rinnakkain kilo- ja litrahintoineen.', 'c2.t': 'Viikon mainoslehdet', 'c2.p': 'Selaa kaikkien kauppojen lehtiä yhdessä paikassa ja tallenna suosikkisi.', 'c3.t': 'Jäsenedut', 'c3.p': 'Kauppojen jäsenhinnat yhdessä paikassa, ettet missaa yhtään alennusta.', 'c4.t': 'Hintavahti', 'c4.p': 'Saat ilmoituksen, kun suosikkituotteesi halpenee.', 'c5.t': 'Skannaa ja säästä', 'c5.p': 'Skannaa viivakoodit, hyllyhinnat ja kuitit ja näe paljonko säästit.', 'c6.t': 'Älykäs ostoslista', 'c6.p': 'ZEVU laskee, missä kaupassa koko lista on halvin.',
+      'c1.t': 'Vertaa hintoja', 'c1.p': 'Näe sama tuote kaikissa kaupoissa rinnakkain kilo- ja litrahintoineen sekä edullisemmat vaihtoehdot muilta merkeiltä.', 'c2.t': 'Viikon mainoslehdet', 'c2.p': 'Kaikkien kauppojen lehdet yhdessä paikassa. Tallenna suosikkisi.', 'c3.t': 'Jäsenedut', 'c3.p': 'Kauppojen jäsenhinnat yhdessä paikassa, ettet missaa yhtään alennusta.', 'c4.t': 'Hintavahti', 'c4.p': 'Saat ilmoituksen, kun suosikkituotteesi halpenee.', 'c5.t': 'Skannaa', 'c5.p': 'Viivakoodit, hyllyhinnat ja kuitit. Kamera hoitaa työn.', 'c6.t': 'Älykäs ostoslista', 'c6.p': 'ZEVU laskee, missä kaupassa koko lista on halvin.', 'c7.t': 'Näe säästösi', 'c7.p': 'Skannaa kuitti, niin näet paljonko säästit joka kuukausi.',
+      'h.title': 'Näin se toimii', h1t: 'Hae tai skannaa', h1p: 'Kirjoita mitä tarvitset tai skannaa viivakoodi kaupassa.', h2t: 'Vertaa', h2p: 'Näe hinta kaikissa kaupoissa rinnakkain, kilohintoineen ja tarjouksineen.', h3t: 'Säästä', h3p: 'Osta sieltä, missä on halvinta, ja näe paljonko säästit joka kuukausi.',
       's1.t': 'Löydä halvin sekunneissa', 's1.p': 'Hae tuhansista tuotteista ja näe heti, missä kaupassa on paras hinta juuri nyt.', 's1.a': 'Hinnat useista ketjuista kerralla', 's1.b': 'Edullisemmat vaihtoehdot muilta merkeiltä', 's1.c': 'Hintahistoria jokaiselle tuotteelle',
       's2.t': 'Koko lista, halvimmalla', 's2.p': 'Kirjoita ostoslistasi, niin ZEVU laskee, missä kaupassa koko ostos on halvin ja paljonko säästät.', 's3.t': 'Näe paljonko säästät', 's3.p': 'Skannaa kuitti ostosten jälkeen, niin ZEVU laskee säästösi muihin kauppoihin verrattuna.',
       'in.title': 'Näin asennat betan', 'in.lead': 'Se vie pari minuuttia. Sovellus on ilmainen, eikä tiliä tarvita.',
       'in.i1': 'Lataa <a href="' + IPA + '">ZEVU.ipa</a> tietokoneellesi.', 'in.i2': 'Avaa Sideloadly (Windows/Mac) tai AltStore ja liitä iPhone.', 'in.i3': 'Valitse tiedosto ja kirjaudu Apple ID:lläsi, niin sovellus asentuu.', 'in.i4': 'iPhonessa: Asetukset → Yleiset → VPN ja laitehallinta → luota Apple ID:hesi.', 'in.inote': 'Ilmaisella Apple ID:llä sovellus pitää asentaa uudelleen 7 päivän välein (AltStore voi tehdä sen automaattisesti).',
       'in.a1': 'Avaa tämä sivu puhelimella ja lataa <a href="' + APK + '">ZEVU.apk</a>.', 'in.a2': 'Avaa tiedosto. Salli asennus selaimesta, kun puhelin kysyy.', 'in.a3': 'Paina Asenna. Uudet versiot asentuvat suoraan vanhan päälle.', 'in.anote': 'Toimii Android 7:ssä ja uudemmissa, myös edullisissa puhelimissa.',
-      'q.title': 'Usein kysyttyä', q1: 'Mitä ZEVU maksaa?', a1: 'Ei mitään. Sovellus on ilmainen, ilman mainoksia ja ilman sovelluksen sisäisiä ostoja.', q2: 'Mistä hinnat tulevat?', a2: 'Kauppojen omilta verkkosivuilta ja mainoslehdistä sekä Open Pricesista, avoimesta hintatietokannasta, johon käyttäjät jakavat hintoja kuiteistaan. Hinnat päivittyvät joka päivä.', q3: 'Tarvitsenko tilin?', a3: 'Et. Tilillä listasi ja hintavahtisi säilyvät uudessa puhelimessa, mutta kaikki toimii ilmankin.', q4: 'Mitä tiedoilleni tapahtuu?', a4: 'Suurin osa pysyy puhelimessasi. Kuitit luetaan puhelimessa ja jaetaan vain, jos itse valitset niin. Lue lisää <a href="integritet.html">tietosuojaselosteesta</a>.', q5: 'Miksi sovellus ei ole vielä App Storessa tai Google Playssa?', a5: 'Sovellus on betavaiheessa. Se tulee kauppoihin, kun se on testattu valmiiksi. Siihen asti voit asentaa sen suoraan täältä.',
+      'q.title': 'Usein kysyttyä', 'q.lead': 'Etkö löydä vastausta? Kirjoita meille GitHubissa.', q1: 'Mitä ZEVU maksaa?', a1: 'Ei mitään. Sovellus on ilmainen, ilman mainoksia ja ilman sovelluksen sisäisiä ostoja.', q2: 'Mistä hinnat tulevat?', a2: 'Kauppojen omilta verkkosivuilta ja mainoslehdistä sekä Open Pricesista, avoimesta hintatietokannasta, johon käyttäjät jakavat hintoja kuiteistaan. Hinnat päivittyvät joka päivä.', q3: 'Tarvitsenko tilin?', a3: 'Et. Tilillä listasi ja hintavahtisi säilyvät uudessa puhelimessa, mutta kaikki toimii ilmankin.', q4: 'Mitä tiedoilleni tapahtuu?', a4: 'Suurin osa pysyy puhelimessasi. Kuitit luetaan puhelimessa ja jaetaan vain, jos itse valitset niin. Lue lisää <a href="integritet.html">tietosuojaselosteesta</a>.', q5: 'Miksi sovellus ei ole vielä App Storessa tai Google Playssa?', a5: 'Sovellus on betavaiheessa. Se tulee kauppoihin, kun se on testattu valmiiksi. Siihen asti voit asentaa sen suoraan täältä.', q6: 'Toimiiko se puhelimessani?', a6: 'Kyllä, iPhonessa iOS 15:stä alkaen ja Androidissa versiosta 7 alkaen. Sovellus on tehty toimimaan sujuvasti myös edullisissa puhelimissa.',
       'end.t': 'Aloita säästäminen jo tänään', 'end.p': 'Ilmainen, ilman mainoksia. Beta on nyt saatavilla iPhonelle ja Androidille.',
       'ft.about': 'Ruokahinnat Suomessa, vertailtuna yhdessä paikassa.', 'ft.app': 'Sovellus', 'ft.more': 'Lisää', 'f.privacy': 'Tietosuoja'
     },
     en: {
-      'n.how': 'How it works', 'n.feat': 'Features', 'n.install': 'Install', 'n.faq': 'Questions', get: 'Download beta',
-      h1: 'Compare more.<br>Spend less.', lead: 'ZEVU compares grocery prices across Finland’s big grocery shops, so you instantly see where your shopping is cheapest.',
-      'dl.small': 'Download for', facts: 'Over 200,000 products from 18 shops, fresh prices every day. Free, with no ads. <a href="#install">How to install the beta</a>',
-      'r.head': 'WEEKLY SHOP', 'r.1': 'Milk 1 l', 'r.2': 'Coffee 500 g', 'r.3': 'Rye bread', 'r.4': 'Cheese 1 kg', 'r.5': 'Bananas 1 kg', 'r.6': 'Rolled oats', 'r.sum': 'Total', 'r.save': 'You save',
-      'h.title': 'How it works', h1t: 'Search or scan', h1p: 'Type what you need or scan the barcode in the shop.', h2t: 'Compare', h2p: 'See the price in every shop side by side, with price per kilo and offers.', h3t: 'Save', h3p: 'Shop where it’s cheapest and see how much you saved each month.',
+      skip: 'Skip to content', 'n.feat': 'Features', 'n.how': 'How it works', 'n.install': 'Install', 'n.faq': 'Questions', get: 'Download',
+      pill: 'Now for iPhone and Android', h1: 'Compare more.<br>Spend less.', lead: 'ZEVU compares grocery prices across Finland’s big grocery shops, so you instantly see where your shopping is cheapest.',
+      'dl.small': 'Download for', free: 'Free, no ads and no account.', howlink: 'How to install the beta',
+      'u.products': 'products', 'u.shops': 'shops compared', 'u.dailyB': 'Every day', 'u.daily': 'fresh prices', 'u.free': 'free, no ads',
       'f.title': 'Everything for cheaper shopping', 'f.lead': 'Prices, offers and leaflets in one place instead of five different apps.',
-      'c1.t': 'Compare prices', 'c1.p': 'See the same product in every shop side by side, with price per kilo and litre.', 'c2.t': 'Weekly leaflets', 'c2.p': 'Browse every shop’s leaflet in one place and save your favourites.', 'c3.t': 'Member offers', 'c3.p': 'Every shop’s member prices together, so you never miss a discount.', 'c4.t': 'Price alerts', 'c4.p': 'Get a notification when something you like gets cheaper.', 'c5.t': 'Scan and save', 'c5.p': 'Scan barcodes, shelf labels and receipts and see how much you saved.', 'c6.t': 'Smart shopping list', 'c6.p': 'ZEVU works out which shop makes your whole list cheapest.',
+      'c1.t': 'Compare prices', 'c1.p': 'See the same product in every shop side by side, with price per kilo and litre and cheaper alternatives from other brands.', 'c2.t': 'Weekly leaflets', 'c2.p': 'Every shop’s leaflet in one place. Save your favourites.', 'c3.t': 'Member offers', 'c3.p': 'Every shop’s member prices together, so you never miss a discount.', 'c4.t': 'Price alerts', 'c4.p': 'Get a notification when something you like gets cheaper.', 'c5.t': 'Scan', 'c5.p': 'Barcodes, shelf labels and receipts. The camera does the work.', 'c6.t': 'Smart shopping list', 'c6.p': 'ZEVU works out which shop makes your whole list cheapest.', 'c7.t': 'See what you saved', 'c7.p': 'Scan your receipt and see how much you saved each month.',
+      'h.title': 'How it works', h1t: 'Search or scan', h1p: 'Type what you need or scan the barcode in the shop.', h2t: 'Compare', h2p: 'See the price in every shop side by side, with price per kilo and offers.', h3t: 'Save', h3p: 'Shop where it’s cheapest and see how much you saved each month.',
       's1.t': 'Find the cheapest in seconds', 's1.p': 'Search thousands of products and instantly see which shop has the best price right now.', 's1.a': 'Prices from several chains at once', 's1.b': 'Cheaper alternatives from other brands', 's1.c': 'Price history for every product',
       's2.t': 'Your whole list, cheapest', 's2.p': 'Write your shopping list and ZEVU works out which shop makes the whole trip cheapest and how much you save.', 's3.t': 'See how much you save', 's3.p': 'Scan your receipt after shopping and ZEVU works out what you saved compared with other shops.',
       'in.title': 'How to install the beta', 'in.lead': 'It takes a couple of minutes. The app is free and needs no account.',
       'in.i1': 'Download <a href="' + IPA + '">ZEVU.ipa</a> to your computer.', 'in.i2': 'Open Sideloadly (Windows/Mac) or AltStore and connect your iPhone.', 'in.i3': 'Pick the file and sign in with your Apple ID, and the app installs.', 'in.i4': 'On the iPhone: Settings → General → VPN & Device Management → trust your Apple ID.', 'in.inote': 'With a free Apple ID the app has to be reinstalled every 7 days (AltStore can do it automatically).',
       'in.a1': 'Open this page on your phone and download <a href="' + APK + '">ZEVU.apk</a>.', 'in.a2': 'Open the file. Allow installing from the browser when your phone asks.', 'in.a3': 'Tap Install. New versions then install straight over the old one.', 'in.anote': 'Works on Android 7 and newer, cheaper phones too.',
-      'q.title': 'Questions', q1: 'What does ZEVU cost?', a1: 'Nothing. The app is free, with no ads and no in-app purchases.', q2: 'Where do the prices come from?', a2: 'From the shops’ own websites and leaflets, and from Open Prices, an open price database where people share prices from their receipts. Prices are updated every day.', q3: 'Do I need an account?', a3: 'No. With an account your lists and price alerts follow you to a new phone, but everything works without one.', q4: 'What happens to my data?', a4: 'Most of it stays on your phone. Receipts are read on the phone and only shared if you choose to. More in the <a href="integritet.html">privacy policy</a>.', q5: 'Why isn’t the app in the App Store or Google Play yet?', a5: 'The app is in beta. It will come to the stores once it is fully tested. Until then you can install it straight from here.',
+      'q.title': 'Questions', 'q.lead': 'Can’t find the answer? Write to us on GitHub.', q1: 'What does ZEVU cost?', a1: 'Nothing. The app is free, with no ads and no in-app purchases.', q2: 'Where do the prices come from?', a2: 'From the shops’ own websites and leaflets, and from Open Prices, an open price database where people share prices from their receipts. Prices are updated every day.', q3: 'Do I need an account?', a3: 'No. With an account your lists and price alerts follow you to a new phone, but everything works without one.', q4: 'What happens to my data?', a4: 'Most of it stays on your phone. Receipts are read on the phone and only shared if you choose to. More in the <a href="integritet.html">privacy policy</a>.', q5: 'Why isn’t the app in the App Store or Google Play yet?', a5: 'The app is in beta. It will come to the stores once it is fully tested. Until then you can install it straight from here.', q6: 'Will it work on my phone?', a6: 'Yes, on iPhones with iOS 15 or newer and on Android 7 or newer. The app is built to run smoothly on cheaper phones too.',
       'end.t': 'Start saving today', 'end.p': 'Free, no ads. The beta is out now for iPhone and Android.',
       'ft.about': 'Grocery prices in Finland, compared in one place.', 'ft.app': 'The app', 'ft.more': 'More', 'f.privacy': 'Privacy'
     }
@@ -399,17 +515,55 @@
   var SV = {}
   document.querySelectorAll('[data-t]').forEach(function (el) { SV[el.dataset.t] = el.innerHTML })
   T.sv = SV
+
+  var lang = 'sv', stats = null
+  function renderNums() {
+    var p = stats ? stats.products : 225000
+    document.getElementById('nProducts').textContent = (Math.floor(p / 1000) * 1000).toLocaleString(LOC[lang]) + '+'
+    if (stats && stats.shops) document.getElementById('nShops').textContent = stats.shops
+  }
   function setLang(l) {
-    var d = T[l] || SV
-    document.querySelectorAll('[data-t]').forEach(function (el) { var v = d[el.dataset.t]; if (v != null) el.innerHTML = v })
-    document.querySelectorAll('.lang button').forEach(function (b) { b.classList.toggle('on', b.dataset.l === l); b.setAttribute('aria-pressed', String(b.dataset.l === l)) })
-    document.documentElement.lang = l
-    try { localStorage.setItem('zevu:site-lang', l) } catch (e) {}
+    lang = T[l] ? l : 'sv'
+    var t = T[lang]
+    document.querySelectorAll('[data-t]').forEach(function (el) { var v = t[el.dataset.t]; if (v != null) el.innerHTML = v })
+    document.querySelectorAll('.lang button').forEach(function (b) { b.classList.toggle('on', b.dataset.l === lang); b.setAttribute('aria-pressed', String(b.dataset.l === lang)) })
+    document.documentElement.lang = lang
+    try { localStorage.setItem('zevu:site-lang', lang) } catch (e) {}
+    renderNums()
   }
   document.querySelectorAll('.lang button').forEach(function (b) { b.onclick = function () { setLang(b.dataset.l) } })
   var start = 'sv'
   try { var nl = (navigator.language || '').slice(0, 2); start = localStorage.getItem('zevu:site-lang') || (nl === 'fi' ? 'fi' : nl === 'sv' ? 'sv' : 'en') } catch (e) {}
   setLang(start)
+
+  // product and shop counts from the daily data
+  fetch('data/stats.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null }).then(function (s) { if (s) { stats = s; renderNums() } }).catch(function () {})
+
+  var io = 'IntersectionObserver' in window
+  // fade each part up once as it comes into view
+  if (io) {
+    var rio = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target) } }) }, { rootMargin: '0px 0px -8% 0px' })
+    document.querySelectorAll('.rv').forEach(function (el) { rio.observe(el) })
+  } else document.querySelectorAll('.rv').forEach(function (el) { el.classList.add('in') })
+
+  // the tour: the phone shows the screen for the text in the middle of the window
+  if (io) {
+    var steps = document.querySelectorAll('.tstep'), scr = document.querySelectorAll('.tour-phone .scr')
+    var tio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return
+        var i = +e.target.dataset.s
+        steps.forEach(function (s, k) { s.classList.toggle('on', k === i) })
+        scr.forEach(function (s, k) { s.classList.toggle('on', k === i) })
+      })
+    }, { rootMargin: '-45% 0px -45% 0px' })
+    steps.forEach(function (s) { tio.observe(s) })
+  }
+
+  // the top bar turns white once the page has scrolled past the top
+  var nav = document.getElementById('nav')
+  var onScroll = function () { nav.classList.toggle('scrolled', scrollY > 24) }
+  addEventListener('scroll', onScroll, { passive: true }); onScroll()
 </script>
 </body>
 </html>

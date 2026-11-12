@@ -28,6 +28,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx tsx scripts/build-price-bundles.ts
+      # today's numbers for the homepage (products, shops, price gaps)
+      - run: npx tsx scripts/build-site-stats.ts
       # The website is the ZEVU homepage (site/). There is no web version of the
       # app; the daily data stays at the top because the installed apps read
       # their live prices from there.

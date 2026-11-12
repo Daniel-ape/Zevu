@@ -238,6 +238,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return m
   }, [effective])
 
+  // Kept stable while their data is unchanged. Screens recompute search
+  // results, deals and list plans whenever these change, so a new function
+  // on every update (adding to a list, opening a product) made the whole app
+  // redo its heaviest work on each tap.
+  const pricesOf = useCallback((id: string) => byProduct.get(id) ?? [], [byProduct])
+  const retailers = useMemo(() => (myStores.length ? RETAILERS.filter((r) => myStores.includes(r.id)) : RETAILERS), [myStores])
+  const t = useCallback((key: Key, vars?: Record<string, string | number>) => translate(lang, key, vars), [lang])
+
   const value = useMemo<Store>(
     () => ({
       products,
@@ -269,11 +277,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
       },
       allRetailers: RETAILERS,
-      retailers: myStores.length ? RETAILERS.filter((r) => myStores.includes(r.id)) : RETAILERS,
+      retailers,
       myStores,
       toggleMyStore: (id) => setMyStores((m) => (m.includes(id) ? m.filter((x) => x !== id) : [...m, id])),
       observations: effective,
-      pricesOf: (id: string) => byProduct.get(id) ?? [],
+      pricesOf,
       loading,
       loadMore,
       moreLoaded: rest,
@@ -340,9 +348,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTheme,
       lang,
       setLang,
-      t: (key, vars) => translate(lang, key, vars),
+      t,
     }),
-    [effective, byProduct, products, loading, rest, loadMore, lists, list, activeId, myStores, watched, receipts, cards, coupons, recent, theme, lang, lastStore],
+    [effective, pricesOf, retailers, t, products, loading, rest, loadMore, lists, list, activeId, myStores, watched, receipts, cards, coupons, recent, theme, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
