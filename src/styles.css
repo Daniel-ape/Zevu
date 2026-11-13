@@ -1702,7 +1702,7 @@ html, body { overscroll-behavior-x: none; }
 /* Leaflets: big covers kept, one swipeable row per store, no filter chips or blurbs */
 .lf-group { margin-top: 22px; }
 .lf-head { display: flex; align-items: center; gap: 10px; margin: 0 0 10px 2px; font-size: 17px; }
-.lf-shelf { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 0 16px 4px; scrollbar-width: none; }
+.lf-shelf { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; margin: 0 -16px; padding: 0 16px 4px; scrollbar-width: none; }
 .lf-shelf::-webkit-scrollbar { display: none; }
 .lf-shelf .cover { flex: 0 0 132px; scroll-snap-align: start; }
 .lf-head .chain-logo.inline.wide { height: 26px; padding: 0 8px; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); }
