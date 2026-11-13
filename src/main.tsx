@@ -12,6 +12,10 @@ import './device'
 import { ErrorBoundary } from './ui/ErrorBoundary'
 import { isNativeApp } from './data/openLink'
 
+// iPhone only shows a button's pressed look (:active) when the page listens
+// for touches, so every press animation in the app depends on this.
+document.addEventListener('touchstart', () => {}, { passive: true })
+
 // The phone app's dock is drawn natively above the page: styles leave room for it.
 if (isNativeApp) document.documentElement.classList.add('native-app')
 

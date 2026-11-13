@@ -331,7 +331,7 @@ function QtyStepper({ id, qty, setQuantity, less, more }: { id: string; qty: num
   return (
     <div className="stepper">
       <button onClick={() => setQuantity(id, (getPendingQty(id) ?? qty) - 1)} aria-label={less}><Minus size={16} /></button>
-      <span>{q}</span>
+      <span><span className="n" key={q}>{q}</span></span>
       <button onClick={() => setQuantity(id, (getPendingQty(id) ?? qty) + 1)} aria-label={more}><Plus size={16} /></button>
     </div>
   )

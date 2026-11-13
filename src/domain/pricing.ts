@@ -112,6 +112,25 @@ export interface BasketTotal {
   missing: number // items this retailer has no fresh price for
 }
 
+// Price observations grouped by product, built once per observation list.
+// Totalling a basket used to scan every observation (hundreds of thousands)
+// for every item at every shop, which froze the app for about a second each
+// time the list changed.
+const obsIndex = new WeakMap<readonly PriceObservation[], Map<string, PriceObservation[]>>()
+function obsOf(observations: readonly PriceObservation[], productId: string): PriceObservation[] {
+  let m = obsIndex.get(observations)
+  if (!m) {
+    m = new Map()
+    for (const o of observations) {
+      const a = m.get(o.productId)
+      if (a) a.push(o)
+      else m.set(o.productId, [o])
+    }
+    obsIndex.set(observations, m)
+  }
+  return m.get(productId) ?? []
+}
+
 /** Total cost of a list at each retailer. Missing items are counted, never guessed. */
 export function basketTotals(
   list: ShoppingList,
@@ -126,7 +145,7 @@ export function basketTotals(
     for (const item of list.items) {
       const product = productById(products, item.productId)
       if (!product) continue
-      const row = compare(product, observations, [retailer], now)[0]
+      const row = compare(product, obsOf(observations, product.id), [retailer], now)[0]
       if (!row || row.freshness !== 'fresh') missing++
       else totalCents += row.current.priceCents * item.quantity
     }
