@@ -203,6 +203,7 @@ class HintaopasViewController: CAPBridgeViewController {
         if let scroll = webView?.scrollView {
             scroll.alwaysBounceHorizontal = false
             scroll.showsHorizontalScrollIndicator = false
+            scroll.showsVerticalScrollIndicator = false
             scroll.isDirectionalLockEnabled = true
         }
     }

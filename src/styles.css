@@ -105,9 +105,9 @@ body {
 button, input { font: inherit; color: inherit; }
 button { cursor: pointer; border: 0; background: none; padding: 0; }
 
-/* App shell: phone-width column, framed on wide screens */
+/* App shell: the full width of a phone (an iPhone Pro Max is 440 points
+   wide), a phone-width column framed on wide screens */
 .shell {
-  max-width: 430px;
   margin: 0 auto;
   min-height: 100dvh;
   background: var(--bg);
@@ -118,6 +118,7 @@ button { cursor: pointer; border: 0; background: none; padding: 0; }
 @media (min-width: 600px) {
   body { background: #ecebf3; }
   .shell {
+    max-width: 430px;
     margin: 24px auto;
     min-height: calc(100dvh - 48px);
     height: calc(100dvh - 48px);
@@ -365,7 +366,7 @@ button.row:active { opacity: 0.6; }
   display: flex; align-items: flex-end; justify-content: center; animation: fade 0.2s ease;
 }
 .sheet {
-  width: 100%; max-width: 430px; max-height: 90dvh; overflow-y: auto; background: var(--bg);
+  width: 100%; max-height: 90dvh; overflow-y: auto; background: var(--bg);
   border-radius: 28px 28px 0 0; padding: 10px 20px 32px; animation: rise 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .sheet-grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 14px; }
@@ -1644,7 +1645,7 @@ html, body { overscroll-behavior-x: none; }
    put while the page scrolls (iOS ignores fixed background images). */
 .shell { isolation: isolate; }
 .shell::before {
-  content: ''; position: fixed; top: 0; bottom: 0; left: 50%; width: min(430px, 100%); transform: translateX(-50%);
+  content: ''; position: fixed; top: 0; bottom: 0; left: 50%; width: 100%; transform: translateX(-50%);
   z-index: -1; pointer-events: none;
   background:
     radial-gradient(70% 38% at 10% 0%, rgba(22, 210, 124, 0.17), transparent 72%),
@@ -1995,3 +1996,12 @@ html.lite .stepper .n, html.lite .tab.on svg, html.lite .tick.on svg { animation
 @media (prefers-reduced-motion: reduce) {
   .stepper .n, .tab.on svg, .tick.on svg { animation: none; }
 }
+
+/* wide screens: the column and sheets keep a phone's width */
+@media (min-width: 600px) {
+  .sheet { max-width: 430px; }
+  .shell::before { width: min(430px, 100%); }
+}
+/* no scroll bars anywhere: the app scrolls like a native app */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; width: 0; height: 0; }
