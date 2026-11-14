@@ -7,7 +7,7 @@ import { flushSync } from 'react-dom'
 // one fades in with plain CSS, like an iPhone tab bar, so a tap answers right away.
 // Without support, with "reduce motion" on, or on cheaper phones the page just changes.
 
-type VT = { finished: Promise<void>; skipTransition?: () => void }
+type VT = { finished: Promise<void>; ready?: Promise<void>; updateCallbackDone?: Promise<void>; skipTransition?: () => void }
 type Doc = Document & { startViewTransition?: (cb: () => void) => VT }
 
 export const viewTransitions = typeof document !== 'undefined' && !!(document as Doc).startViewTransition
@@ -42,6 +42,9 @@ export function transition(kind: 'right' | 'left' | 'push' | 'pop' | 'fade', upd
   try {
     const t = d.startViewTransition(() => flushSync(update))
     running = t
+    // skipping a slide rejects these; that is expected, not an error
+    t.ready?.catch(() => {})
+    t.updateCallbackDone?.catch(() => {})
     const done = () => {
       if (running !== t) return
       running = null

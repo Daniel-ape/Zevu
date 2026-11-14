@@ -213,6 +213,9 @@ function Shell() {
   // pages that are not kept (scan, profile, coupons) are forgotten when you leave them
   for (const t of [...visited.current]) if (!KEEP.includes(t) && t !== tab) visited.current.delete(t)
 
+  // test builds only: the automatic walk-through (src/probe.ts) drives the app through this
+  useEffect(() => { if (import.meta.env.VITE_PROBE === '1') (window as unknown as { __zevuNav?: Nav }).__zevuNav = nav }, [nav])
+
   return (
     <NavCtx.Provider value={nav}>
       <div className="shell" data-motion={motion.current}>

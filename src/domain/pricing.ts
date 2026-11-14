@@ -131,6 +131,10 @@ function obsOf(observations: readonly PriceObservation[], productId: string): Pr
   return m.get(productId) ?? []
 }
 
+/** Build the per-product index ahead of time (when the app is idle), so the
+ * first change to a list doesn't pay for it. */
+export function warmPriceIndex(observations: readonly PriceObservation[]) { obsOf(observations, '') }
+
 /** Total cost of a list at each retailer. Missing items are counted, never guessed. */
 export function basketTotals(
   list: ShoppingList,

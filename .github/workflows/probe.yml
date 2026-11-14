@@ -1,0 +1,79 @@
+name: App test run (simulator + emulator)
+
+# Runs the automatic walk-through (src/probe.ts) in the iPhone simulator and
+# the Android emulator, and saves its log and screenshots on the
+# "probe-results" branch. Temporary: removed again after the test.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/probe.yml', '.github/probe/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 50
+    env:
+      VITE_PROBE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci && npx tsx scripts/build-price-bundles.ts && npm run build && node scripts/slim-dist.mjs && npx cap sync ios
+      - name: Build for simulator
+        working-directory: ios/App
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1); [ -n "$X" ] && sudo xcode-select -s "$X"
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tail -5
+      - name: Walk through the app
+        working-directory: ios/App
+        run: |
+          DEV=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for r,l in sorted(d.items(), reverse=True) if 'iOS' in r for x in l if 'Pro Max' in x['name']))")
+          xcrun simctl boot "$DEV"; xcrun simctl bootstatus "$DEV" -b
+          xcrun simctl install "$DEV" build/Build/Products/Debug-iphonesimulator/App.app
+          xcrun simctl launch --console-pty "$DEV" fi.hintaopas.app > ios.log 2>&1 &
+          bash ../../.github/probe/watch.sh ios.log "xcrun simctl io $DEV screenshot" ../../out/ios 400
+          tail -40 ios.log > ../../out/ios/tail.txt || true
+      - uses: actions/upload-artifact@v4
+        with: { name: probe-ios, path: out/ }
+      - name: Save results
+        run: |
+          cd out && git init -q && git checkout -q -b probe-results-ios && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "iOS probe ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" probe-results-ios
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      VITE_PROBE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm ci && npx tsx scripts/build-price-bundles.ts && npx vite build && node scripts/slim-dist.mjs && npx cap sync android
+      - run: chmod +x android/gradlew && (cd android && ./gradlew assembleDebug --no-daemon -q)
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Walk through the app
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          ram-size: 3072M
+          disable-animations: false
+          script: bash .github/probe/android.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: probe-android, path: out/ }
+      - name: Save results
+        run: |
+          cd out && git init -q && git checkout -q -b probe-results-android && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Android probe ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" probe-results-android
