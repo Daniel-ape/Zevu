@@ -1730,7 +1730,7 @@ html, body { overscroll-behavior-x: none; }
 .camera video { opacity: 0; transition: opacity 0.2s ease; }
 .camera video.shown { opacity: 1; }
 /* Products: rows below the screen are not laid out or painted until scrolled to */
-.search-row { content-visibility: auto; contain-intrinsic-size: auto 74px; }
+.search-row { }
 /* No zoom from double taps or from focusing a small text field (iOS) */
 html, body { touch-action: manipulation; }
 input, textarea, select { font-size: max(16px, 1em); }
@@ -1769,7 +1769,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .sc2-chips b { color: var(--text); font-weight: 750; font-variant-numeric: tabular-nums; }
 /* Products: one card per product, like a shop app: big picture, whole name, big price */
 .sr-list { display: flex; flex-direction: column; gap: 10px; }
-.sr-card { position: relative; display: flex; align-items: stretch; background: var(--card); border-radius: 20px; box-shadow: var(--card-shadow); padding: 0; content-visibility: auto; contain-intrinsic-size: auto 150px; }
+.sr-card { position: relative; display: flex; align-items: stretch; background: var(--card); border-radius: 20px; box-shadow: var(--card-shadow); padding: 0; }
 .sr-open { flex: 1; min-width: 0; display: flex; gap: 14px; align-items: center; padding: 14px 64px 14px 12px; background: none; border: 0; text-align: left; font: inherit; color: inherit; }
 .sr-pic { width: 92px; height: 112px; flex-shrink: 0; display: grid; place-items: center; }
 .sr-pic .tile { width: 92px; height: 112px; border-radius: 12px; box-shadow: none; background: transparent; font-size: 34px; }

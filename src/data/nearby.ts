@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core'
+import { Geolocation } from '@capacitor/geolocation'
 import { useEffect, useState } from 'react'
 
 // "Stores near me": the user's position (asked for only when they tap the
@@ -74,7 +76,16 @@ async function fetchStores(p: { lat: number; lon: number }): Promise<Omit<NearSt
 }
 
 /** Ask for the position (once, on the user's tap) and load the stores around it. */
-export function locate(): Promise<void> {
+export async function locate(): Promise<void> {
+  // In the phone apps the position comes from the app itself (one system
+  // question, in the app's name). The web page's own location request showed
+  // a second question on iPhone, from "localhost".
+  if (Capacitor.isNativePlatform()) {
+    const g = await Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 15000, maximumAge: 3_600_000 })
+    write(POS, { lat: g.coords.latitude, lon: g.coords.longitude, at: new Date().toISOString() })
+    dispatchEvent(new Event(EVENT))
+    return
+  }
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) return reject(new Error('unsupported'))
     navigator.geolocation.getCurrentPosition(
@@ -99,7 +110,7 @@ export function autoLocate() {
     if (asked === 'denied') return
     locate().then(
       () => localStorage.setItem(ASKED, 'granted'),
-      (e: GeolocationPositionError | Error) => { if ('code' in e && e.code === 1) localStorage.setItem(ASKED, 'denied') },
+      (e: GeolocationPositionError | Error) => { if (('code' in e && e.code === 1) || /denied/i.test(e.message ?? '')) localStorage.setItem(ASKED, 'denied') },
     )
   } catch { /* no storage: skip */ }
 }
