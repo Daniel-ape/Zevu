@@ -16,3 +16,4 @@ while [ $t -lt $MAX ]; do
 done
 grep "PROBE" "$LOG" > "$OUT/probe.txt" || true
 echo "---- $OUT"; cat "$OUT/probe.txt"
+# rerun 2026-11-14T12:36:53

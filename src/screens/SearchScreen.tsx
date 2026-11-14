@@ -82,12 +82,18 @@ export function SearchScreen() {
   // product list grows it is prepared in small pieces between frames, so the
   // first search after that never has to do it all at once.
   const hay = useMemo(() => hayFor(products), [products])
+  // Search text for each product, prepared a little at a time in the
+  // background. Until a product's text is ready a search skips it (once most
+  // of the catalogue is ready), and the list refreshes when the pass is done,
+  // so the screen never freezes while thousands of new products arrive.
+  const [hayTick, setHayTick] = useState(0)
   useEffect(() => {
-    let i = 0, id = 0
+    let i = 0, id = 0, missing = false
     const step = () => {
       const end = Math.min(products.length, i + 1500)
-      for (; i < end; i++) hay.get(products[i])
+      for (; i < end; i++) if (!hay.peek(products[i])) { missing = true; hay.get(products[i]) }
       if (i < products.length) id = window.setTimeout(step, 16)
+      else if (missing) setHayTick((t) => t + 1)
     }
     id = window.setTimeout(step, 50)
     return () => clearTimeout(id)
@@ -108,7 +114,7 @@ export function SearchScreen() {
   const [fuzzyTick, setFuzzyTick] = useState(0)
   const fuzzyKey = `${dcat}|${dq.trim()}`
   const results = useMemo(() => {
-    const key = [dq, dcat, dsort, products, pricesOf, retailers, online, fuzzyTick]
+    const key = [dq, dcat, dsort, products, pricesOf, retailers, online, fuzzyTick, hayTick]
     if (lastResults && sameKey(lastResults.key, key)) return lastResults.value as ReturnType<typeof compute>
     const value = compute()
     lastResults = { key, value }
@@ -124,16 +130,33 @@ export function SearchScreen() {
     const want = needle ? guessCategory(needle, '') : undefined
     const off = (p: Product) => (want && p.category !== want ? 1 : 0)
     const inCat = dcat === 'all' ? products : products.filter((p) => p.category === dcat)
+    // with most search texts ready, products still waiting for theirs are left
+    // out of this pass; they join when the background pass finishes
+    const lazy = hay.built() > 20000
     const scoreAll = (fuzzy: boolean) => {
       const out: { p: (typeof products)[number]; score: number; priced: boolean }[] = []
       for (const p of inCat) {
         const priced = pricesOf(p.id).length > 0
         // Browsing without a query lists only products that have prices.
         if (!needle) { if (priced) out.push({ p, score: 1, priced }); continue }
-        const score = matchScore(query, hay.get(p), fuzzy) || (onlineIds?.has(p.id) ? 2 : 0)
+        const h = lazy ? hay.peek(p) : hay.get(p)
+        if (!h) continue
+        const score = matchScore(query, h, fuzzy) || (onlineIds?.has(p.id) ? 2 : 0)
         if (score > 0) out.push({ p, score, priced })
       }
       return out
+    }
+    // Browsing without a query: the catalogue is already in popularity order,
+    // so the first priced products are the list. No need to look at (and
+    // sort) all two hundred thousand of them.
+    const poolSize = dsort === 'top' ? 160 : 600
+    if (!needle) {
+      const out: { p: (typeof products)[number]; score: number; priced: boolean }[] = []
+      for (const p of inCat) {
+        if (pricesOf(p.id).length > 0) out.push({ p, score: 1, priced: true })
+        if (out.length >= poolSize) break
+      }
+      return finish(out)
     }
     let found = scoreAll(false)
     // Forgive typos only when the exact pass finds little. Those matches come
@@ -152,7 +175,13 @@ export function SearchScreen() {
     // price comparison only for the products that can make the list.
     found.sort((a, b) =>
       (needle ? tier(a.score) - tier(b.score) : 0) || off(a.p) - off(b.p) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
-    const pool = dsort === 'top' ? found.slice(0, 160) : found.slice(0, 600)
+    return finish(found.slice(0, poolSize))
+    }
+    function finish(pool: { p: Product; score: number; priced: boolean }[]) {
+    const needle = dq.trim()
+    const want = needle ? guessCategory(needle, '') : undefined
+    const off = (p: Product) => (want && p.category !== want ? 1 : 0)
+    const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
     return pool
       .map(({ p, score }) => {
         const rows = compare(p, pricesOf(p.id), retailers)
@@ -173,7 +202,7 @@ export function SearchScreen() {
       })
       .slice(0, 80)
     }
-  }, [dq, dcat, dsort, products, pricesOf, retailers, online, hay, rank, fuzzyTick, fuzzyKey])
+  }, [dq, dcat, dsort, products, pricesOf, retailers, online, hay, rank, fuzzyTick, fuzzyKey, hayTick])
 
   // The background typo pass: a few thousand products per slice, then the list updates.
   useEffect(() => {

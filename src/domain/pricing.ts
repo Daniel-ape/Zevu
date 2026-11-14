@@ -133,7 +133,23 @@ function obsOf(observations: readonly PriceObservation[], productId: string): Pr
 
 /** Build the per-product index ahead of time (when the app is idle), so the
  * first change to a list doesn't pay for it. */
-export function warmPriceIndex(observations: readonly PriceObservation[]) { obsOf(observations, '') }
+export async function warmPriceIndex(observations: readonly PriceObservation[], stop: () => boolean = () => false) {
+  if (obsIndex.has(observations)) return
+  const m = new Map<string, PriceObservation[]>()
+  for (let i = 0; i < observations.length; i += 8000) {
+    const end = Math.min(observations.length, i + 8000)
+    for (let k = i; k < end; k++) {
+      const o = observations[k]
+      const a = m.get(o.productId)
+      if (a) a.push(o)
+      else m.set(o.productId, [o])
+    }
+    // small pieces, so a slow phone never freezes while the index is made
+    await new Promise<void>((r) => setTimeout(r, 0))
+    if (stop() || obsIndex.has(observations)) return
+  }
+  obsIndex.set(observations, m)
+}
 
 /** Total cost of a list at each retailer. Missing items are counted, never guessed. */
 export function basketTotals(

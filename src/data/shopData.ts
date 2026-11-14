@@ -29,9 +29,15 @@ export async function loadShopData(part: 'core' | 'rest'): Promise<ShopData> {
   const ids = new Map<string, string>()
   const idOf = (ean: string) => { let v = ids.get(ean); if (v === undefined) { v = `off:${ean}`; ids.set(ean, v) } return v }
   const time = (t: string) => { let v = times.get(t); if (v === undefined) { v = t.length === 16 ? t + ':00.000Z' : t; times.set(t, v) } return v }
+  // The work is done a few thousand products at a time, with a short pause
+  // in between, so the app keeps answering taps while the catalogue loads
+  // (on a slow phone, doing it all at once froze the screen for seconds).
+  let done = 0
+  const pause = () => new Promise<void>((r) => setTimeout(r, 0))
   for (const s of bundle?.shops ?? []) {
     const source: PriceSource = s.r === 'tokmanni' ? 'tokmanni' : 'shop'
     for (const [ean, cents, name, brand, pic, link, checked, storeOnly] of s.i) {
+      if (++done % 2500 === 0) await pause()
       // pictures are stored without the start the shop's pictures share (s.p)
       const image = pic && !pic.startsWith('http') ? (s.p ?? '') + pic : pic
       const id = idOf(ean)

@@ -15,3 +15,19 @@ export function productById(products: readonly Product[], id: string | undefined
   }
   return m.get(id)
 }
+
+const pause = () => new Promise<void>((r) => setTimeout(r, 0))
+
+/** Build the index in small pieces, so a slow phone never freezes while it is
+ * made. Done once, in the background, soon after the catalogue loads. */
+export async function warmProductIndex(products: readonly Product[], stop: () => boolean = () => false) {
+  if (cache.has(products)) return
+  const m = new Map<string, Product>()
+  for (let i = 0; i < products.length; i += 8000) {
+    const end = Math.min(products.length, i + 8000)
+    for (let k = i; k < end; k++) { const p = products[k]; if (!m.has(p.id)) m.set(p.id, p) }
+    await pause()
+    if (stop() || cache.has(products)) return
+  }
+  cache.set(products, m)
+}

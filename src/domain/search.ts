@@ -93,12 +93,18 @@ export const haystack = (p: Product): Haystack => {
 }
 
 // One shared set of search texts per product list, made as products are first searched.
-const hayCache = new WeakMap<object, Map<string, Haystack>>()
-export function hayFor(products: readonly Product[]) {
-  let m = hayCache.get(products)
-  if (!m) { m = new Map(); hayCache.set(products, m) }
-  const map = m
-  return { get: (p: Product) => { let v = map.get(p.id); if (!v) { v = haystack(p); map.set(p.id, v) } return v }, m: map }
+// One haystack per product, kept for the life of the app. When the rest of
+// the catalogue arrives the product list is a new array, but the products
+// already in it are the same objects, so their haystacks are not built again.
+const hayCache = new WeakMap<Product, Haystack>()
+let hayBuilt = 0
+export function hayFor(_products?: readonly Product[]) {
+  return {
+    get: (p: Product) => { let v = hayCache.get(p); if (!v) { v = haystack(p); hayCache.set(p, v); hayBuilt++ } return v },
+    peek: (p: Product) => hayCache.get(p),
+    /** how many haystacks exist so far */
+    built: () => hayBuilt,
+  }
 }
 
 /** A query prepared once, so scoring thousands of products stays cheap while typing. */

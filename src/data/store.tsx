@@ -1,4 +1,4 @@
-import { productById } from '../domain/productIndex'
+import { warmProductIndex } from '../domain/productIndex'
 import { warmPriceIndex } from '../domain/pricing'
 import { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { setPendingQty, settlePendingQty } from './pendingQty'
@@ -228,14 +228,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     () => [...observations, ...receiptObservations(receipts), ...userPrices],
     [observations, receipts, userPrices],
   )
-  // Build the lookup indexes while the app is idle, so the first tap on a
-  // list button doesn't have to wait for them.
+  // Build the lookup indexes in the background, a little at a time, so the
+  // first tap on a list button doesn't have to wait for them.
   useEffect(() => {
     if (!products.length) return
-    const idle = (window as unknown as { requestIdleCallback?: (f: () => void, o?: object) => number }).requestIdleCallback
-    const run = () => { productById(products, ''); warmPriceIndex(effective) }
-    const id = idle ? idle(run, { timeout: 4000 }) : window.setTimeout(run, 1500)
-    return () => { const c = (window as unknown as { cancelIdleCallback?: (n: number) => void }).cancelIdleCallback; if (idle && c) c(id); else clearTimeout(id) }
+    let stopped = false
+    const stop = () => stopped
+    const id = window.setTimeout(() => { void warmProductIndex(products, stop).then(() => warmPriceIndex(effective, stop)) }, 1200)
+    return () => { stopped = true; clearTimeout(id) }
   }, [products, effective])
   useEffect(() => {
     save('theme', theme)
