@@ -1,0 +1,30 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 120329 Realtime: 120329
+
+** MEMINFO in pid 2340 [fi.hintaopas.app] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap    21856    21800       48    13461    23120    44944    37195     3527
+  Dalvik Heap     6250     6236        0      109     7352     9942     4971     4971
+ Dalvik Other     3016     2936        0       70     3356                           
+        Stack     1556     1552        4      728     1564                           
+       Ashmem      111        0        0        0      780                           
+    Other dev      228      228        0        0      520                           
+     .so mmap     1728      204       92      242    35424                           
+    .jar mmap     1782        0        4        0    37740                           
+    .apk mmap    20064      128     6600      364    52092                           
+    .ttf mmap       74        0        0        0      416                           
+    .dex mmap       30        0        0        4      920                           
+    .oat mmap       22        0        0        0     1796                           
+    .art mmap     3342     2752      360     2865    18136                           
+   Other mmap      836        8      164        0     3224                           
+      Unknown    13983    12676     1304    12408    14320                           
+        TOTAL   105129    48520     8576    30251   200760    54886    42166     8498
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     9348                          25488
+         Native Heap:    21800                          23120
+                Code:     7028                         128564
