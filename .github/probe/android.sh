@@ -1,6 +1,8 @@
 #!/bin/bash
 set -x
 adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+adb shell pm grant fi.hintaopas.app android.permission.ACCESS_FINE_LOCATION || true
+adb shell pm grant fi.hintaopas.app android.permission.ACCESS_COARSE_LOCATION || true
 adb logcat -c
 (adb logcat -v raw 'Capacitor/Console:I' '*:S' > android.log 2>&1 &)
 adb shell am start -n fi.hintaopas.app/.MainActivity

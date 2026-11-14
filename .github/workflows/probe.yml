@@ -33,6 +33,8 @@ jobs:
           DEV=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for r,l in sorted(d.items(), reverse=True) if 'iOS' in r for x in l if 'Pro Max' in x['name']))")
           xcrun simctl boot "$DEV"; xcrun simctl bootstatus "$DEV" -b
           xcrun simctl install "$DEV" build/Build/Products/Debug-iphonesimulator/App.app
+          xcrun simctl privacy "$DEV" grant location fi.hintaopas.app || true
+          xcrun simctl location "$DEV" set 63.675,22.705 || true
           xcrun simctl launch --console-pty "$DEV" fi.hintaopas.app > ios.log 2>&1 &
           bash ../../.github/probe/watch.sh ios.log "xcrun simctl io $DEV screenshot" ../../out/ios 400
           tail -40 ios.log > ../../out/ios/tail.txt || true
