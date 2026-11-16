@@ -1,3 +1,5 @@
+import { cleanCode, fetchShared, mergeItems, sharingEnabled, startSharing, syncShared as syncSharedList, type ShareState } from './sharedLists'
+import { isNativeApp } from './openLink'
 import { warmProductIndex } from '../domain/productIndex'
 import { warmPriceIndex } from '../domain/pricing'
 import { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
@@ -59,6 +61,14 @@ interface Store {
   renameList: (id: string, name: string) => void
   deleteList: (id: string) => void
   restoreList: (l: ShoppingList) => void
+  /** Starts sharing a list; resolves with its code. */
+  shareList: (id: string) => Promise<string>
+  /** Joins a shared list by code; resolves with its name, or null when there is no such list. */
+  joinShared: (code: string) => Promise<string | null>
+  /** Keeps the list on this phone but stops syncing it. */
+  leaveShared: (id: string) => void
+  /** Whether the last sync of shared lists worked. */
+  sharedOnline: boolean
   setQuantity: (productId: string, qty: number) => void
   toggleChecked: (productId: string) => void
   clearChecked: () => void
@@ -111,6 +121,69 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     settlePendingQty((id) => list.items.find((i) => i.productId === id)?.quantity ?? 0)
   }, [list])
+  // ── Shared lists: kept in sync with everyone who has the code ──
+  const listsRef = useRef(lists)
+  listsRef.current = lists
+  const [sharedOnline, setSharedOnline] = useState(true)
+  const syncing = useRef(false)
+  const syncShared = useCallback(async () => {
+    if (!sharingEnabled || syncing.current) return
+    const shared = listsRef.current.filter((l): l is ShoppingList & { shared: ShareState } => !!l.shared)
+    if (!shared.length) return
+    syncing.current = true
+    try {
+      for (const l of shared) {
+        const r = await syncSharedList(l, l.name)
+        if (!r) continue
+        setLists((all) => all.map((x) => {
+          if (x.id !== l.id || x.shared?.code !== l.shared.code) return x
+          // changed on this phone while syncing: put those changes on top
+          const items = x.items === l.items ? r.items : mergeItems(l.items, x.items, r.items)
+          return { ...x, items, shared: r.shared }
+        }))
+      }
+      setSharedOnline(true)
+    } catch {
+      setSharedOnline(false)
+    } finally {
+      syncing.current = false
+    }
+  }, [])
+  // soon after a change here, every few seconds while the app is open, and on return
+  useEffect(() => {
+    if (!sharingEnabled || !lists.some((l) => l.shared)) return
+    const id = window.setTimeout(() => void syncShared(), 700)
+    return () => clearTimeout(id)
+  }, [lists, syncShared])
+  const anyShared = lists.some((l) => l.shared)
+  useEffect(() => {
+    if (!sharingEnabled || !anyShared) return
+    const tick = () => { if (document.visibilityState === 'visible') void syncShared() }
+    const id = window.setInterval(tick, 6000)
+    document.addEventListener('visibilitychange', tick)
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', tick) }
+  }, [anyShared, syncShared])
+  const joinShared = useCallback(async (raw: string) => {
+    const code = cleanCode(raw)
+    const existing = listsRef.current.find((l) => l.shared?.code === code)
+    if (existing) { setActiveId(existing.id); return existing.name }
+    const r = await fetchShared(code)
+    if (!r) return null
+    const id = (crypto.randomUUID?.() ?? String(Date.now())).slice(0, 8)
+    setLists((all) => [...all, { id, name: r.name || code, items: r.items, shared: r.share }])
+    setActiveId(id)
+    return r.name || code
+  }, [])
+  // invite links open the app: fi.hintaopas.app://join/CODE (or ?join=CODE on the web)
+  useEffect(() => {
+    if (!sharingEnabled) return
+    const fromUrl = (u: string) => { const m = /join[/=]([A-Za-z0-9-]{8,20})/.exec(u); if (m) void joinShared(m[1]).catch(() => {}) }
+    try { fromUrl(location.search) } catch { /* */ }
+    let remove: (() => void) | undefined
+    if (isNativeApp) void import('@capacitor/app').then(({ App }) => App.addListener('appUrlOpen', ({ url }) => fromUrl(url))).then((h) => { remove = () => void h.remove() })
+    return () => remove?.()
+  }, [joinShared])
+
   const [myStores, setMyStores] = useState<string[]>(() => load('myStores', []))
   const [watched, setWatched] = useState<Watch[]>(() => load('watched', []))
   const [cards, setCards] = useState<LoyaltyCard[]>(() => load('cards', []))
@@ -316,6 +389,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (id === activeId) setActiveId(next[0].id)
           return next
         }),
+      shareList: async (id) => {
+        const l = listsRef.current.find((x) => x.id === id)
+        if (!l) throw new Error('no list')
+        if (l.shared) return l.shared.code
+        const share = await startSharing(l, l.name)
+        setLists((all) => all.map((x) => (x.id === id ? { ...x, shared: share } : x)))
+        return share.code
+      },
+      joinShared,
+      leaveShared: (id) => setLists((all) => all.map((x) => (x.id === id ? { ...x, shared: undefined } : x))),
+      sharedOnline,
       restoreList: (l) => {
         setLists((all) => [...all.filter((x) => x.id !== l.id), l])
         setActiveId(l.id)
@@ -369,7 +453,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setLang,
       t,
     }),
-    [effective, pricesOf, retailers, t, products, loading, rest, loadMore, lists, list, activeId, myStores, watched, receipts, cards, coupons, recent, theme, lang, lastStore],
+    [effective, pricesOf, retailers, t, products, loading, rest, loadMore, lists, list, activeId, sharedOnline, joinShared, myStores, watched, receipts, cards, coupons, recent, theme, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

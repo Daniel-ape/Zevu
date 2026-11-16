@@ -82,3 +82,15 @@ export const Store = ({ size }: P) => (
 export const Chart = ({ size }: P) => (
   <svg {...base(size)}><path d="M4 19.5h16M7 16v-4M11.5 16V8M16 16v-6.5" /></svg>
 )
+
+export const Chat = ({ size = 18 }: P) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z" />
+  </svg>
+)
+
+export const People = ({ size = 18 }: P) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <circle cx="9" cy="8" r="3.2" /><path d="M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5" /><circle cx="17" cy="9" r="2.6" /><path d="M16.5 14.6c2.3.2 4 1.8 4.5 4.4" />
+  </svg>
+)

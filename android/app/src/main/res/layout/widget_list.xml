@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_bg"
+    android:padding="14dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@mipmap/ic_launcher_round"
+            android:contentDescription="@null" />
+        <TextView
+            android:id="@+id/w_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#10221A"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/w_empty" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" android:textColor="#4C5D54" android:textSize="13sp" android:visibility="gone" />
+    <TextView android:id="@+id/w_row1" style="@style/WidgetRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <TextView android:id="@+id/w_row2" style="@style/WidgetRow" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <TextView android:id="@+id/w_row3" style="@style/WidgetRow" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <TextView android:id="@+id/w_row4" style="@style/WidgetRow" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <TextView android:id="@+id/w_row5" style="@style/WidgetRow" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <TextView android:id="@+id/w_more" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textColor="#74837B" android:textSize="12sp" android:visibility="gone" />
+
+    <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/w_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/widget_pill"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingStart="10dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="6dp"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+</LinearLayout>

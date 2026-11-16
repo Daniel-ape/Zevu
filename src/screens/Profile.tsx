@@ -1,3 +1,5 @@
+import { FeedbackSheet } from '../ui/FeedbackSheet'
+import { feedbackEnabled } from '../data/feedback'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Portal } from '../ui/Portal'
 import type { Session } from '@supabase/supabase-js'
@@ -7,7 +9,7 @@ import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
-import { Back, Bell, Chart, Check, Chevron, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket } from '../ui/icons'
+import { Back, Bell, Chart, Chat, Check, Chevron, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket } from '../ui/icons'
 import { useNav, type Tab } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
@@ -39,6 +41,7 @@ export function Profile() {
   // Opened from another tab (bell, savings card…): back on that page goes back there.
   const [entry] = useState(() => { const w = wanted; wanted = null; return w })
   const [page, setPage] = useState<Page | null>(entry?.page ?? null)
+  const [feedback, setFeedback] = useState(false)
   const [notify, setNotify] = useState<'on' | 'off' | 'na'>('na')
   useEffect(() => { notifyStatus().then(setNotify) }, [page])
   const back = () => {
@@ -193,7 +196,9 @@ export function Profile() {
         <MenuRow icon={<Globe size={18} />} title={t('you.language')} value={LANGS.find((l) => l.id === lang)?.label} onClick={() => setPage('language')} />
         {notify !== 'na' && <MenuRow icon={<Bell size={18} />} title={t('nt.title')} value={t(notify === 'on' ? 'nt.on' : 'nt.off')} onClick={() => setPage('notify')} />}
         <MenuRow icon={<Info size={18} />} title={t('you.info')} onClick={() => setPage('info')} />
+        {feedbackEnabled && <MenuRow icon={<Chat size={18} />} title={t('fb.send')} onClick={() => setFeedback(true)} />}
       </div>
+      {feedback && <FeedbackSheet onClose={() => setFeedback(false)} />}
       {sheets}
     </div>
   )

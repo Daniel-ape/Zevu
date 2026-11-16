@@ -19,7 +19,7 @@ const en = {
   'stores.title': 'My stores',
   'stores.note': 'Comparisons and “cheapest” use only the stores you pick. Pick none to compare all stores.',
   'list.new': 'New list', 'list.newName': 'List name', 'list.create': 'Create', 'list.rename': 'Rename',
-  'list.delete': 'Delete list', 'list.share': 'Share list', 'list.copied': 'List copied',
+  'list.delete': 'Delete list', 'list.share': 'Send as text', 'list.copied': 'List copied',
   'list.clearChecked': 'Remove ticked items', 'list.save': 'Save', 'list.tick': 'Tick off',
   'watch.on': 'Watching price', 'watch.off': 'Watch price', 'watch.title': 'Watched prices', 'watch.reached': 'Down to your price {price}', 'watch.inLeaflet': 'In the {chain} leaflet', 'watch.member': 'members', 'watch.how': 'Tap a product to choose when to be told. Offers in this week’s leaflets show up here too.', 'watch.target': 'Target {price}', 'watch.offerTag': '{chain} leaflet {price}', 'watch.since': '{price} when you started', 'watch.tellWhen': 'Tell me when', 'watch.anyDrop': 'It gets cheaper', 'watch.under': 'At most {price}', 'watch.ownPrice': 'Own price, e.g. 1,99', 'watch.set': 'Set', 'watch.leaflets': 'In leaflets this week', 'watch.open': 'Show product', 'watch.stop': 'Stop watching',
   'watch.cheaper': '{amount} cheaper', 'watch.dearer': '{amount} more', 'watch.same': 'No change', 'watch.noPrice': 'No price yet',
@@ -97,6 +97,8 @@ const en = {
   'you.title': 'You', 'you.language': 'Language', 'you.appearance': 'Appearance',
   'theme.system': 'Auto', 'theme.light': 'Light', 'theme.dark': 'Dark',
   'you.data': 'Price data', 'you.dataNote': 'Prices: your receipts and shelf labels; the shops’ own websites (Tokmanni, Halpa-Halli, Prisma.fi, Verkkokauppa.com, Stockmann, Kärkkäinen, Ruohonjuuri, Lidl, Apteekki360, Yliopiston Apteekki); prices people report to Open Prices by Open Food Facts (ODbL). Products: Open Food Facts (ODbL).',
+  'fb.wrong': 'Wrong price or info?', 'fb.title': 'Report a mistake', 'fb.send': 'Send feedback', 'fb.sendBtn': 'Send', 'fb.sending': 'Sending…', 'fb.thanks': 'Thanks! We got your message.', 'fb.failed': 'Couldn’t send. Check your connection and try again.', 'fb.kPrice': 'Wrong price', 'fb.kPicture': 'Wrong picture', 'fb.kName': 'Wrong name or size', 'fb.kOther': 'Something else', 'fb.placeholder': 'What’s wrong? E.g. the right price and the shop.', 'fb.generalTitle': 'Send feedback', 'fb.generalHint': 'Ideas, mistakes or something that doesn’t work? Tell us. No account needed.', 'fb.generalPlaceholder': 'Write your message…', 'fb.anon': 'Sent without your name or email.',
+  'sh.share': 'Share with family', 'sh.invite': 'Invite more people', 'sh.leave': 'Stop sharing on this phone', 'sh.join': 'Join a shared list', 'sh.joinTitle': 'Join a shared list', 'sh.joinHint': 'Type the code you got. The list shows up here and stays in sync.', 'sh.code': 'Code', 'sh.joinBtn': 'Join', 'sh.joining': 'Joining…', 'sh.notFound': 'No list with that code.', 'sh.title': 'Shared list', 'sh.hint': 'Everyone with the code sees the same list. Changes show up on all phones within a few seconds.', 'sh.shareBtn': 'Send invite', 'sh.copied': 'Invite copied', 'sh.badge': 'Shared', 'sh.synced': 'Shared · up to date', 'sh.offline': 'Shared · will sync when online', 'sh.failed': 'Sharing isn’t available right now. Try again later.', 'sh.inviteText': 'Join my list “{name}” in ZEVU: {url} (code {code})', 'sh.joined': 'You joined “{name}”',
 }
 
 type Dict = typeof en
@@ -112,7 +114,7 @@ const fi: Dict = {
   'stores.title': 'Omat kaupat',
   'stores.note': 'Vertailut ja ”halvin” koskevat vain valitsemiasi kauppoja. Jos et valitse yhtään, vertaillaan kaikkia.',
   'list.new': 'Uusi lista', 'list.newName': 'Listan nimi', 'list.create': 'Luo', 'list.rename': 'Nimeä uudelleen',
-  'list.delete': 'Poista lista', 'list.share': 'Jaa lista', 'list.copied': 'Lista kopioitu',
+  'list.delete': 'Poista lista', 'list.share': 'Lähetä tekstinä', 'list.copied': 'Lista kopioitu',
   'list.clearChecked': 'Poista rastitetut', 'list.save': 'Tallenna', 'list.tick': 'Rastita',
   'watch.on': 'Hintaa seurataan', 'watch.off': 'Seuraa hintaa', 'watch.title': 'Seuratut hinnat', 'watch.reached': 'Hintasi {price} on alittunut', 'watch.inLeaflet': '{chain}-lehdessä', 'watch.member': 'jäsenille', 'watch.how': 'Napauta tuotetta valitaksesi, milloin kerromme. Viikon tarjouslehtien tarjoukset näkyvät myös täällä.', 'watch.target': 'Tavoite {price}', 'watch.offerTag': '{chain}-lehti {price}', 'watch.since': '{price} seurannan alussa', 'watch.tellWhen': 'Kerro, kun', 'watch.anyDrop': 'Hinta laskee', 'watch.under': 'Enintään {price}', 'watch.ownPrice': 'Oma hinta, esim. 1,99', 'watch.set': 'Aseta', 'watch.leaflets': 'Tämän viikon lehdissä', 'watch.open': 'Näytä tuote', 'watch.stop': 'Lopeta seuranta',
   'watch.cheaper': '{amount} halvempi', 'watch.dearer': '{amount} kalliimpi', 'watch.same': 'Ei muutosta', 'watch.noPrice': 'Ei vielä hintaa',
@@ -181,6 +183,8 @@ const fi: Dict = {
   'you.title': 'Sinä', 'you.language': 'Kieli', 'you.appearance': 'Ulkoasu',
   'theme.system': 'Auto', 'theme.light': 'Vaalea', 'theme.dark': 'Tumma',
   'you.data': 'Hintatiedot', 'you.dataNote': 'Hinnat: omat kuittisi ja hintalappusi; kauppojen omat verkkosivut (Tokmanni, Halpa-Halli, Prisma.fi, Verkkokauppa.com, Stockmann, Kärkkäinen, Ruohonjuuri, Lidl, Apteekki360, Yliopiston Apteekki); Open Food Factsin Open Prices -palveluun ilmoitetut hinnat (ODbL). Tuotteet: Open Food Facts (ODbL).',
+  'fb.wrong': 'Väärä hinta tai tieto?', 'fb.title': 'Ilmoita virheestä', 'fb.send': 'Lähetä palautetta', 'fb.sendBtn': 'Lähetä', 'fb.sending': 'Lähetetään…', 'fb.thanks': 'Kiitos! Saimme viestisi.', 'fb.failed': 'Lähetys ei onnistunut. Tarkista yhteys ja yritä uudelleen.', 'fb.kPrice': 'Väärä hinta', 'fb.kPicture': 'Väärä kuva', 'fb.kName': 'Väärä nimi tai koko', 'fb.kOther': 'Jotain muuta', 'fb.placeholder': 'Mikä on väärin? Esim. oikea hinta ja kauppa.', 'fb.generalTitle': 'Lähetä palautetta', 'fb.generalHint': 'Ideoita, virheitä tai jokin ei toimi? Kerro meille. Tiliä ei tarvita.', 'fb.generalPlaceholder': 'Kirjoita viestisi…', 'fb.anon': 'Lähetetään ilman nimeäsi tai sähköpostiasi.',
+  'sh.share': 'Jaa perheen kanssa', 'sh.invite': 'Kutsu lisää ihmisiä', 'sh.leave': 'Lopeta jakaminen tässä puhelimessa', 'sh.join': 'Liity jaettuun listaan', 'sh.joinTitle': 'Liity jaettuun listaan', 'sh.joinHint': 'Kirjoita saamasi koodi. Lista ilmestyy tänne ja pysyy ajan tasalla.', 'sh.code': 'Koodi', 'sh.joinBtn': 'Liity', 'sh.joining': 'Liitytään…', 'sh.notFound': 'Tällä koodilla ei löydy listaa.', 'sh.title': 'Jaettu lista', 'sh.hint': 'Kaikki, joilla on koodi, näkevät saman listan. Muutokset näkyvät kaikissa puhelimissa muutamassa sekunnissa.', 'sh.shareBtn': 'Lähetä kutsu', 'sh.copied': 'Kutsu kopioitu', 'sh.badge': 'Jaettu', 'sh.synced': 'Jaettu · ajan tasalla', 'sh.offline': 'Jaettu · päivittyy, kun yhteys palaa', 'sh.failed': 'Jakaminen ei ole juuri nyt käytettävissä. Yritä myöhemmin.', 'sh.inviteText': 'Liity listaani ”{name}” ZEVUssa: {url} (koodi {code})', 'sh.joined': 'Liityit listaan ”{name}”',
 }
 
 const sv: Dict = {
@@ -193,7 +197,7 @@ const sv: Dict = {
   'stores.title': 'Mina butiker',
   'stores.note': 'Jämförelser och ”billigast” gäller bara butikerna du väljer. Välj ingen för att jämföra alla.',
   'list.new': 'Ny lista', 'list.newName': 'Listans namn', 'list.create': 'Skapa', 'list.rename': 'Byt namn',
-  'list.delete': 'Radera listan', 'list.share': 'Dela listan', 'list.copied': 'Listan kopierad',
+  'list.delete': 'Radera listan', 'list.share': 'Skicka som text', 'list.copied': 'Listan kopierad',
   'list.clearChecked': 'Ta bort avbockade', 'list.save': 'Spara', 'list.tick': 'Bocka av',
   'watch.on': 'Bevakar priset', 'watch.off': 'Bevaka priset', 'watch.title': 'Bevakade priser', 'watch.reached': 'Under ditt pris {price}', 'watch.inLeaflet': 'I {chain}-bladet', 'watch.member': 'för medlemmar', 'watch.how': 'Tryck på en vara för att välja när du vill få besked. Erbjudanden i veckans reklamblad syns också här.', 'watch.target': 'Mål {price}', 'watch.offerTag': '{chain}-bladet {price}', 'watch.since': '{price} när du började', 'watch.tellWhen': 'Säg till när', 'watch.anyDrop': 'Priset sjunker', 'watch.under': 'Högst {price}', 'watch.ownPrice': 'Eget pris, t.ex. 1,99', 'watch.set': 'Spara', 'watch.leaflets': 'I veckans reklamblad', 'watch.open': 'Visa varan', 'watch.stop': 'Sluta bevaka',
   'watch.cheaper': '{amount} billigare', 'watch.dearer': '{amount} dyrare', 'watch.same': 'Ingen ändring', 'watch.noPrice': 'Inget pris ännu',
@@ -262,6 +266,8 @@ const sv: Dict = {
   'you.title': 'Du', 'you.language': 'Språk', 'you.appearance': 'Utseende',
   'theme.system': 'Auto', 'theme.light': 'Ljust', 'theme.dark': 'Mörkt',
   'you.data': 'Prisdata', 'you.dataNote': 'Priser: dina kvitton och hyllkantsetiketter; butikernas egna webbplatser (Tokmanni, Halpa-Halli, Prisma.fi, Verkkokauppa.com, Stockmann, Kärkkäinen, Ruohonjuuri, Lidl, Apteekki360, Yliopiston Apteekki); priser som folk rapporterat till Open Food Facts Open Prices (ODbL). Produkter: Open Food Facts (ODbL).',
+  'fb.wrong': 'Fel pris eller info?', 'fb.title': 'Rapportera fel', 'fb.send': 'Skicka feedback', 'fb.sendBtn': 'Skicka', 'fb.sending': 'Skickar…', 'fb.thanks': 'Tack! Vi har fått ditt meddelande.', 'fb.failed': 'Det gick inte att skicka. Kolla anslutningen och försök igen.', 'fb.kPrice': 'Fel pris', 'fb.kPicture': 'Fel bild', 'fb.kName': 'Fel namn eller storlek', 'fb.kOther': 'Något annat', 'fb.placeholder': 'Vad är fel? T.ex. rätt pris och butik.', 'fb.generalTitle': 'Skicka feedback', 'fb.generalHint': 'Idéer, fel eller något som inte fungerar? Berätta. Inget konto behövs.', 'fb.generalPlaceholder': 'Skriv ditt meddelande…', 'fb.anon': 'Skickas utan ditt namn eller din e-post.',
+  'sh.share': 'Dela med familjen', 'sh.invite': 'Bjud in fler', 'sh.leave': 'Sluta dela på den här telefonen', 'sh.join': 'Gå med i en delad lista', 'sh.joinTitle': 'Gå med i en delad lista', 'sh.joinHint': 'Skriv koden du fått. Listan dyker upp här och hålls uppdaterad.', 'sh.code': 'Kod', 'sh.joinBtn': 'Gå med', 'sh.joining': 'Går med…', 'sh.notFound': 'Ingen lista med den koden.', 'sh.title': 'Delad lista', 'sh.hint': 'Alla som har koden ser samma lista. Ändringar syns i alla telefoner inom några sekunder.', 'sh.shareBtn': 'Skicka inbjudan', 'sh.copied': 'Inbjudan kopierad', 'sh.badge': 'Delad', 'sh.synced': 'Delad · uppdaterad', 'sh.offline': 'Delad · uppdateras när du är online', 'sh.failed': 'Delning går inte att använda just nu. Försök igen senare.', 'sh.inviteText': 'Gå med i min lista ”{name}” i ZEVU: {url} (kod {code})', 'sh.joined': 'Du gick med i ”{name}”',
 }
 
 const DICTS: Record<Lang, Dict> = { en, fi, sv }

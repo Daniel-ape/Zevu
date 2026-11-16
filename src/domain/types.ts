@@ -101,4 +101,6 @@ export interface ShoppingList {
   id: string
   name: string
   items: ShoppingListItem[]
+  /** Set when the list is shared: its code, the version last synced and the items as they were then. */
+  shared?: { code: string; v: number; base: ShoppingListItem[] }
 }

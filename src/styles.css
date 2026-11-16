@@ -2005,3 +2005,24 @@ html.lite .stepper .n, html.lite .tab.on svg, html.lite .tick.on svg { animation
 /* no scroll bars anywhere: the app scrolls like a native app */
 * { scrollbar-width: none; }
 *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* feedback */
+.fb { display: flex; flex-direction: column; gap: 12px; padding-bottom: 8px; }
+.fb-product { font-weight: 700; margin: 0; }
+.fb-hint, .fb-note { margin: 0; color: var(--text-2); font-size: 14px; line-height: 1.45; }
+.fb-note { text-align: center; font-size: 13px; }
+.fb-err { margin: 0; color: var(--danger, #c0392b); font-size: 14px; }
+.fb .textarea { width: 100%; resize: none; }
+.fb-done { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 0 32px; text-align: center; }
+.fb-done p { margin: 0; font-weight: 600; }
+.fb-check { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 28px; font-weight: 800; animation: m-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+.pd-report { display: block; margin: 6px auto 0; background: none; border: 0; color: var(--text-2); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 8px 12px; }
+
+/* shared lists */
+.share-list { display: flex; flex-direction: column; gap: 14px; padding-bottom: 8px; }
+.share-code { text-align: center; font-size: 30px; font-weight: 800; letter-spacing: 0.08em; padding: 18px 8px; border-radius: 18px; background: var(--accent-soft); color: var(--accent); font-variant-numeric: tabular-nums; }
+.share-code.wait { opacity: 0.5; }
+.chip .shared-ico { display: inline-flex; vertical-align: -3px; margin-right: 5px; }
+.shared-line { display: flex; align-items: center; gap: 6px; margin: -4px 4px 10px; font-size: 13px; color: var(--text-2); }
+.shared-line .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.shared-line.off .dot { background: #d29a2a; }

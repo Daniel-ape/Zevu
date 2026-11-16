@@ -4,4 +4,5 @@
     <string name="title_activity_main">ZEVU</string>
     <string name="package_name">fi.hintaopas.app</string>
     <string name="custom_url_scheme">fi.hintaopas.app</string>
+    <string name="widget_desc">Inköpslistan och billigaste butiken</string>
 </resources>

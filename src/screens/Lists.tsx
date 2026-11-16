@@ -1,3 +1,5 @@
+import { ShareListSheet, JoinListSheet } from '../ui/ShareListSheet'
+import { prettyCode, sharingEnabled } from '../data/sharedLists'
 import { getPendingQty, usePendingQty } from '../data/pendingQty'
 import type { ReactNode } from 'react'
 import { productById } from '../domain/productIndex'
@@ -6,7 +8,7 @@ import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan } from '../domain/pricing'
 import { useNav } from '../nav'
-import { Check, List as ListIcon, Minus, Plus } from '../ui/icons'
+import { Check, List as ListIcon, Minus, People, Plus } from '../ui/icons'
 import { RankBadge, RetailerMark, Tile } from '../ui/bits'
 import { openProfilePage } from './Profile'
 import { StoreMode } from './StoreMode'
@@ -15,6 +17,7 @@ export function Lists() {
   const {
     list, lists, setActiveList, createList, renameList, deleteList, restoreList,
     products, observations, retailers, setQuantity, toggleChecked, clearChecked, pricesOf, myStores, t,
+    leaveShared, sharedOnline,
   } = useStore()
   const nav = useNav()
   const [mode, setMode] = useState<'none' | 'new' | 'rename'>('none')
@@ -23,6 +26,8 @@ export function Lists() {
   const [undo, setUndo] = useState<typeof list | null>(null)
   const [shopping, setShopping] = useState(false)
   const [menu, setMenu] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const [joining, setJoining] = useState(false)
   const display = (n: string) => (n === 'Weekly shop' ? t('list.defaultName') : n)
 
   const totals = useMemo(
@@ -79,11 +84,15 @@ export function Lists() {
       <div className="chips">
         {lists.map((l) => (
           <button key={l.id} className={'chip' + (l.id === list.id ? ' on' : '')} onClick={() => { setActiveList(l.id); setMode('none') }}>
-            {display(l.name)}
+            {l.shared && <span className="shared-ico" aria-label={t('sh.badge')}><People size={15} /></span>}{display(l.name)}
           </button>
         ))}
         <button className="chip" onClick={() => { setMode('new'); setName('') }}>+ {t('list.new')}</button>
       </div>
+
+      {list.shared && (
+        <div className={'shared-line' + (sharedOnline ? '' : ' off')}><span className="dot" />{t(sharedOnline ? 'sh.synced' : 'sh.offline')} · {prettyCode(list.shared.code)}</div>
+      )}
 
       {mode !== 'none' ? (
         <form className="section" style={{ display: 'flex', gap: 8 }} onSubmit={(e) => { e.preventDefault(); submit() }}>
@@ -294,8 +303,11 @@ export function Lists() {
           <div className="sheet menu-sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-grab" />
             <div className="rows">
+              {sharingEnabled && <button className="row" onClick={() => { setMenu(false); setSharing(true) }}>{t(list.shared ? 'sh.invite' : 'sh.share')}</button>}
+              {sharingEnabled && <button className="row" onClick={() => { setMenu(false); setJoining(true) }}>{t('sh.join')}</button>}
               {list.items.length > 0 && <button className="row" onClick={() => { setMenu(false); share() }}>{t('list.share')}</button>}
               <button className="row" onClick={() => { setMenu(false); setMode('rename'); setName(display(list.name)) }}>{t('list.rename')}</button>
+              {list.shared && <button className="row" onClick={() => { setMenu(false); leaveShared(list.id) }}>{t('sh.leave')}</button>}
               {lists.length > 1 && (
                 <button className="row danger" onClick={() => { setMenu(false); const gone = list; deleteList(list.id); setUndo(gone); setTimeout(() => setUndo((u) => (u === gone ? null : u)), 6000) }}>
                   {t('list.delete')}
@@ -305,6 +317,8 @@ export function Lists() {
           </div>
         </div></Portal>
       )}
+      {sharing && <ShareListSheet listId={list.id} name={display(list.name)} onClose={() => setSharing(false)} />}
+      {joining && <JoinListSheet onClose={() => setJoining(false)} onJoined={(n) => { setToast(t('sh.joined', { name: display(n) })); setTimeout(() => setToast(''), 2500) }} />}
       {toast && <div className="toast">{toast}</div>}
       {undo && (
         <div className="toast">

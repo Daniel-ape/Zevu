@@ -1,3 +1,5 @@
+import { FeedbackSheet } from '../ui/FeedbackSheet'
+import { feedbackEnabled } from '../data/feedback'
 import { usePendingQty } from '../data/pendingQty'
 import { productById } from '../domain/productIndex'
 import { useEffect, useMemo } from 'react'
@@ -20,6 +22,7 @@ export function ProductScreen({ id }: { id: string }) {
   const [picFrom, setPicFrom] = useState<string>()
   const nav = useNav()
   const [adding, setAdding] = useState<false | { store?: string }>(false)
+  const [report, setReport] = useState(false)
   const product = productById(products, id)
   const pendingQty = usePendingQty(id)
 
@@ -207,7 +210,9 @@ export function ProductScreen({ id }: { id: string }) {
           <a href={`https://world.openfoodfacts.org/product/${product.ean}`} target="_blank" rel="noreferrer" onClick={inAppLink(`https://world.openfoodfacts.org/product/${product.ean}`)} style={{ color: 'var(--text-3)' }}>{t('product.info')}</a>
         </p>
       )}
+      {feedbackEnabled && <button className="pd-report" onClick={() => setReport(true)}>{t('fb.wrong')}</button>}
       {adding && <PriceSheet product={product} store={adding.store} onClose={() => setAdding(false)} />}
+      {report && <FeedbackSheet product={{ id: product.id, name: product.name }} onClose={() => setReport(false)} />}
     </div>
   )
 }

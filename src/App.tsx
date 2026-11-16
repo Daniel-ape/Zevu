@@ -1,3 +1,5 @@
+import { isNativeApp } from './data/openLink'
+import { useWidgetSync } from './native/widget'
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { transition } from './viewTransition'
 import { Welcome } from './screens/Welcome'
@@ -131,6 +133,20 @@ function Shell() {
   const backState = useRef({ stack, tab, nav })
   backState.current = { stack, tab, nav }
   useEffect(() => setupAndroidKeyboard(), [])
+  // the home-screen widget follows the list, and opens it when tapped
+  useWidgetSync()
+  useEffect(() => {
+    if (!isNativeApp) return
+    let remove: (() => void) | undefined
+    const open = (url?: string) => { const m = /open\/(\w+)/.exec(url ?? ''); if (m && TABS.includes(m[1] as Tab)) nav.go(m[1] as Tab) }
+    void import('@capacitor/app').then(async ({ App: CapApp }) => {
+      open((await CapApp.getLaunchUrl())?.url)
+      const h = await CapApp.addListener('appUrlOpen', ({ url }) => open(url))
+      remove = () => void h.remove()
+    })
+    return () => remove?.()
+  }, [nav])
+
   useEffect(() => setupAndroidBack({
     hasStack: () => backState.current.stack.length > 0,
     back: () => backState.current.nav.back(),

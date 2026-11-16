@@ -1,6 +1,6 @@
 // Run: npm run test:receipts
 import assert from 'node:assert/strict'
-import { cleanOcrLine, matchLine, monthSavings, parseReceipt } from '../src/domain/receipts'
+import { cleanOcrLine, matchLine, monthSavings, parseReceipt, sizeOnLine } from '../src/domain/receipts'
 import { pickShelfPrice } from '../src/domain/shelfLabel'
 import { parseCoupon } from '../src/domain/coupons'
 
@@ -145,6 +145,21 @@ test('Matching survives misread letters and receipt words for the same thing', (
   assert.equal(matchLine('KANAN FILEELE1KE 600G', products)?.id, 'k')
   assert.equal(matchLine('VALIO RASV MAITO 1L', products)?.id, 'm')
   assert.equal(matchLine('PERLSMUOVIKASSI', products), undefined)
+})
+
+test('The package size on the receipt picks the right size', () => {
+  const products = [
+    { id: 'm1', name: 'Valio rasvaton maito', brand: 'Valio', size: { amount: 1000, unit: 'ml' } },
+    { id: 'm15', name: 'Valio rasvaton maito', brand: 'Valio', size: { amount: 1500, unit: 'ml' } },
+    { id: 'j4', name: 'Oltermanni juusto', brand: 'Valio', size: { amount: 400, unit: 'g' } },
+    { id: 'j9', name: 'Oltermanni juusto', brand: 'Valio', size: { amount: 900, unit: 'g' } },
+  ] as never[]
+  assert.equal(matchLine('VALIO RASV MAITO 1,5L', products)?.id, 'm15')
+  assert.equal(matchLine('VALIO RASV MAITO 1L', products)?.id, 'm1')
+  assert.equal(matchLine('OLTERMANNI 900G', products)?.id, 'j9')
+  assert.equal(matchLine('OLTERMANNI JUUSTO 400 G', products)?.id, 'j4')
+  assert.deepEqual(sizeOnLine('OLUT 6X0,33L'), { amount: 1980, unit: 'ml' })
+  assert.equal(sizeOnLine('BANAANI'), undefined)
 })
 
 console.log(`${passed} tests passed`)

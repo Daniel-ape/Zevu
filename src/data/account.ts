@@ -24,6 +24,9 @@ function supabase(): Promise<SupabaseClient> {
   ))
 }
 
+/** The shared Supabase connection (feedback and shared lists use it too). */
+export function supabaseClient(): Promise<SupabaseClient> { return supabase() }
+
 /** Opens Google's sign-in. On the web the page comes back signed in; in the app the browser sheet returns to the app. */
 export async function signInWithGoogle(): Promise<void> {
   const sb = await supabase()

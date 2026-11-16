@@ -228,6 +228,28 @@ function wordWeight(w: string, o: string): number {
 }
 
 /**
+ * The package size written on a receipt line ("MAITO 1,5L", "JUUSTO 400G",
+ * "OLUT 6X0,33L"), in grams or millilitres; undefined when there is none.
+ */
+export function sizeOnLine(name: string): { amount: number; unit: 'g' | 'ml' } | undefined {
+  const t = name.toLowerCase().replace(/(\d),(\d)/g, '$1.$2')
+  const m = /(?:(\d+)\s*x\s*)?(\d+(?:\.\d+)?)\s*(kg|g|l|dl|cl|ml)(?![a-zåäö])/.exec(t)
+  if (!m) return undefined
+  const n = (m[1] ? +m[1] : 1) * +m[2]
+  const f: Record<string, [number, 'g' | 'ml']> = { kg: [1000, 'g'], g: [1, 'g'], l: [1000, 'ml'], dl: [100, 'ml'], cl: [10, 'ml'], ml: [1, 'ml'] }
+  const [mul, unit] = f[m[3]]
+  const amount = Math.round(n * mul)
+  return amount > 0 ? { amount, unit } : undefined
+}
+
+/** +1 same size, −1 another size, 0 when either size is unknown. */
+function sizeFit(line: { amount: number; unit: string } | undefined, p: Product): number {
+  if (!line || !p.size || p.size.unit === 'pcs' || !p.size.amount) return 0
+  if (p.size.unit !== line.unit) return -1
+  return Math.abs(p.size.amount - line.amount) <= Math.max(2, line.amount * 0.03) ? 1 : -1
+}
+
+/**
  * Link a receipt line to a catalogue product. Receipts abbreviate
  * ("VALIO RASV MAITO 1L") and photos get letters wrong ("PCSSUN"), so each
  * receipt word may be the start of a product word, or nearly it. Lines the
@@ -262,18 +284,22 @@ export function matchLine(name: string, products: Product[], learned: Record<str
       sums.set(k, s)
     }
   }
-  let top: { id: string; rank: number; score: number; cover: number; hits: number } | undefined
+  const lineSize = sizeOnLine(name)
+  let top: { id: string; rank: number; score: number; cover: number; hits: number; fit: number } | undefined
   for (const [k, s] of sums) {
     const score = s.sum / words.length
     const nw = ix.nameWords[k]
     const cover = nw.length ? nw.filter((x) => s.used.has(x)).length / nw.length : 0
-    const rank = score * 0.75 + cover * 0.25
-    if (!top || rank > top.rank) top = { id: products[k].id, rank, score, cover, hits: s.hits }
+    // the package size on the receipt picks the right one of several sizes
+    // (milk 1 l or 1,5 l), so the price compared is for the same package
+    const fit = sizeFit(lineSize, products[k])
+    const rank = score * 0.75 + cover * 0.25 + fit * 0.12
+    if (!top || rank > top.rank) top = { id: products[k].id, rank, score, cover, hits: s.hits, fit }
   }
   if (!top) return undefined
   const enough = top.score >= 0.7 && (top.hits >= 2 || (words.length === 1 && words[0].length >= 5))
   if (!enough) return undefined
-  return { id: top.id, sure: top.score >= 0.9 && top.cover >= 0.6 && top.hits >= 2 }
+  return { id: top.id, sure: top.score >= 0.9 && top.cover >= 0.6 && top.hits >= 2 && top.fit >= 0 }
 }
 
 /** Older name kept for callers: the product id or undefined. */

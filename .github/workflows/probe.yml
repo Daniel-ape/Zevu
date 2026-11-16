@@ -1,13 +1,18 @@
 name: App test run (simulator + emulator)
 
 # Runs the automatic walk-through (src/probe.ts) in the iPhone simulator and
-# the Android emulator, and saves its log and screenshots on the
-# "probe-results" branch. Temporary: removed again after the test.
+# the Android emulator after every change to the app, and saves its log and
+# screenshots on the probe-results-ios / probe-results-android branches.
+# The run fails when a step errors, crashes or is clearly too slow, so a
+# problem shows up as a red mark on the commit before anyone installs it.
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/probe.yml', '.github/probe/**']
+    paths: ['src/**', 'ios/**', 'android/**', 'index.html', 'package.json', '.github/workflows/probe.yml', '.github/probe/**']
   workflow_dispatch:
+concurrency:
+  group: probe
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -38,13 +43,17 @@ jobs:
           xcrun simctl launch --console-pty "$DEV" fi.hintaopas.app > ios.log 2>&1 &
           bash ../../.github/probe/watch.sh ios.log "xcrun simctl io $DEV screenshot" ../../out/ios 400
           tail -40 ios.log > ../../out/ios/tail.txt || true
+          bash ../../.github/probe/check.sh ../../out/ios/probe.txt > ../../out/ios/verdict.txt || echo FAIL >> ../../out/ios/verdict.txt
       - uses: actions/upload-artifact@v4
+        if: always()
         with: { name: probe-ios, path: out/ }
       - name: Save results
         run: |
           cd out && git init -q && git checkout -q -b probe-results-ios && git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "iOS probe ${GITHUB_SHA::7}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" probe-results-ios
+      - name: Verdict
+        run: cat out/ios/verdict.txt && ! grep -q FAIL out/ios/verdict.txt
 
   android:
     runs-on: ubuntu-latest
@@ -72,10 +81,14 @@ jobs:
           ram-size: 3072M
           disable-animations: false
           script: bash .github/probe/android.sh
+      - run: bash .github/probe/check.sh out/android/probe.txt > out/android/verdict.txt || echo FAIL >> out/android/verdict.txt
       - uses: actions/upload-artifact@v4
+        if: always()
         with: { name: probe-android, path: out/ }
       - name: Save results
         run: |
           cd out && git init -q && git checkout -q -b probe-results-android && git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Android probe ${GITHUB_SHA::7}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" probe-results-android
+      - name: Verdict
+        run: cat out/android/verdict.txt && ! grep -q FAIL out/android/verdict.txt

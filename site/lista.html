@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZEVU – Delad inköpslista</title>
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#06331d" />
+<link rel="icon" href="img/icon.png" />
+<style>
+  @font-face { font-family: 'Jakarta'; src: url(fonts/jakarta-500.woff2) format('woff2'); font-weight: 500; }
+  @font-face { font-family: 'Jakarta'; src: url(fonts/jakarta-800.woff2) format('woff2'); font-weight: 800; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 28px 20px; font-family: 'Jakarta', system-ui, sans-serif; color: #fff; text-align: center;
+    background: radial-gradient(700px 420px at 50% 110%, rgba(25, 181, 106, 0.5), transparent 70%), linear-gradient(180deg, #04271a, #06331d 60%, #0b4528); }
+  main { width: 100%; max-width: 420px; }
+  .logo { width: 64px; height: 64px; border-radius: 18px; background: #0a7a44; padding: 14px; margin: 0 auto 26px; box-shadow: 0 16px 40px -14px rgba(0, 0, 0, 0.6); }
+  h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin: 0 0 12px; }
+  p { margin: 0 0 22px; color: rgba(255, 255, 255, 0.75); font-weight: 500; line-height: 1.5; }
+  .code { font-size: 30px; font-weight: 800; letter-spacing: 0.1em; padding: 16px; border-radius: 18px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.16); margin: 0 0 22px; }
+  .btn { display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 16px; background: #fff; color: #10221a; font-weight: 800; font-size: 17px; text-decoration: none; margin-bottom: 12px; }
+  .btn.ghost { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 15px; height: 50px; }
+  small { display: block; margin-top: 14px; color: rgba(255, 255, 255, 0.55); font-size: 13px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<main>
+  <svg class="logo" viewBox="282 292 460 440" aria-hidden="true"><path d="M330 340 H694 L330 684 H694" fill="none" stroke="#fff" stroke-width="96" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="10"/></svg>
+  <h1 data-t="t">Du är inbjuden till en inköpslista</h1>
+  <p data-t="p">Öppna listan i ZEVU, så ser ni samma lista och ändringar syns direkt hos alla.</p>
+  <div class="code" id="code">–</div>
+  <a class="btn" id="open" href="#" data-t="open">Öppna i ZEVU</a>
+  <a class="btn ghost" href="./#install" data-t="get">Har du inte appen? Ladda ner den</a>
+  <small data-t="note">Öppnas inte appen? Starta ZEVU, gå till Lista → ⋯ → Gå med i en delad lista och skriv koden ovan.</small>
+</main>
+<script>
+  var T = {
+    fi: { t: 'Sinut on kutsuttu ostoslistaan', p: 'Avaa lista ZEVUssa, niin näette saman listan ja muutokset näkyvät heti kaikille.', open: 'Avaa ZEVUssa', get: 'Eikö sinulla ole sovellusta? Lataa se', note: 'Eikö sovellus aukea? Käynnistä ZEVU, mene kohtaan Lista → ⋯ → Liity jaettuun listaan ja kirjoita yllä oleva koodi.' },
+    en: { t: 'You’re invited to a shopping list', p: 'Open the list in ZEVU and you’ll share the same list, with changes showing up for everyone at once.', open: 'Open in ZEVU', get: 'Don’t have the app? Download it', note: 'App didn’t open? Start ZEVU, go to List → ⋯ → Join a shared list and type the code above.' }
+  }
+  var l = (navigator.language || '').slice(0, 2)
+  var d = T[l === 'fi' ? 'fi' : l === 'sv' ? '' : 'en']
+  if (d) { document.documentElement.lang = l === 'fi' ? 'fi' : 'en'; document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = d[el.dataset.t] }) }
+  var c = (new URLSearchParams(location.search).get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (c) {
+    document.getElementById('code').textContent = c.replace(/(.{5})(?=.)/g, '$1-')
+    document.getElementById('open').href = 'fi.hintaopas.app://join/' + c
+  }
+</script>
+</body>
+</html>
