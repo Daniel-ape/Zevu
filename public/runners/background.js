@@ -78,11 +78,67 @@ addEventListener('syncWatch', (resolve, reject, args) => {
   }
 })
 
+// The app says whether new-leaflet notifications are wanted.
+addEventListener('syncLeaflets', (resolve, reject, args) => {
+  try {
+    CapacitorKV.set('lfOn', args && args.on === false ? 'off' : 'on')
+    if (args && args.lang) CapacitorKV.set('lang', args.lang)
+    resolve()
+  } catch (e) {
+    reject(e)
+  }
+})
+
+// New leaflets since the last check, one notification each (or one for many).
+// The very first check only remembers what is out, so nobody gets a pile of
+// notifications for leaflets that were already there.
+const LF_CHAINS = { lidl: 'Lidl', tokmanni: 'Tokmanni', minimani: 'Minimani', rusta: 'Rusta', halpahalli: 'Halpa-Halli', karkkainen: 'Kärkkäinen' }
+async function newLeaflets(lang) {
+  if (((CapacitorKV.get('lfOn') || {}).value || 'on') === 'off') return []
+  let d
+  try {
+    const r = await live('leaflets.json')
+    if (!r.ok) return []
+    d = await r.json()
+  } catch (e) {
+    return []
+  }
+  const all = []
+  for (const chain of Object.keys(LF_CHAINS)) {
+    const list = Array.isArray(d[chain]) ? d[chain] : []
+    for (const l of list) if (l && l.url) all.push({ chain: chain, name: l.name || '', period: l.period || '', url: l.url })
+  }
+  if (!all.length) return []
+  const seen = readJson('lfSeen', null)
+  CapacitorKV.set('lfSeen', JSON.stringify(all.map(function (l) { return l.url }).concat(seen || []).slice(0, 400)))
+  if (!seen) return []
+  const fresh = all.filter(function (l) { return seen.indexOf(l.url) < 0 })
+  if (!fresh.length) return []
+  const t = function (sv, fi, en) { return lang === 'sv' ? sv : lang === 'en' ? en : fi }
+  if (fresh.length > 3) {
+    const chains = fresh.map(function (l) { return LF_CHAINS[l.chain] }).filter(function (c, i, a) { return a.indexOf(c) === i })
+    return [{ id: 6000 + (Date.now() % 100000), title: t(fresh.length + ' nya reklamblad', fresh.length + ' uutta mainoslehteä', fresh.length + ' new leaflets'), body: chains.join(', '), scheduleAt: new Date(Date.now() + 1000) }]
+  }
+  return fresh.map(function (l, k) {
+    const chain = LF_CHAINS[l.chain]
+    return {
+      id: 6000 + k + (Date.now() % 100000),
+      title: t('Nytt reklamblad från ' + chain, 'Uusi mainoslehti: ' + chain, 'New leaflet from ' + chain),
+      body: [l.name, l.period].filter(Boolean).join(' · '),
+      scheduleAt: new Date(Date.now() + 1000),
+    }
+  })
+}
+
 addEventListener('checkPrices', async (resolve, reject) => {
   try {
-    const watch = readJson('watch', [])
-    if (!watch.length) return resolve()
     const lang = (CapacitorKV.get('lang') || {}).value || 'fi'
+    const leafletNotes = await newLeaflets(lang)
+    const watch = readJson('watch', [])
+    if (!watch.length) {
+      if (leafletNotes.length) CapacitorNotifications.schedule(leafletNotes)
+      return resolve()
+    }
     const told = readJson('told', {})
     const best = {}
     const want = {}
@@ -163,6 +219,7 @@ addEventListener('checkPrices', async (resolve, reject) => {
       /* no leaflet offers this time */
     }
     CapacitorKV.set('told', JSON.stringify(told))
+    for (const n of leafletNotes) notes.push(n)
     if (notes.length) CapacitorNotifications.schedule(notes)
     resolve()
   } catch (e) {

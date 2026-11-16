@@ -98,7 +98,7 @@ export function Home() {
         <div className="section">
           <div className="section-head">
             <h2>{t('home.leaflets')}</h2>
-            <button className="link small" onClick={() => nav.go('leaflets')}>{t('home.seeAll')} <ArrowRight size={14} /></button>
+            <button className="link small" onClick={() => nav.go('leaflets')}>{t('home.seeAll')}</button>
           </div>
           <div className="strip covers-strip">
             {leaflets.map(({ chain, l }) => <Cover key={l.url} chain={chain} l={l} compact logo />)}

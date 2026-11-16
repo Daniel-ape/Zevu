@@ -15,7 +15,7 @@ import { useNav, type Tab } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 import { WatchList } from '../ui/WatchList'
-import { allowNotify, notifyStatus, testNotify } from '../data/priceAlerts'
+import { allowNotify, leafletNotifyOn, notifyStatus, setLeafletNotify, testNotify } from '../data/priceAlerts'
 
 type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'notify' | 'about' | 'privacy' | 'sources' | 'terms' | 'info'
 
@@ -289,6 +289,7 @@ function NotifyPage() {
   const [status, setStatus] = useState<'on' | 'off' | 'na' | null>(null)
   const [sent, setSent] = useState(false)
   const [weekly, setWeekly] = useState(weeklyOn)
+  const [lfOn, setLfOn] = useState(leafletNotifyOn)
   useEffect(() => { notifyStatus().then(setStatus) }, [])
   return (
     <div>
@@ -303,6 +304,10 @@ function NotifyPage() {
           <label className="row">
             <span className="grow"><span className="title" style={{ display: 'block' }}>{t('wk.setting')}</span><span className="tiny muted">{t('wk.settingSub')}</span></span>
             <input type="checkbox" className="switch" checked={weekly} onChange={(e) => { setWeekly(e.target.checked); setWeeklyOn(e.target.checked) }} />
+          </label>
+          <label className="row">
+            <span className="grow"><span className="title" style={{ display: 'block' }}>{t('lfn.setting')}</span><span className="tiny muted">{t('lfn.settingSub')}</span></span>
+            <input type="checkbox" className="switch" checked={lfOn} onChange={(e) => { setLfOn(e.target.checked); setLeafletNotify(e.target.checked) }} />
           </label>
         </div>
       )}

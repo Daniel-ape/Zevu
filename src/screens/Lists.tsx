@@ -136,7 +136,7 @@ export function Lists() {
                 <b>{euro(best.totalCents)}</b>
               </span>
               <span className="pt-foot">
-                <span>{complete.length > 1 ? t('trip.cheapestOf', { n: complete.length }) : t('list.cheapest')}</span>
+                <span>{complete.length > 1 ? t('trip.cheapestOf', { n: complete.length }) : t('trip.onlyOne')}</span>
                 {dearest && dearest !== best && <span className="pt-save">−{euro(dearest.totalCents - best.totalCents)}</span>}
               </span>
             </>
@@ -335,7 +335,7 @@ export function Lists() {
 function ListRow({ id, checked, children }: { id: string; checked: boolean; children: ReactNode }) {
   const pending = usePendingQty(id)
   if (pending === 0) return null
-  return <div className="row" style={{ opacity: checked ? 0.45 : 1 }}>{children}</div>
+  return <div className="row li-row" style={{ opacity: checked ? 0.45 : 1 }}>{children}</div>
 }
 
 // − n + : the number changes the moment a button is pressed.

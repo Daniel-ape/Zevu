@@ -67,35 +67,39 @@ export function ProductScreen({ id }: { id: string }) {
         <button className="icon-btn" onClick={nav.back} aria-label={t('product.back')}><Back /></button>
       </div>
 
-      {/* Big picture, the name, the best price large, and the actions under it */}
+      {/* Big picture, the name, then the best price with the actions beside it */}
       <div className="pd-hero"><Tile product={product} large onSource={setPicFrom} /></div>
       {picFrom && <div className="pd-credit">{t('pd.picFrom', { from: picFrom === 'off' ? 'Open Food Facts' : (allRetailers.find((r) => r.id === picFrom)?.name ?? picFrom) })}</div>}
-      <h1 className="pd-name">{product.name}</h1>
+      <h1 className={'pd-name' + (product.name.length > 60 ? ' long' : product.name.length > 34 ? ' mid' : '')}>{product.name}</h1>
       <div className="pd-brand">{[brandLabel(product.brand), sizeLabel(product)].filter(Boolean).join(' · ')}</div>
-      {best && (
+      <div className="pd-buy">
         <div className="pd-price-block">
-          <div className="pd-price">{euro(best.current.priceCents)}</div>
-          <div className="pd-meta">
-            {[best.retailer.name, best.unitPriceCents != null ? `${euro(best.unitPriceCents)}${unitLabel(product)}` : ''].filter(Boolean).join(' · ')}
-          </div>
-          {facts?.droppedFrom && facts.now === best.current.priceCents && (
-            <div className="price-flags"><span className="flag down">{t('price.droppedFrom', { amount: euro(facts.droppedFrom) })}</span></div>
+          {best ? (
+            <>
+              <div className="pd-price">{euro(best.current.priceCents)}</div>
+              <div className="pd-meta">
+                {[best.retailer.name, best.unitPriceCents != null ? `${euro(best.unitPriceCents)}${unitLabel(product)}` : ''].filter(Boolean).join(' · ')}
+              </div>
+            </>
+          ) : null}
+        </div>
+        <div className="pd-actions">
+          <button className={'pd-act' + (isWatched ? ' on' : '')} onClick={() => toggleWatch(product.id, best?.current.priceCents ?? null)}
+            aria-label={t(isWatched ? 'watch.on' : 'watch.off')} aria-pressed={isWatched} title={t(isWatched ? 'watch.on' : 'watch.off')}>
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z" fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" /></svg>
+          </button>
+          {listQty ? (
+            <button className="pd-add in" onClick={() => nav.go('lists')} aria-label={t('product.inList', { n: listQty })}>
+              <Check size={20} /><span>{listQty}</span>
+            </button>
+          ) : (
+            <button className="pd-add" onClick={() => setQuantity(product.id, 1)} aria-label={t('product.add')}><Plus size={24} /></button>
           )}
         </div>
-      )}
-      <div className="pd-actions">
-        {listQty ? (
-          <button className="pd-add in" onClick={() => nav.go('lists')} aria-label={t('product.inList', { n: listQty })}>
-            <Check size={22} /><span>{listQty}</span>
-          </button>
-        ) : (
-          <button className="pd-add" onClick={() => setQuantity(product.id, 1)} aria-label={t('product.add')}><Plus size={26} /></button>
-        )}
-        <button className={'pd-act' + (isWatched ? ' on' : '')} onClick={() => toggleWatch(product.id, best?.current.priceCents ?? null)}
-          aria-label={t(isWatched ? 'watch.on' : 'watch.off')} aria-pressed={isWatched} title={t(isWatched ? 'watch.on' : 'watch.off')}>
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.6 8.2 3.6 5 6.9 5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.3 0 5.3 3.2 4.2 6.3-1.8 4.8-9.3 9.2-9.3 9.2z" fill={isWatched ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" /></svg>
-        </button>
       </div>
+      {best && facts?.droppedFrom && facts.now === best.current.priceCents && (
+        <div className="price-flags pd-flags"><span className="flag down">{t('price.droppedFrom', { amount: euro(facts.droppedFrom) })}</span></div>
+      )}
 
       {rows.length === 0 ? (
         <div className="notice-plain section">

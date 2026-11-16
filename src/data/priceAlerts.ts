@@ -76,3 +76,23 @@ export function checkNow() {
   if (!isNativeApp) return
   BackgroundRunner.dispatchEvent({ label: LABEL, event: 'checkPrices', details: {} }).catch(() => {})
 }
+
+// New-leaflet notifications (checked by the background runner too).
+const LF_KEY = 'hintaopas:lfNotify'
+const LF_EVENT = 'hintaopas:lfNotify'
+export const leafletNotifyOn = () => { try { return localStorage.getItem(LF_KEY) !== 'off' } catch { return true } }
+export function setLeafletNotify(on: boolean) {
+  try { localStorage.setItem(LF_KEY, on ? 'on' : 'off') } catch { /* private mode */ }
+  dispatchEvent(new Event(LF_EVENT))
+}
+/** Keeps the runner told whether new leaflets should be notified. */
+export function useLeafletNotify() {
+  const { lang } = useStore()
+  useEffect(() => {
+    if (!isNativeApp) return
+    const send = () => BackgroundRunner.dispatchEvent({ label: LABEL, event: 'syncLeaflets', details: { on: leafletNotifyOn(), lang } }).catch(() => {})
+    send()
+    addEventListener(LF_EVENT, send)
+    return () => removeEventListener(LF_EVENT, send)
+  }, [lang])
+}

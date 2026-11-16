@@ -2032,3 +2032,31 @@ html.lite .stepper .n, html.lite .tab.on svg, html.lite .tick.on svg { animation
 .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18); transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1); }
 .switch:checked { background: var(--accent); }
 .switch:checked::after { transform: translateX(20px); }
+
+/* product page, cleaned up: a framed picture with its source under it, a name
+   that shrinks when it is long, then price and buttons on one row */
+.pd-hero { position: relative; height: 290px; margin-top: 6px; border-radius: 22px; overflow: hidden; isolation: isolate; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+.pd-hero .tile.lg { position: absolute; inset: 0; width: auto !important; height: auto !important; border-radius: 0; box-shadow: none; background: transparent; display: block; }
+.pd-hero .tile img { position: absolute; inset: 22px; width: calc(100% - 44px) !important; height: calc(100% - 44px) !important; padding: 0 !important; object-fit: contain !important; background: transparent; }
+.pd-credit { margin: 8px 4px 0; text-align: right; font-size: 11px; color: var(--text-3); }
+.screen .pd-name { font-size: 24px; font-weight: 750; letter-spacing: -0.025em; line-height: 1.22; margin: 16px 0 0; overflow-wrap: anywhere; }
+.screen .pd-name.mid { font-size: 21px; }
+.screen .pd-name.long { font-size: 19px; line-height: 1.28; letter-spacing: -0.015em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pd-brand { margin-top: 6px; font-size: 14px; color: var(--text-2); font-weight: 500; }
+.pd-buy { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-top: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.pd-buy .pd-price-block { margin: 0; min-width: 0; }
+.pd-buy .pd-price { font-size: 34px; }
+.pd-buy .pd-meta { margin-top: 6px; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-buy .pd-actions { margin: 0; padding: 0; border: 0; gap: 10px; flex-shrink: 0; }
+.pd-buy .pd-add, .pd-buy .pd-act { width: 52px; height: 52px; border-radius: 16px; }
+.pd-flags { margin-top: 12px; }
+.pd-hero .tile.lg { display: grid; place-items: center; font-size: 96px; }
+
+/* product pictures fade in when they arrive instead of popping in */
+html:not(.lite) .tile img { opacity: 0; transition: opacity 0.28s ease; }
+html:not(.lite) .tile img.ok { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .tile img { opacity: 1 !important; transition: none !important; } }
+/* a product put on the list slides into place; ticking off fades it */
+html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; transition: opacity 0.25s ease; }
+@keyframes row-in { from { opacity: 0; transform: translate3d(0, -6px, 0); } }
+@media (prefers-reduced-motion: reduce) { .li-row { animation: none !important; } }

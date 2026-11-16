@@ -18,7 +18,7 @@ import { Profile } from './screens/Profile'
 import { Leaflets } from './screens/Leaflets'
 import { Coupons } from './screens/Coupons'
 import { useNewLeaflets } from './data/leafletFeed'
-import { usePriceAlerts } from './data/priceAlerts'
+import { useLeafletNotify, usePriceAlerts } from './data/priceAlerts'
 import { autoLocate } from './data/nearby'
 import { setupAndroidBack, setupAndroidKeyboard } from './native/androidBack'
 import { lite } from './device'
@@ -56,6 +56,7 @@ function Shell() {
   const newLeaflets = useNewLeaflets()
   usePriceAlerts()
   useWeeklySummary()
+  useLeafletNotify()
   // Follow the user's area: nearest stores' leaflets update when the app opens.
   const [tab, setTab] = useState<Tab>(fromHash)
   // First start: a welcome page with Google sign-in (shown once per device).
