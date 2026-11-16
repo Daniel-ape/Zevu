@@ -1,3 +1,4 @@
+import { setWeeklyOn, weeklyOn } from '../data/weekly'
 import { FeedbackSheet } from '../ui/FeedbackSheet'
 import { feedbackEnabled } from '../data/feedback'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -287,6 +288,7 @@ function NotifyPage() {
   const { t } = useStore()
   const [status, setStatus] = useState<'on' | 'off' | 'na' | null>(null)
   const [sent, setSent] = useState(false)
+  const [weekly, setWeekly] = useState(weeklyOn)
   useEffect(() => { notifyStatus().then(setStatus) }, [])
   return (
     <div>
@@ -296,6 +298,14 @@ function NotifyPage() {
       </div>
       {status === 'off' && <button className="btn primary" style={{ marginTop: 14 }} onClick={async () => setStatus(await allowNotify())}>{t('nt.allow')}</button>}
       {status === 'off' && <p className="tiny muted" style={{ margin: '10px 4px 0', lineHeight: 1.5 }}>{t('nt.denied')}</p>}
+      {status === 'on' && (
+        <div className="rows group-rows" style={{ marginTop: 14 }}>
+          <label className="row">
+            <span className="grow"><span className="title" style={{ display: 'block' }}>{t('wk.setting')}</span><span className="tiny muted">{t('wk.settingSub')}</span></span>
+            <input type="checkbox" className="switch" checked={weekly} onChange={(e) => { setWeekly(e.target.checked); setWeeklyOn(e.target.checked) }} />
+          </label>
+        </div>
+      )}
       {status === 'on' && (
         <button className="btn ghost" style={{ marginTop: 14 }} onClick={async () => { setSent(await testNotify(t('nt.testTitle'), t('nt.testBody'))) }}>
           {sent ? t('nt.sent') : t('nt.test')}

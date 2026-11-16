@@ -1,3 +1,4 @@
+import { useWeeklySummary } from './data/weekly'
 import { isNativeApp } from './data/openLink'
 import { useWidgetSync } from './native/widget'
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -54,6 +55,7 @@ function Shell() {
   const { t } = useStore()
   const newLeaflets = useNewLeaflets()
   usePriceAlerts()
+  useWeeklySummary()
   // Follow the user's area: nearest stores' leaflets update when the app opens.
   const [tab, setTab] = useState<Tab>(fromHash)
   // First start: a welcome page with Google sign-in (shown once per device).
