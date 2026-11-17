@@ -16,6 +16,8 @@ import { inAppLink } from '../data/openLink'
 import { PriceSheet } from './PriceSheet'
 import { cheaperAlternatives } from '../domain/alternatives'
 import { useState } from 'react'
+import { useShrink } from '../data/shrink'
+import type { Shrink } from '../domain/shrink'
 
 export function ProductScreen({ id }: { id: string }) {
   const { products, pricesOf, retailers, allRetailers, list, setQuantity, markViewed, watched, toggleWatch, t, lang } = useStore()
@@ -25,6 +27,7 @@ export function ProductScreen({ id }: { id: string }) {
   const [report, setReport] = useState(false)
   const product = productById(products, id)
   const pendingQty = usePendingQty(id)
+  const shrink = useShrink(product?.ean)
 
   useEffect(() => markViewed(id), [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -100,6 +103,8 @@ export function ProductScreen({ id }: { id: string }) {
       {best && facts?.droppedFrom && facts.now === best.current.priceCents && (
         <div className="price-flags pd-flags"><span className="flag down">{t('price.droppedFrom', { amount: euro(facts.droppedFrom) })}</span></div>
       )}
+
+      {shrink && <ShrinkNote s={shrink} />}
 
       {rows.length === 0 ? (
         <div className="notice-plain section">
@@ -217,6 +222,25 @@ export function ProductScreen({ id }: { id: string }) {
       {feedbackEnabled && <button className="pd-report" onClick={() => setReport(true)}>{t('fb.wrong')}</button>}
       {adding && <PriceSheet product={product} store={adding.store} onClose={() => setAdding(false)} />}
       {report && <FeedbackSheet product={{ id: product.id, name: product.name }} onClose={() => setReport(false)} />}
+    </div>
+  )
+}
+
+const sizeText = (amount: number, unit: string) =>
+  unit === 'pcs' ? `${amount} kpl` : amount >= 1000 ? `${(amount / 1000).toLocaleString('fi-FI')} ${unit === 'g' ? 'kg' : 'l'}` : `${amount} ${unit}`
+
+/** Smaller pack, higher price per kilo or litre (src/domain/shrink.ts). */
+function ShrinkNote({ s }: { s: Shrink }) {
+  const { t, lang } = useStore()
+  const [, , from, to, unit, day, oldC, newC] = s
+  const pct = Math.round(((newC / to) / (oldC / from) - 1) * 100)
+  return (
+    <div className="rc-check warn pd-shrink">
+      <div className="rc-check-head"><span className="rc-check-ico">!</span><b>{t('shr.title')}</b></div>
+      <div className="rc-check-sub">
+        {t('shr.body', { from: sizeText(from, unit), to: sizeText(to, unit), date: new Date(day).toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'numeric' }), pct: String(pct), per: t(`shr.${unit}` as 'shr.g') })}
+        {s[0] !== s[1] ? ' ' + t('shr.newCode') : ''}
+      </div>
     </div>
   )
 }

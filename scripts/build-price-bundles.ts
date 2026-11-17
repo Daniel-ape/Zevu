@@ -15,6 +15,7 @@
 // Run: npx tsx scripts/build-price-bundles.ts (the web build does this).
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { EVERYDAY, categoryFor } from '../src/domain/categories'
+import { findShrinks, type SizeDb } from '../src/domain/shrink'
 
 interface Price { ean: string; priceCents: number; checkedAt?: string; name?: string; brand?: string; image?: string; url?: string; store?: boolean }
 interface ShopFile { retailerId: string; fetchedAt: string; prices: Price[] }
@@ -136,6 +137,11 @@ const builtAt = new Date().toISOString()
 writeFileSync(`${OUT}/core.json`, JSON.stringify({ builtAt, shops: core }))
 writeFileSync(`${OUT}/rest.json`, JSON.stringify({ builtAt, shops: rest }))
 writeFileSync(`${OUT}/history.json`, JSON.stringify(history))
+// Products that shrank (smaller pack, higher price per kilo or litre).
+const sizes: SizeDb | null = existsSync(`${DIR}/sizes.json`) ? JSON.parse(readFileSync(`${DIR}/sizes.json`, 'utf8')) : null
+const shrinks = sizes ? findShrinks(sizes, builtAt.slice(0, 10)) : []
+writeFileSync(`${OUT}/shrink.json`, JSON.stringify(shrinks))
+console.log(`${shrinks.length} shrunk products`)
 // Cheapest price per barcode, split by the barcode's last two digits, for the
 // installed app's background price check (public/runners/background.js): it
 // fetches only the few small files its watched products are in.

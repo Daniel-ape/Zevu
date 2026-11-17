@@ -1,0 +1,31 @@
+# Records the pack size of every product once a day, so the app can warn
+# about shrinkflation (smaller pack, higher price per kilo or litre).
+name: Record pack sizes
+on:
+  schedule:
+    - cron: '29 22 * * *'  # 00:29 Finnish time (winter), after the day's collecting
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sizes
+jobs:
+  sizes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npx tsx scripts/record-sizes.ts
+      - name: Commit sizes
+        run: |
+          git config user.name "hintaopas-bot"
+          git config user.email "hintaopas-bot@users.noreply.github.com"
+          git add public/prices/sizes.json
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Record pack sizes"
+          for i in 1 2 3 4 5; do git pull --rebase -q && git push -q && exit 0; sleep $((RANDOM % 20 + 5)); done
+          exit 1

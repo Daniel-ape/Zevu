@@ -18,7 +18,8 @@
     "test:alt": "tsx tests/alternatives.test.ts",
     "test:merge": "tsx tests/listMerge.test.ts",
     "test:budget": "tsx tests/budget.test.ts",
-    "test": "npm run test:receipts && npm run test:off && npm run test:search && npm run test:watch && npm run test:alt && npm run test:merge && npm run test:budget",
+    "test:shrink": "tsx tests/shrink.test.ts",
+    "test": "npm run test:receipts && npm run test:off && npm run test:search && npm run test:watch && npm run test:alt && npm run test:merge && npm run test:budget && npm run test:shrink",
     "app:sync": "vite build && cap sync",
     "app:android": "vite build && cap sync android && cap open android"
   },
