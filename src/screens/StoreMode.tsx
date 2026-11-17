@@ -2,7 +2,7 @@ import { productById } from '../domain/productIndex'
 import { useEffect } from 'react'
 import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
-import type { CategoryId } from '../domain/types'
+import { aisleOf, aisleLabel, byAisle } from '../domain/aisles'
 import { sizeLabel } from '../domain/pricing'
 import { Check } from '../ui/icons'
 import type { Key } from '../i18n'
@@ -10,7 +10,6 @@ import type { Key } from '../i18n'
 // Shopping mode: the active list in store-walk order, big text, the whole row
 // ticks an item, ticked items drop into "In the basket". Keeps the screen on
 // where the browser allows it.
-const AISLES: CategoryId[] = ['produce', 'bread', 'meat', 'dairy', 'pantry', 'snacks', 'drinks', 'household', 'health', 'pets', 'home', 'electronics', 'toys', 'clothing', 'office']
 
 export function StoreMode({ onClose }: { onClose: () => void }) {
   const { list, products, toggleChecked, t } = useStore()
@@ -29,7 +28,7 @@ export function StoreMode({ onClose }: { onClose: () => void }) {
     .filter((r): r is { item: typeof r.item; p: NonNullable<typeof r.p> } => !!r.p)
   const todo = rows.filter((r) => !r.item.checked)
   const done = rows.filter((r) => r.item.checked)
-  const groups = AISLES.map((a) => ({ aisle: a, rows: todo.filter((r) => r.p.category === a) })).filter((g) => g.rows.length)
+  const groups = byAisle(todo, (r) => aisleOf(r.p))
 
   const row = (r: (typeof rows)[number]) => (
     <button key={r.p.id} className={'shop-row' + (r.item.checked ? ' done' : '')} onClick={() => toggleChecked(r.p.id)} aria-pressed={!!r.item.checked}>
@@ -56,7 +55,7 @@ export function StoreMode({ onClose }: { onClose: () => void }) {
         {todo.length === 0 && rows.length > 0 && <div className="shop-all">✓ {t('shop.allDone')}</div>}
         {groups.map((g) => (
           <div key={g.aisle} className="shop-group">
-            <div className="shop-aisle">{t(`cat.${g.aisle}` as Key)}</div>
+            <div className="shop-aisle">{t(aisleLabel(g.aisle) as Key)}</div>
             {g.rows.map(row)}
           </div>
         ))}

@@ -410,3 +410,33 @@ export function dailyByStore(productId: string, observations: PriceObservation[]
   series.sort((a, b) => (a.values[a.values.length - 1] ?? Infinity) - (b.values[b.values.length - 1] ?? Infinity))
   return { dates, series }
 }
+
+export type BuyAdvice =
+  | { kind: 'good'; days: number; pct: number }
+  | { kind: 'wait'; days: number; low: number; pct: number; times: number }
+  | { kind: 'normal'; days: number }
+
+/**
+ * Buy now or wait: today's lowest price against the last weeks' daily lowest
+ * prices (dailyLowest). Says nothing until three weeks of prices are known.
+ */
+export function buyAdvice(points: { cents: number }[], seenAt = Date.now(), today = Date.now()): BuyAdvice | null {
+  if (points.length < 21) return null
+  // only for a price seen lately, not an old price carried forward
+  if (today - seenAt > 3 * 86_400_000) return null
+  const days = points.length
+  const vals = points.map((p) => p.cents)
+  const now = vals[vals.length - 1]
+  const sorted = [...vals].sort((a, b) => a - b)
+  const min = sorted[0]
+  const median = sorted[Math.floor(sorted.length / 2)]
+  if (now <= min * 1.01 && median >= now * 1.08) return { kind: 'good', days, pct: Math.round((1 - now / median) * 100) }
+  // a low price that came back more than once is worth waiting for
+  const lowDay = (c: number) => c <= min * 1.05
+  let times = 0
+  for (let i = 0; i < vals.length - 1; i++) if (lowDay(vals[i]) && (i === 0 || !lowDay(vals[i - 1]))) times++
+  const lowShare = vals.filter(lowDay).length / days
+  if (now >= min * 1.12 && lowShare >= 0.1 && times >= 1) return { kind: 'wait', days, low: min, pct: Math.round((1 - min / now) * 100), times }
+  if (Math.abs(now - median) <= median * 0.05) return { kind: 'normal', days }
+  return null
+}

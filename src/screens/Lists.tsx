@@ -4,6 +4,8 @@ import { getPendingQty, usePendingQty } from '../data/pendingQty'
 import type { ReactNode } from 'react'
 import { productById } from '../domain/productIndex'
 import { useMemo, useState } from 'react'
+import { aisleLabel, aisleOf, byAisle } from '../domain/aisles'
+import type { Key } from '../i18n'
 import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan } from '../domain/pricing'
@@ -40,6 +42,8 @@ export function Lists() {
   const best = complete[0]
   const itemCount = list.items.reduce((n, i) => n + i.quantity, 0)
   const items = [...list.items].sort((a, b) => Number(!!a.checked) - Number(!!b.checked))
+  const [order, setOrderState] = useState<'shop' | 'added'>(() => { try { return localStorage.getItem('hintaopas:listOrder') === 'added' ? 'added' : 'shop' } catch { return 'shop' } })
+  const setOrder = (o: 'shop' | 'added') => { setOrderState(o); try { localStorage.setItem('hintaopas:listOrder', o) } catch { /* private mode */ } }
   const ticked = list.items.filter((i) => i.checked).length
   // Splitting is worth an extra stop only when it saves at least 1,50 €.
   const worth = !!plan && (!plan.single || plan.savingCents >= 150)
@@ -171,8 +175,8 @@ export function Lists() {
         </div>
       ) : (
         <>
-          <div className="rows section" style={{ marginTop: 12 }}>
-            {items.map((item) => {
+          {(() => {
+            const row = (item: (typeof items)[number]) => {
               const p = productById(products, item.productId)
               if (!p) return null
               const c = cheapest(compare(p, pricesOf(p.id), retailers))
@@ -191,8 +195,42 @@ export function Lists() {
                   <QtyStepper id={p.id} qty={item.quantity} setQuantity={setQuantity} less={t('list.less')} more={t('list.more')} />
                 </ListRow>
               )
-            })}
-          </div>
+            }
+            // In store order the list is split into the shop's departments,
+            // walked from fruit & veg to the checkout; ticked items go last.
+            const open = items.filter((i) => !i.checked)
+            const done = items.filter((i) => i.checked)
+            const groups = order === 'shop' ? byAisle(open, (i) => { const p = productById(products, i.productId); return p ? aisleOf(p) : 'pantry' }) : []
+            const grouped = groups.length > 1
+            return (
+              <>
+                {list.items.length > 2 && (
+                  <div className="seg list-order" role="tablist">
+                    <button role="tab" aria-selected={order === 'shop'} className={order === 'shop' ? 'on' : ''} onClick={() => setOrder('shop')}>{t('list.orderShop')}</button>
+                    <button role="tab" aria-selected={order === 'added'} className={order === 'added' ? 'on' : ''} onClick={() => setOrder('added')}>{t('list.orderAdded')}</button>
+                  </div>
+                )}
+                {grouped ? (
+                  <>
+                    {groups.map((g) => (
+                      <div key={g.aisle} className="list-aisle">
+                        <div className="list-aisle-head">{t(aisleLabel(g.aisle) as Key)}</div>
+                        <div className="rows">{g.rows.map(row)}</div>
+                      </div>
+                    ))}
+                    {done.length > 0 && (
+                      <div className="list-aisle">
+                        <div className="list-aisle-head">{t('shop.inBasket')}</div>
+                        <div className="rows">{done.map(row)}</div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="rows section" style={{ marginTop: 12 }}>{items.map(row)}</div>
+                )}
+              </>
+            )
+          })()}
           <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
             <button className="link" onClick={() => nav.go('search', { focus: true })}><Plus size={16} /> {t('list.add')}</button>
             {ticked > 0 && <button className="link" onClick={clearChecked}>{t('list.clearChecked')}</button>}

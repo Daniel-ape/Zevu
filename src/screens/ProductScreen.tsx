@@ -4,7 +4,7 @@ import { usePendingQty } from '../data/pendingQty'
 import { productById } from '../domain/productIndex'
 import { useEffect, useMemo } from 'react'
 import { useStore } from '../data/store'
-import { cheapest, compare, dailyByStore, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel, brandLabel } from '../domain/pricing'
+import { cheapest, compare, dailyByStore, dailyLowest, euro, priceFacts, sizeLabel, trend, unitLabel, brandLabel, buyAdvice, type BuyAdvice } from '../domain/pricing'
 import { LOCALE } from '../i18n'
 import { EVERYDAY } from '../domain/categories'
 import { useNav } from '../nav'
@@ -35,6 +35,11 @@ export function ProductScreen({ id }: { id: string }) {
   const rows = useMemo(() => (product ? compare(product, observations, retailers) : []), [product, observations, retailers])
   const history = useMemo(() => dailyLowest(id, observations), [id, observations])
   const facts = useMemo(() => priceFacts(history), [history])
+  const advice = useMemo(() => {
+    let seen = 0
+    for (const o of observations) if (o.productId === id && o.source !== 'user-report') seen = Math.max(seen, Date.parse(o.observedAt) || 0)
+    return buyAdvice(history, seen)
+  }, [history, observations, id])
   const perStore = useMemo(() => dailyByStore(id, observations, retailers), [id, observations, retailers])
   // Lowest and highest over every shop's line when there are several.
   const range = useMemo(() => {
@@ -104,6 +109,7 @@ export function ProductScreen({ id }: { id: string }) {
         <div className="price-flags pd-flags"><span className="flag down">{t('price.droppedFrom', { amount: euro(facts.droppedFrom) })}</span></div>
       )}
 
+      {advice && <AdviceNote a={advice} />}
       {shrink && <ShrinkNote s={shrink} />}
 
       {rows.length === 0 ? (
@@ -241,6 +247,20 @@ function ShrinkNote({ s }: { s: Shrink }) {
         {t('shr.body', { from: sizeText(from, unit), to: sizeText(to, unit), date: new Date(day).toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'numeric' }), pct: String(pct), per: t(`shr.${unit}` as 'shr.g') })}
         {s[0] !== s[1] ? ' ' + t('shr.newCode') : ''}
       </div>
+    </div>
+  )
+}
+
+/** Buy now or wait, from the last weeks' lowest prices (buyAdvice). */
+function AdviceNote({ a }: { a: BuyAdvice }) {
+  const { t } = useStore()
+  const text = a.kind === 'good' ? t('adv.good', { days: String(a.days), pct: String(a.pct) })
+    : a.kind === 'wait' ? t(a.times > 1 ? 'adv.waitMany' : 'adv.wait', { days: String(a.days), low: euro(a.low), pct: String(a.pct) })
+    : t('adv.normal')
+  return (
+    <div className={'pd-advice ' + a.kind}>
+      <span className="pd-advice-dot" aria-hidden />
+      <div><b>{t(`adv.${a.kind}Title` as 'adv.goodTitle')}</b><span>{text}</span></div>
     </div>
   )
 }

@@ -23,3 +23,13 @@ test('amounts typed by hand', () => {
   assert.equal(parseEuros('5'), undefined)
   assert.equal(parseEuros('abc'), undefined)
 })
+
+import { buyAdvice } from '../src/domain/pricing'
+test('buy advice', () => {
+  const pts = (a: number[]) => a.map((cents) => ({ cents }))
+  assert.equal(buyAdvice(pts(Array(10).fill(500))), null)
+  assert.equal(buyAdvice(pts([...Array(25).fill(500), 399]))?.kind, 'good')
+  const w = buyAdvice(pts([...Array(10).fill(500), ...Array(5).fill(399), ...Array(10).fill(500)]))
+  assert.equal(w?.kind, 'wait'); assert.equal(w && 'low' in w && w.low, 399)
+  assert.equal(buyAdvice(pts(Array(30).fill(500)))?.kind, 'normal')
+})
