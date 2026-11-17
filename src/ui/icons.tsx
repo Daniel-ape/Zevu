@@ -110,3 +110,6 @@ export const Join = ({ size }: P) => (
 export const Leave = ({ size }: P) => (
   <svg {...base(size)}><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M20 12H9M16 8l4 4-4 4" /></svg>
 )
+export const Shrink = ({ size }: P) => (
+  <svg {...base(size)}><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M9 9h6v6H9z" /><path d="M4 4l5 5M20 4l-5 5M4 20l5-5M20 20l-5-5" /></svg>
+)

@@ -4,9 +4,9 @@ import { Portal } from '../ui/Portal'
 import { openCamera } from '../data/takePhoto'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
-import { checkReceipt, lineKey, matchLine, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
+import { checkReceipt, type ReceiptIssue, lineKey, matchLine, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
 import { ProductPicker } from '../ui/ProductPicker'
-import { LOCALE } from '../i18n'
+import { LOCALE, translate, type Key } from '../i18n'
 import { ShareReceipt, type ShareChoice } from '../ui/ShareReceipt'
 import { openPricesLogin, shareReceipt } from '../data/openPrices'
 
@@ -233,9 +233,10 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
 }
 
 /** Kvittokontroll: lines that cost more than the same chain's own price that day. */
-function ReceiptCheck({ draft }: { draft: Pick<Receipt, 'retailerId' | 'date' | 'items'> }) {
+function ReceiptCheck({ draft }: { draft: Pick<Receipt, 'retailerId' | 'date' | 'items' | 'storeName'> }) {
   const { pricesOf, products, t } = useStore()
   const { issues, checked } = useMemo(() => checkReceipt(draft, pricesOf), [draft, pricesOf])
+  const [showing, setShowing] = useState(false)
   if (!checked) return null
   if (!issues.length) return <div className="rc-check ok"><span className="rc-check-ico">✓</span>{t('rck.ok', { n: checked })}</div>
   const extra = issues.reduce((s, i) => s + (i.paidUnitCents - i.shopUnitCents) * i.quantity, 0)
@@ -250,6 +251,33 @@ function ReceiptCheck({ draft }: { draft: Pick<Receipt, 'retailerId' | 'date' | 
         </div>
       ))}
       <p className="rc-check-note">{t('rck.note')}</p>
+      <button type="button" className="btn rc-check-show" onClick={() => setShowing(true)}>{t('rck.show')}</button>
+      {showing && <CheckoutView draft={draft} issues={issues} onClose={() => setShowing(false)} />}
     </div>
+  )
+}
+
+/**
+ * Full screen, big type, to show at the checkout: what the receipt says and
+ * what the shelf price is. The labels are always in Finnish too, since that
+ * is what the staff will read.
+ */
+function CheckoutView({ draft, issues, onClose }: { draft: Pick<Receipt, 'retailerId' | 'date' | 'storeName'>; issues: ReceiptIssue[]; onClose: () => void }) {
+  const { products, t, lang, allRetailers } = useStore()
+  const both = (k: Key) => lang === 'fi' ? translate('fi', k) : `${translate('fi', k)} · ${t(k)}`
+  return (
+    <Portal><div className="checkout-view" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="cv-meta">{allRetailers.find((x) => x.id === draft.retailerId)?.name ?? draft.storeName} · {new Date(draft.date).toLocaleDateString(LOCALE.fi)}</div>
+      {issues.map((i) => (
+        <div key={i.index} className="cv-item">
+          <div className="cv-name">{productById(products, i.productId)?.name ?? i.name}</div>
+          {productById(products, i.productId)?.ean && <div className="cv-ean">EAN {productById(products, i.productId)!.ean}</div>}
+          <div className="cv-row"><span>{both('rck.cvShelf')}</span><b className="cv-shelf">{euro(i.shopUnitCents)}</b></div>
+          <div className="cv-row"><span>{both('rck.cvPaid')}</span><b className="cv-paid">{euro(i.paidUnitCents)}</b></div>
+          {i.quantity > 1 && <div className="cv-row"><span>{both('rck.cvQty')}</span><b>{i.quantity}</b></div>}
+        </div>
+      ))}
+      <button className="btn primary cv-close" onClick={onClose}>{t('rck.cvClose')}</button>
+    </div></Portal>
   )
 }

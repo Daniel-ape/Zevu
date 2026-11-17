@@ -70,7 +70,19 @@ export const EMOJI: Record<CategoryId, string> = {
  * Catalogue products whose source only said "pantry" (the catch-all) get a
  * better food category from their name when it is clear.
  */
+// Clear mistakes in the catalogue's own categories, caught by the name: bread
+// filed as sweets or groceries, ice cream filed as health products, sweets
+// filed as electronics ("TV Mix"). Only words that leave no doubt.
+const CLEAR: [RegExp, CategoryId, CategoryId[]][] = [
+  [/viipaleleipä|paahtoleipä|ruisleipä|sämpylä|bagel|croissant|patonki|(?<![a-zåäö])tortillat?(?!.*lastu)|tortillas/i, 'bread', ['pantry', 'snacks', 'produce']],
+  [/jäätelö|ice cream|glass\b/i, 'snacks', ['health', 'home', 'pantry']],
+  [/kaurajuoma|täysmehu|kivennäisvesi|energiajuoma/i, 'drinks', ['pantry', 'produce', 'snacks']],
+  [/\btv mix\b|makeis|karkki|pastilli/i, 'snacks', ['electronics', 'home', 'health', 'produce']],
+]
+
 export function refineCategory(name: string, category: CategoryId): CategoryId {
+  const clear = CLEAR.find(([re, , from]) => from.includes(category) && re.test(name))
+  if (clear) return clear[1]
   if (category !== 'pantry') return category
   return FOOD.find(([re]) => re.test(name))?.[1] ?? category
 }

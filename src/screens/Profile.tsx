@@ -1,3 +1,4 @@
+import { ShrinkList } from '../ui/ShrinkList'
 import { setWeeklyOn, weeklyOn } from '../data/weekly'
 import { FeedbackSheet } from '../ui/FeedbackSheet'
 import { feedbackEnabled } from '../data/feedback'
@@ -10,14 +11,14 @@ import { useStore, type Theme } from '../data/store'
 import { euro } from '../domain/pricing'
 import { retailerName, type Receipt } from '../domain/receipts'
 import { LANGS, LOCALE } from '../i18n'
-import { Back, Bell, Chart, Chat, Check, Chevron, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket } from '../ui/icons'
+import { Back, Bell, Chart, Chat, Check, Chevron, Globe, Info, Paper, Plus, Receipt as ReceiptIcon, Shield, Store, Ticket, Shrink } from '../ui/icons'
 import { useNav, type Tab } from '../nav'
 import { ReceiptSheet } from './ReceiptSheet'
 import { Spending } from '../ui/Spending'
 import { WatchList } from '../ui/WatchList'
 import { allowNotify, leafletNotifyOn, notifyStatus, setLeafletNotify, testNotify } from '../data/priceAlerts'
 
-type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'language' | 'appearance' | 'notify' | 'about' | 'privacy' | 'sources' | 'terms' | 'info'
+type Page = 'spending' | 'receipts' | 'stores' | 'watched' | 'shrink' | 'language' | 'appearance' | 'notify' | 'about' | 'privacy' | 'sources' | 'terms' | 'info'
 
 /** Open a page of the You tab from elsewhere (call before nav.go('profile')). */
 let wanted: { page: Page; from: Tab } | null = null
@@ -58,7 +59,7 @@ export function Profile() {
     .filter((r) => { const d = new Date(r.date); return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() })
     .reduce((sum, r) => sum + (r.totalCents ?? r.items.reduce((x, i) => x + i.priceCents, 0)), 0)
   const titles: Record<Page, string> = {
-    spending: t('spend.title'), receipts: t('you.groupReceipts'), stores: t('stores.title'), watched: t('watch.title'),
+    spending: t('spend.title'), receipts: t('you.groupReceipts'), stores: t('stores.title'), watched: t('watch.title'), shrink: t('shr.listTitle'),
     language: t('you.language'), appearance: t('you.appearance'), notify: t('nt.title'), about: legalTitle('about', lang),
     privacy: legalTitle('privacy', lang), sources: legalTitle('sources', lang), terms: legalTitle('terms', lang), info: t('you.info'),
   }
@@ -129,6 +130,7 @@ export function Profile() {
         )}
 
         {page === 'watched' && <WatchList />}
+        {page === 'shrink' && <ShrinkList />}
 
         {page === 'language' && (
           <div className="rows">
@@ -189,6 +191,7 @@ export function Profile() {
       <div className="rows group-rows">
         <MenuRow icon={<Store size={18} />} title={t('stores.title')} value={myStores.length ? String(myStores.length) : t('you.allStores')} onClick={() => setPage('stores')} />
         <MenuRow icon={<Bell size={18} />} title={t('watch.title')} value={String(watched.length)} onClick={() => setPage('watched')} />
+        <MenuRow icon={<Shrink size={18} />} title={t('shr.listTitle')} onClick={() => setPage('shrink')} />
         <MenuRow icon={<Ticket size={18} />} title={t('cp.title')} value={String(coupons.filter((c) => !c.used).length)} onClick={() => nav.go('coupons')} />
       </div>
 

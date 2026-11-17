@@ -18,3 +18,14 @@ export function useShrink(ean: string | undefined): Shrink | undefined {
   }, [ean])
   return s
 }
+
+/** Every product found to have shrunk, newest first. */
+export function useShrinks(): Shrink[] | null {
+  const [list, setList] = useState<Shrink[] | null>(null)
+  useEffect(() => {
+    let live = true
+    load().then((m) => { if (live) setList([...m.values()].sort((a, b) => b[5].localeCompare(a[5]))) }).catch(() => { if (live) setList([]) })
+    return () => { live = false }
+  }, [])
+  return list
+}

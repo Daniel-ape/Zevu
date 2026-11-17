@@ -2135,3 +2135,15 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 .pd-advice.good b { color: var(--accent); }
 .pd-advice.wait .pd-advice-dot { background: var(--warn); }
 .pd-advice.wait b { color: var(--warn); }
+.rc-check-show { width: 100%; margin-top: 10px; height: 44px; background: var(--card); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+.checkout-view { position: fixed; inset: 0; z-index: 200; background: #fff; color: #111; display: flex; flex-direction: column; gap: 22px; padding: calc(28px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)); overflow-y: auto; }
+.cv-meta { font-size: 17px; color: #555; }
+.cv-item { display: flex; flex-direction: column; gap: 10px; padding-bottom: 22px; border-bottom: 1px solid #e6e6e6; }
+.cv-name { font-size: 28px; font-weight: 800; line-height: 1.15; }
+.cv-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 18px; color: #444; }
+.cv-row b { font-size: 34px; font-variant-numeric: tabular-nums; color: #111; }
+.cv-row .cv-shelf { color: #0a7d3e; }
+.cv-row .cv-paid { color: #b3261e; }
+.cv-close { margin-top: auto; height: 54px; }
+.cv-ean { font-size: 16px; color: #555; font-variant-numeric: tabular-nums; margin-top: -4px; }
+.shr-up { color: var(--warn); font-weight: 600; }
