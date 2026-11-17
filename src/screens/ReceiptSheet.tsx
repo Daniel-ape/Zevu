@@ -1,10 +1,10 @@
 import { productById } from '../domain/productIndex'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Portal } from '../ui/Portal'
 import { openCamera } from '../data/takePhoto'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
-import { lineKey, matchLine, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
+import { checkReceipt, lineKey, matchLine, parseReceipt, retailerName, type Receipt } from '../domain/receipts'
 import { ProductPicker } from '../ui/ProductPicker'
 import { LOCALE } from '../i18n'
 import { ShareReceipt, type ShareChoice } from '../ui/ShareReceipt'
@@ -198,6 +198,8 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
               </div>
             </div>
 
+            <ReceiptCheck draft={draft} />
+
             {viewing ? (
               <button className="btn ghost" style={{ marginTop: 16, color: 'var(--accent)' }} onClick={() => { removeReceipt(receipt!.id); onDeleted?.(receipt!); onClose() }}>
                 {t('rc.delete')}
@@ -227,5 +229,27 @@ export function ReceiptSheet({ receipt, onClose, onDeleted }: { receipt?: Receip
         )}
       </div>
     </div></Portal>
+  )
+}
+
+/** Kvittokontroll: lines that cost more than the same chain's own price that day. */
+function ReceiptCheck({ draft }: { draft: Pick<Receipt, 'retailerId' | 'date' | 'items'> }) {
+  const { pricesOf, products, t } = useStore()
+  const { issues, checked } = useMemo(() => checkReceipt(draft, pricesOf), [draft, pricesOf])
+  if (!checked) return null
+  if (!issues.length) return <div className="rc-check ok"><span className="rc-check-ico">✓</span>{t('rck.ok', { n: checked })}</div>
+  const extra = issues.reduce((s, i) => s + (i.paidUnitCents - i.shopUnitCents) * i.quantity, 0)
+  return (
+    <div className="rc-check warn">
+      <div className="rc-check-head"><span className="rc-check-ico">!</span><b>{issues.length === 1 ? t('rck.one') : t('rck.many', { n: issues.length })}</b></div>
+      <p className="rc-check-sub">{t('rck.sub', { amount: euro(extra) })}</p>
+      {issues.map((i) => (
+        <div key={i.index} className="rc-check-line">
+          <span className="grow">{productById(products, i.productId)?.name ?? i.name}</span>
+          <span className="rc-check-p"><s>{euro(i.paidUnitCents)}</s> {euro(i.shopUnitCents)}{i.promo ? ` · ${t('rck.promo')}` : ''}</span>
+        </div>
+      ))}
+      <p className="rc-check-note">{t('rck.note')}</p>
+    </div>
   )
 }

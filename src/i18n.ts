@@ -104,6 +104,7 @@ const en = {
   'trip.onlyOne': 'The only shop with everything on the list',
   'bud.title': 'Monthly budget', 'bud.set': 'Set a monthly budget', 'bud.setHint': 'Tell ZEVU what you want to spend on food a month. Your scanned receipts count towards it.', 'bud.edit': 'Change', 'bud.remove': 'Remove budget', 'bud.save': 'Save', 'bud.amount': 'Amount per month', 'bud.of': '{spent} of {budget}', 'bud.left': '{amount} left', 'bud.overBy': '{amount} over', 'bud.daysLeft': '{n} days left this month', 'bud.daysLeft1': '1 day left this month', 'bud.pace': 'At this pace: about {amount} this month', 'bud.fromReceipts': 'Counted from your scanned receipts.', 'bud.nearTitle': 'Budget almost used', 'bud.nearBody': '{left} left for {days} more days this month.', 'bud.overTitle': 'Over budget', 'bud.overBody': 'You have spent {spent} this month, more than your budget of {budget}.', 'bud.invalid': 'Write an amount between 10 € and 10 000 €.', 'bud.chip': 'Budget',
   'bud.month': 'month',
+  'rck.ok': 'Receipt check: {n} prices match the shop’s own prices.', 'rck.one': 'Receipt check: 1 price looks wrong', 'rck.many': 'Receipt check: {n} prices look wrong', 'rck.sub': 'You may have paid {amount} too much.', 'rck.promo': 'offer', 'rck.note': 'Compared with the chain’s own price that day. Prices can differ between stores, so check with the shop, and they’ll usually refund the difference.',
 }
 
 type Dict = typeof en
@@ -195,6 +196,7 @@ const fi: Dict = {
   'trip.onlyOne': 'Ainoa kauppa, josta saa kaiken listalta',
   'bud.title': 'Kuukausibudjetti', 'bud.set': 'Aseta kuukausibudjetti', 'bud.setHint': 'Kerro ZEVUlle, paljonko haluat käyttää ruokaan kuukaudessa. Skannatut kuittisi lasketaan siihen.', 'bud.edit': 'Muuta', 'bud.remove': 'Poista budjetti', 'bud.save': 'Tallenna', 'bud.amount': 'Summa kuukaudessa', 'bud.of': '{spent} / {budget}', 'bud.left': '{amount} jäljellä', 'bud.overBy': '{amount} yli', 'bud.daysLeft': '{n} päivää jäljellä tässä kuussa', 'bud.daysLeft1': '1 päivä jäljellä tässä kuussa', 'bud.pace': 'Tällä tahdilla: noin {amount} tässä kuussa', 'bud.fromReceipts': 'Laskettu skannatuista kuiteistasi.', 'bud.nearTitle': 'Budjetti melkein käytetty', 'bud.nearBody': '{left} jäljellä vielä {days} päiväksi tässä kuussa.', 'bud.overTitle': 'Budjetti ylittyi', 'bud.overBody': 'Olet käyttänyt tässä kuussa {spent}, enemmän kuin budjettisi {budget}.', 'bud.invalid': 'Kirjoita summa väliltä 10–10 000 €.', 'bud.chip': 'Budjetti',
   'bud.month': 'kk',
+  'rck.ok': 'Kuittitarkistus: {n} hintaa vastaa kaupan omia hintoja.', 'rck.one': 'Kuittitarkistus: 1 hinta näyttää väärältä', 'rck.many': 'Kuittitarkistus: {n} hintaa näyttää väärältä', 'rck.sub': 'Olet ehkä maksanut {amount} liikaa.', 'rck.promo': 'tarjous', 'rck.note': 'Verrattu ketjun omaan hintaan sinä päivänä. Hinnat voivat vaihdella kaupoittain, joten tarkista kaupasta. Yleensä erotus hyvitetään.',
 }
 
 const sv: Dict = {
@@ -283,6 +285,7 @@ const sv: Dict = {
   'trip.onlyOne': 'Enda butiken som har allt på listan',
   'bud.title': 'Månadsbudget', 'bud.set': 'Sätt en månadsbudget', 'bud.setHint': 'Berätta hur mycket du vill lägga på mat i månaden. Dina skannade kvitton räknas mot budgeten.', 'bud.edit': 'Ändra', 'bud.remove': 'Ta bort budget', 'bud.save': 'Spara', 'bud.amount': 'Belopp per månad', 'bud.of': '{spent} av {budget}', 'bud.left': '{amount} kvar', 'bud.overBy': '{amount} över', 'bud.daysLeft': '{n} dagar kvar av månaden', 'bud.daysLeft1': '1 dag kvar av månaden', 'bud.pace': 'I den här takten: cirka {amount} den här månaden', 'bud.fromReceipts': 'Räknat på dina skannade kvitton.', 'bud.nearTitle': 'Budgeten snart slut', 'bud.nearBody': '{left} kvar för {days} dagar till den här månaden.', 'bud.overTitle': 'Över budget', 'bud.overBody': 'Du har lagt {spent} den här månaden, mer än din budget på {budget}.', 'bud.invalid': 'Skriv ett belopp mellan 10 € och 10 000 €.', 'bud.chip': 'Budget',
   'bud.month': 'månad',
+  'rck.ok': 'Kvittokontroll: {n} priser stämmer med butikens egna priser.', 'rck.one': 'Kvittokontroll: 1 pris ser fel ut', 'rck.many': 'Kvittokontroll: {n} priser ser fel ut', 'rck.sub': 'Du kan ha betalat {amount} för mycket.', 'rck.promo': 'erbjudande', 'rck.note': 'Jämfört med kedjans eget pris den dagen. Priser kan skilja mellan butiker, så kolla med butiken – oftast får du skillnaden tillbaka.',
 }
 
 const DICTS: Record<Lang, Dict> = { en, fi, sv }

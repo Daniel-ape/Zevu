@@ -421,3 +421,47 @@ export function savingsReport(receipts: Receipt[], pricesOf: (id: string) => Pri
   out.stores = [...stores.values()].sort((a, b) => b.spentCents - a.spentCents)
   return out
 }
+
+export interface ReceiptIssue {
+  index: number
+  productId: string
+  name: string
+  quantity: number
+  paidUnitCents: number
+  /** the lowest price the same chain had for it around the receipt's date */
+  shopUnitCents: number
+  promo: boolean
+}
+
+/**
+ * Receipt check: lines where the receipt shows more than the same chain's
+ * own price (shelf or campaign) around that day. Shops sometimes forget to
+ * apply a campaign price at the till. Only clear differences count (at least
+ * 5 % and 20 cents per item), and only prices from the shop's own data.
+ */
+export function checkReceipt(r: Pick<Receipt, 'retailerId' | 'date' | 'items'>, pricesOf: (id: string) => PriceObservation[]): { issues: ReceiptIssue[]; checked: number } {
+  const issues: ReceiptIssue[] = []
+  let checked = 0
+  if (!r.retailerId) return { issues, checked }
+  const at = Date.parse(r.date)
+  r.items.forEach((it, index) => {
+    if (!it.productId || it.quantity < 1 || it.priceCents <= 0) return
+    // the shop's price in force that day: what it was last seen at before the
+    // receipt (shop prices stay until they change), or seen within a day after
+    let best: { c: number; promo: boolean; t: number } | undefined
+    for (const o of pricesOf(it.productId)) {
+      if (o.retailerId !== r.retailerId || o.source === 'user-report' || o.origin) continue
+      const t = Date.parse(o.observedAt)
+      if (t > at + 86_400_000 || at - t > 14 * 86_400_000) continue
+      const c = o.isMemberPrice && o.memberPriceCents ? o.memberPriceCents : o.priceCents
+      if (!best || t > best.t || (t === best.t && c < best.c)) best = { c, promo: !!o.isPromotion || !!o.isMemberPrice, t }
+    }
+    if (!best) return
+    checked++
+    const unit = it.priceCents / it.quantity
+    if (unit - best.c >= 20 && unit > best.c * 1.05) {
+      issues.push({ index, productId: it.productId, name: it.name, quantity: it.quantity, paidUnitCents: Math.round(unit), shopUnitCents: best.c, promo: best.promo })
+    }
+  })
+  return { issues, checked }
+}

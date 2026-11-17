@@ -1,6 +1,6 @@
 // Run: npm run test:receipts
 import assert from 'node:assert/strict'
-import { cleanOcrLine, matchLine, monthSavings, parseReceipt, sizeOnLine } from '../src/domain/receipts'
+import { checkReceipt, cleanOcrLine, matchLine, monthSavings, parseReceipt, sizeOnLine } from '../src/domain/receipts'
 import { pickShelfPrice } from '../src/domain/shelfLabel'
 import { parseCoupon } from '../src/domain/coupons'
 
@@ -160,6 +160,27 @@ test('The package size on the receipt picks the right size', () => {
   assert.equal(matchLine('OLTERMANNI JUUSTO 400 G', products)?.id, 'j4')
   assert.deepEqual(sizeOnLine('OLUT 6X0,33L'), { amount: 1980, unit: 'ml' })
   assert.equal(sizeOnLine('BANAANI'), undefined)
+})
+
+test('Receipt check flags a missed campaign price, not small differences', () => {
+  const day = '2026-11-14T12:00:00.000Z'
+  const obs: Record<string, { productId: string; retailerId: string; priceCents: number; observedAt: string; source: 'shop'; isPromotion?: boolean }[]> = {
+    a: [{ productId: 'a', retailerId: 'lidl', priceCents: 99, observedAt: '2026-11-13T08:00:00Z', source: 'shop', isPromotion: true }],
+    b: [{ productId: 'b', retailerId: 'lidl', priceCents: 249, observedAt: '2026-11-14T08:00:00Z', source: 'shop' }],
+    c: [{ productId: 'c', retailerId: 'prisma', priceCents: 100, observedAt: '2026-11-14T08:00:00Z', source: 'shop' }],
+  }
+  const r = { retailerId: 'lidl', date: day, items: [
+    { name: 'MAITO', quantity: 2, priceCents: 258, productId: 'a' }, // 1,29 each, campaign 0,99
+    { name: 'LEIPÄ', quantity: 1, priceCents: 259, productId: 'b' }, // 10 c more: ignored
+    { name: 'KAHVI', quantity: 1, priceCents: 500, productId: 'c' }, // other chain only: not checked
+  ] }
+  const out = checkReceipt(r, (id) => (obs[id] ?? []) as never)
+  assert.equal(out.checked, 2)
+  assert.equal(out.issues.length, 1)
+  assert.equal(out.issues[0].productId, 'a')
+  assert.equal(out.issues[0].paidUnitCents, 129)
+  assert.equal(out.issues[0].shopUnitCents, 99)
+  assert.equal(out.issues[0].promo, true)
 })
 
 console.log(`${passed} tests passed`)

@@ -2088,3 +2088,16 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 .bud-mini-row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-2); }
 .bud-mini-row b { color: var(--text); font-variant-numeric: tabular-nums; }
 .bud-mini .bud-bar { height: 6px; margin-top: 5px; }
+
+/* receipt check */
+.rc-check { margin-top: 16px; border-radius: 16px; padding: 12px 14px; font-size: 14px; line-height: 1.45; }
+.rc-check.ok { display: flex; gap: 10px; align-items: center; background: var(--accent-soft); color: var(--text); }
+.rc-check.warn { background: #fff4e0; border: 1px solid #f3d9a6; }
+.rc-check-ico { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; font-weight: 800; font-size: 14px; background: var(--accent); color: #fff; }
+.rc-check.warn .rc-check-ico { background: #e0a21b; }
+.rc-check-head { display: flex; gap: 10px; align-items: center; }
+.rc-check-sub { margin: 6px 0 8px; color: var(--text-2); }
+.rc-check-line { display: flex; gap: 10px; padding: 7px 0; border-top: 1px solid #f0e2c4; }
+.rc-check-p { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
+.rc-check-p s { color: #b0423a; font-weight: 500; margin-right: 4px; }
+.rc-check-note { margin: 8px 0 0; font-size: 12.5px; color: var(--text-2); }
