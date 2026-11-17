@@ -1,3 +1,4 @@
+import { useBudgetAlerts } from './data/budget'
 import { useWeeklySummary } from './data/weekly'
 import { isNativeApp } from './data/openLink'
 import { useWidgetSync } from './native/widget'
@@ -57,6 +58,7 @@ function Shell() {
   usePriceAlerts()
   useWeeklySummary()
   useLeafletNotify()
+  useBudgetAlerts()
   // Follow the user's area: nearest stores' leaflets update when the app opens.
   const [tab, setTab] = useState<Tab>(fromHash)
   // First start: a welcome page with Google sign-in (shown once per device).

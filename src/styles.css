@@ -2063,3 +2063,28 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 
 /* search cards: the price-per-kilo line stays on one line on narrow phones */
 .sr-meta.one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* monthly budget */
+.bud-card { display: block; width: 100%; text-align: left; border: 0; font: inherit; color: inherit; background: var(--surface, #fff); border-radius: 20px; padding: 16px 16px 14px; margin: 4px 0 16px; box-shadow: 0 1px 2px rgba(16, 34, 26, 0.06); }
+.bud-card.empty { display: flex; gap: 12px; align-items: flex-start; }
+.bud-card.empty b { display: block; font-size: 16px; }
+.bud-plus { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 22px; font-weight: 700; line-height: 1; }
+.bud-hint { display: block; margin-top: 3px; font-size: 13.5px; color: var(--text-2); line-height: 1.4; }
+.bud-top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); font-weight: 600; }
+.bud-edit { color: var(--accent); font-weight: 600; }
+.bud-nums { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 6px; }
+.bud-nums b { font-size: 22px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.bud-nums span { font-size: 13.5px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bud-bar { display: block; height: 8px; border-radius: 99px; background: rgba(18, 160, 92, 0.12); overflow: hidden; margin-top: 10px; }
+.bud-bar i { display: block; height: 100%; border-radius: inherit; background: var(--accent); transform-origin: left; transition: transform 0.6s cubic-bezier(0.22, 0.9, 0.25, 1), background-color 0.3s; }
+.near .bud-bar i { background: #e0a21b; }
+.over .bud-bar i { background: #d9473a; }
+.bud-card.over .bud-nums b { color: #c0392b; }
+.bud-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-top: 8px; font-size: 12.5px; color: var(--text-2); }
+.bud-input { display: flex; align-items: baseline; gap: 8px; padding: 10px 16px; border-radius: 16px; background: var(--surface-2); }
+.bud-input input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; color: inherit; outline: none; }
+.bud-input span { color: var(--text-2); font-weight: 600; }
+.bud-mini { display: block; margin-top: 12px; }
+.bud-mini-row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-2); }
+.bud-mini-row b { color: var(--text); font-variant-numeric: tabular-nums; }
+.bud-mini .bud-bar { height: 6px; margin-top: 5px; }

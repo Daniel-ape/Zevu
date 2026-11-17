@@ -1,3 +1,4 @@
+import { BudgetCard } from './BudgetCard'
 import { productById } from '../domain/productIndex'
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
@@ -54,10 +55,16 @@ export function Spending() {
   const label = month.toLocaleDateString(LOCALE[lang], { month: 'long', year: 'numeric' })
   const maxSaved = Math.max(1, ...history.map((h) => h.saved))
 
-  if (receipts.length === 0) return <p className="small muted" style={{ padding: '16px 0', margin: 0, lineHeight: 1.5 }}>{t('spend.none')}</p>
+  if (receipts.length === 0) return (
+    <>
+      <BudgetCard />
+      <p className="small muted" style={{ padding: '16px 0', margin: 0, lineHeight: 1.5 }}>{t('spend.none')}</p>
+    </>
+  )
 
   return (
     <div className="savings">
+      {isCurrent && <BudgetCard />}
       <div className="sv-month">
         <button className="icon-btn" onClick={() => shift(-1)} aria-label={t('spend.prev')}><Back size={18} /></button>
         <div className="sv-month-label">{label}</div>

@@ -1,3 +1,4 @@
+import { BudgetMini } from './BudgetCard'
 import { useMemo } from 'react'
 import { useStore } from '../data/store'
 import { euro } from '../domain/pricing'
@@ -42,6 +43,7 @@ export function SaveCard({ month, onOpen }: { month: string; bestShop?: string; 
         <span><b>{euro(report.spentCents)}</b> {t('sv.spent').toLowerCase()}</span>
         <span><b>{report.receipts}</b> {t('save.receiptsWord').toLowerCase()}</span>
       </div>
+      <BudgetMini />
     </button>
   )
 }

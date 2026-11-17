@@ -102,6 +102,8 @@ const en = {
   'wk.title': 'Your week in prices', 'wk.best': '{list} is cheapest at {store}: {total}.', 'wk.bestSave': '{list} is cheapest at {store}: {total}, {save} less than the dearest shop.', 'wk.deals1': '1 product on your list is on offer.', 'wk.deals': '{n} products on your list are on offer.', 'wk.cheaper1': '1 watched product is cheaper than when you started watching.', 'wk.cheaper': '{n} watched products are cheaper than when you started watching.', 'wk.setting': 'Weekly summary', 'wk.settingSub': 'Sundays at 10: where your list is cheapest and what’s on offer',
   'lfn.setting': 'New leaflets', 'lfn.settingSub': 'A notification when a shop puts out a new leaflet',
   'trip.onlyOne': 'The only shop with everything on the list',
+  'bud.title': 'Monthly budget', 'bud.set': 'Set a monthly budget', 'bud.setHint': 'Tell ZEVU what you want to spend on food a month. Your scanned receipts count towards it.', 'bud.edit': 'Change', 'bud.remove': 'Remove budget', 'bud.save': 'Save', 'bud.amount': 'Amount per month', 'bud.of': '{spent} of {budget}', 'bud.left': '{amount} left', 'bud.overBy': '{amount} over', 'bud.daysLeft': '{n} days left this month', 'bud.daysLeft1': '1 day left this month', 'bud.pace': 'At this pace: about {amount} this month', 'bud.fromReceipts': 'Counted from your scanned receipts.', 'bud.nearTitle': 'Budget almost used', 'bud.nearBody': '{left} left for {days} more days this month.', 'bud.overTitle': 'Over budget', 'bud.overBody': 'You have spent {spent} this month, more than your budget of {budget}.', 'bud.invalid': 'Write an amount between 10 € and 10 000 €.', 'bud.chip': 'Budget',
+  'bud.month': 'month',
 }
 
 type Dict = typeof en
@@ -191,6 +193,8 @@ const fi: Dict = {
   'wk.title': 'Viikon hinnat', 'wk.best': '{list} on halvin kaupassa {store}: {total}.', 'wk.bestSave': '{list} on halvin kaupassa {store}: {total}, {save} vähemmän kuin kalleimmassa.', 'wk.deals1': '1 listasi tuote on tarjouksessa.', 'wk.deals': '{n} listasi tuotetta on tarjouksessa.', 'wk.cheaper1': '1 seuraamasi tuote on halvempi kuin seurannan alussa.', 'wk.cheaper': '{n} seuraamaasi tuotetta on halvempia kuin seurannan alussa.', 'wk.setting': 'Viikon yhteenveto', 'wk.settingSub': 'Sunnuntaisin klo 10: missä listasi on halvin ja mikä on tarjouksessa',
   'lfn.setting': 'Uudet mainoslehdet', 'lfn.settingSub': 'Ilmoitus, kun kauppa julkaisee uuden mainoslehden',
   'trip.onlyOne': 'Ainoa kauppa, josta saa kaiken listalta',
+  'bud.title': 'Kuukausibudjetti', 'bud.set': 'Aseta kuukausibudjetti', 'bud.setHint': 'Kerro ZEVUlle, paljonko haluat käyttää ruokaan kuukaudessa. Skannatut kuittisi lasketaan siihen.', 'bud.edit': 'Muuta', 'bud.remove': 'Poista budjetti', 'bud.save': 'Tallenna', 'bud.amount': 'Summa kuukaudessa', 'bud.of': '{spent} / {budget}', 'bud.left': '{amount} jäljellä', 'bud.overBy': '{amount} yli', 'bud.daysLeft': '{n} päivää jäljellä tässä kuussa', 'bud.daysLeft1': '1 päivä jäljellä tässä kuussa', 'bud.pace': 'Tällä tahdilla: noin {amount} tässä kuussa', 'bud.fromReceipts': 'Laskettu skannatuista kuiteistasi.', 'bud.nearTitle': 'Budjetti melkein käytetty', 'bud.nearBody': '{left} jäljellä vielä {days} päiväksi tässä kuussa.', 'bud.overTitle': 'Budjetti ylittyi', 'bud.overBody': 'Olet käyttänyt tässä kuussa {spent}, enemmän kuin budjettisi {budget}.', 'bud.invalid': 'Kirjoita summa väliltä 10–10 000 €.', 'bud.chip': 'Budjetti',
+  'bud.month': 'kk',
 }
 
 const sv: Dict = {
@@ -277,6 +281,8 @@ const sv: Dict = {
   'wk.title': 'Veckans sammanfattning', 'wk.best': '{list} är billigast hos {store}: {total}.', 'wk.bestSave': '{list} är billigast hos {store}: {total}, {save} mindre än i dyraste butiken.', 'wk.deals1': '1 vara på din lista är på erbjudande.', 'wk.deals': '{n} varor på din lista är på erbjudande.', 'wk.cheaper1': '1 bevakad vara är billigare än när du började bevaka den.', 'wk.cheaper': '{n} bevakade varor är billigare än när du började bevaka dem.', 'wk.setting': 'Veckans sammanfattning', 'wk.settingSub': 'Söndagar kl. 10: var listan är billigast och vad som är på erbjudande',
   'lfn.setting': 'Nya reklamblad', 'lfn.settingSub': 'En notis när en butik ger ut ett nytt reklamblad',
   'trip.onlyOne': 'Enda butiken som har allt på listan',
+  'bud.title': 'Månadsbudget', 'bud.set': 'Sätt en månadsbudget', 'bud.setHint': 'Berätta hur mycket du vill lägga på mat i månaden. Dina skannade kvitton räknas mot budgeten.', 'bud.edit': 'Ändra', 'bud.remove': 'Ta bort budget', 'bud.save': 'Spara', 'bud.amount': 'Belopp per månad', 'bud.of': '{spent} av {budget}', 'bud.left': '{amount} kvar', 'bud.overBy': '{amount} över', 'bud.daysLeft': '{n} dagar kvar av månaden', 'bud.daysLeft1': '1 dag kvar av månaden', 'bud.pace': 'I den här takten: cirka {amount} den här månaden', 'bud.fromReceipts': 'Räknat på dina skannade kvitton.', 'bud.nearTitle': 'Budgeten snart slut', 'bud.nearBody': '{left} kvar för {days} dagar till den här månaden.', 'bud.overTitle': 'Över budget', 'bud.overBody': 'Du har lagt {spent} den här månaden, mer än din budget på {budget}.', 'bud.invalid': 'Skriv ett belopp mellan 10 € och 10 000 €.', 'bud.chip': 'Budget',
+  'bud.month': 'månad',
 }
 
 const DICTS: Record<Lang, Dict> = { en, fi, sv }
