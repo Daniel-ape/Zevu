@@ -8,7 +8,7 @@ import { Portal } from '../ui/Portal'
 import { useStore } from '../data/store'
 import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan } from '../domain/pricing'
 import { useNav } from '../nav'
-import { Check, List as ListIcon, Minus, People, Plus } from '../ui/icons'
+import { Check, Join, Leave, List as ListIcon, Minus, Pencil, People, Plus, ShareOut, Trash } from '../ui/icons'
 import { RankBadge, RetailerMark, Tile } from '../ui/bits'
 import { openProfilePage } from './Profile'
 import { StoreMode } from './StoreMode'
@@ -302,18 +302,25 @@ export function Lists() {
         <Portal><div className="sheet-backdrop" onClick={() => setMenu(false)}>
           <div className="sheet menu-sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-grab" />
+            <div className="menu-title">{display(list.name)}</div>
+            {sharingEnabled && (
+              <div className="rows">
+                <MenuItem icon={<People size={20} />} label={t(list.shared ? 'sh.invite' : 'sh.share')} sub={t(list.shared ? 'mn.inviteSub' : 'mn.shareSub')} onClick={() => { setMenu(false); setSharing(true) }} />
+                <MenuItem icon={<Join />} label={t('sh.join')} sub={t('mn.joinSub')} onClick={() => { setMenu(false); setJoining(true) }} />
+              </div>
+            )}
             <div className="rows">
-              {sharingEnabled && <button className="row" onClick={() => { setMenu(false); setSharing(true) }}>{t(list.shared ? 'sh.invite' : 'sh.share')}</button>}
-              {sharingEnabled && <button className="row" onClick={() => { setMenu(false); setJoining(true) }}>{t('sh.join')}</button>}
-              {list.items.length > 0 && <button className="row" onClick={() => { setMenu(false); share() }}>{t('list.share')}</button>}
-              <button className="row" onClick={() => { setMenu(false); setMode('rename'); setName(display(list.name)) }}>{t('list.rename')}</button>
-              {list.shared && <button className="row" onClick={() => { setMenu(false); leaveShared(list.id) }}>{t('sh.leave')}</button>}
-              {lists.length > 1 && (
-                <button className="row danger" onClick={() => { setMenu(false); const gone = list; deleteList(list.id); setUndo(gone); setTimeout(() => setUndo((u) => (u === gone ? null : u)), 6000) }}>
-                  {t('list.delete')}
-                </button>
-              )}
+              {list.items.length > 0 && <MenuItem icon={<ShareOut />} label={t('list.share')} onClick={() => { setMenu(false); share() }} />}
+              <MenuItem icon={<Pencil />} label={t('list.rename')} onClick={() => { setMenu(false); setMode('rename'); setName(display(list.name)) }} />
             </div>
+            {(list.shared || lists.length > 1) && (
+              <div className="rows">
+                {list.shared && <MenuItem icon={<Leave />} label={t('sh.leave')} danger onClick={() => { setMenu(false); leaveShared(list.id) }} />}
+                {lists.length > 1 && (
+                  <MenuItem icon={<Trash />} label={t('list.delete')} danger onClick={() => { setMenu(false); const gone = list; deleteList(list.id); setUndo(gone); setTimeout(() => setUndo((u) => (u === gone ? null : u)), 6000) }} />
+                )}
+              </div>
+            )}
           </div>
         </div></Portal>
       )}
@@ -348,5 +355,14 @@ function QtyStepper({ id, qty, setQuantity, less, more }: { id: string; qty: num
       <span><span className="n" key={q}>{q}</span></span>
       <button onClick={() => setQuantity(id, (getPendingQty(id) ?? qty) + 1)} aria-label={more}><Plus size={16} /></button>
     </div>
+  )
+}
+
+function MenuItem({ icon, label, sub, danger, onClick }: { icon: ReactNode; label: string; sub?: string; danger?: boolean; onClick: () => void }) {
+  return (
+    <button className={'row menu-item' + (danger ? ' danger' : '')} onClick={onClick}>
+      <span className="mi-ico" aria-hidden>{icon}</span>
+      <span className="mi-text"><span className="mi-label">{label}</span>{sub && <span className="mi-sub">{sub}</span>}</span>
+    </button>
   )
 }

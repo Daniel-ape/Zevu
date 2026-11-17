@@ -711,7 +711,16 @@ h1 { font-size: 30px; }
 /* Icon button in the title bar */
 .icon-plain { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--card); box-shadow: var(--card-shadow); color: var(--text); font-size: 20px; line-height: 1; }
 .menu-sheet .row { width: 100%; font-weight: 600; }
-.menu-sheet .row.danger { color: var(--accent); }
+.menu-sheet .row.danger { color: var(--danger, #d64545); }
+.menu-sheet .rows + .rows { margin-top: 12px; }
+.menu-title { text-align: center; font-size: 15px; font-weight: 600; color: var(--text-2); margin: -2px 0 14px; }
+.menu-item { display: flex; align-items: center; gap: 14px; text-align: left; min-height: 56px; }
+.mi-ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; background: var(--accent-soft); color: var(--accent); }
+.mi-ico svg { width: 20px; height: 20px; }
+.menu-item.danger .mi-ico { background: color-mix(in srgb, var(--danger, #d64545) 12%, transparent); color: var(--danger, #d64545); }
+.mi-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mi-label { font-size: 16px; font-weight: 600; }
+.mi-sub { font-size: 13px; font-weight: 400; color: var(--text-2); }
 
 /* You page menu */
 .menu-row { gap: 12px; }
@@ -2113,3 +2122,4 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 /* share sheets: everything centred, the title too (balanced against the ✕) */
 .sheet:has(.share-list) .sheet-head h2 { flex: 1; text-align: center; padding-left: 44px; }
 .share-input { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
+.menu-sheet .rows .row.menu-item:not(:last-child)::after { left: 64px; }

@@ -94,3 +94,19 @@ export const People = ({ size = 18 }: P) => (
     <circle cx="9" cy="8" r="3.2" /><path d="M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5" /><circle cx="17" cy="9" r="2.6" /><path d="M16.5 14.6c2.3.2 4 1.8 4.5 4.4" />
   </svg>
 )
+
+export const Pencil = ({ size }: P) => (
+  <svg {...base(size)}><path d="M15.5 5.5 18.5 8.5M4 20l1-4L16 5a2.1 2.1 0 0 1 3 3L8 19z" /></svg>
+)
+export const Trash = ({ size }: P) => (
+  <svg {...base(size)}><path d="M4.5 7h15M9.5 7V5h5v2M6.5 7l1 12.5h9l1-12.5M10.5 11v5M13.5 11v5" /></svg>
+)
+export const ShareOut = ({ size }: P) => (
+  <svg {...base(size)}><path d="M12 15V4M8 8l4-4 4 4M6 12v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7" /></svg>
+)
+export const Join = ({ size }: P) => (
+  <svg {...base(size)}><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M4 12h11M11 8l4 4-4 4" /></svg>
+)
+export const Leave = ({ size }: P) => (
+  <svg {...base(size)}><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M20 12H9M16 8l4 4-4 4" /></svg>
+)
