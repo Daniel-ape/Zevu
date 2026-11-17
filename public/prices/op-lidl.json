@@ -1,12 +1,16 @@
-{"source":"Open Prices (prices.openfoodfacts.org), ODbL","retailerId":"lidl","fetchedAt":"2026-11-15T21:07:22.850Z","prices":[
+{"source":"Open Prices (prices.openfoodfacts.org), ODbL","retailerId":"lidl","fetchedAt":"2026-11-17T00:20:14.642Z","prices":[
 {"ean":"20242169","priceCents":159,"checkedAt":"2026-10-31T12:00:00.000Z"},
+{"ean":"20514716","priceCents":329,"checkedAt":"2026-11-16T12:00:00.000Z"},
 {"ean":"20643058","priceCents":69,"checkedAt":"2026-10-31T12:00:00.000Z"},
 {"ean":"20788513","priceCents":149,"checkedAt":"2026-10-31T12:00:00.000Z"},
 {"ean":"4056489013488","priceCents":279,"checkedAt":"2026-10-31T12:00:00.000Z"},
 {"ean":"4056489332848","priceCents":149,"checkedAt":"2026-10-31T12:00:00.000Z"},
+{"ean":"4056489455240","priceCents":379,"checkedAt":"2026-11-16T12:00:00.000Z"},
 {"ean":"4056489946106","priceCents":195,"checkedAt":"2026-10-31T12:00:00.000Z"},
 {"ean":"4056489962625","priceCents":83,"checkedAt":"2026-10-31T12:00:00.000Z"},
+{"ean":"4304493265486","priceCents":59,"checkedAt":"2026-11-16T12:00:00.000Z"},
 {"ean":"4335619087378","priceCents":175,"checkedAt":"2026-10-31T12:00:00.000Z"},
 {"ean":"4335619294578","priceCents":229,"checkedAt":"2026-10-31T12:00:00.000Z"},
-{"ean":"6408400000448","priceCents":249,"checkedAt":"2026-10-31T12:00:00.000Z"}
+{"ean":"6408400000448","priceCents":249,"checkedAt":"2026-10-31T12:00:00.000Z"},
+{"ean":"7394376621697","priceCents":194,"checkedAt":"2026-11-16T12:00:00.000Z"}
 ]}
