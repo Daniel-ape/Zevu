@@ -1,0 +1,30 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 114570 Realtime: 114570
+
+** MEMINFO in pid 3177 [fi.hintaopas.app] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap    30341    30328        4       39    31628    41356    31918     5373
+  Dalvik Heap     4085     4072        0       94     5108     9998     5015     4983
+ Dalvik Other     3140     3072        0        7     3452                           
+        Stack     2296     2292        4      100     2304                           
+       Ashmem      747       28        0        0     2024                           
+    Other dev      280      272        8        0      596                           
+     .so mmap     2100      292      108       26    37696                           
+    .jar mmap     2165        0        8        0    39424                           
+    .apk mmap    26212      492     8932        0    62316                           
+    .ttf mmap       68        0        0        0      368                           
+    .dex mmap       36        4        0        0      888                           
+    .oat mmap       20        0        0        0     1692                           
+    .art mmap     4261     3996       40     1930    19196                           
+   Other mmap     1148        8      324        0     3732                           
+      Unknown    23823    23820        0     2416    24168                           
+        TOTAL   105334    68676     9428     4612   234592    51354    36933    10356
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8108                          24304
+         Native Heap:    30328                          31628
+                Code:     9836                         142536
