@@ -113,7 +113,7 @@ export function SearchScreen() {
   const dsort = useDeferredValue(sort)
   const [fuzzyTick, setFuzzyTick] = useState(0)
   const fuzzyKey = `${dcat}|${dq.trim()}`
-  const results = useMemo(() => {
+  const fresh = useMemo(() => {
     const key = [dq, dcat, dsort, products, pricesOf, retailers, online, fuzzyTick, hayTick]
     if (lastResults && sameKey(lastResults.key, key)) return lastResults.value as ReturnType<typeof compute>
     const value = compute()
@@ -204,6 +204,24 @@ export function SearchScreen() {
     }
   }, [dq, dcat, dsort, products, pricesOf, retailers, online, hay, rank, fuzzyTick, fuzzyKey, hayTick])
 
+  // While the catalogue is still arriving the list can be redrawn with more
+  // matches. If that happens just as a finger is on the list, the row under it
+  // would jump, so a redraw for the same search waits until the list has been
+  // left alone for a moment. A new search shows at once.
+  const touched = useRef(0)
+  const [results, setResults] = useState(fresh)
+  const shownKey = useRef(`${dq}|${dcat}|${dsort}`)
+  useEffect(() => {
+    const k = `${dq}|${dcat}|${dsort}`
+    if (k !== shownKey.current) { shownKey.current = k; setResults(fresh); return }
+    const wait = touched.current + 1200 - Date.now()
+    if (wait <= 0) { setResults(fresh); return }
+    const id = window.setTimeout(() => setResults(fresh), wait)
+    return () => clearTimeout(id)
+  }, [fresh, dq, dcat, dsort])
+  const shown = shownKey.current === `${dq}|${dcat}|${dsort}` ? results : fresh
+  const touch = () => { touched.current = Date.now() }
+
   // The background typo pass: a few thousand products per slice, then the list updates.
   useEffect(() => {
     const needle = dq.trim()
@@ -236,18 +254,18 @@ export function SearchScreen() {
     setLimit(24)
     const id = setTimeout(() => setLimit(80), 180)
     return () => clearTimeout(id)
-  }, [results])
+  }, [shown])
   // Back from a product: scroll to where the list was, once the rows are there.
   useEffect(() => {
     const y = restoreScroll.current
-    if (!y || !results.length) return
+    if (!y || !shown.length) return
     restoreScroll.current = 0
     requestAnimationFrame(() => {
       const el = scroller()
       if (el && el.scrollHeight > el.clientHeight) el.scrollTop = y
       else window.scrollTo(0, y)
     })
-  }, [results])
+  }, [shown])
 
   // How many products with a price each category has (shown in the picker).
   // Counted after the page is drawn (and kept), so opening the picker is instant.
@@ -282,7 +300,7 @@ export function SearchScreen() {
   const openProduct = useCallback((id: string) => latest.current.nav.openProduct(id), [])
 
   return (
-    <div className="screen">
+    <div className="screen" onPointerDown={touch} onWheel={touch}>
       <div className="topbar"><h1>{t('search.title')}</h1></div>
       <label className="search">
         <Search />
@@ -319,14 +337,14 @@ export function SearchScreen() {
         </Sheet>
       )}
 
-      {results.length === 0 && !q.trim() ? (
+      {shown.length === 0 && !q.trim() ? (
         <div className="empty">{t('search.hint', { n: products.length })}</div>
-      ) : results.length === 0 && online !== 'loading' ? (
+      ) : shown.length === 0 && online !== 'loading' ? (
         <div className="empty">{t('search.none', { q })}</div>
       ) : (
         <div>
           <div className="sr-list" style={{ opacity: stale ? 0.6 : 1, transition: 'opacity 0.15s' }}>
-            {results.slice(0, limit).map(({ p, best, count }) => (
+            {shown.slice(0, limit).map(({ p, best, count }) => (
               <ResultRow key={p.id} p={p} best={best} count={count} sort={sort} qty={inList(p.id)?.quantity ?? 0}
                 justAdded={added === p.id} onOpen={openProduct} onAdd={quickAdd} noPrice={t('search.noPrice')} addLabel={t('search.addToList')} />
             ))}
@@ -336,7 +354,7 @@ export function SearchScreen() {
       {added && <div className="toast">{t('search.added', { list: list.name === 'Weekly shop' ? t('list.defaultName') : list.name })}</div>}
       {moreLoaded === 'loading' && <p className="tiny muted" style={{ textAlign: 'center' }}>{t('search.moreLoading')}</p>}
       {online === 'loading' && <p className="tiny muted" style={{ textAlign: 'center' }}>{t('search.onlineLoading')}</p>}
-      {online === 'unavailable' && results.length === 0 && <p className="tiny muted" style={{ textAlign: 'center', lineHeight: 1.5 }}>{t('search.onlineOff')}</p>}
+      {online === 'unavailable' && shown.length === 0 && <p className="tiny muted" style={{ textAlign: 'center', lineHeight: 1.5 }}>{t('search.onlineOff')}</p>}
     </div>
   )
 }
