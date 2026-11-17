@@ -2019,11 +2019,18 @@ html.lite .stepper .n, html.lite .tab.on svg, html.lite .tick.on svg { animation
 .pd-report { display: block; margin: 6px auto 0; background: none; border: 0; color: var(--text-2); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 8px 12px; }
 
 /* shared lists */
-.share-list { display: flex; flex-direction: column; gap: 14px; padding-bottom: 8px; }
-.share-code { text-align: center; font-size: 30px; font-weight: 800; letter-spacing: 0.08em; padding: 18px 8px; border-radius: 18px; background: var(--accent-soft); color: var(--accent); font-variant-numeric: tabular-nums; }
+.share-list { display: flex; flex-direction: column; align-items: stretch; gap: 14px; padding: 2px 0 8px; text-align: center; }
+.share-ico { align-self: center; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.share-ico svg { width: 28px; height: 28px; }
+.share-hint { margin: 0 auto 4px; max-width: 30ch; font-size: 15px; line-height: 1.45; color: var(--text-2); text-wrap: balance; }
+.share-code { display: flex; justify-content: center; padding: 18px 8px; border-radius: 18px; background: var(--accent-soft); color: var(--accent); }
+/* the letter gap after the last letter would push the code off centre */
+.share-code span { font-size: 28px; font-weight: 800; letter-spacing: 0.08em; margin-right: -0.08em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.share-note { margin: 0; }
+.share-input input { text-align: center; font-size: 20px; font-weight: 700; letter-spacing: 0.06em; }
 .share-code.wait { opacity: 0.5; }
 .chip .shared-ico { display: inline-flex; vertical-align: -3px; margin-right: 5px; }
-.shared-line { display: flex; align-items: center; gap: 6px; margin: -4px 4px 10px; font-size: 13px; color: var(--text-2); }
+.shared-line { display: flex; align-items: center; gap: 6px; margin: 2px 4px 12px; font-size: 13px; color: var(--text-2); }
 .shared-line .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .shared-line.off .dot { background: #d29a2a; }
 
@@ -2103,3 +2110,6 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 .rc-check-note { margin: 8px 0 0; font-size: 12.5px; color: var(--text-2); }
 .pd-shrink { margin: 14px 0 0; }
 .pd-shrink .rc-check-sub { margin-bottom: 0; }
+/* share sheets: everything centred, the title too (balanced against the ✕) */
+.sheet:has(.share-list) .sheet-head h2 { flex: 1; text-align: center; padding-left: 44px; }
+.share-input { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
