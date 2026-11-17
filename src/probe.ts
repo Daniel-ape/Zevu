@@ -47,7 +47,9 @@ export async function runProbe() {
   await shot('02-search')
   for (let k = 0; k < 3; k++) await step('add-' + k, async () => {
     const b = pane().querySelectorAll('.sr-add')[k] as HTMLElement
-    b.click(); return await until(() => b.classList.contains('in'), 5000)
+    // the results can be redrawn while the catalogue finishes loading, so
+    // count added buttons instead of watching the one element
+    b.click(); return await until(() => b.classList.contains('in') || pane().querySelectorAll('.sr-add.in').length > k, 5000)
   })
   await shot('03-added')
   await step('open-product', async () => {
