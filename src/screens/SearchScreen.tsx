@@ -362,7 +362,7 @@ const ResultRow = memo(function ResultRow({ p, best, count, qty, justAdded, onOp
           {best ? (
             <>
               <span className="price">{euro(best.current.priceCents)}</span>
-              <span className="sub sr-meta">
+              <span className="sub sr-meta one">
                 {[best.unitPriceCents !== null ? `${euro(best.unitPriceCents)}${unitLabel(p)}` : '', `${best.retailer.name}${count > 1 ? ` +${count - 1}` : ''}`].filter(Boolean).join(' · ')}
               </span>
             </>

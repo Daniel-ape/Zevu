@@ -1,7 +1,7 @@
 import { productById } from '../domain/productIndex'
 import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
-import { basketTotals, cheapest, compare, euro, sizeLabel, trend } from '../domain/pricing'
+import { basketTotals, cheapest, compare, euro, sizeLabel, splitPlan, trend } from '../domain/pricing'
 import { useNav } from '../nav'
 import { ArrowRight, List } from '../ui/icons'
 import { Tile, TrendTag } from '../ui/bits'
@@ -36,6 +36,8 @@ export function Home() {
     [list, products, observations, retailers],
   )
   const best = totals.find((x) => x.missing === 0)
+  // no single shop has everything: the cheapest way across two shops, as on the list page
+  const plan = useMemo(() => (best || !list.items.length ? null : splitPlan(list, products, pricesOf, retailers)), [best, list, products, pricesOf, retailers])
   const worst = [...totals].filter((x) => x.missing === 0).sort((a, b) => b.totalCents - a.totalCents)[0]
   const saving = best && worst ? worst.totalCents - best.totalCents : 0
 
@@ -83,10 +85,11 @@ export function Home() {
           <span style={{ flex: 1, minWidth: 0 }}>
             <b>{listName} · {itemCount === 1 ? t('list.items1') : t('list.items', { n: itemCount })}</b>
             <span className="sub">
-              {best ? t('home.cheapestStore', { store: best.retailer.name }) + (saving > 0 ? ' · ' + t('home.saveUpTo', { amount: euro(saving) }) : '') : t('home.noListPrices')}
+              {best ? t('home.cheapestStore', { store: best.retailer.name }) + (saving > 0 ? ' · ' + t('home.saveUpTo', { amount: euro(saving) }) : '')
+                : plan ? plan.stores.map((r) => r.name).join(' + ') : t('home.noListPrices')}
             </span>
           </span>
-          {best ? <span className="price">{euro(best.totalCents)}</span> : <ArrowRight size={16} />}
+          {best ? <span className="price">{euro(best.totalCents)}</span> : plan ? <span className="price">{euro(plan.totalCents)}</span> : <ArrowRight size={16} />}
         </button>
       )}
 

@@ -2060,3 +2060,6 @@ html:not(.lite) .tile img.ok { opacity: 1; }
 html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 1) backwards; transition: opacity 0.25s ease; }
 @keyframes row-in { from { opacity: 0; transform: translate3d(0, -6px, 0); } }
 @media (prefers-reduced-motion: reduce) { .li-row { animation: none !important; } }
+
+/* search cards: the price-per-kilo line stays on one line on narrow phones */
+.sr-meta.one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
