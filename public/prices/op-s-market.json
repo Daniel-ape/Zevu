@@ -1,9 +1,11 @@
-{"source":"Open Prices (prices.openfoodfacts.org), ODbL","retailerId":"s-market","fetchedAt":"2026-11-18T14:24:32.776Z","prices":[
+{"source":"Open Prices (prices.openfoodfacts.org), ODbL","retailerId":"s-market","fetchedAt":"2026-11-18T22:59:11.642Z","prices":[
 {"ean":"0404000000372","priceCents":289,"checkedAt":"2025-11-29T12:00:00.000Z"},
+{"ean":"5060250346759","priceCents":215,"checkedAt":"2026-11-18T12:00:00.000Z"},
 {"ean":"6405799002466","priceCents":319,"checkedAt":"2025-11-29T12:00:00.000Z"},
 {"ean":"6413466080204","priceCents":135,"checkedAt":"2026-11-18T12:00:00.000Z"},
 {"ean":"6413467449604","priceCents":115,"checkedAt":"2026-11-18T12:00:00.000Z"},
 {"ean":"6413467449703","priceCents":215,"checkedAt":"2026-11-18T12:00:00.000Z"},
+{"ean":"6415712507855","priceCents":209,"checkedAt":"2026-11-18T12:00:00.000Z"},
 {"ean":"6416627004019","priceCents":238,"checkedAt":"2026-11-18T12:00:00.000Z"},
 {"ean":"6416884207994","priceCents":149,"checkedAt":"2025-11-29T12:00:00.000Z"},
 {"ean":"6416884208922","priceCents":149,"checkedAt":"2025-11-29T12:00:00.000Z"},
