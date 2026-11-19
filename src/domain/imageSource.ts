@@ -17,6 +17,9 @@ const BY_HOST: [RegExp, string][] = [
   [/(^|\.)yliopistonapteekki\.fi/, 'yliopistonapteekki'],
   [/(^|\.)apteekki360\.fi/, 'apteekki360'],
   [/(^|\.)tokmanni\.fi/, 'tokmanni'],
+  [/(^|\.)fiksuruoka\.fi/, 'fiksuruoka'],
+  [/(^|\.)puuilo\.fi/, 'puuilo'],
+  [/(^|\.)fitnesstukku\.fi/, 'fitnesstukku'],
 ]
 
 /** 'off' for Open Food Facts, a retailer id, or undefined when unknown. */

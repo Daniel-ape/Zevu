@@ -9,7 +9,7 @@ import { categoryFor } from '../src/domain/categories'
 type Item = [string, number, string, string, string, string, string, 1?]
 interface Shop { r: string; at: string; o: string; p?: string; i: Item[] }
 
-const FOOD_SHOPS = new Set(['prisma', 's-market', 'alepa', 'k-citymarket', 'k-market', 'lidl', 'minimani', 'halpahalli', 'tokmanni', 'stockmann', 'ruohonjuuri'])
+const FOOD_SHOPS = new Set(['prisma', 's-market', 'alepa', 'k-citymarket', 'k-market', 'lidl', 'minimani', 'halpahalli', 'tokmanni', 'stockmann', 'ruohonjuuri', 'fiksuruoka', 'puuilo', 'fitnesstukku'])
 const FOOD = new Set(['dairy', 'bread', 'produce', 'meat', 'pantry', 'drinks', 'snacks', 'frozen'])
 // things a shopper would not call groceries, even if the name looks like food
 const SKIP = /proteiini|whey|detox|gel\b|geeli|linnuille|lintu|hau-hau|koira|kissa|silikoni|alusta|palautus|kreatiini|lisäravin|sensitive|gluteeniton|luomu.*kapseli|nutrition|sportlife|\bvalo24h/i

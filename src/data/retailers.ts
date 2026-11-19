@@ -23,4 +23,7 @@ export const RETAILERS: Retailer[] = [
   { id: 'multitronic', name: 'Multitronic', chain: 'multitronic' },
   { id: 'jimms', name: "Jimm's", chain: 'jimms' },
   { id: 'minimani', name: 'Minimani', chain: 'minimani' },
+  { id: 'fiksuruoka', name: 'Fiksuruoka', chain: 'fiksuruoka' },
+  { id: 'puuilo', name: 'Puuilo', chain: 'puuilo' },
+  { id: 'fitnesstukku', name: 'Fitnesstukku', chain: 'fitnesstukku' },
 ]
