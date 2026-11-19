@@ -1,5 +1,4 @@
-# One-off look at shops that could be added: robots.txt, sitemaps, and whether
-# one product page carries a barcode (GTIN) and price in schema.org JSON-LD.
+# One-off look at how a shop's product pages show barcode and price.
 name: Check candidate shops
 on:
   workflow_dispatch:
@@ -10,15 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: sitemaps and one product page each
+      - name: one product page each
         run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; price comparison)"
           g() { curl -s -L -m 30 -A "$UA" "$1"; }
-          for site in www.fiksuruoka.fi www.puuilo.fi www.fitnesstukku.fi; do
-            echo "=================== $site"
-            g "https://$site/robots.txt" | grep -i sitemap
-            for sm in $(g "https://$site/robots.txt" | grep -i '^sitemap' | awk '{print $2}' | tr -d '\r') https://$site/sitemap.xml https://$site/sitemap_index.xml; do
-              echo "--- $sm"; g "$sm" | head -c 1500 | grep -o '<loc>[^<]*</loc>' | head -8
+          for sm in https://kauppa.fiksuruoka.fi/sitemap-products.xml https://www.puuilo.fi/media/sitemap/fi_sitemap.xml; do
+            echo "=================== $sm"
+            urls=$(g "$sm" | grep -o '<loc>[^<]*</loc>' | sed 's/<[^>]*>//g' | grep -iE 'energia|juoma|monster|olut|kahvi|suklaa|limsa|vesi|sipsi|red-bull|pepsi|cola' | head -2)
+            echo "$urls"
+            for u in $urls; do
+              sleep 10
+              echo "--- $u"
+              g "$u" > /tmp/p.html; wc -c < /tmp/p.html
+              grep -o '"@type"[^,]*' /tmp/p.html | sort | uniq -c | head
+              grep -oiE '"(gtin|gtin13|gtin8|ean|sku|mpn|price|priceCurrency)"\s*:\s*"?[^",}]*' /tmp/p.html | head -12
+              grep -oiE '(ean|viivakoodi|gtin)[^<]{0,60}' /tmp/p.html | head -5
+              grep -oiE 'itemprop="(gtin13|gtin|sku|price)"[^>]{0,80}' /tmp/p.html | head -5
             done
-            sleep 10
           done
