@@ -2152,3 +2152,10 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 .has-logo .cover-img::after { content: ''; position: absolute; inset: auto 0 0 0; height: 46%; pointer-events: none; z-index: 1;
   background: radial-gradient(120% 90% at 100% 100%, rgba(0,0,0,0.34), rgba(0,0,0,0.12) 45%, transparent 72%); }
 .has-logo .cover-img .chain-logo, .has-logo .cover-img .chain-mark { z-index: 2; box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 3px 10px rgba(0,0,0,0.38); }
+.cover-img { isolation: isolate; }
+/* a list item whose product is still loading keeps its place */
+.li-wait { pointer-events: none; }
+.li-wait-tile { width: 44px; height: 44px; border-radius: 12px; background: var(--line); flex-shrink: 0; animation: li-pulse 1.2s ease-in-out infinite; }
+.li-wait-line { height: 12px; flex: 1; max-width: 60%; border-radius: 6px; background: var(--line); animation: li-pulse 1.2s ease-in-out infinite; }
+@keyframes li-pulse { 50% { opacity: 0.45; } }
+.li-remove { width: auto; height: 34px; padding: 0 12px; font-size: 14px; }

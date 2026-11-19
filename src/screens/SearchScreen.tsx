@@ -28,6 +28,10 @@ const sameKey = (a: unknown[], b: unknown[]) => a.length === b.length && a.every
 let kept: { q: string; cat: CategoryId | 'all'; sort: Sort; navCat: CategoryId | 'all'; scroll: number } | null = null
 const scroller = () => document.querySelector<HTMLElement>('.screen')
 
+// Looking for food, a toy, a pet food or a kitchen gadget with the same word in
+// its name ("kananmunankeitin", cat food "kana, kananmuna") goes last.
+const NON_FOOD = new Set<string>(['pets', 'toys', 'home', 'electronics', 'clothing', 'office'])
+
 export function SearchScreen() {
   const { products, retailers, searchOnline, list, setQuantity, pricesOf, loadMore, moreLoaded, t } = useStore()
   const [added, setAdded] = useState<string | null>(null)
@@ -127,8 +131,9 @@ export function SearchScreen() {
     const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
     // What the search is for ("banaani" is fruit, "kana" meat): products of
     // that kind come before ones that only taste of it or mention it.
-    const want = needle ? guessCategory(needle, '') : undefined
+    const want = needle ? guessCategory(needle, '') ?? guessCategory(compileQuery(needle).flatMap((q) => q.alts).join(' '), '') : undefined
     const off = (p: Product) => (want && p.category !== want ? 1 : 0)
+    const stray = (p: Product) => (want && !NON_FOOD.has(want) && NON_FOOD.has(p.category) ? 1 : 0)
     const inCat = dcat === 'all' ? products : products.filter((p) => p.category === dcat)
     // with most search texts ready, products still waiting for theirs are left
     // out of this pass; they join when the background pass finishes
@@ -174,13 +179,16 @@ export function SearchScreen() {
     // Cheap first cut (match strength, has a price, popularity), then the
     // price comparison only for the products that can make the list.
     found.sort((a, b) =>
-      (needle ? tier(a.score) - tier(b.score) : 0) || off(a.p) - off(b.p) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
+      (needle ? stray(a.p) - stray(b.p) || (tier(a.score) === 0 && !off(a.p) ? 0 : 1) - (tier(b.score) === 0 && !off(b.p) ? 0 : 1) || tier(a.score) - tier(b.score) : 0) || off(a.p) - off(b.p) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
     return finish(found.slice(0, poolSize))
     }
     function finish(pool: { p: Product; score: number; priced: boolean }[]) {
     const needle = dq.trim()
-    const want = needle ? guessCategory(needle, '') : undefined
+    const want = needle ? guessCategory(needle, '') ?? guessCategory(compileQuery(needle).flatMap((q) => q.alts).join(' '), '') : undefined
     const off = (p: Product) => (want && p.category !== want ? 1 : 0)
+    // Looking for food, a toy, a pet food or a kitchen gadget with the same
+    // word in its name ("kananmunankeitin", cat food "kana, kananmuna") goes last.
+    const stray = (p: Product) => (want && !NON_FOOD.has(want) && NON_FOOD.has(p.category) ? 1 : 0)
     const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
     return pool
       .map(({ p, score }) => {
@@ -191,6 +199,11 @@ export function SearchScreen() {
       .sort((a, b) => {
         // Typo matches last; otherwise products with a price come first.
         if (needle && (tier(a.score) === 3) !== (tier(b.score) === 3)) return tier(a.score) === 3 ? 1 : -1
+        if (needle && stray(a.p) !== stray(b.p)) return stray(a.p) - stray(b.p)
+        // The thing itself before things that only mention it, even without a
+        // price: eggs, not chocolate eggs, when "kananmuna" is searched.
+        const spot = (r: typeof a) => (tier(r.score) === 0 && !off(r.p) ? 0 : 1)
+        if (needle && want && spot(a) !== spot(b)) return spot(a) - spot(b)
         if (!!a.best !== !!b.best) return a.best ? -1 : 1
         if (needle && tier(a.score) !== tier(b.score)) return tier(a.score) - tier(b.score)
         if (needle && off(a.p) !== off(b.p)) return off(a.p) - off(b.p)

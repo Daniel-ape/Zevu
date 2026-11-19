@@ -19,7 +19,7 @@ export function Lists() {
   const {
     list, lists, setActiveList, createList, renameList, deleteList, restoreList,
     products, observations, retailers, setQuantity, toggleChecked, clearChecked, pricesOf, myStores, t,
-    leaveShared, sharedOnline,
+    leaveShared, sharedOnline, loading, moreLoaded,
   } = useStore()
   const nav = useNav()
   const [mode, setMode] = useState<'none' | 'new' | 'rename'>('none')
@@ -178,7 +178,18 @@ export function Lists() {
           {(() => {
             const row = (item: (typeof items)[number]) => {
               const p = productById(products, item.productId)
-              if (!p) return null
+              if (!p) {
+                // Still on its way (shop ranges load in the background): keep its
+                // place. Gone from every shop: say so, rather than hide it.
+                if (loading || moreLoaded !== 'done') return <div key={item.productId} className="row li-row li-wait" aria-hidden><span className="tick" /><span className="li-wait-tile" /><span className="li-wait-line" /></div>
+                return (
+                  <ListRow key={item.productId} id={item.productId} checked={!!item.checked}>
+                    <span className="tick" aria-hidden />
+                    <div className="grow" style={{ minWidth: 0 }}><div className="title">{t('list.gone')}</div><div className="sub">{t('list.goneSub')}</div></div>
+                    <button className="btn li-remove" onClick={() => setQuantity(item.productId, 0)}>{t('list.remove')}</button>
+                  </ListRow>
+                )
+              }
               const c = cheapest(compare(p, pricesOf(p.id), retailers))
               return (
                 <ListRow key={p.id} id={p.id} checked={!!item.checked}>

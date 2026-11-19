@@ -78,6 +78,7 @@ const CLEAR: [RegExp, CategoryId, CategoryId[]][] = [
   [/jäätelö|ice cream|glass\b/i, 'snacks', ['health', 'home', 'pantry']],
   [/kaurajuoma|täysmehu|kivennäisvesi|energiajuoma/i, 'drinks', ['pantry', 'produce', 'snacks']],
   [/\btv mix\b|makeis|karkki|pastilli/i, 'snacks', ['electronics', 'home', 'health', 'produce']],
+  [/puumun|koristemun|pääsiäiskoriste/i, 'home', ['dairy', 'pantry']],
 ]
 
 export function refineCategory(name: string, category: CategoryId): CategoryId {

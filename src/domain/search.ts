@@ -13,7 +13,9 @@ export const fold = (s: string) =>
 // Swedish / English word -> Finnish words used in product names.
 const WORDS: Record<string, string[]> = {
   mjolk: ['maito'], milk: ['maito'], smor: ['voi'], butter: ['voi'], ost: ['juusto'], cheese: ['juusto'],
-  brod: ['leipa', 'leivat'], bread: ['leipa'], agg: ['kananmuna', 'muna'], egg: ['kananmuna', 'muna'], eggs: ['kananmuna', 'muna'],
+  brod: ['leipa', 'leivat'], bread: ['leipa'], agg: ['kananmuna', 'kanan mun', 'munat', 'munia'], egg: ['kananmuna', 'kanan mun', 'munat', 'munia'], eggs: ['kananmuna', 'kanan mun', 'munat', 'munia'],
+  // eggs are mostly sold as "vapaan kanan munia", not "kananmunia"
+  kananmuna: ['kanan mun', 'munat', 'munia'], kananmunat: ['kanan mun', 'munat', 'munia'], munat: ['kanan mun', 'munia'],
   kaffe: ['kahvi'], coffee: ['kahvi'], te: ['tee'], tea: ['tee'], yoghurt: ['jogurtti'], yogurt: ['jogurtti'], jogurt: ['jogurtti'],
   gradde: ['kerma'], cream: ['kerma'], fil: ['viili'], filmjolk: ['piima', 'viili'], kvarg: ['rahka'], kesella: ['rahka'],
   kottfars: ['jauheliha'], mince: ['jauheliha'], kyckling: ['kana', 'broileri'], chicken: ['kana', 'broileri'],
@@ -62,6 +64,9 @@ function wordScore(q: string, words: string[], joined: string, named: number, fu
     const w = words[i]
     // A word found only in the brand is a weaker match than one in the name.
     if (w === q) { if (i < named) return 4; best = Math.max(best, 2.5); continue }
+    // Finnish plural and case endings: "kananmunat", "banaanit", "tomaatteja"
+    // name the same thing as the query word.
+    if (i < named && q.length >= 5 && w.startsWith(q) && w.length - q.length <= 2 && /^(t|a|ä|ja|jä|ta|tä)$/.test(w.slice(q.length))) { best = Math.max(best, 3.9); continue }
     // Finnish compounds name the thing last: "kevytmaito" is milk, "maitosuklaa"
     // is chocolate. A query at the end of a word is a strong match, a whole
     // word at the start of a longer compound a weaker one.
@@ -130,7 +135,7 @@ export function matchScore(query: string | Query, h: Haystack, fuzzy = true): nu
     let s = wordScore(term, words, h.joined, h.named, fuzzy)
     for (const a of alts) {
       if (s >= 3.5) break
-      s = Math.max(s, a.includes(' ') ? (h.joined.includes(a) ? 3 : 0) : Math.min(3.5, wordScore(a, words, h.joined, h.named, fuzzy)))
+      s = Math.max(s, a.includes(' ') ? (h.joined.includes(a) ? 3.6 : 0) : Math.min(3.5, wordScore(a, words, h.joined, h.named, fuzzy)))
     }
     if (!s) return 0
     total += s
