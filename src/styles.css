@@ -2147,3 +2147,8 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 .cv-close { margin-top: auto; height: 54px; }
 .cv-ean { font-size: 16px; color: #555; font-variant-numeric: tabular-nums; margin-top: -4px; }
 .shr-up { color: var(--warn); font-weight: 600; }
+/* leaflet covers on Home: a soft dark fade in the bottom corner, so the shop
+   logo stands out from busy, often white, leaflet pages */
+.has-logo .cover-img::after { content: ''; position: absolute; inset: auto 0 0 0; height: 46%; pointer-events: none; z-index: 1;
+  background: radial-gradient(120% 90% at 100% 100%, rgba(0,0,0,0.34), rgba(0,0,0,0.12) 45%, transparent 72%); }
+.has-logo .cover-img .chain-logo, .has-logo .cover-img .chain-mark { z-index: 2; box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 3px 10px rgba(0,0,0,0.38); }
