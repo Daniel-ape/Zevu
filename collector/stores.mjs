@@ -39,10 +39,6 @@ const STORES = {
   jimms: { retailerId: 'jimms', base: 'https://www.jimms.fi', sitemaps: [], lists: { start: 'https://www.jimms.fi/', link: /\/fi\/Product\/List\/[0-9A-Z]{3}-[0-9A-Z]{3}\/[a-z0-9-]+/g, show: /\/fi\/Product\/Show\/(\d+)/g, share: 0.3, maxPages: 80 }, product: /^https:\/\/www\.jimms\.fi\/fi\/Product\/Show\/\d+$/, keep: 'all' },
   multitronic: { retailerId: 'multitronic', base: 'https://www.multitronic.fi', sitemaps: ['https://www.multitronic.fi/sitemap.xml'], maps: /sitemap\/fi\/sitemap_product/, product: /\/fi\/products\/\d+$/, keep: 'all' },
   power: { retailerId: 'power', base: 'https://www.power.fi', sitemaps: ['https://www.power.fi/services/sitemap.xml'], maps: /products-\d+\.xml/, product: /\/p-\d+\/?$/, keep: 'all' },
-  // food: surplus and short-dated groceries, drinks, snacks (products on the kauppa. host)
-  fiksuruoka: { retailerId: 'fiksuruoka', base: 'https://kauppa.fiksuruoka.fi', sitemaps: ['https://kauppa.fiksuruoka.fi/sitemap-products.xml'], product: /^https:\/\/kauppa\.fiksuruoka\.fi\/./, keep: 'all' },
-  // drinks, energy drinks, sweets and snacks next to hardware; food read first
-  puuilo: { retailerId: 'puuilo', base: 'https://www.puuilo.fi', sitemaps: ['https://www.puuilo.fi/media/sitemap/fi_sitemap.xml'], product: /^https:\/\/www\.puuilo\.fi\/[a-z0-9-]+$/, keep: 'all', foodFirst: true },
   // energy and sports drinks, protein bars
   fitnesstukku: { retailerId: 'fitnesstukku', base: 'https://www.fitnesstukku.fi', sitemaps: ['https://www.fitnesstukku.fi/sitemap_index.xml'], product: /^https:\/\/www\.fitnesstukku\.fi\/.+\.html$/, keep: 'all' },
   stockmann: { retailerId: 'stockmann', base: 'https://www.stockmann.com', sitemaps: ['https://www.stockmann.com/sitemap.xml'], product: /\/\d{6,}\.html$/, keep: 'all' },

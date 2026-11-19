@@ -60,7 +60,7 @@ export const guess = (name: string, shop: string): CategoryId | undefined => {
 export const SHOP_DEFAULT: Record<string, CategoryId> = {
   verkkokauppa: 'electronics', minimani: 'home', power: 'electronics', multitronic: 'electronics', jimms: 'electronics', yliopistonapteekki: 'health', apteekki360: 'health', ruohonjuuri: 'pantry',
   stockmann: 'health', karkkainen: 'home', halpahalli: 'home', prisma: 'home', lidl: 'home', tokmanni: 'home',
-  fiksuruoka: 'pantry', puuilo: 'home', fitnesstukku: 'health',
+  fitnesstukku: 'health',
 }
 export const EMOJI: Record<CategoryId, string> = {
   dairy: '🥛', produce: '🥕', bread: '🍞', meat: '🥩', pantry: '🥫', drinks: '🧃', snacks: '🍫', household: '🧽',

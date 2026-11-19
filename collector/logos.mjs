@@ -20,8 +20,6 @@ const SITES = {
   ruohonjuuri: 'https://www.ruohonjuuri.fi/',
   apteekki360: 'https://www.apteekki360.fi/',
   yliopistonapteekki: 'https://www.yliopistonapteekki.fi/',
-  fiksuruoka: 'https://kauppa.fiksuruoka.fi/',
-  puuilo: 'https://www.puuilo.fi/',
   fitnesstukku: 'https://www.fitnesstukku.fi/',
   // square icon for small round marks, next to Tokmanni's wide header logo
   'tokmanni-icon': 'https://www.tokmanni.fi/',

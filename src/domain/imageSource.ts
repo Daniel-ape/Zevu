@@ -17,8 +17,6 @@ const BY_HOST: [RegExp, string][] = [
   [/(^|\.)yliopistonapteekki\.fi/, 'yliopistonapteekki'],
   [/(^|\.)apteekki360\.fi/, 'apteekki360'],
   [/(^|\.)tokmanni\.fi/, 'tokmanni'],
-  [/(^|\.)fiksuruoka\.fi/, 'fiksuruoka'],
-  [/(^|\.)puuilo\.fi/, 'puuilo'],
   [/(^|\.)fitnesstukku\.fi/, 'fitnesstukku'],
 ]
 
