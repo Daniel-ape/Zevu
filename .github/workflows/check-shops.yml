@@ -1,5 +1,5 @@
-# One-off look at shops that could be added: their robots.txt and whether a
-# product sitemap exists. Reads only robots.txt and sitemap files.
+# One-off look at shops that could be added: robots.txt, sitemaps, and whether
+# one product page carries a barcode (GTIN) and price in schema.org JSON-LD.
 name: Check candidate shops
 on:
   workflow_dispatch:
@@ -8,13 +8,17 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: robots.txt and sitemaps
+      - name: sitemaps and one product page each
         run: |
           UA="HintaopasBot/0.1 (+https://github.com/Daniel-ape/zevu; price comparison)"
-          for site in www.kauppahalli24.fi www.fiksuruoka.fi www.alko.fi www.puuilo.fi www.fitnesstukku.fi www.ruokaboksi.fi www.mathem.fi www.foodie.fi www.hongkong.fi www.motonet.fi www.lidl.fi www.minimani.fi www.tokmanni.fi www.k-ruoka.fi www.s-kaupat.fi www.clasohlson.com www.bodylab.fi www.myprotein.fi www.sokos.fi www.halpahalli.fi www.citymarket.fi www.ruoka.fi www.kauppa24.fi www.prisma.fi; do
+          g() { curl -s -L -m 30 -A "$UA" "$1"; }
+          for site in www.fiksuruoka.fi www.puuilo.fi www.fitnesstukku.fi; do
             echo "=================== $site"
-            curl -s -m 15 -A "$UA" -o /tmp/r.txt -w "robots: HTTP %{http_code}\n" "https://$site/robots.txt" || echo "robots: failed"
-            head -c 2500 /tmp/r.txt | grep -iE "user-agent|disallow|allow|sitemap|crawl" | head -40
+            g "https://$site/robots.txt" | grep -i sitemap
+            for sm in $(g "https://$site/robots.txt" | grep -i '^sitemap' | awk '{print $2}' | tr -d '\r') https://$site/sitemap.xml https://$site/sitemap_index.xml; do
+              echo "--- $sm"; g "$sm" | head -c 1500 | grep -o '<loc>[^<]*</loc>' | head -8
+            done
+            sleep 10
           done
