@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="sc_scan">Skannaa</string>
+    <string name="sc_scan_long">Skannaa viivakoodi tai kuitti</string>
+    <string name="sc_list">Lista</string>
+    <string name="sc_list_long">Ostoslistani</string>
+    <string name="sc_search">Haku</string>
+    <string name="sc_search_long">Hae tuotteita</string>
+</resources>

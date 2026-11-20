@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="sc_scan">Scan</string>
+    <string name="sc_scan_long">Scan a barcode or receipt</string>
+    <string name="sc_list">List</string>
+    <string name="sc_list_long">My shopping list</string>
+    <string name="sc_search">Search</string>
+    <string name="sc_search_long">Search products</string>
+</resources>

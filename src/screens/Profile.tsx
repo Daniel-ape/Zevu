@@ -1,3 +1,4 @@
+import { NearbyStores } from '../ui/NearbyStores'
 import { ShrinkList } from '../ui/ShrinkList'
 import { setWeeklyOn, weeklyOn } from '../data/weekly'
 import { FeedbackSheet } from '../ui/FeedbackSheet'
@@ -117,6 +118,9 @@ export function Profile() {
 
         {page === 'stores' && (
           <>
+            <div className="group-title">{t('nb.title')}</div>
+            <NearbyStores />
+            <div className="group-title">{t('nb.compare')}</div>
             <div className="rows">
               {allRetailers.map((r) => (
                 <button key={r.id} className="row" onClick={() => toggleMyStore(r.id)} aria-pressed={myStores.includes(r.id)}>

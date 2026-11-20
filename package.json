@@ -20,7 +20,8 @@
     "test:budget": "tsx tests/budget.test.ts",
     "test:shrink": "tsx tests/shrink.test.ts",
     "test:ocr": "tsx tests/ocrLines.test.ts",
-    "test": "npm run test:receipts && npm run test:off && npm run test:search && npm run test:watch && npm run test:alt && npm run test:merge && npm run test:budget && npm run test:shrink && npm run test:ocr",
+    "test:hours": "tsx tests/openingHours.test.ts",
+    "test": "npm run test:receipts && npm run test:off && npm run test:search && npm run test:watch && npm run test:alt && npm run test:merge && npm run test:budget && npm run test:shrink && npm run test:ocr && npm run test:hours",
     "app:sync": "vite build && cap sync",
     "app:android": "vite build && cap sync android && cap open android"
   },

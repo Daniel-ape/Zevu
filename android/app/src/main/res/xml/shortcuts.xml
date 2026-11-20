@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long-press the app icon: these open the app straight on a tab (fi.hintaopas.app://open/<tab>) -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="scan" android:enabled="true" android:icon="@drawable/sc_ic_scan" android:shortcutShortLabel="@string/sc_scan" android:shortcutLongLabel="@string/sc_scan_long">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="fi.hintaopas.app" android:targetClass="fi.hintaopas.app.MainActivity" android:data="fi.hintaopas.app://open/scan" />
+    </shortcut>
+    <shortcut android:shortcutId="list" android:enabled="true" android:icon="@drawable/sc_ic_list" android:shortcutShortLabel="@string/sc_list" android:shortcutLongLabel="@string/sc_list_long">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="fi.hintaopas.app" android:targetClass="fi.hintaopas.app.MainActivity" android:data="fi.hintaopas.app://open/lists" />
+    </shortcut>
+    <shortcut android:shortcutId="search" android:enabled="true" android:icon="@drawable/sc_ic_search" android:shortcutShortLabel="@string/sc_search" android:shortcutLongLabel="@string/sc_search_long">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="fi.hintaopas.app" android:targetClass="fi.hintaopas.app.MainActivity" android:data="fi.hintaopas.app://open/search" />
+    </shortcut>
+</shortcuts>

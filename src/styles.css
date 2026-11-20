@@ -2171,3 +2171,10 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 .staples { margin-top: 30px; width: 100%; }
 .staples-head { font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 10px; }
 .staples .rs-chips { justify-content: center; }
+/* nearest stores, with open now */
+.near-ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; background: var(--accent-soft); color: var(--accent); }
+.near-open { color: var(--accent); font-weight: 600; }
+.near-closed { color: var(--text-2); }
+.near-off { padding: 14px 4px 4px; }
+.near-off p { margin: 0 0 12px; color: var(--text-2); font-size: 14px; line-height: 1.45; }
+.near-list, .near-off { margin-bottom: 24px; }

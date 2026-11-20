@@ -143,7 +143,7 @@ function Shell() {
   useEffect(() => {
     if (!isNativeApp) return
     let remove: (() => void) | undefined
-    const open = (url?: string) => { const m = /open\/(\w+)/.exec(url ?? ''); if (m && TABS.includes(m[1] as Tab)) nav.go(m[1] as Tab) }
+    const open = (url?: string) => { const m = /open\/(\w+)/.exec(url ?? ''); if (m && TABS.includes(m[1] as Tab)) nav.go(m[1] as Tab, m[1] === 'search' ? { focus: true } : undefined) }
     void import('@capacitor/app').then(async ({ App: CapApp }) => {
       open((await CapApp.getLaunchUrl())?.url)
       const h = await CapApp.addListener('appUrlOpen', ({ url }) => open(url))

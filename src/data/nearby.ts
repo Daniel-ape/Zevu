@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 // button, kept on the device) and the grocery stores around it from
 // OpenStreetMap (Overpass API). Only the coordinates are sent to OpenStreetMap.
 export type Chain = 'lidl' | 'tokmanni' | 'prisma' | 's-market' | 'sale' | 'k-citymarket' | 'k-supermarket' | 'k-market'
-export type NearStore = { chain: Chain; name: string; lat: number; lon: number; km: number; url?: string; kSlug?: string; osm?: { type: 'NODE' | 'WAY' | 'RELATION'; id: number } }
+export type NearStore = { chain: Chain; name: string; lat: number; lon: number; km: number; url?: string; kSlug?: string; osm?: { type: 'NODE' | 'WAY' | 'RELATION'; id: number }; hours?: string }
 type Pos = { lat: number; lon: number; at: string }
 
 const POS = 'hintaopas:pos'
@@ -66,7 +66,7 @@ async function fetchStores(p: { lat: number; lon: number }): Promise<Omit<NearSt
         const url = /^https:\/\/(www\.)?(k-ruoka|s-kaupat|tokmanni|lidl)\.fi\//.test(site) && !/lidl\.fi\/?$/.test(site) ? site : undefined
         // the OpenStreetMap place, which is how Open Prices names a shop
         const osm = e.type && e.id ? { type: e.type.toUpperCase() as 'NODE' | 'WAY' | 'RELATION', id: e.id } : undefined
-        return [{ chain, name, lat, lon, url, kSlug, osm }]
+        return [{ chain, name, lat, lon, url, kSlug, osm, hours: tags.opening_hours }]
       })
     } catch {
       /* try the next server */
@@ -129,15 +129,15 @@ export function useNearby() {
       const pos = read<Pos>(POS)
       if (!pos) return setState({ stores: null, status: 'off' })
       const cache = read<{ lat: number; lon: number; at: string; stores: Omit<NearStore, 'km'>[] }>(STORES)
-      // (lists saved before shops carried their OpenStreetMap place are read again)
-      const fresh = cache && km(cache, pos) < 3 && Date.now() - +new Date(cache.at) < 14 * 86_400_000 && (!cache.stores.length || !!cache.stores[0].osm)
+      // (lists saved before shops carried their OpenStreetMap place and opening hours are read again)
+      const fresh = cache && km(cache, pos) < 3 && Date.now() - +new Date(cache.at) < 14 * 86_400_000 && (cache as { v?: number }).v === 2
       if (fresh) {
         const stores = cache.stores.map((s) => ({ ...s, km: km(pos, s) })).sort((a, b) => a.km - b.km)
         return setState({ stores, status: 'ready' })
       }
       setState((s) => ({ ...s, status: 'loading' }))
       loading ??= fetchStores(pos)
-        .then((stores) => { write(STORES, { lat: pos.lat, lon: pos.lon, at: new Date().toISOString(), stores }) })
+        .then((stores) => { write(STORES, { v: 2, lat: pos.lat, lon: pos.lon, at: new Date().toISOString(), stores }) })
         .finally(() => { loading = null })
       loading.then(update, () => setState({ stores: null, status: 'error' }))
     }

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="sc_scan">Skanna</string>
+    <string name="sc_scan_long">Skanna streckkod eller kvitto</string>
+    <string name="sc_list">Lista</string>
+    <string name="sc_list_long">Min inköpslista</string>
+    <string name="sc_search">Sök</string>
+    <string name="sc_search_long">Sök produkter</string>
+</resources>
