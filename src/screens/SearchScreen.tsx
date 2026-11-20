@@ -1,3 +1,4 @@
+import { takePendingSearch } from '../data/pendingSearch'
 import { getPendingQty, usePendingQty } from '../data/pendingQty'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../data/store'
@@ -43,7 +44,12 @@ export function SearchScreen() {
   const nav = useNav()
   // Restore only if nobody asked for another category meanwhile (e.g. from Home).
   const restore = kept && kept.navCat === nav.searchCategory ? kept : null
-  const [q, setQ] = useState(restore?.q ?? '')
+  const [q, setQ] = useState(() => takePendingSearch() ?? restore?.q ?? '')
+  useEffect(() => {
+    const on = () => { const p = takePendingSearch(); if (p !== null) setQ(p) }
+    window.addEventListener('zevu:search', on)
+    return () => window.removeEventListener('zevu:search', on)
+  }, [])
   const [cat, setCat] = useState<CategoryId | 'all'>(restore?.cat ?? nav.searchCategory)
   const [sort, setSort] = useState<Sort>(restore?.sort ?? 'top')
   const state = useRef({ q, cat, sort })

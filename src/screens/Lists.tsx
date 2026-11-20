@@ -4,6 +4,7 @@ import { getPendingQty, usePendingQty } from '../data/pendingQty'
 import type { ReactNode } from 'react'
 import { productById } from '../domain/productIndex'
 import { useCallback, useMemo, useState } from 'react'
+import { searchFor } from '../data/pendingSearch'
 import { aisleLabel, aisleOf, byAisle } from '../domain/aisles'
 import type { Key } from '../i18n'
 import { Portal } from '../ui/Portal'
@@ -19,7 +20,7 @@ export function Lists() {
   const {
     list, lists, setActiveList, createList, renameList, deleteList, restoreList,
     products, observations, retailers, setQuantity, toggleChecked, clearChecked, pricesOf, myStores, t,
-    leaveShared, sharedOnline, loading, moreLoaded, sharedNews, clearSharedNews,
+    leaveShared, sharedOnline, loading, moreLoaded, sharedNews, clearSharedNews, lang,
   } = useStore()
   const nav = useNav()
   const [mode, setMode] = useState<'none' | 'new' | 'rename'>('none')
@@ -191,6 +192,14 @@ export function Lists() {
           <div className="empty-title">{t('list.empty')}</div>
           <div className="empty-text">{t('list.emptyHint')}</div>
           <button className="btn primary" onClick={() => nav.go('search', { focus: true })}>{t('list.find')}</button>
+          <div className="staples">
+            <div className="staples-head">{t('list.staples')}</div>
+            <div className="rs-chips">
+              {STAPLES.map(([q, sv, fi, en]) => (
+                <button key={q} className="chip" onClick={() => { searchFor(q); nav.go('search') }}>{lang === 'fi' ? fi : lang === 'en' ? en : sv}</button>
+              ))}
+            </div>
+          </div>
         </div>
       ) : (
         <>
@@ -440,3 +449,10 @@ function MenuItem({ icon, label, sub, danger, onClick }: { icon: ReactNode; labe
     </button>
   )
 }
+
+// Everyday things to start a list with: [search, Swedish, Finnish, English]
+const STAPLES: [string, string, string, string][] = [
+  ['maito', 'Mjölk', 'Maito', 'Milk'], ['leipä', 'Bröd', 'Leipä', 'Bread'], ['kananmuna', 'Ägg', 'Kananmunat', 'Eggs'],
+  ['kahvi', 'Kaffe', 'Kahvi', 'Coffee'], ['voi', 'Smör', 'Voi', 'Butter'], ['juusto', 'Ost', 'Juusto', 'Cheese'],
+  ['jogurtti', 'Yoghurt', 'Jogurtti', 'Yoghurt'], ['pasta', 'Pasta', 'Pasta', 'Pasta'], ['wc-paperi', 'Toalettpapper', 'WC-paperi', 'Toilet paper'],
+]
