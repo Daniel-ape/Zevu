@@ -153,6 +153,40 @@
   .t-yellow p { color: rgba(16, 34, 26, 0.72); }
 
   /* how it works */
+
+  /* What only ZEVU does: four small drawn scenes on deep forest green */
+  .only { background: var(--forest); color: #fff; }
+  .only .lead { color: rgba(255,255,255,0.72); }
+  .only-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 56px; }
+  .only-card { background: var(--forest-2); border-radius: var(--r); padding: 22px 22px 26px; }
+  .only-card h3 { font-size: 20px; margin: 22px 0 8px; }
+  .only-card p { margin: 0; font-size: 15.5px; line-height: 1.55; color: rgba(255,255,255,0.74); }
+  .art { height: 150px; border-radius: 18px; background: rgba(255,255,255,0.06); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .art-receipt { flex-direction: column; gap: 9px; align-items: stretch; padding: 22px 34px; background: #fff; }
+  .art-receipt .ln { display: block; height: 10px; border-radius: 5px; background: #dfe7e2; position: relative; }
+  .art-receipt .ln.s { width: 64%; }
+  .art-receipt .ln.warn { background: var(--tag); height: 16px; border-radius: 8px; }
+  .art-receipt .ln.warn b { position: absolute; right: -14px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: #c2410c; color: #fff; display: grid; place-items: center; font-size: 15px; font-style: normal; }
+  .art-shrink { gap: 14px; }
+  .art-shrink .pack { display: grid; place-items: center; border-radius: 12px; background: #fff; color: var(--forest); font-weight: 800; }
+  .art-shrink .big { width: 84px; height: 96px; font-size: 17px; }
+  .art-shrink .small { width: 70px; height: 80px; font-size: 15px; box-shadow: 0 0 0 3px var(--tag); }
+  .art-shrink .arrow { font-size: 24px; color: var(--tag); font-weight: 800; }
+  .art-chart { color: var(--green-b); padding: 26px 20px 30px; align-items: stretch; }
+  .art-chart svg { width: 100%; height: 100%; overflow: visible; }
+  .art-chart .dot { position: absolute; right: 13px; bottom: 42px; width: 14px; height: 14px; border-radius: 50%; background: var(--tag); }
+  .art-chart .tag { position: absolute; right: 14px; top: 14px; background: var(--tag); color: var(--forest); font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 999px; }
+  .art-share { flex-direction: column; gap: 10px; align-items: stretch; padding: 34px 26px 22px; }
+  .art-share .who { position: absolute; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 800; border: 2px solid var(--forest-2); }
+  .art-share .who.a { left: 22px; background: var(--tag); color: var(--forest); }
+  .art-share .who.b { left: 44px; background: var(--green-b); color: #fff; }
+  .art-share .row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 12px; }
+  .art-share .tick { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #b9c7bf; flex-shrink: 0; }
+  .art-share .tick.on { background: var(--green); border-color: var(--green); }
+  .art-share .bar { height: 9px; border-radius: 5px; background: #dfe7e2; flex: 1; }
+  .art-share .bar.s { flex: 0 0 55%; }
+  @media (max-width: 1000px) { .only-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .only-grid { grid-template-columns: 1fr; } }
   .how { background: var(--soft); }
   .steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: s; padding: 0; margin: 0; }
   .steps3 li { list-style: none; counter-increment: s; background: #fff; border-radius: var(--r); padding: 34px; }
@@ -435,6 +469,48 @@
   </div>
 </section>
 
+<section class="only" id="only">
+  <div class="wrap">
+    <div class="head center rv">
+      <h2 data-t="o.title">Det här gör ingen annan app</h2>
+      <p class="lead" data-t="o.lead">ZEVU håller koll åt dig, även efter att du har handlat.</p>
+    </div>
+    <div class="only-grid">
+      <article class="only-card rv">
+        <div class="art art-receipt" aria-hidden="true">
+          <i class="ln"></i><i class="ln s"></i><i class="ln warn"><b>!</b></i><i class="ln"></i><i class="ln s"></i>
+        </div>
+        <h3 data-t="o1.t">Kvittokontroll</h3>
+        <p data-t="o1.p">ZEVU jämför kvittot med butikens hyllpris och säger till om du betalat för mycket. Ett tryck visar det i stor text för kassan.</p>
+      </article>
+      <article class="only-card rv">
+        <div class="art art-shrink" aria-hidden="true">
+          <span class="pack big">500 g</span><span class="arrow">→</span><span class="pack small">450 g</span>
+        </div>
+        <h3 data-t="o2.t">Varning för krympta förpackningar</h3>
+        <p data-t="o2.p">Förpackningarnas storlek sparas varje dag. Blir en vara mindre medan kilopriset stiger, ser du det på produktsidan.</p>
+      </article>
+      <article class="only-card rv">
+        <div class="art art-chart" aria-hidden="true">
+          <svg viewBox="0 0 220 80" preserveAspectRatio="none"><polyline points="0,30 30,28 55,32 80,26 100,60 120,62 140,30 165,28 190,31 220,64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></svg><i class="dot"></i>
+          <span class="tag" data-t="o3.tag">Lägsta på 90 dagar</span>
+        </div>
+        <h3 data-t="o3.t">Köp nu eller vänta</h3>
+        <p data-t="o3.p">Prishistoriken visar om dagens pris är bra, eller om varan brukar bli billigare snart.</p>
+      </article>
+      <article class="only-card rv">
+        <div class="art art-share" aria-hidden="true">
+          <span class="who a">A</span><span class="who b">D</span>
+          <span class="row"><i class="tick on"></i><i class="bar"></i></span>
+          <span class="row"><i class="tick"></i><i class="bar s"></i></span>
+        </div>
+        <h3 data-t="o4.t">En lista för hela familjen</h3>
+        <p data-t="o4.p">Dela listan med en kod. Alla ser samma lista och ändringar syns direkt på allas telefoner.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
 <section class="how" id="how">
   <div class="wrap">
     <div class="head center rv"><h2 data-t="h.title">Så fungerar det</h2></div>
@@ -528,10 +604,10 @@
       <div class="news">
         <h3 data-t="w.title">Nytt i betan</h3>
         <ul>
-          <li><b data-t="w1.t">Snabbare knappar</b><span data-t="w1.p">Plus och minus svarar direkt, och hela appen går smidigare.</span></li>
-          <li><b data-t="w2.t">Billigare alternativ</b><span data-t="w2.p">Produktsidan visar liknande varor som kostar mindre.</span></li>
-          <li><b data-t="w3.t">Bildkälla</b><span data-t="w3.p">Under varje produktbild står var bilden kommer ifrån.</span></li>
-          <li><b data-t="w4.t">Fler matvaror</b><span data-t="w4.p">Fler butiker och varor, med nya priser varje dag.</span></li>
+          <li><b data-t="w1.t">Kvittokontroll</b><span data-t="w1.p">Kvittot jämförs med hyllpriset, och du ser om du betalat för mycket.</span></li>
+          <li><b data-t="w2.t">Köp nu eller vänta</b><span data-t="w2.p">Produktsidan säger om dagens pris är bra eller om det lönar sig att vänta.</span></li>
+          <li><b data-t="w3.t">Månadsbudget</b><span data-t="w3.p">Sätt en budget för maten och få en påminnelse innan den tar slut.</span></li>
+          <li><b data-t="w4.t">Listan i butikens ordning</b><span data-t="w4.p">Varorna sorteras efter avdelning, från frukt och grönt till kassan.</span></li>
         </ul>
       </div>
     </div>
@@ -541,6 +617,8 @@
       <details><summary data-t="q3">Behöver jag ett konto?</summary><p data-t="a3">Nej. Med ett konto sparas dina listor och bevakningar så att de finns kvar på en ny telefon, men allt fungerar utan.</p></details>
       <details><summary data-t="q4">Vad händer med mina uppgifter?</summary><p data-t="a4">Det mesta stannar på din telefon. Kvitton läses på telefonen och delas bara om du själv väljer det. Läs mer i <a href="integritet.html">integritetspolicyn</a>.</p></details>
       <details><summary data-t="q5">Varför finns inte appen i App Store eller Google Play än?</summary><p data-t="a5">Appen är i beta. Den kommer till butikerna när den är färdigtestad. Tills dess kan du installera den direkt härifrån.</p></details>
+      <details><summary data-t="q7">Kan jag dela listan med familjen?</summary><p data-t="a7">Ja. Tryck på de tre punkterna i listan och välj Dela med familjen. De andra skriver in koden i sin app, och sedan ser alla samma lista.</p></details>
+      <details><summary data-t="q8">Hur vet ZEVU att en vara har krympt?</summary><p data-t="a8">Storleken på varje förpackning sparas varje dag. Om samma vara, eller en ny version av den, säljs i mindre förpackning medan kilo- eller literpriset stiger, visas en varning.</p></details>
       <details><summary data-t="q6">Fungerar den på min telefon?</summary><p data-t="a6">Ja, på iPhone med iOS 15 eller nyare och på Android 7 eller nyare. Appen är byggd för att gå smidigt även på enklare telefoner.</p></details>
     </div>
   </div>
@@ -604,6 +682,9 @@
       'qr.t': 'Oletko tietokoneella?', 'qr.p': 'Skannaa koodi puhelimen kameralla, niin sivu aukeaa siellä ja voit ladata sovelluksen.',
       'm.title': 'Tehty sinulle', 'm.lead': 'Helppo sovellus, joka kunnioittaa sekä lompakkoasi että yksityisyyttäsi.', 'm1.t': 'Kolmella kielellä', 'm1.p': 'Svenska, suomi ja English. Vaihda milloin haluat.', 'm2.t': 'Kaupat lähelläsi', 'm2.p': 'Sovellus näyttää lähimmät kaupat ja niiden mainoslehdet.', 'm3.t': 'Ei tiliä', 'm3.p': 'Kaikki toimii heti. Tili tarvitaan vain, jos haluat listat useaan puhelimeen.', 'm4.t': 'Kuitti pysyy sinulla', 'm4.p': 'Kuitit luetaan puhelimessa ja jaetaan vain, jos itse valitset niin.', 'm5.t': 'Ei mainoksia eikä seurantaa', 'm5.p': 'Ei mainoksia, ei tilastointia sinusta eikä mainosevästeitä. <a href="integritet.html">Lue lisää</a>', 'm6.t': 'Sujuva kaikissa puhelimissa', 'm6.p': 'Tehty toimimaan nopeasti myös edullisissa ja vanhemmissa puhelimissa.',
       'w.title': 'Uutta betassa', 'w1.t': 'Nopeammat painikkeet', 'w1.p': 'Plus ja miinus reagoivat heti, ja koko sovellus toimii sujuvammin.', 'w2.t': 'Edullisemmat vaihtoehdot', 'w2.p': 'Tuotesivu näyttää samankaltaiset tuotteet, jotka maksavat vähemmän.', 'w3.t': 'Kuvan lähde', 'w3.p': 'Jokaisen tuotekuvan alla lukee, mistä kuva on peräisin.', 'w4.t': 'Lisää ruokatuotteita', 'w4.p': 'Lisää kauppoja ja tuotteita, uudet hinnat joka päivä.',
+      'o.title': 'Tätä ei tee mikään muu sovellus', 'o.lead': 'ZEVU pitää puolestasi silmällä, myös ostosten jälkeen.', 'o1.t': 'Kuittitarkistus', 'o1.p': 'ZEVU vertaa kuittia kaupan hyllyhintaan ja kertoo, jos maksoit liikaa. Yksi napautus näyttää sen isolla kassalle.', 'o2.t': 'Varoitus pienentyneistä pakkauksista', 'o2.p': 'Pakkauskoot tallennetaan joka päivä. Jos tuote pienenee ja kilohinta nousee, näet sen tuotesivulla.', 'o3.tag': 'Halvin 90 päivään', 'o3.t': 'Osta nyt vai odota', 'o3.p': 'Hintahistoria kertoo, onko päivän hinta hyvä vai halpeneeko tuote yleensä pian.', 'o4.t': 'Yksi lista koko perheelle', 'o4.p': 'Jaa lista koodilla. Kaikki näkevät saman listan, ja muutokset näkyvät heti kaikkien puhelimissa.',
+      'w1.t': 'Kuittitarkistus', 'w1.p': 'Kuittia verrataan hyllyhintaan, ja näet, maksoitko liikaa.', 'w2.t': 'Osta nyt vai odota', 'w2.p': 'Tuotesivu kertoo, onko päivän hinta hyvä vai kannattaako odottaa.', 'w3.t': 'Kuukausibudjetti', 'w3.p': 'Aseta ruokabudjetti ja saat muistutuksen ennen kuin se loppuu.', 'w4.t': 'Lista kaupan järjestyksessä', 'w4.p': 'Tuotteet järjestyvät osastoittain hedelmistä kassalle.',
+      q7: 'Voinko jakaa listan perheen kanssa?', a7: 'Kyllä. Napauta listan kolmea pistettä ja valitse Jaa perheen kanssa. Muut kirjoittavat koodin omaan sovellukseensa, ja sen jälkeen kaikki näkevät saman listan.', q8: 'Mistä ZEVU tietää, että tuote on pienentynyt?', a8: 'Jokaisen pakkauksen koko tallennetaan joka päivä. Jos sama tuote tai sen uusi versio myydään pienempänä pakkauksena ja kilo- tai litrahinta nousee, näet varoituksen.',
       'end.t': 'Aloita säästäminen jo tänään', 'end.p': 'Ilmainen, ilman mainoksia. Beta on nyt saatavilla iPhonelle ja Androidille.',
       'ft.about': 'Ruokahinnat Suomessa, vertailtuna yhdessä paikassa.', 'ft.app': 'Sovellus', 'ft.more': 'Lisää', 'f.privacy': 'Tietosuoja'
     },
@@ -626,6 +707,9 @@
       'qr.t': 'On a computer?', 'qr.p': 'Scan the code with your phone’s camera to open the page there and download the app.',
       'm.title': 'Made for you', 'm.lead': 'A simple app that respects both your wallet and your privacy.', 'm1.t': 'In three languages', 'm1.p': 'Svenska, suomi and English. Switch any time.', 'm2.t': 'Shops near you', 'm2.p': 'The app shows the nearest shops and their leaflets.', 'm3.t': 'No account', 'm3.p': 'Everything works straight away. You only need an account to have your lists on several phones.', 'm4.t': 'Your receipt stays with you', 'm4.p': 'Receipts are read on your phone and only shared if you choose to.', 'm5.t': 'No ads or tracking', 'm5.p': 'No adverts, no statistics about you and no advertising cookies. <a href="integritet.html">Read more</a>', 'm6.t': 'Smooth on every phone', 'm6.p': 'Built to run fast on cheaper and older phones too.',
       'w.title': 'New in the beta', 'w1.t': 'Faster buttons', 'w1.p': 'Plus and minus respond instantly, and the whole app runs more smoothly.', 'w2.t': 'Cheaper alternatives', 'w2.p': 'The product page shows similar products that cost less.', 'w3.t': 'Picture source', 'w3.p': 'Every product picture says where it comes from.', 'w4.t': 'More groceries', 'w4.p': 'More shops and products, with fresh prices every day.',
+      'o.title': 'What no other app does', 'o.lead': 'ZEVU keeps an eye on things for you, even after you have shopped.', 'o1.t': 'Receipt check', 'o1.p': 'ZEVU compares your receipt with the shelf price and tells you if you paid too much. One tap shows it in large type for the checkout.', 'o2.t': 'Shrinking pack alerts', 'o2.p': 'Pack sizes are recorded every day. If a product gets smaller while its price per kilo goes up, you see it on the product page.', 'o3.tag': 'Lowest in 90 days', 'o3.t': 'Buy now or wait', 'o3.p': 'Price history shows whether today’s price is good, or whether the product usually gets cheaper soon.', 'o4.t': 'One list for the whole family', 'o4.p': 'Share the list with a code. Everyone sees the same list, and changes show up on every phone straight away.',
+      'w1.t': 'Receipt check', 'w1.p': 'Your receipt is compared with the shelf price, so you see if you paid too much.', 'w2.t': 'Buy now or wait', 'w2.p': 'The product page tells you whether today’s price is good or worth waiting on.', 'w3.t': 'Monthly budget', 'w3.p': 'Set a grocery budget and get a reminder before it runs out.', 'w4.t': 'List in store order', 'w4.p': 'Items are sorted by department, from fruit and veg to the checkout.',
+      q7: 'Can I share the list with my family?', a7: 'Yes. Tap the three dots on the list and choose Share with family. The others enter the code in their app, and from then on everyone sees the same list.', q8: 'How does ZEVU know a product has shrunk?', a8: 'The size of every pack is recorded every day. If the same product, or a new version of it, is sold in a smaller pack while the price per kilo or litre goes up, you see a warning.',
       'end.t': 'Start saving today', 'end.p': 'Free, no ads. The beta is out now for iPhone and Android.',
       'ft.about': 'Grocery prices in Finland, compared in one place.', 'ft.app': 'The app', 'ft.more': 'More', 'f.privacy': 'Privacy'
     }
