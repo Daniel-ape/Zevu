@@ -1,0 +1,40 @@
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000239
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000240
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000241
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000242
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000243
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000244
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000245
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000246
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000247
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000248
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000249
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000250
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000251
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000252
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000253
+⚡️  TO JS undefined
+⚡️  [log] - PROBE STEP stress-60-taps ms=4956 1
+⚡️  To Native ->  NativeDock show 3000254
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeDock show 3000255
+⚡️  TO JS undefined
+⚡️  [log] - PROBE STEP responsive-after-stress ms=423 423
+⚡️  [log] - PROBE STEP memory n/a
+⚡️  [log] - PROBE SHOT 07-after-stress
+⚡️  [log] - PROBE DONE

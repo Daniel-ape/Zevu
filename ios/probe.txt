@@ -1,0 +1,25 @@
+⚡️  [log] - PROBE START Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 440x956
+⚡️  [log] - PROBE STEP startup ms=1126 nav 0 ui 1121
+⚡️  [log] - PROBE SHOT 01-home
+⚡️  [log] - PROBE STEP tab-search ms=550 240
+⚡️  [log] - PROBE STEP search-maito ms=15 1 results=24
+⚡️  [log] - PROBE SHOT 02-search
+⚡️  [log] - PROBE STEP add-0 ms=35 30
+⚡️  [log] - PROBE STEP add-1 ms=18 17
+⚡️  [log] - PROBE STEP add-2 ms=19 19
+⚡️  [log] - PROBE SHOT 03-added
+⚡️  [log] - PROBE STEP open-product ms=403 353
+⚡️  [log] - PROBE SHOT 04-product
+⚡️  [log] - PROBE STEP back ms=176 0
+⚡️  [log] - PROBE STEP tab-lists ms=148 134
+⚡️  [log] - PROBE STEP stepper-plus ms=46 45
+⚡️  [log] - PROBE STEP stepper-minus ms=173 172
+⚡️  [log] - PROBE SHOT 05-list
+⚡️  [log] - PROBE STEP tab-leaflets ms=59 57 groups=3
+⚡️  [log] - PROBE SHOT 06-leaflets
+⚡️  [log] - PROBE STEP tab-home ms=0 0
+⚡️  [log] - PROBE STEP stress-60-taps ms=4956 1
+⚡️  [log] - PROBE STEP responsive-after-stress ms=423 423
+⚡️  [log] - PROBE STEP memory n/a
+⚡️  [log] - PROBE SHOT 07-after-stress
+⚡️  [log] - PROBE DONE

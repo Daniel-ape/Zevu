@@ -1,0 +1,10 @@
+ok add-0 35 ms
+ok add-1 18 ms
+ok add-2 19 ms
+ok open-product 403 ms
+ok back 176 ms
+ok tab-lists 148 ms
+ok stepper-plus 46 ms
+ok stepper-minus 173 ms
+ok responsive-after-stress 423 ms
+PASS
