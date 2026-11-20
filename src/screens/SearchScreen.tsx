@@ -35,6 +35,15 @@ const HISTORY_KEY = 'hintaopas:searchHistory'
 function readHistory(): string[] { try { const v = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : [] } catch { return [] } }
 function writeHistory(h: string[]) { try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)) } catch { /* private mode */ } }
 
+/** The category most of these are in, when it is a clear majority. */
+function mostlyOf(cats: CategoryId[]): CategoryId | undefined {
+  if (cats.length < 4) return undefined
+  const n = new Map<CategoryId, number>()
+  for (const c of cats) n.set(c, (n.get(c) ?? 0) + 1)
+  const [top, k] = [...n.entries()].sort((a, b) => b[1] - a[1])[0]
+  return k / cats.length >= 0.5 ? top : undefined
+}
+
 const NON_FOOD = new Set<string>(['pets', 'toys', 'home', 'electronics', 'clothing', 'office'])
 
 export function SearchScreen() {
@@ -141,7 +150,7 @@ export function SearchScreen() {
     const tier = (score: number) => (score >= 3.5 ? 0 : score >= 2.5 ? 1 : score >= 1.5 ? 2 : 3)
     // What the search is for ("banaani" is fruit, "kana" meat): products of
     // that kind come before ones that only taste of it or mention it.
-    const want = needle ? guessCategory(needle, '') ?? guessCategory(compileQuery(needle).flatMap((q) => q.alts).join(' '), '') : undefined
+    let want = needle ? guessCategory(needle, '') ?? guessCategory(compileQuery(needle).flatMap((q) => q.alts).join(' '), '') : undefined
     const off = (p: Product) => (want && p.category !== want ? 1 : 0)
     const stray = (p: Product) => (want && !NON_FOOD.has(want) && NON_FOOD.has(p.category) ? 1 : 0)
     const inCat = dcat === 'all' ? products : products.filter((p) => p.category === dcat)
@@ -171,7 +180,7 @@ export function SearchScreen() {
         if (pricesOf(p.id).length > 0) out.push({ p, score: 1, priced: true })
         if (out.length >= poolSize) break
       }
-      return finish(out)
+      return finish(out, want)
     }
     let found = scoreAll(false)
     // Forgive typos only when the exact pass finds little. Those matches come
@@ -186,15 +195,17 @@ export function SearchScreen() {
         }
       }
     }
+    // A brand or a word that names no kind of product ("pepsi", "fazer"): what
+    // most of the strong matches are is what is meant (drinks, not lip balm).
+    if (needle && !want) want = mostlyOf(found.filter((f) => f.score >= 3.5).map((f) => f.p.category))
     // Cheap first cut (match strength, has a price, popularity), then the
     // price comparison only for the products that can make the list.
     found.sort((a, b) =>
       (needle ? stray(a.p) - stray(b.p) || (tier(a.score) === 0 && !off(a.p) ? 0 : 1) - (tier(b.score) === 0 && !off(b.p) ? 0 : 1) || tier(a.score) - tier(b.score) : 0) || off(a.p) - off(b.p) || (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || rank.get(a.p.id)! - rank.get(b.p.id)!)
-    return finish(found.slice(0, poolSize))
+    return finish(found.slice(0, poolSize), want)
     }
-    function finish(pool: { p: Product; score: number; priced: boolean }[]) {
+    function finish(pool: { p: Product; score: number; priced: boolean }[], want: CategoryId | undefined) {
     const needle = dq.trim()
-    const want = needle ? guessCategory(needle, '') ?? guessCategory(compileQuery(needle).flatMap((q) => q.alts).join(' '), '') : undefined
     const off = (p: Product) => (want && p.category !== want ? 1 : 0)
     // Looking for food, a toy, a pet food or a kitchen gadget with the same
     // word in its name ("kananmunankeitin", cat food "kana, kananmuna") goes last.

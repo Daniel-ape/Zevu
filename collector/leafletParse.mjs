@@ -64,7 +64,9 @@ function cropOf(page, p, lines, prices, wide = false) {
 
 /** "Torkkupeitto Florentina Erittäin pehmeä, …" → "Torkkupeitto Florentina" */
 function tidyName(n) {
-  n = n.replace(/\s+/g, ' ').replace(/(\p{L})- (\p{Ll})/gu, '$1$2').replace(/\s*\|\s*$/, '').trim()
+  n = n.replace(/\s+/g, ' ').replace(/(\p{L})- (\p{Ll})/gu, '$1$2').replace(/(\p{Lu}{2})- (\p{Lu}{2})/gu, '$1$2').replace(/\s*\|\s*$/, '').trim()
+  // a compound left unfinished ("Tuore-") is dropped rather than shown cut
+  n = n.replace(/\s*\S*\p{L}-$/u, '').trim()
   const words = n.split(' ')
   if (n.length > 34) {
     const dot = n.search(/\.\s+\p{Lu}/u)
@@ -139,8 +141,17 @@ export function offersOf(html) {
       if (!named.length) return
       // name: the largest lines (headline + brand), top to bottom
       const maxH = Math.max(...named.map((l) => l.h))
-      let name = named.filter((l) => l.h >= maxH * 0.7 && !SIZE.test(l.text) || l.h >= maxH * 0.95)
-        .sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0).slice(0, 3).map((l) => l.text).join(' ')
+      const big = named.filter((l) => l.h >= maxH * 0.7 && !SIZE.test(l.text) || l.h >= maxH * 0.95)
+        .sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0).slice(0, 3)
+      let name = big.map((l) => l.text).join(' ')
+      // a word split over lines ("Joululahja-" / "kortti") whose second half is
+      // in a smaller line: take that half from the next line below
+      if (/\p{L}-\s*$/u.test(name)) {
+        const last = big[big.length - 1]
+        const next = named.filter((l) => l !== last && l.y0 > last.y0).sort((a, b) => a.y0 - b.y0)[0]
+        const half = next?.text.trim().split(/\s+/)[0]
+        if (half && /^\p{Ll}/u.test(half)) name = name.replace(/-\s*$/, '') + half
+      }
       name = tidyName(name)
       if (name.length < 3 || /•/.test(name) || !/\p{L}{4}/u.test(name)) return
       const details = named.filter((l) => l.h < maxH * 0.7 && SIZE.test(l.text)).map((l) => l.text).slice(0, 2).join(' ').replace(/\s+/g, ' ')
