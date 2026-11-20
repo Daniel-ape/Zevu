@@ -30,6 +30,10 @@ const scroller = () => document.querySelector<HTMLElement>('.screen')
 
 // Looking for food, a toy, a pet food or a kitchen gadget with the same word in
 // its name ("kananmunankeitin", cat food "kana, kananmuna") goes last.
+const HISTORY_KEY = 'hintaopas:searchHistory'
+function readHistory(): string[] { try { const v = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : [] } catch { return [] } }
+function writeHistory(h: string[]) { try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)) } catch { /* private mode */ } }
+
 const NON_FOOD = new Set<string>(['pets', 'toys', 'home', 'electronics', 'clothing', 'office'])
 
 export function SearchScreen() {
@@ -303,14 +307,23 @@ export function SearchScreen() {
   // Stable handlers, so result rows that did not change are not drawn again while typing.
   const latest = useRef({ list, setQuantity, nav })
   latest.current = { list, setQuantity, nav }
+  // searches that led somewhere (a product opened or added), newest first
+  const qRef = useRef(q); qRef.current = q
+  const [history, setHistory] = useState<string[]>(readHistory)
+  const remember = (term: string) => {
+    const k = term.trim(); if (k.length < 2) return
+    setHistory((h) => { const n = [k, ...h.filter((x) => x.toLowerCase() !== k.toLowerCase())].slice(0, 8); writeHistory(n); return n })
+  }
+
   const quickAdd = useCallback((id: string) => {
     const { list, setQuantity } = latest.current
     const item = list.items.find((i) => i.productId === id)
     setQuantity(id, (getPendingQty(id) ?? item?.quantity ?? 0) + 1)
+    remember(qRef.current)
     setAdded(id)
     setTimeout(() => setAdded((a) => (a === id ? null : a)), 1600)
   }, [])
-  const openProduct = useCallback((id: string) => latest.current.nav.openProduct(id), [])
+  const openProduct = useCallback((id: string) => { remember(qRef.current); latest.current.nav.openProduct(id) }, [])
 
   return (
     <div className="screen" onPointerDown={touch} onWheel={touch}>
@@ -320,6 +333,13 @@ export function SearchScreen() {
         <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('search.placeholder')} enterKeyHint="search" />
         {q && <button className="tiny muted" onClick={() => setQ('')}>{t('search.clear')}</button>}
       </label>
+
+      {!q && history.length > 0 && (
+        <div className="recent-searches">
+          <div className="rs-head"><span>{t('search.recent')}</span><button className="tiny muted" onClick={() => { setHistory([]); writeHistory([]) }}>{t('search.clearRecent')}</button></div>
+          <div className="rs-chips">{history.map((h) => <button key={h} className="chip" onClick={() => setQ(h)}>{h}</button>)}</div>
+        </div>
+      )}
 
       <div className="cat-bar filter-bar">
         <button className={'cat-btn' + (cat !== 'all' ? ' on' : '')} onClick={() => setPicking(true)} aria-haspopup="dialog">

@@ -3,7 +3,7 @@ import { prettyCode, sharingEnabled } from '../data/sharedLists'
 import { getPendingQty, usePendingQty } from '../data/pendingQty'
 import type { ReactNode } from 'react'
 import { productById } from '../domain/productIndex'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { aisleLabel, aisleOf, byAisle } from '../domain/aisles'
 import type { Key } from '../i18n'
 import { Portal } from '../ui/Portal'
@@ -19,13 +19,25 @@ export function Lists() {
   const {
     list, lists, setActiveList, createList, renameList, deleteList, restoreList,
     products, observations, retailers, setQuantity, toggleChecked, clearChecked, pricesOf, myStores, t,
-    leaveShared, sharedOnline, loading, moreLoaded,
+    leaveShared, sharedOnline, loading, moreLoaded, sharedNews, clearSharedNews,
   } = useStore()
   const nav = useNav()
   const [mode, setMode] = useState<'none' | 'new' | 'rename'>('none')
   const [name, setName] = useState('')
   const [toast, setToast] = useState('')
   const [undo, setUndo] = useState<typeof list | null>(null)
+  // an item tapped down to zero can be brought back for a few seconds
+  const [gone, setGone] = useState<{ id: string; name: string; checked: boolean } | null>(null)
+  const setQty = useCallback((id: string, q: number) => {
+    if (q <= 0) {
+      const it = list.items.find((i) => i.productId === id)
+      const p = productById(products, id)
+      const g = { id, name: p?.name ?? '', checked: !!it?.checked }
+      setGone(g)
+      setTimeout(() => setGone((x) => (x === g ? null : x)), 5000)
+    }
+    setQuantity(id, q)
+  }, [list.items, products, setQuantity])
   const [shopping, setShopping] = useState(false)
   const [menu, setMenu] = useState(false)
   const [sharing, setSharing] = useState(false)
@@ -96,6 +108,13 @@ export function Lists() {
 
       {list.shared && (
         <div className={'shared-line' + (sharedOnline ? '' : ' off')}><span className="dot" />{t(sharedOnline ? 'sh.synced' : 'sh.offline')} · {prettyCode(list.shared.code)}</div>
+      )}
+      {list.shared && sharedNews?.listId === list.id && Date.now() - sharedNews.at < 60_000 && (
+        <button className="shared-news" onClick={clearSharedNews}>
+          <People size={16} />
+          <span>{[sharedNews.added && t('sh.newsAdded', { n: String(sharedNews.added) }), sharedNews.removed && t('sh.newsRemoved', { n: String(sharedNews.removed) })].filter(Boolean).join(' · ')}</span>
+          <span className="x" aria-label={t('common.close')}>×</span>
+        </button>
       )}
 
       {mode !== 'none' ? (
@@ -203,7 +222,7 @@ export function Lists() {
                       <div className="sub">{[sizeLabel(p), c && t('list.from', { price: euro(c.current.priceCents) })].filter(Boolean).join(' · ')}</div>
                     </div>
                   </button>
-                  <QtyStepper id={p.id} qty={item.quantity} setQuantity={setQuantity} less={t('list.less')} more={t('list.more')} />
+                  <QtyStepper id={p.id} qty={item.quantity} setQuantity={setQty} less={t('list.less')} more={t('list.more')} />
                 </ListRow>
               )
             }
@@ -376,6 +395,12 @@ export function Lists() {
       {sharing && <ShareListSheet listId={list.id} name={display(list.name)} onClose={() => setSharing(false)} />}
       {joining && <JoinListSheet onClose={() => setJoining(false)} onJoined={(n) => { setToast(t('sh.joined', { name: display(n) })); setTimeout(() => setToast(''), 2500) }} />}
       {toast && <div className="toast">{toast}</div>}
+      {gone && !undo && (
+        <div className="toast">
+          <span className="toast-text">{t('undo.itemRemoved', { name: gone.name })}</span>
+          <button onClick={() => { setQuantity(gone.id, 1); if (gone.checked) toggleChecked(gone.id); setGone(null) }}>{t('undo.undo')}</button>
+        </div>
+      )}
       {undo && (
         <div className="toast">
           {t('undo.listDeleted')}

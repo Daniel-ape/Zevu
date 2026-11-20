@@ -37,6 +37,7 @@ function save(key: string, value: unknown) {
 
 const DEFAULT_LIST: ShoppingList = { id: 'weekly', name: 'Weekly shop', items: [] }
 
+export interface SharedNews { listId: string; added: number; removed: number; at: number }
 export type Theme = 'system' | 'light' | 'dark'
 
 interface Store {
@@ -69,6 +70,9 @@ interface Store {
   leaveShared: (id: string) => void
   /** Whether the last sync of shared lists worked. */
   sharedOnline: boolean
+  /** The latest change someone else made to a shared list. */
+  sharedNews: SharedNews | null
+  clearSharedNews: () => void
   setQuantity: (productId: string, qty: number) => void
   toggleChecked: (productId: string) => void
   clearChecked: () => void
@@ -125,6 +129,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const listsRef = useRef(lists)
   listsRef.current = lists
   const [sharedOnline, setSharedOnline] = useState(true)
+  const [sharedNews, setSharedNews] = useState<SharedNews | null>(null)
   const syncing = useRef(false)
   const syncShared = useCallback(async () => {
     if (!sharingEnabled || syncing.current) return
@@ -135,6 +140,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       for (const l of shared) {
         const r = await syncSharedList(l, l.name)
         if (!r) continue
+        // what someone else changed, for a short note on the list
+        if (r.items !== l.items) {
+          const mine = new Set(l.items.map((i) => i.productId))
+          const theirs = new Set(r.items.map((i) => i.productId))
+          const added = r.items.filter((i) => !mine.has(i.productId)).length
+          const removed = l.items.filter((i) => !theirs.has(i.productId)).length
+          if (added || removed) setSharedNews({ listId: l.id, added, removed, at: Date.now() })
+        }
         setLists((all) => all.map((x) => {
           if (x.id !== l.id || x.shared?.code !== l.shared.code) return x
           // changed on this phone while syncing: put those changes on top
@@ -400,6 +413,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       joinShared,
       leaveShared: (id) => setLists((all) => all.map((x) => (x.id === id ? { ...x, shared: undefined } : x))),
       sharedOnline,
+      sharedNews,
+      clearSharedNews: () => setSharedNews(null),
       restoreList: (l) => {
         setLists((all) => [...all.filter((x) => x.id !== l.id), l])
         setActiveId(l.id)
@@ -453,7 +468,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setLang,
       t,
     }),
-    [effective, pricesOf, retailers, t, products, loading, rest, loadMore, lists, list, activeId, sharedOnline, joinShared, myStores, watched, receipts, cards, coupons, recent, theme, lang, lastStore],
+    [effective, pricesOf, retailers, t, products, loading, rest, loadMore, lists, list, activeId, sharedOnline, sharedNews, joinShared, myStores, watched, receipts, cards, coupons, recent, theme, lang, lastStore],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

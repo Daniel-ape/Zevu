@@ -2159,3 +2159,12 @@ html:not(.lite) .li-row { animation: row-in 0.32s cubic-bezier(0.22, 0.9, 0.25, 
 .li-wait-line { height: 12px; flex: 1; max-width: 60%; border-radius: 6px; background: var(--line); animation: li-pulse 1.2s ease-in-out infinite; }
 @keyframes li-pulse { 50% { opacity: 0.45; } }
 .li-remove { width: auto; height: 34px; padding: 0 12px; font-size: 14px; }
+/* someone else changed the shared list */
+.shared-news { display: flex; align-items: center; gap: 8px; width: calc(100% - 8px); margin: 0 4px 12px; padding: 10px 12px; border-radius: 14px; background: var(--accent-soft); color: var(--accent); font-size: 14px; font-weight: 600; text-align: left; animation: fade 0.3s ease-out; }
+.shared-news span:nth-child(2) { flex: 1; }
+.shared-news .x { font-size: 18px; line-height: 1; opacity: 0.6; }
+.toast .toast-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.recent-searches { margin: 14px 0 8px; }
+.rs-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--text-2); margin: 0 4px 8px; }
+.rs-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.rs-chips .chip { height: 34px; padding: 0 14px; border-radius: 999px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; font-weight: 600; color: var(--text); }
