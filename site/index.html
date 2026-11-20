@@ -119,7 +119,7 @@
 
   /* numbers */
   .nums { position: relative; z-index: 2; background: #fff; border-bottom: 1px solid var(--line); }
-  .nums .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .nums .wrap { display: grid; grid-template-columns: repeat(3, 1fr); }
   .num { padding: 40px 28px; text-align: center; }
   .num + .num { border-left: 1px solid var(--line); }
   .num b { display: block; font-size: clamp(30px, 3.4vw, 44px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; }
@@ -194,15 +194,6 @@
   .steps3 p { color: var(--ink-2); margin-top: 10px; }
 
   /* the app up close: one phone stays put while the text scrolls past it */
-  .tour-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
-  .tstep { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; opacity: 0.25; transition: opacity 0.5s; }
-  .tstep.on { opacity: 1; }
-  .tstep .lead { margin-top: 18px; }
-  .tstep .pic { display: none; }
-  .tour-phone { position: relative; }
-  .tour-stick { position: sticky; top: calc(50vh - 300px); height: 600px; display: grid; place-items: center; }
-  .tour-stick::before { content: ''; position: absolute; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(25, 181, 106, 0.25), transparent 65%); }
-  .tour-stick .phone { width: 282px; }
   .check { list-style: none; padding: 0; margin: 24px 0 0; }
   .check li { position: relative; padding-left: 34px; margin: 12px 0; font-weight: 500; }
   .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
@@ -256,18 +247,6 @@
   @keyframes slide { to { transform: translateX(-50%); } }
 
   /* with and without */
-  .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 980px; margin: 0 auto; }
-  .vs-col { border-radius: var(--r); padding: 36px; background: var(--soft); }
-  .vs-col.yes { background: var(--forest); color: #fff; }
-  .vs-col h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
-  .vs-col h3 svg { width: 26px; height: 26px; border-radius: 7px; background: var(--green); padding: 5px; }
-  .vs-col ul { list-style: none; margin: 0; padding: 0; }
-  .vs-col li { position: relative; padding: 13px 0 13px 34px; border-top: 1px solid var(--line); }
-  .vs-col.yes li { border-color: rgba(255, 255, 255, 0.12); }
-  .vs-col li::before { content: ''; position: absolute; left: 0; top: 15px; width: 22px; height: 22px; border-radius: 50%; background: center / 12px no-repeat; }
-  .vs-col.no li { color: var(--ink-2); }
-  .vs-col.no li::before { background-color: #e4e9e6; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 7l10 10M17 7L7 17' stroke='%2374837b' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"); }
-  .vs-col.yes li::before { background-color: var(--tag); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%2310221a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
   /* scan to open on the phone (computers only) */
   .qr { display: flex; align-items: center; gap: 24px; margin-top: 20px; padding: 24px; border-radius: var(--r); background: #fff; color: var(--ink); max-width: 520px; }
@@ -275,8 +254,6 @@
   .qr p { color: var(--ink-2); margin-top: 6px; font-size: 15px; }
 
   @media (max-width: 760px) {
-    .vs { grid-template-columns: 1fr; }
-    .vs-col { padding: 28px; }
     .qr { display: none; }
   }
   @media (hover: none) { .qr { display: none; } }
@@ -318,13 +295,7 @@
     .t-big, .t-tall, .t-half { grid-column: span 2; grid-row: auto; min-height: 480px; }
     .t-third { grid-column: span 1; grid-row: auto; min-height: 260px; }
     .tile .shot, .t-big .shot, .t-half .shot, .t-tall .shot { width: 230px; left: 50%; right: auto; margin-left: -115px; bottom: -250px; }
-    .tour-grid, .two, .faq-grid, .final, footer .wrap { grid-template-columns: 1fr; }
     .faq-grid { gap: 40px; }
-    .tour-phone { display: none; }
-    .tstep { min-height: 0; opacity: 1; padding: 40px 0; }
-    .tstep + .tstep { border-top: 1px solid var(--line); }
-    .tstep .pic { display: flex; justify-content: center; padding: 40px 0 8px; }
-    .tstep .pic .phone { width: 250px; }
     .steps3 { grid-template-columns: 1fr; }
     .final { padding: 56px 32px 0; } .final .phone { margin: 10px auto -200px; width: 220px; }
   }
@@ -334,7 +305,7 @@
     .fan .p1 { width: 230px; margin-left: -115px; bottom: -90px; }
     .fan .p2 { width: 180px; margin-left: -250px; bottom: -120px; }
     .fan .p3 { width: 180px; margin-left: 70px; bottom: -120px; }
-    .nums .wrap { grid-template-columns: 1fr 1fr; }
+    .nums .wrap { grid-template-columns: repeat(3, 1fr); }
     .num { padding: 28px 12px; }
     .num:nth-child(3) { border-left: 0; }
     .num:nth-child(n + 3) { border-top: 1px solid var(--line); }
@@ -348,7 +319,7 @@
     html { scroll-behavior: auto; }
     .fan .phone, .strip-track { animation: none; }
     .rv { opacity: 1; transform: none; transition: none; }
-    .phone .scr, .tstep, .tile .shot { transition: none; }
+    .phone .scr, .tile .shot { transition: none; }
   }
 </style>
 </head>
@@ -394,7 +365,6 @@
     <div class="num"><b id="nProducts">225 000+</b><span data-t="u.products">produkter</span></div>
     <div class="num"><b id="nShops">18</b><span data-t="u.shops">butiker jämförda</span></div>
     <div class="num"><b data-t="u.dailyB">Varje dag</b><span data-t="u.daily">nya priser</span></div>
-    <div class="num"><b>0 €</b><span data-t="u.free">gratis, utan reklam</span></div>
   </div>
 </div>
 
@@ -445,25 +415,6 @@
         <h3 data-t="c7.t">Se vad du sparat</h3>
         <p data-t="c7.p">Skanna kvittot, så ser du hur mycket du sparat varje månad.</p>
         <div class="phone shot"><img src="img/savings.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="vs-sec">
-  <div class="wrap">
-    <div class="head center rv">
-      <h2 data-t="v.title">Slipp jaga erbjudanden</h2>
-      <p class="lead" data-t="v.lead">Samma handling, mycket mindre jobb.</p>
-    </div>
-    <div class="vs">
-      <div class="vs-col no rv">
-        <h3 data-t="v.no">Utan ZEVU</h3>
-        <ul><li data-t="v.n1">Fem appar och lika många reklamblad</li><li data-t="v.n2">Jämföra kilopriser i huvudet</li><li data-t="v.n3">Missa medlemspriser och kampanjer</li><li data-t="v.n4">Ingen aning om vad du sparat</li></ul>
-      </div>
-      <div class="vs-col yes rv">
-        <h3><svg viewBox="282 292 460 440" aria-hidden="true"><path d="M330 340 H694 L330 684 H694" fill="none" stroke="#fff" stroke-width="96" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="10"/></svg><span data-t="v.yes">Med ZEVU</span></h3>
-        <ul><li data-t="v.y1">Alla butiker i en app</li><li data-t="v.y2">Kilopris och billigaste alternativet direkt</li><li data-t="v.y3">Notis när något du gillar blir billigare</li><li data-t="v.y4">Se vad du sparat varje månad</li></ul>
       </div>
     </div>
   </div>
@@ -522,32 +473,6 @@
   </div>
 </section>
 
-<section class="tour">
-  <div class="wrap tour-grid">
-    <div>
-      <div class="tstep on" data-s="0">
-        <h2 data-t="s1.t">Hitta det billigaste på sekunder</h2>
-        <p class="lead" data-t="s1.p">Sök bland tusentals varor och se direkt vilken butik som har bästa priset just nu.</p>
-        <ul class="check"><li data-t="s1.a">Priser från flera kedjor på en gång</li><li data-t="s1.b">Billigare alternativ från andra märken</li><li data-t="s1.c">Prishistorik för varje vara</li></ul>
-        <div class="pic"><div class="phone"><img src="img/search.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
-      </div>
-      <div class="tstep" data-s="1">
-        <h2 data-t="s2.t">Hela listan, billigast</h2>
-        <p class="lead" data-t="s2.p">Skriv din inköpslista, så räknar ZEVU ut i vilken butik hela handlingen blir billigast och hur mycket du sparar.</p>
-        <div class="pic"><div class="phone"><img src="img/lists.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
-      </div>
-      <div class="tstep" data-s="2">
-        <h2 data-t="s3.t">Se hur mycket du sparar</h2>
-        <p class="lead" data-t="s3.p">Skanna kvittot efter handlingen, så räknar ZEVU ut vad du sparat jämfört med andra butiker.</p>
-        <div class="pic"><div class="phone"><img src="img/savings.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
-      </div>
-    </div>
-    <div class="tour-phone" aria-hidden="true">
-      <div class="tour-stick"><div class="phone"><img class="scr on" src="img/search.webp" alt="" loading="lazy" /><img class="scr" src="img/lists.webp" alt="" loading="lazy" /><img class="scr" src="img/savings.webp" alt="" loading="lazy" /><i class="island"></i><i class="sb r"></i><i class="sb cam"></i><i class="sb l1"></i><i class="sb l2"></i><i class="sb l3"></i></div></div>
-    </div>
-  </div>
-</section>
-
 <section class="made">
   <div class="wrap">
     <div class="head center rv">
@@ -558,12 +483,9 @@
       <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg></div><h3 data-t="m1.t">På tre språk</h3><p data-t="m1.p">Svenska, suomi och English. Byt när du vill.</p></div>
       <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><h3 data-t="m2.t">Butiker nära dig</h3><p data-t="m2.p">Appen visar de närmaste butikerna och deras reklamblad.</p></div>
       <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div><h3 data-t="m3.t">Inget konto</h3><p data-t="m3.p">Allt fungerar direkt. Ett konto behövs bara om du vill ha listorna på flera telefoner.</p></div>
-      <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></div><h3 data-t="m4.t">Kvittot stannar hos dig</h3><p data-t="m4.p">Kvitton läses på telefonen och delas bara om du själv väljer det.</p></div>
-      <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3 data-t="m5.t">Ingen reklam eller spårning</h3><p data-t="m5.p">Inga annonser, ingen statistik om dig och inga reklamkakor. <a href="integritet.html">Läs mer</a></p></div>
+      <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3 data-t="m5.t">Ingen reklam, ingen spårning</h3><p data-t="m5.p">Inga annonser och ingen spårning. Kvitton läses på telefonen och stannar där. <a href="integritet.html">Läs mer</a></p></div>
       <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div><h3 data-t="m6.t">Smidig på alla telefoner</h3><p data-t="m6.p">Byggd för att gå snabbt även på enklare och äldre telefoner.</p></div>
       <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12a10 10 0 0 1 13 0"/><path d="M9 15.5a5 5 0 0 1 6 0"/><path d="M12 19h.01"/><path d="M3 3l18 18"/></svg></div><h3 data-t="m7.t">Fungerar utan nät</h3><p data-t="m7.p">Listan och priserna finns kvar i telefonen, också där butiken saknar täckning.</p></div>
-      <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg></div><h3 data-t="m8.t">Notiser du väljer själv</h3><p data-t="m8.p">Prisfall på det du bevakar, nya reklamblad och en kort veckosammanfattning. Stäng av det du inte vill ha.</p></div>
-      <div class="mi rv"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></div><h3 data-t="m9.t">Lätt att ångra</h3><p data-t="m9.p">Tog du bort fel vara eller lista? Ett tryck så är den tillbaka.</p></div>
     </div>
   </div>
 </section>
@@ -690,6 +612,7 @@
       q7: 'Voinko jakaa listan perheen kanssa?', a7: 'Kyllä. Napauta listan kolmea pistettä ja valitse Jaa perheen kanssa. Muut kirjoittavat koodin omaan sovellukseensa, ja sen jälkeen kaikki näkevät saman listan.', q8: 'Mistä ZEVU tietää, että tuote on pienentynyt?', a8: 'Jokaisen pakkauksen koko tallennetaan joka päivä. Jos sama tuote tai sen uusi versio myydään pienempänä pakkauksena ja kilo- tai litrahinta nousee, näet varoituksen.',
       'm7.t': 'Toimii ilman verkkoa', 'm7.p': 'Lista ja hinnat pysyvät puhelimessa, myös kaupassa, jossa kenttä ei kuulu.', 'm8.t': 'Ilmoitukset, jotka valitset itse', 'm8.p': 'Hinnanlaskut seuraamillesi tuotteille, uudet mainoslehdet ja lyhyt viikkokooste. Laita pois ne, joita et halua.', 'm9.t': 'Helppo perua', 'm9.p': 'Poistitko väärän tuotteen tai listan? Yksi napautus ja se on takaisin.',
       'w1.t': 'Viimeisimmät haut', 'w1.p': 'Viimeisimmät hakusi ovat yhden napautuksen päässä, ja tyhjällä listalla on pikavalinnat yleisimpiin.', 'w2.t': 'Peruminen', 'w2.p': 'Jos poistat tuotteen listalta vahingossa, saat sen takaisin yhdellä napautuksella.', 'w3.t': 'Perheen lista kertoo muutokset', 'w3.p': 'Kun joku muu lisää tai poistaa tuotteita, se näkyy heti listassa.', 'w4.t': 'Lisää juomia', 'w4.p': 'Energia- ja urheilujuomia vielä yhdestä kaupasta, uusin hinnoin joka päivä.',
+      'm5.t': 'Ei mainoksia, ei seurantaa', 'm5.p': 'Ei mainoksia eikä seurantaa. Kuitit luetaan puhelimessa ja ne pysyvät siellä. <a href="integritet.html">Lue lisää</a>',
       'end.t': 'Aloita säästäminen jo tänään', 'end.p': 'Ilmainen, ilman mainoksia. Beta on nyt saatavilla iPhonelle ja Androidille.',
       'ft.about': 'Ruokahinnat Suomessa, vertailtuna yhdessä paikassa.', 'ft.app': 'Sovellus', 'ft.more': 'Lisää', 'f.privacy': 'Tietosuoja'
     },
@@ -717,6 +640,7 @@
       q7: 'Can I share the list with my family?', a7: 'Yes. Tap the three dots on the list and choose Share with family. The others enter the code in their app, and from then on everyone sees the same list.', q8: 'How does ZEVU know a product has shrunk?', a8: 'The size of every pack is recorded every day. If the same product, or a new version of it, is sold in a smaller pack while the price per kilo or litre goes up, you see a warning.',
       'm7.t': 'Works offline', 'm7.p': 'Your list and the prices stay on your phone, even where the shop has no signal.', 'm8.t': 'Notifications you choose', 'm8.p': 'Price drops on what you watch, new leaflets and a short weekly summary. Turn off what you don’t want.', 'm9.t': 'Easy to undo', 'm9.p': 'Removed the wrong item or list? One tap and it’s back.',
       'w1.t': 'Recent searches', 'w1.p': 'Your recent searches are one tap away, and an empty list has quick picks for the basics.', 'w2.t': 'Undo', 'w2.p': 'Remove an item from the list by mistake and you get it back with one tap.', 'w3.t': 'The family list tells you', 'w3.p': 'When someone else adds or removes items, you see it on the list straight away.', 'w4.t': 'More drinks', 'w4.p': 'Energy and sports drinks from one more shop, with fresh prices every day.',
+      'm5.t': 'No ads, no tracking', 'm5.p': 'No ads and no tracking. Receipts are read on your phone and stay there. <a href="integritet.html">Read more</a>',
       'end.t': 'Start saving today', 'end.p': 'Free, no ads. The beta is out now for iPhone and Android.',
       'ft.about': 'Grocery prices in Finland, compared in one place.', 'ft.app': 'The app', 'ft.more': 'More', 'f.privacy': 'Privacy'
     }
@@ -769,19 +693,6 @@
     document.querySelectorAll('.rv').forEach(function (el) { rio.observe(el) })
   } else document.querySelectorAll('.rv').forEach(function (el) { el.classList.add('in') })
 
-  // the tour: the phone shows the screen for the text in the middle of the window
-  if (io) {
-    var steps = document.querySelectorAll('.tstep'), scr = document.querySelectorAll('.tour-phone .scr')
-    var tio = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (!e.isIntersecting) return
-        var i = +e.target.dataset.s
-        steps.forEach(function (s, k) { s.classList.toggle('on', k === i) })
-        scr.forEach(function (s, k) { s.classList.toggle('on', k === i) })
-      })
-    }, { rootMargin: '-45% 0px -45% 0px' })
-    steps.forEach(function (s) { tio.observe(s) })
-  }
 
 
 
