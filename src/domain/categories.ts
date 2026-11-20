@@ -92,7 +92,7 @@ export function refineCategory(name: string, category: CategoryId): CategoryId {
 
 /** The category a shop product ends up in. */
 export function categoryFor(name: string, shop: string): CategoryId {
-  return guess(name, shop) ?? SHOP_DEFAULT[shop] ?? 'household'
+  return refineCategory(name, guess(name, shop) ?? SHOP_DEFAULT[shop] ?? 'household')
 }
 
 /** What people buy week to week: loaded when the app starts. */
