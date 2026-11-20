@@ -19,7 +19,8 @@
     "test:merge": "tsx tests/listMerge.test.ts",
     "test:budget": "tsx tests/budget.test.ts",
     "test:shrink": "tsx tests/shrink.test.ts",
-    "test": "npm run test:receipts && npm run test:off && npm run test:search && npm run test:watch && npm run test:alt && npm run test:merge && npm run test:budget && npm run test:shrink",
+    "test:ocr": "tsx tests/ocrLines.test.ts",
+    "test": "npm run test:receipts && npm run test:off && npm run test:search && npm run test:watch && npm run test:alt && npm run test:merge && npm run test:budget && npm run test:shrink && npm run test:ocr",
     "app:sync": "vite build && cap sync",
     "app:android": "vite build && cap sync android && cap open android"
   },

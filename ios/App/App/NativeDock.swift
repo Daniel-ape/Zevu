@@ -1,6 +1,7 @@
 import UIKit
 import SwiftUI
 import Capacitor
+import Vision
 
 // Native tab bar for iPhone. On iOS 26 it is drawn with Apple's own Liquid Glass
 // material (glassEffect): real lensing, specular highlights and the interactive
@@ -195,10 +196,57 @@ public class NativeDockPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 }
 
+/// Reads the text of a receipt or shelf-label photo with Apple's own text
+/// recognition (Vision), on the phone. Gives back each line with where it is
+/// in the picture (0–1, top left origin), so the app can put a receipt's
+/// product names and prices back on the same row.
+@objc(ZevuOcrPlugin)
+public class ZevuOcrPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "ZevuOcrPlugin"
+    public let jsName = "ZevuOcr"
+    public let pluginMethods: [CAPPluginMethod] = [CAPPluginMethod(name: "read", returnType: CAPPluginReturnPromise)]
+
+    @objc func read(_ call: CAPPluginCall) {
+        guard let b64 = call.getString("base64"),
+              let data = Data(base64Encoded: b64, options: .ignoreUnknownCharacters),
+              let image = UIImage(data: data), let cg = image.cgImage else {
+            call.reject("No image")
+            return
+        }
+        let request = VNRecognizeTextRequest { req, err in
+            if let err = err { call.reject(err.localizedDescription); return }
+            let found = (req.results as? [VNRecognizedTextObservation]) ?? []
+            var lines: [[String: Any]] = []
+            for o in found {
+                guard let best = o.topCandidates(1).first else { continue }
+                let b = o.boundingBox
+                lines.append(["text": best.string, "x": b.minX, "y": 1 - b.maxY, "w": b.width, "h": b.height])
+            }
+            call.resolve(["lines": lines])
+        }
+        request.recognitionLevel = .accurate
+        // receipts are abbreviations and prices, not sentences: no "correcting" them
+        request.usesLanguageCorrection = false
+        let wanted = ["fi-FI", "sv-SE", "en-US"]
+        if let supported = try? request.supportedRecognitionLanguages() {
+            let langs = wanted.filter { supported.contains($0) }
+            if !langs.isEmpty { request.recognitionLanguages = langs }
+        }
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try VNImageRequestHandler(cgImage: cg, orientation: .up, options: [:]).perform([request])
+            } catch {
+                call.reject(error.localizedDescription)
+            }
+        }
+    }
+}
+
 /// Bridge view controller that registers the app's own native plugins.
 class HintaopasViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(NativeDockPlugin())
+        bridge?.registerPluginInstance(ZevuOcrPlugin())
         // The page scrolls up and down only: no sideways drag or bounce of the whole page.
         if let scroll = webView?.scrollView {
             scroll.alwaysBounceHorizontal = false

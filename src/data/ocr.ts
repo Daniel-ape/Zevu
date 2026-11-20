@@ -3,6 +3,8 @@
 // load only the first time a photo is scanned. Photos never leave the phone.
 
 import type { Worker } from 'tesseract.js'
+import { Capacitor, registerPlugin } from '@capacitor/core'
+import { linesToText, type OcrLine } from '../domain/ocrLines'
 
 let worker: Promise<Worker> | null = null
 
@@ -236,6 +238,43 @@ function score(text: string, judge?: (text: string) => number) {
  * block" layout and keeps whichever read scores better.
  */
 export async function photoToText(file: File, onProgress: (p: number) => void = () => {}, judge?: (text: string) => number): Promise<string> {
+  // In the app: the phone's own text recognition (Apple Vision, Google ML Kit)
+  // reads faded receipt print far better. If it finds little, Tesseract tries too.
+  let nativeText = ''
+  if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('ZevuOcr')) {
+    try {
+      onProgress(0.15)
+      const photo = await loadPhoto(file)
+      // little found and the receipt lies sideways in the photo: try it turned
+      const box = paperBox(photo)
+      const views = box.w > box.h * 1.1 ? [() => photo, () => quarterTurn(photo, 1), () => quarterTurn(photo, -1)] : [() => photo]
+      for (const view of views) {
+        const res = await ZevuOcr.read({ base64: await jpegBase64(view()) })
+        const text = linesToText(res.lines ?? [])
+        if (score(text, judge) > score(nativeText, judge)) nativeText = text
+        if (score(nativeText, judge) >= 3) break
+      }
+      onProgress(1)
+      if (score(nativeText, judge) >= 3) return nativeText
+    } catch { /* fall back to Tesseract below */ }
+  }
+  const tess = await photoToTextTesseract(file, onProgress, judge)
+  return score(nativeText, judge) > score(tess, judge) ? nativeText : tess
+}
+
+const ZevuOcr = registerPlugin<{ read(o: { base64: string }): Promise<{ lines: OcrLine[] }> }>('ZevuOcr')
+
+/** A photo as JPEG (base64), no bigger than the phone's reader needs. */
+async function jpegBase64(img: Photo): Promise<string> {
+  const scale = Math.min(1, 2600 / Math.max(img.width, img.height))
+  const c = document.createElement('canvas')
+  c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale)
+  c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height)
+  const url = c.toDataURL('image/jpeg', 0.92)
+  return url.slice(url.indexOf(',') + 1)
+}
+
+async function photoToTextTesseract(file: File, onProgress: (p: number) => void, judge?: (text: string) => number): Promise<string> {
   const w = await getWorker(onProgress)
   await w.setParameters({ tessedit_pageseg_mode: '4' as never, preserve_interword_spaces: '1' as never })
   try {
